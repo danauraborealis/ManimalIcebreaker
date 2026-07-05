@@ -1,0 +1,10 @@
+<Project>
+  <!-- single source of truth for version + identity, per manimal mod conventions -->
+  <PropertyGroup>
+    <ModVersion>0.1.0</ModVersion>
+    <ModGuid>com.manimal.icebreaker</ModGuid>
+    <ModUsername>Manimal</ModUsername>
+    <ModDisplayName>Icebreaker</ModDisplayName>
+    <SPTPath>D:\SPTDev</SPTPath>
+  </PropertyGroup>
+</Project>

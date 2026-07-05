@@ -1,0 +1,12 @@
+{
+  "manifest": [
+    {
+      "key": "maps/icebreaker.bundle",
+      "dependencyKeys": []
+    },
+    {
+      "key": "assets/content/locations/icebreaker/icebreaker_scenes.bundle",
+      "dependencyKeys": []
+    }
+  ]
+}

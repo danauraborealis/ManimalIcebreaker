@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>Manimal.Icebreaker.Server</RootNamespace>
+    <AssemblyName>icebreaker-server</AssemblyName>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Library</OutputType>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <Authors>$(ModUsername)</Authors>
+    <Version>$(ModVersion)</Version>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SPTarkov.Common" Version="4.0.13" />
+    <PackageReference Include="SPTarkov.DI" Version="4.0.13" />
+    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.13" />
+  </ItemGroup>
+
+  <!--
+    deploy dll + db + bundles.json into the dev SPT mod folder. the two BUNDLE files
+    (615MB scenes + preset) are NOT copied per-build — stage those once by hand or
+    with the deploy script; a rebuild only refreshes dll/json.
+  -->
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <PropertyGroup>
+      <DevModDir>$(SPTPath)\SPT\user\mods\ManimalIcebreaker</DevModDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <DbFiles Include="$(ProjectDir)db\**\*.*" />
+    </ItemGroup>
+    <MakeDir Directories="$(DevModDir)" />
+    <Copy SourceFiles="@(DbFiles)" DestinationFiles="@(DbFiles->'$(DevModDir)\db\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="$(ProjectDir)bundles.json" DestinationFolder="$(DevModDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(DevModDir)" />
+  </Target>
+
+</Project>

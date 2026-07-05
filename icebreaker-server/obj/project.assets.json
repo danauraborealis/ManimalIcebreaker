@@ -1,0 +1,381 @@
+{
+  "version": 4,
+  "targets": {
+    "net9.0": {
+      "FastCloner/3.3.16": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/FastCloner.dll": {}
+        },
+        "runtime": {
+          "lib/net8.0/FastCloner.dll": {}
+        }
+      },
+      "JetBrains.Annotations/2025.2.2": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/JetBrains.Annotations.dll": {
+            "related": ".deps.json;.xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/JetBrains.Annotations.dll": {
+            "related": ".deps.json;.xml"
+          }
+        }
+      },
+      "Microsoft.Extensions.DependencyInjection.Abstractions/9.0.9": {
+        "type": "package",
+        "compile": {
+          "lib/net9.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net8.0/_._": {}
+        }
+      },
+      "SemanticVersioning/3.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/SemanticVersioning.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/SemanticVersioning.dll": {}
+        }
+      },
+      "SPTarkov.Common/4.0.13": {
+        "type": "package",
+        "dependencies": {
+          "SemanticVersioning": "3.0.0"
+        },
+        "compile": {
+          "lib/net9.0/SPTarkov.Common.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/SPTarkov.Common.dll": {
+            "related": ".xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
+      },
+      "SPTarkov.DI/4.0.13": {
+        "type": "package",
+        "dependencies": {
+          "JetBrains.Annotations": "2025.2.2",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.9"
+        },
+        "compile": {
+          "lib/net9.0/SPTarkov.DI.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/SPTarkov.DI.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "SPTarkov.Server.Core/4.0.13": {
+        "type": "package",
+        "dependencies": {
+          "FastCloner": "3.3.16",
+          "SPTarkov.Common": "4.0.13",
+          "SPTarkov.DI": "4.0.13",
+          "System.IO.Hashing": "9.0.9"
+        },
+        "compile": {
+          "lib/net9.0/SPTarkov.Server.Core.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/SPTarkov.Server.Core.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "System.IO.Hashing/9.0.9": {
+        "type": "package",
+        "compile": {
+          "lib/net9.0/System.IO.Hashing.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/System.IO.Hashing.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net8.0/_._": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "FastCloner/3.3.16": {
+      "sha512": "3469qHsau6KXmOnLSR7DvvId+NwXuXKAvtDoJVJMDpRRaHLT7DU8IY2G4osMAbXyUfrlbrmXGI5HrlMwQUUjow==",
+      "type": "package",
+      "path": "fastcloner/3.3.16",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "fastcloner.3.3.16.nupkg.sha512",
+        "fastcloner.nuspec",
+        "icon.jpg",
+        "lib/net46/FastCloner.dll",
+        "lib/net8.0/FastCloner.dll",
+        "lib/netstandard2.0/FastCloner.dll"
+      ]
+    },
+    "JetBrains.Annotations/2025.2.2": {
+      "sha512": "0X56ZRizuHdrnPpgXjWV7f2tQO1FlQg5O1967OGKnI/4ZRNOK642J8L7brM1nYvrxTTU5TP1yRyXLRLaXLPQ8A==",
+      "type": "package",
+      "path": "jetbrains.annotations/2025.2.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "icon.png",
+        "jetbrains.annotations.2025.2.2.nupkg.sha512",
+        "jetbrains.annotations.nuspec",
+        "lib/net20/JetBrains.Annotations.dll",
+        "lib/net20/JetBrains.Annotations.xml",
+        "lib/netstandard1.0/JetBrains.Annotations.deps.json",
+        "lib/netstandard1.0/JetBrains.Annotations.dll",
+        "lib/netstandard1.0/JetBrains.Annotations.xml",
+        "lib/netstandard2.0/JetBrains.Annotations.deps.json",
+        "lib/netstandard2.0/JetBrains.Annotations.dll",
+        "lib/netstandard2.0/JetBrains.Annotations.xml",
+        "lib/portable40-net40+sl5+win8+wp8+wpa81/JetBrains.Annotations.dll",
+        "lib/portable40-net40+sl5+win8+wp8+wpa81/JetBrains.Annotations.xml",
+        "readme.md"
+      ]
+    },
+    "Microsoft.Extensions.DependencyInjection.Abstractions/9.0.9": {
+      "sha512": "/hymojfWbE9AlDOa0mczR44m00Jj+T3+HZO0ZnVTI032fVycI0ZbNOVFP6kqZMcXiLSYXzR2ilcwaRi6dzeGyA==",
+      "type": "package",
+      "path": "microsoft.extensions.dependencyinjection.abstractions/9.0.9",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net461/Microsoft.Extensions.DependencyInjection.Abstractions.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net8.0/_._",
+        "buildTransitive/netcoreapp2.0/Microsoft.Extensions.DependencyInjection.Abstractions.targets",
+        "lib/net462/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "lib/net462/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
+        "lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
+        "lib/net9.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "lib/net9.0/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
+        "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
+        "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
+        "microsoft.extensions.dependencyinjection.abstractions.9.0.9.nupkg.sha512",
+        "microsoft.extensions.dependencyinjection.abstractions.nuspec",
+        "useSharedDesignerContext.txt"
+      ]
+    },
+    "SemanticVersioning/3.0.0": {
+      "sha512": "RR+8GbPQ/gjDqov/1QN1OPoUlbUruNwcL3WjWCeLw+MY7+od/ENhnkYxCfAC6rQLIu3QifaJt3kPYyP3RumqMQ==",
+      "type": "package",
+      "path": "semanticversioning/3.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "README.md",
+        "lib/netstandard2.0/SemanticVersioning.dll",
+        "semanticversioning.3.0.0.nupkg.sha512",
+        "semanticversioning.nuspec"
+      ]
+    },
+    "SPTarkov.Common/4.0.13": {
+      "sha512": "jlTE8OsQXpZJUYeGFcKI75MISG0o8DDURhgvuJX4oqMVSWTsYFdH8svR8aO9vJrR9l1JcvFv8igSGF8kgisYqA==",
+      "type": "package",
+      "path": "sptarkov.common/4.0.13",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "lib/net9.0/SPTarkov.Common.dll",
+        "lib/net9.0/SPTarkov.Common.xml",
+        "sptarkov.common.4.0.13.nupkg.sha512",
+        "sptarkov.common.nuspec"
+      ]
+    },
+    "SPTarkov.DI/4.0.13": {
+      "sha512": "mV5A4lgUFmIx+0NIIksEcQnK1mHtvBScArbQPpguzkBf3tr+dd3bL046xn4tf/eFGiBBUqm/NTuOsrhrVfbQ7w==",
+      "type": "package",
+      "path": "sptarkov.di/4.0.13",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "lib/net9.0/SPTarkov.DI.dll",
+        "lib/net9.0/SPTarkov.DI.xml",
+        "sptarkov.di.4.0.13.nupkg.sha512",
+        "sptarkov.di.nuspec"
+      ]
+    },
+    "SPTarkov.Server.Core/4.0.13": {
+      "sha512": "UyChgcUgaW4mjHwlUk5ZdMFSnZsH7w4789EEGM8R2LP01/Bhdidbqcn5fr1Dkkc/HGw+KFBGPgEm3Y0psqGYEQ==",
+      "type": "package",
+      "path": "sptarkov.server.core/4.0.13",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "lib/net9.0/SPTarkov.Server.Core.dll",
+        "lib/net9.0/SPTarkov.Server.Core.xml",
+        "sptarkov.server.core.4.0.13.nupkg.sha512",
+        "sptarkov.server.core.nuspec"
+      ]
+    },
+    "System.IO.Hashing/9.0.9": {
+      "sha512": "hcGHdlcKtox37LQZBLYJ3GdTlHx16F5tL96Rt8iaFscCAJW9IZt3asQbyuJMjcM9oyrn3Yh2454VY2fU0d/stw==",
+      "type": "package",
+      "path": "system.io.hashing/9.0.9",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net461/System.IO.Hashing.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net8.0/_._",
+        "buildTransitive/netcoreapp2.0/System.IO.Hashing.targets",
+        "lib/net462/System.IO.Hashing.dll",
+        "lib/net462/System.IO.Hashing.xml",
+        "lib/net8.0/System.IO.Hashing.dll",
+        "lib/net8.0/System.IO.Hashing.xml",
+        "lib/net9.0/System.IO.Hashing.dll",
+        "lib/net9.0/System.IO.Hashing.xml",
+        "lib/netstandard2.0/System.IO.Hashing.dll",
+        "lib/netstandard2.0/System.IO.Hashing.xml",
+        "system.io.hashing.9.0.9.nupkg.sha512",
+        "system.io.hashing.nuspec",
+        "useSharedDesignerContext.txt"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net9.0": [
+      "SPTarkov.Common >= 4.0.13",
+      "SPTarkov.DI >= 4.0.13",
+      "SPTarkov.Server.Core >= 4.0.13"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\peard\\.nuget\\packages\\": {}
+  },
+  "project": {
+    "version": "0.1.0",
+    "restore": {
+      "projectUniqueName": "C:\\Users\\peard\\Desktop\\ManimalIcebreaker\\icebreaker-server\\icebreaker-server.csproj",
+      "projectName": "icebreaker-server",
+      "projectPath": "C:\\Users\\peard\\Desktop\\ManimalIcebreaker\\icebreaker-server\\icebreaker-server.csproj",
+      "packagesPath": "C:\\Users\\peard\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\peard\\Desktop\\ManimalIcebreaker\\icebreaker-server\\obj\\",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "C:\\Users\\peard\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net9.0"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net9.0": {
+          "framework": "net9.0",
+          "targetAlias": "net9.0",
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "10.0.300"
+    },
+    "frameworks": {
+      "net9.0": {
+        "framework": "net9.0",
+        "targetAlias": "net9.0",
+        "dependencies": {
+          "SPTarkov.Common": {
+            "target": "Package",
+            "version": "[4.0.13, )"
+          },
+          "SPTarkov.DI": {
+            "target": "Package",
+            "version": "[4.0.13, )"
+          },
+          "SPTarkov.Server.Core": {
+            "target": "Package",
+            "version": "[4.0.13, )"
+          }
+        },
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.AspNetCore.App.Ref",
+            "version": "[9.0.17, 9.0.17]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Ref",
+            "version": "[9.0.17, 9.0.17]"
+          },
+          {
+            "name": "Microsoft.WindowsDesktop.App.Ref",
+            "version": "[9.0.17, 9.0.17]"
+          }
+        ],
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.301/PortableRuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}
