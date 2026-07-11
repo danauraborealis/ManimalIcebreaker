@@ -7,6 +7,22 @@
     {
       "key": "assets/content/locations/icebreaker/icebreaker_scenes.bundle",
       "dependencyKeys": []
+    },
+    {
+      "key": "manimal/icebreaker_keypad.bundle",
+      "dependencyKeys": [
+        "shaders"
+      ]
+    },
+    {
+      "key": "manimal/icebreaker_keypad_ui.bundle",
+      "dependencyKeys": []
+    },
+    {
+      "key": "manimal/icebreaker_postit.bundle",
+      "dependencyKeys": [
+        "shaders"
+      ]
     }
   ]
 }

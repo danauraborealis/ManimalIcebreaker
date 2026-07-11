@@ -431,8 +431,8 @@
     "BotsDamageSources",
     "LootPositions"
   ],
-  "IconX": 350,
-  "IconY": 550,
+  "IconX": 91,
+  "IconY": 747,
   "Id": "Suburbs",
   "Insurance": true,
   "IsSecret": false,
