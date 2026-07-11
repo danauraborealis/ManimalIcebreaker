@@ -1,0 +1,88 @@
+{
+ "normal": {
+  "name": "MultiFlare",
+  "floats": {
+   "_DepthOffset": 0.10000000149011612,
+   "_FadeDepthOffset": 0.30000001192092896,
+   "_FallofShift": 1.0,
+   "_FallofStrength": 18.0,
+   "_Intensity": 0.6000000238418579,
+   "_Size": 0.20000000298023224,
+   "_Val1": 0.0,
+   "_Val2": -2.619999885559082,
+   "_VisibilityCheckerSize": 0.003000000026077032,
+   "_Volume": 1.0,
+   "_VolumeStep": 3.0
+  },
+  "colors": {
+   "_Color": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "_Size": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  }
+ },
+ "shit": {
+  "name": "ShitOnScreen",
+  "floats": {
+   "_DepthOffset": 1.0,
+   "_FadeDepthOffset": 0.4000000059604645,
+   "_FallofShift": 1.0,
+   "_FallofStrength": 16.0,
+   "_Intensity": 1.0,
+   "_NoiseIntensity": 5.0,
+   "_VisibilityCheckerSize": 0.009999999776482582
+  },
+  "colors": {
+   "_Color": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "_NoiseScale": [
+    2.0,
+    2.0,
+    1.0,
+    0.0
+   ]
+  }
+ },
+ "overlap": {
+  "name": "FlashLightFlares",
+  "floats": {
+   "_DepthOffset": 0.10000000149011612,
+   "_FadeDepthOffset": 0.30000001192092896,
+   "_FallofShift": 1.0,
+   "_FallofStrength": 18.0,
+   "_Intensity": 0.6000000238418579,
+   "_Size": 0.20000000298023224,
+   "_Val1": 0.0,
+   "_Val2": -2.619999885559082,
+   "_VisibilityCheckerSize": 0.003000000026077032,
+   "_Volume": 1.0,
+   "_VolumeStep": 3.0
+  },
+  "colors": {
+   "_Color": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "_Size": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  }
+ }
+}

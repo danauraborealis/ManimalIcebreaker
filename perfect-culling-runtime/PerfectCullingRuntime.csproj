@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- PLAYER build of the Perfect Culling runtime. the editor-compiled ScriptAssemblies
+       DLL has UNITY_EDITOR code baked in: editor-only callbacks NRE in the player AND the
+       serialized class layout mismatches what the bundle build wrote (EFT player runs with
+       stripped typetrees -> deserializes by compiled layout -> bake data came out null).
+       compiling the same sources WITHOUT UNITY_EDITOR gives the exact layout the bundle
+       expects. assembly name must stay "PerfectCullingRuntime" (bundle binds by name). -->
+  <PropertyGroup>
+    <TargetFramework>net471</TargetFramework>
+    <AssemblyName>PerfectCullingRuntime</AssemblyName>
+    <LangVersion>9.0</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <NoWarn>CS0649;CS0414;CS0169;CS1691</NoWarn>
+    <!-- unity version defines the editor compile had (EFT = 2022.3): without these,
+         version-gated code picks ancient fallbacks — e.g. ToggleRenderer applied culling
+         via renderer.enabled instead of forceRenderingOff -->
+    <DefineConstants>UNITY_5_3_OR_NEWER;UNITY_2019_1_OR_NEWER;UNITY_2019_3_OR_NEWER;UNITY_2022_1_OR_NEWER;UNITY_2022_3_OR_NEWER</DefineConstants>
+    <ManagedDir>D:\SPTDev\EscapeFromTarkov_Data\Managed</ManagedDir>
+    <PcScripts>C:\Users\peard\Desktop\WTT-SDK-2022 Public\Assets\Koenigz\Perfect Culling\Scripts</PcScripts>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(PcScripts)\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="UnityEngine"><HintPath>$(ManagedDir)\UnityEngine.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(ManagedDir)\UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.PhysicsModule"><HintPath>$(ManagedDir)\UnityEngine.PhysicsModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.TerrainModule"><HintPath>$(ManagedDir)\UnityEngine.TerrainModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.IMGUIModule"><HintPath>$(ManagedDir)\UnityEngine.IMGUIModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.AIModule"><HintPath>$(ManagedDir)\UnityEngine.AIModule.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+
+  <Target Name="DeployToBepInEx" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetPath)" DestinationFiles="D:\SPTDev\BepInEx\plugins\AIDataDumper\PerfectCullingRuntime.dll" ContinueOnError="true" />
+  </Target>
+</Project>

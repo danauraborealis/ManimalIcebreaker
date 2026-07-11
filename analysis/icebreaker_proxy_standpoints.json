@@ -1,0 +1,200 @@
+{
+ "security_pass_card_living_04": {
+  "level": "level700",
+  "proxyWorld": [
+   -7.426,
+   27.742,
+   31.399
+  ],
+  "standWorld": [
+   -6.617,
+   26.342,
+   31.499
+  ],
+  "viewWorld": [
+   -7.408,
+   27.742,
+   31.539
+  ]
+ },
+ "security_pass_card_living_02": {
+  "level": "level700",
+  "proxyWorld": [
+   7.432,
+   25.08,
+   33.469
+  ],
+  "standWorld": [
+   6.622,
+   23.68,
+   33.369
+  ],
+  "viewWorld": [
+   7.413,
+   25.08,
+   33.329
+  ]
+ },
+ "security_pass_card_living_01": {
+  "level": "level700",
+  "proxyWorld": [
+   -7.427,
+   25.08,
+   31.871
+  ],
+  "standWorld": [
+   -6.617,
+   23.68,
+   31.971
+  ],
+  "viewWorld": [
+   -7.408,
+   25.08,
+   32.011
+  ]
+ },
+ "security_pass_card_captain": {
+  "level": "level700",
+  "proxyWorld": [
+   -5.485,
+   35.899,
+   28.419
+  ],
+  "standWorld": [
+   -6.295,
+   34.499,
+   28.319
+  ],
+  "viewWorld": [
+   -5.504,
+   35.899,
+   28.299
+  ]
+ },
+ "security_pass_card_living_07": {
+  "level": "level700",
+  "proxyWorld": [
+   -7.429,
+   30.46,
+   24.743
+  ],
+  "standWorld": [
+   -6.619,
+   29.06,
+   24.843
+  ],
+  "viewWorld": [
+   -7.41,
+   30.46,
+   24.883
+  ]
+ },
+ "security_pass_card_living_08": {
+  "level": "level700",
+  "proxyWorld": [
+   7.432,
+   30.46,
+   39.064
+  ],
+  "standWorld": [
+   6.622,
+   29.06,
+   38.964
+  ],
+  "viewWorld": [
+   7.413,
+   30.46,
+   38.924
+  ]
+ },
+ "security_pass_card_living_06": {
+  "level": "level700",
+  "proxyWorld": [
+   7.432,
+   27.742,
+   24.841
+  ],
+  "standWorld": [
+   6.622,
+   26.342,
+   24.742
+  ],
+  "viewWorld": [
+   7.413,
+   27.742,
+   24.701
+  ]
+ },
+ "security_pass_card_living_03": {
+  "level": "level700",
+  "proxyWorld": [
+   7.432,
+   25.08,
+   25.311
+  ],
+  "standWorld": [
+   6.622,
+   23.68,
+   25.211
+  ],
+  "viewWorld": [
+   7.413,
+   25.08,
+   25.171
+  ]
+ },
+ "security_pass_card_living_05": {
+  "level": "level700",
+  "proxyWorld": [
+   -7.426,
+   27.742,
+   41.182
+  ],
+  "standWorld": [
+   -6.617,
+   26.342,
+   41.282
+  ],
+  "viewWorld": [
+   -7.408,
+   27.742,
+   41.322
+  ]
+ },
+ "security_pass_card_tech": {
+  "level": "level701",
+  "proxyWorld": [
+   10.488,
+   16.952,
+   26.762
+  ],
+  "standWorld": [
+   11.298,
+   15.552,
+   26.862
+  ],
+  "viewWorld": [
+   10.507,
+   16.862,
+   26.892
+  ]
+ },
+ "security_pass_card_lab": {
+  "level": "level704",
+  "proxyWorld": [
+   11.504,
+   19.777,
+   41.355
+  ],
+  "standWorld": [
+   11.604,
+   18.377,
+   40.545
+  ],
+  "viewWorld": [
+   11.634,
+   19.777,
+   41.336
+  ]
+ }
+}

@@ -1,0 +1,324 @@
+# builds the icebreaker server mod's looseLoot.json from the Author 12 marker export
+# (icebreaker_loose_spots.json) + labs' per-container staticLoot pools. each authored
+# spot becomes one spawnpoint: labs pool items as candidates at labs weights, spawned
+# at the marker's exact pose. spawnpointCount.mean = expected fills per raid
+# (sum of authored probabilities).
+
+import hashlib
+import json
+from pathlib import Path
+
+SPOTS = Path(__file__).parent / "icebreaker_loose_spots.json"
+DB_LOCATIONS = Path(r"D:\SPTDev\SPT\SPT_Data\database\locations")
+ITEMS_DB = Path(r"D:\SPTDev\SPT\SPT_Data\database\templates\items.json")
+STIM_PARENT = "5448f3a64bdc2d60728b456a"  # Stimulator class — every injector derives from it
+OUTS = [
+    Path(r"C:\Users\peard\Desktop\ManimalIcebreaker\icebreaker-server\db\looseLoot.json"),
+    Path(r"D:\SPTDev\SPT\user\mods\ManimalIcebreaker\db\looseLoot.json"),
+]
+
+# pool name -> (source map, container tpl) whose itemDistribution we borrow.
+# labs for everything it stocks; the ration crate isn't a labs container so
+# Food borrows lighthouse's. TPLS VERIFIED AGAINST LOCALE NAMES — the obvious
+# guesses were wrong two ways (5909d50c is the TOOLBOX, 5909d24f the MEDBAG;
+# 578f8778 is the JACKET, the real safe is 578f8782) and it put hardware in
+# the med pool for a raid.
+POOLS = {
+    "Tech":      ("laboratory", "59139c2186f77411564f8e42"),  # PC block
+    "Med":       ("laboratory", "5909d24f86f77466f56e6855"),  # Medbag SMU06 (meds + stims)
+    "Tools":     ("laboratory", "5909d50c86f774659e6aaebe"),  # Toolbox
+    "Weapons":   ("laboratory", "5909d7cf86f77470ee57d75a"),  # Weapon box
+    "Misc":      ("laboratory", "578f87a3245977356274f2cb"),  # Duffle bag
+    "Valuables": ("laboratory", "578f8782245977354405a1e3"),  # Safe
+    "Food":      ("lighthouse", "5d6fd13186f77424ad2a8c69"),  # Ration supply crate (35 items incl aquamari)
+}
+
+# per-pool tpl blocklist applied to the borrowed distribution BEFORE extras
+EXCLUDE_ITEMS = {
+    # no smokes in the food pool
+    "Food": {
+        "573476f124597737e04bf328",  # Wilston cigarettes
+        "573476d324597737da2adc13",  # Malboro Cigarettes
+        "5734770f24597738025ee254",  # Strike Cigarettes
+        "573475fb24597737fb1379e1",  # Apollo Soyuz cigarettes
+    },
+    # no raw cash at valuables spots — jewelry/intel/figurines only
+    "Valuables": {
+        "5449016a4bdc2d6f028b456f",  # Roubles
+        "5696686a4bdc2da3298b456a",  # Dollars
+        "569668774bdc2da2298b4568",  # Euros
+    },
+}
+
+# per-pool additions on top of the borrowed distribution. weights are relative to
+# the source pool (labs PC pool commons run ~90-135k, rares ~18k; lighthouse food
+# runs ~500-6000) — tune in place.
+EXTRA_ITEMS = {
+    # the backported 1.0 icebreaker electronics (WTT-ContentBackport must be
+    # installed or the server cant resolve these tpls)
+    # endgame map — rares run hotter here than their labs-equivalent weights
+    "Tech": [
+        ("69bb4203f94327bc0f0230cd", 16000),  # IBX Gigachad cryptographic processor (rare)
+        ("69bb424e99f3fda8f107247d", 20000),  # Memento Server RAM Module
+        ("69bb41c03b5fb75517065960", 12000),  # Ultralink satellite communication module
+        ("5d0378d486f77420421a5ff4", 10000),  # Military power filter (rare)
+        ("5d1b2ffd86f77425243e8d17", 10000),  # NIXXOR lens
+        ("590a391c86f774385a33c404", 40000),  # Magnet (common junk)
+        ("6389c70ca33d8c4cdf4932c6", 8000),   # Electronic components
+        ("590c392f86f77444754deb29", 6000),   # SSD drive
+    ],
+    # the backported hydraulic fluid rides with the tools (toolbox pool: sum
+    # ~432k, commons 5-23k; the LOOTABLE variant — 699f0976... is the QuestItem
+    # twin, dont swap them)
+    "Tools": [
+        ("699f09de81a6c812900a77b7", 4300),  # AMG-10 hydraulic fluid (~1%)
+    ],
+    # medical hardware belongs with the meds (medbag pool: 42 items, sum ~152k,
+    # commons 2-15k — weights rescaled to keep the same per-slot percentages)
+    "Med": [
+        ("69bb435ff609db77390b0e25", 2500),   # Aceso Xpress semi-automatic biochemical analyzer (~1.6%)
+        ("5c0530ee86f774697952d952", 2200),   # LEDX Skin Transilluminator (rare, ~1.4%)
+        ("69bb43df99f3fda8f1072483", 370),    # Nooby Shield potassium iodide tablets (ophthalmoscope-tier ~0.24%)
+        ("6937ecf8628ee476240c07cb", 230),    # Tigzresq splint (rarer than alu splint ~0.15%)
+    ],
+    # every figurine/statue in the base game + backport, riding the safe pool
+    # (sum ~126k, median 357): regulars at 200, iconic/premium ones at 80
+    "Valuables": [
+        ("573478bc24597738002c6175", 200),  # Horse figurine
+        ("59e3639286f7741777737013", 150),   # Bronze lion figurine
+        ("59e3658a86f7741776641ac4", 200),  # Cat figurine
+        ("5bc9bc53d4351e00367fbcee", 150),   # Golden rooster figurine
+        ("5e54f62086f774219b0f1937", 200),  # Raven figurine
+        ("62a091170b9d3c46de5b6cf2", 200),  # Axel parrot figurine
+        ("655c652d60d0ac437100fed7", 200),  # BEAR operative figurine
+        ("655c663a6689c676ce57af85", 200),  # USEC operative figurine
+        ("655c669103999d3c810c025b", 200),  # Cultist figurine
+        ("655c66e40b2de553b618d4b8", 150),   # Politician Mutkevich figurine
+        ("655c673673a43e23e857aebd", 200),  # Scav figurine
+        ("655c67782a1356436041c9c5", 200),  # Ryzhy figurine
+        ("655c67ab0d37ca5135388f4b", 150),   # Ded Moroz figurine
+        ("66572b8d80b1cd4b6a67847f", 200),  # Den figurine
+        ("66572be36a723f7f005a066e", 150),   # Reshala figurine
+        ("66572c82ad599021091c6118", 150),   # Killa figurine
+        ("66572cbdad599021091c611a", 150),   # Tagilla figurine
+        ("679b9cce4e4ed4b3b40ae5c5", 200),  # Nailhead figurine
+        ("679b9d43597ba2ed120c3d44", 200),  # Petya Crooker figurine
+        ("679b9d4b3374fb14f40efe6d", 200),  # Count Bloodsucker figurine
+        ("679b9d55708cfcb2060b9ae3", 200),  # Xenoalien figurine
+        ("679b9d6390622daf9708da76", 200),  # Pointy guy figurine
+        ("6841b6b674a3c16f5e03d653", 200),  # PMC Origins figurine
+        # backport set (WTT-ContentBackport required)
+        ("68f25c64b2b53abd200b954f", 150),  # Prapor figurine
+        ("68f25ce9b2b53abd200b9551", 150),  # Therapist figurine
+        ("68f25da3b84c6e1f8a09cffb", 150),  # Fence figurine
+        ("68f25eba19a2b503d70dc28f", 150),  # Skier figurine
+        ("68f25eef19a2b503d70dc291", 150),  # Peacekeeper figurine
+        ("68f25f1201fb9de974058be4", 150),  # Mechanic figurine
+        ("68f25f3a5d977110860c3350", 150),  # Ragman figurine
+        ("68f25faa22c8979ee308f4da", 150),  # Jaeger figurine
+        ("68f25fdf928cd23ddf0471fb", 150),  # Lightkeeper figurine
+        ("68f26063b2b53abd200b9553", 150),  # Ref figurine
+        ("68f260d7b84c6e1f8a09cffd", 150),  # Hideout Cat figurine
+        ("68f2608301fb9de974058be6", 150),  # BTR figurine
+        ("68f26124b84c6e1f8a09cfff", 150),  # Walking Tank figurine
+        ("68f26161b84c6e1f8a09d001", 150),  # Escape figurine
+        ("68f261f6928cd23ddf0471fd", 150),  # Mastichin figurine
+        ("68f11224197b61ffe703b16f", 150),  # Hardened PMC figurine
+        ("690c70a2a1461a01d605a1bd", 150),  # Elvisvista figurine
+    ],
+    # the ration crate pool has no booze or the canister — add them
+    "Food": [
+        ("5d40407c86f774318526545a", 700),    # Tarkovskaya vodka
+        ("5d403f9186f7743cac3f229b", 500),    # Dan Jackiel whiskey
+        ("5d1b376e86f774252519444e", 300),    # Fierce Hatchling moonshine (rare)
+        ("62a09f32621468534a797acb", 900),    # Pevko Light beer
+        ("5d1b33a686f7742523398398", 450),    # Canister with purified water ("superwater", rare)
+    ],
+}
+
+
+# Intel pool: no container base — authored outright. paperwork/media commons up
+# top, the money items (folders + textbooks) at really-rare weights.
+INTEL_POOL = [
+    ("590c645c86f77412b01304d9", 1200),  # Diary
+    ("590c651286f7741e566b6461", 1200),  # Slim diary
+    ("62a0a124de7ac81993580542", 900),   # Topographic survey maps
+    ("62a09e73af34e73a266d932a", 900),   # BakeEzy cook book
+    ("590c639286f774151567fa95", 700),   # Tech manual
+    ("62a09e974f842e1bd12da3f0", 700),   # Video cassette with the Cyborg Killer movie
+    ("61bf7c024770ee6f9c6b8b53", 600),   # Secure magnetic tape cassette
+    ("590c37d286f77443be3d7827", 450),   # SAS drive
+    ("590c392f86f77444754deb29", 350),   # SSD drive
+    ("5c05300686f7746dce784e5d", 350),   # VPX Flash Storage Module
+    ("62a0a16d0b9d3c46de5b6e97", 350),   # Military flash drive
+    ("6389c8fb46b54c634724d847", 90),    # Silicon Optoelectronic Integrated Circuits textbook (really rare)
+    ("6389c92d52123d5dd17f8876", 90),    # Advanced Electronic Materials textbook (really rare)
+    ("5c12613b86f7743bbe2c3f76", 80),    # Intelligence folder (really rare)
+    ("6389c8c5dbfd5e4b95197e6b", 50),    # TerraGroup "Blue Folders" materials (really rare)
+]
+
+
+def mongo_from(seed):
+    return hashlib.md5(seed.encode()).hexdigest()[:24]
+
+
+def main():
+    spots = json.loads(SPOTS.read_text())["spots"]
+
+    static_cache = {}
+    pool_dists = {}
+    for name, (srcmap, tpl) in POOLS.items():
+        if srcmap not in static_cache:
+            static_cache[srcmap] = json.loads((DB_LOCATIONS / srcmap / "staticLoot.json").read_text())
+        src = static_cache[srcmap]
+        if tpl not in src:
+            print(f"WARNING: {srcmap} staticLoot has no pool for {name} ({tpl}) — spots with this pool are skipped")
+            continue
+        excl = EXCLUDE_ITEMS.get(name, set())
+        dist = [e for e in src[tpl]["itemDistribution"] if e["tpl"] not in excl]
+        if excl:
+            print(f"{name} pool: {len(src[tpl]['itemDistribution']) - len(dist)} item(s) excluded")
+        for extra_tpl, weight in EXTRA_ITEMS.get(name, []):
+            dist.append({"tpl": extra_tpl, "relativeProbability": weight})
+        pool_dists[name] = dist
+
+    # Stims pool: built from the item db, not a container — every injector at
+    # uniform weight
+    items_db = json.loads(ITEMS_DB.read_text(encoding="utf8"))
+    stims = [k for k, v in items_db.items()
+             if v.get("_parent") == STIM_PARENT and v.get("_type") == "Item"]
+    pool_dists["Stims"] = [{"tpl": t, "relativeProbability": 100} for t in sorted(stims)]
+    print(f"Stims pool: {len(stims)} injectors")
+
+    pool_dists["Intel"] = [{"tpl": t, "relativeProbability": w} for t, w in INTEL_POOL]
+
+    # group collapse: spots sharing a non-empty group name become ONE spawnpoint
+    # whose GroupPositions lists every member pose — the game picks one per raid
+    # (retail's randomized-keycard mechanic). pool/override/prob come from the
+    # first member; mismatched members get a warning.
+    merged = []
+    by_group = {}
+    for s in spots:
+        g = (s.get("group") or "").strip()
+        if not g:
+            merged.append(s)
+            continue
+        if g in by_group:
+            head = by_group[g]
+            h_ovr = (head.get("overrideTpl") or "").strip()
+            s_ovr = (s.get("overrideTpl") or "").strip()
+            # pool only matters when there's no override; override spots ignore it
+            if h_ovr != s_ovr:
+                print(f"WARNING: group '{g}' members disagree on overrideTpl — using '{h_ovr or 'pool roll'}'")
+            elif not h_ovr and head.get("pool") != s.get("pool"):
+                print(f"WARNING: group '{g}' members disagree on pool — using '{head.get('pool')}'")
+            head["groupPoses"].append((s["pos"], s.get("euler", [0, 0, 0])))
+        else:
+            s = dict(s)
+            s["groupPoses"] = [(s["pos"], s.get("euler", [0, 0, 0]))]
+            by_group[g] = s
+            merged.append(s)
+    for g, head in by_group.items():
+        print(f"group '{g}': {len(head['groupPoses'])} candidate position(s)")
+    spots = merged
+
+    spawnpoints = []
+    forced = []
+    total_prob = 0.0
+    skipped = 0
+    for i, s in enumerate(spots):
+        x, y, z = s["pos"]
+        rx, ry, rz = s.get("euler", [0, 0, 0])
+        prob = max(0.01, min(1.0, float(s.get("prob", 0.35))))
+        group_poses = s.get("groupPoses")
+        is_group = bool(group_poses) and len(group_poses) > 1
+        group_positions = [
+            {
+                "Name": f"groupPoint[{k}]",
+                "Weight": 1,
+                "Position": {"x": p[0], "y": p[1], "z": p[2]},
+                "Rotation": {"x": e[0], "y": e[1], "z": e[2]},
+            }
+            for k, (p, e) in enumerate(group_poses)
+        ] if is_group else []
+
+        # specific-item spot: exactly this tpl, emitted into spawnpointsForced —
+        # forced entries roll independently of the spawnpointCount budget, so
+        # probability 1 there means guaranteed every raid
+        override = (s.get("overrideTpl") or "").strip()
+        if override:
+            iid = mongo_from(f"iceforced_{i}_{override}")
+            forced.append({
+                "locationId": f"({x}, {y}, {z})",
+                "probability": prob,
+                "template": {
+                    "Id": f"iceforced_{i:03d}",
+                    "IsContainer": False,
+                    "useGravity": False,
+                    "randomRotation": False,
+                    "Position": {"x": x, "y": y, "z": z},
+                    "Rotation": {"x": rx, "y": ry, "z": rz},
+                    "IsGroupPosition": is_group,
+                    "GroupPositions": group_positions,
+                    "IsAlwaysSpawn": False,
+                    "Root": iid,
+                    "Items": [
+                        {"_id": iid, "_tpl": override, "upd": {"StackObjectsCount": 1}}
+                    ],
+                },
+            })
+            continue
+
+        dist = pool_dists.get(s["pool"])
+        if dist is None:
+            skipped += 1
+            continue
+        total_prob += prob
+        items, item_dist = [], []
+        for j, entry in enumerate(dist):
+            key = str(hash((i, entry["tpl"])) & 0x7FFFFFFF)
+            iid = mongo_from(f"iceloose_{i}_{j}_{entry['tpl']}")
+            items.append({
+                "composedKey": key,
+                "_id": iid,
+                "_tpl": entry["tpl"],
+                "upd": {"StackObjectsCount": 1},
+            })
+            item_dist.append({
+                "composedKey": {"key": key},
+                "relativeProbability": entry["relativeProbability"],
+            })
+        spawnpoints.append({
+            "locationId": f"({x}, {y}, {z})",
+            "probability": prob,
+            "template": {
+                "Id": f"iceloose_{s['pool']}_{i:03d}",
+                "IsContainer": False,
+                "useGravity": False,
+                "randomRotation": False,
+                "Position": {"x": x, "y": y, "z": z},
+                "Rotation": {"x": rx, "y": ry, "z": rz},
+                "IsGroupPosition": is_group,
+                "GroupPositions": group_positions,
+                "IsAlwaysSpawn": False,
+                "Root": items[0]["_id"],
+                "Items": items,
+            },
+            "itemDistribution": item_dist,
+        })
+
+    out = {
+        "spawnpointCount": {"mean": round(total_prob, 2), "std": round(total_prob * 0.25, 2)},
+        "spawnpointsForced": forced,
+        "spawnpoints": spawnpoints,
+    }
+    text = json.dumps(out, indent=1)
+    for o in OUTS:
+        o.parent.mkdir(parents=True, exist_ok=True)
+        o.write_text(text)
+        print(f"wrote {o} ({len(spawnpoints)} pool spawnpoints + {len(forced)} specific-item, "
+              f"~{total_prob:.1f} pool items/raid{f', {skipped} skipped' if skipped else ''})")
+
+
+if __name__ == "__main__":
+    main()

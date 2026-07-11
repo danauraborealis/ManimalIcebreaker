@@ -1,0 +1,2564 @@
+{
+ "lightplanes": [
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes",
+   "localPosition": {
+    "x": 0.0,
+    "y": -0.25999999046325684,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane (2)~1",
+   "localPosition": {
+    "x": -13.369999885559082,
+    "y": 36.560001373291016,
+    "z": 64.93000030517578
+   },
+   "localRotation": {
+    "x": 0.724062442779541,
+    "y": -0.12220824509859085,
+    "z": 0.11297435313463211,
+    "w": 0.6693546175956726
+   },
+   "localScale": {
+    "x": 38.16812515258789,
+    "y": 43.91254425048828,
+    "z": 16.74962615966797
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane (2)",
+   "localPosition": {
+    "x": 12.989999771118164,
+    "y": 36.290000915527344,
+    "z": 64.79000091552734
+   },
+   "localRotation": {
+    "x": 0.7331022024154663,
+    "y": 0.13945385813713074,
+    "z": -0.10072335600852966,
+    "w": 0.6580035090446472
+   },
+   "localScale": {
+    "x": 40.091514587402344,
+    "y": 42.71145248413086,
+    "z": 13.147273063659668
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane (4)",
+   "localPosition": {
+    "x": 24.860000610351562,
+    "y": 47.619876861572266,
+    "z": 52.7599983215332
+   },
+   "localRotation": {
+    "x": 0.037659648805856705,
+    "y": -0.542955756187439,
+    "z": -0.6390360593795776,
+    "w": 0.5435198545455933
+   },
+   "localScale": {
+    "x": 10.278854370117188,
+    "y": 31.72119140625,
+    "z": 13.147273063659668
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane (2)~2",
+   "localPosition": {
+    "x": -24.6299991607666,
+    "y": 49.79999923706055,
+    "z": 54.209999084472656
+   },
+   "localRotation": {
+    "x": 0.3762282133102417,
+    "y": -0.8078396916389465,
+    "z": -0.4532122015953064,
+    "w": 0.02112322300672531
+   },
+   "localScale": {
+    "x": 10.278854370117188,
+    "y": 31.72119140625,
+    "z": 13.147272109985352
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane (2)~3",
+   "localPosition": {
+    "x": 24.860000610351562,
+    "y": 47.619876861572266,
+    "z": 52.7599983215332
+   },
+   "localRotation": {
+    "x": 0.478496253490448,
+    "y": 0.0003990701225120574,
+    "z": -0.4252377450466156,
+    "w": 0.7682539224624634
+   },
+   "localScale": {
+    "x": 10.278854370117188,
+    "y": 31.72119140625,
+    "z": 13.147273063659668
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane (3)",
+   "localPosition": {
+    "x": -24.6299991607666,
+    "y": 49.79999923706055,
+    "z": 54.209999084472656
+   },
+   "localRotation": {
+    "x": 0.5865029692649841,
+    "y": -0.5562925934791565,
+    "z": -0.054435957223176956,
+    "w": 0.5861651301383972
+   },
+   "localScale": {
+    "x": 10.278854370117188,
+    "y": 31.72119140625,
+    "z": 13.147272109985352
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (9)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (11)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (3)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (2)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (7)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (21)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (16)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (12)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (25)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (15)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (22)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (17)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (14)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (1)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (26)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (20)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (5)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (23)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (24)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (19)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (4)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (10)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (6)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (8)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (27)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (13)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (18)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (28)/Lightplane_Llight_Round_White_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (5)",
+   "localPosition": {
+    "x": 5.125999450683594,
+    "y": 21.070999145507812,
+    "z": -73.67300415039062
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (20)",
+   "localPosition": {
+    "x": 7.009999752044678,
+    "y": 21.070999145507812,
+    "z": -50.97999954223633
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (24)",
+   "localPosition": {
+    "x": 5.929999351501465,
+    "y": 21.070999145507812,
+    "z": -61.61399841308594
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (23)",
+   "localPosition": {
+    "x": -6.0360002517700195,
+    "y": 21.070999145507812,
+    "z": -61.61399841308594
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (19)",
+   "localPosition": {
+    "x": 12.350000381469727,
+    "y": 21.070999145507812,
+    "z": -63.7400016784668
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (4)",
+   "localPosition": {
+    "x": 12.289999008178711,
+    "y": 21.070999145507812,
+    "z": -66.46700286865234
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (10)",
+   "localPosition": {
+    "x": -10.359999656677246,
+    "y": 21.070999145507812,
+    "z": -54.380001068115234
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (6)",
+   "localPosition": {
+    "x": -5.099999904632568,
+    "y": 21.070999145507812,
+    "z": -73.67300415039062
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (8)",
+   "localPosition": {
+    "x": -12.246000289916992,
+    "y": 21.070999145507812,
+    "z": -56.30500030517578
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (27)",
+   "localPosition": {
+    "x": -4.280000686645508,
+    "y": 21.070999145507812,
+    "z": -65.69000244140625
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (13)",
+   "localPosition": {
+    "x": -10.465999603271484,
+    "y": 21.070999145507812,
+    "z": -68.38400268554688
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (18)",
+   "localPosition": {
+    "x": 10.36400032043457,
+    "y": 21.070999145507812,
+    "z": -68.36400604248047
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (28)",
+   "localPosition": {
+    "x": 4.403999328613281,
+    "y": 21.070999145507812,
+    "z": -65.55400085449219
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (9)",
+   "localPosition": {
+    "x": -7.415999412536621,
+    "y": 21.070999145507812,
+    "z": -51.42399978637695
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (11)",
+   "localPosition": {
+    "x": -12.32599925994873,
+    "y": 21.070999145507812,
+    "z": -59.07400131225586
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (2)",
+   "localPosition": {
+    "x": -5.079999923706055,
+    "y": 21.070999145507812,
+    "z": -49.11000061035156
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (3)",
+   "localPosition": {
+    "x": 5.052000045776367,
+    "y": 21.070999145507812,
+    "z": -49.0880012512207
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (7)",
+   "localPosition": {
+    "x": -12.281999588012695,
+    "y": 21.070999145507812,
+    "z": -66.53900146484375
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (21)",
+   "localPosition": {
+    "x": 0.03999999910593033,
+    "y": 21.070999145507812,
+    "z": -55.34000015258789
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (16)",
+   "localPosition": {
+    "x": 2.3740005493164062,
+    "y": 21.070999145507812,
+    "z": -73.68400573730469
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (12)",
+   "localPosition": {
+    "x": -12.32599925994873,
+    "y": 21.070999145507812,
+    "z": -64.18400573730469
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (25)",
+   "localPosition": {
+    "x": 4.27400016784668,
+    "y": 21.070999145507812,
+    "z": -56.9839973449707
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (15)",
+   "localPosition": {
+    "x": -2.2100000381469727,
+    "y": 21.070999145507812,
+    "z": -73.7300033569336
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (22)",
+   "localPosition": {
+    "x": 0.03999999910593033,
+    "y": 21.070999145507812,
+    "z": -67.44999694824219
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (17)",
+   "localPosition": {
+    "x": 7.110000133514404,
+    "y": 21.070999145507812,
+    "z": -71.69999694824219
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (14)",
+   "localPosition": {
+    "x": -6.769999980926514,
+    "y": 21.070999145507812,
+    "z": -72.01000213623047
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (1)",
+   "localPosition": {
+    "x": 0.07300031185150146,
+    "y": 21.070999145507812,
+    "z": -49.11000061035156
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/HELIPAD/EFEECTS/Lightplanes/Lightplane_Round_White (26)",
+   "localPosition": {
+    "x": -4.605999946594238,
+    "y": 21.070999145507812,
+    "z": -57.37399673461914
+   },
+   "localRotation": {
+    "x": -0.707105278968811,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 0.7071083188056946
+   },
+   "localScale": {
+    "x": 0.15000000596046448,
+    "y": 0.15000000596046448,
+    "z": 0.15000000596046448
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (2)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (36)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (33)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish~2/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (34)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (20)/Lightplane_Round_Yellowish (18)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (1)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (39)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (6)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (15)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (28)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (21)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (38)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (37)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (20)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (26)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (31)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish~1/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (5)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (29)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (30)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (27)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (24)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (25)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (35)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (4)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+   },
+   "localRotation": {
+    "x": 0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (17)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (23)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (32)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (16)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (22)/Lightplane_Llight_Round_Yellowish_LOD0",
+   "localPosition": {
+    "x": 0.03400000184774399,
+    "y": 0.009999999776482582,
+    "z": -0.05000000074505806
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.003738892963156104,
+    "z": -0.0,
+    "w": 0.9999930262565613
+   },
+   "localScale": {
+    "x": 0.9354382753372192,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (31)",
+   "localPosition": {
+    "x": 12.404999732971191,
+    "y": 28.049999237060547,
+    "z": 27.3799991607666
+   },
+   "localRotation": {
+    "x": -0.00015214965969789773,
+    "y": 0.7077215313911438,
+    "z": 0.00015161704504862428,
+    "w": 0.7064915299415588
+   },
+   "localScale": {
+    "x": 3.879056692123413,
+    "y": 3.242208957672119,
+    "z": 0.4873499870300293
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish~1",
+   "localPosition": {
+    "x": -2.75,
+    "y": 27.959999084472656,
+    "z": 49.439998626708984
+   },
+   "localRotation": {
+    "x": -0.20068998634815216,
+    "y": -7.461096174665727e-06,
+    "z": 1.4307594256024458e-06,
+    "w": 0.9796547889709473
+   },
+   "localScale": {
+    "x": 9.60009479522705,
+    "y": 4.24623441696167,
+    "z": 1.001671314239502
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (5)",
+   "localPosition": {
+    "x": -2.890000104904175,
+    "y": 22.6299991607666,
+    "z": 49.95000076293945
+   },
+   "localRotation": {
+    "x": -0.009403377771377563,
+    "y": 0.0007592598558403552,
+    "z": 0.0013545263791456819,
+    "w": 0.9999545812606812
+   },
+   "localScale": {
+    "x": 9.472248077392578,
+    "y": 4.6884918212890625,
+    "z": 5.703421592712402
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (29)",
+   "localPosition": {
+    "x": 12.430999755859375,
+    "y": 22.600000381469727,
+    "z": 29.639999389648438
+   },
+   "localRotation": {
+    "x": -0.00015214965969789773,
+    "y": 0.7077215313911438,
+    "z": 0.00015161704504862428,
+    "w": 0.7064915299415588
+   },
+   "localScale": {
+    "x": 15.274398803710938,
+    "y": 6.6527323722839355,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (30)",
+   "localPosition": {
+    "x": 12.404999732971191,
+    "y": 25.354000091552734,
+    "z": 24.56100082397461
+   },
+   "localRotation": {
+    "x": -0.00015214965969789773,
+    "y": 0.7077215313911438,
+    "z": 0.00015161704504862428,
+    "w": 0.7064915299415588
+   },
+   "localScale": {
+    "x": 3.879056692123413,
+    "y": 3.242208957672119,
+    "z": 0.4873499870300293
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (27)",
+   "localPosition": {
+    "x": 12.425999641418457,
+    "y": 22.68000030517578,
+    "z": 38.125
+   },
+   "localRotation": {
+    "x": -0.00015214965969789773,
+    "y": 0.7077215313911438,
+    "z": 0.00015161704504862428,
+    "w": 0.7064915299415588
+   },
+   "localScale": {
+    "x": 3.0507307052612305,
+    "y": 2.9860999584198,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (24)",
+   "localPosition": {
+    "x": 12.437000274658203,
+    "y": 22.66699981689453,
+    "z": 45.106998443603516
+   },
+   "localRotation": {
+    "x": -0.00015214965969789773,
+    "y": 0.7077215313911438,
+    "z": 0.00015161704504862428,
+    "w": 0.7064915299415588
+   },
+   "localScale": {
+    "x": 6.439672946929932,
+    "y": 2.9860999584198,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (25)",
+   "localPosition": {
+    "x": 12.430000305175781,
+    "y": 22.68000030517578,
+    "z": 41.31999969482422
+   },
+   "localRotation": {
+    "x": -0.00015214965969789773,
+    "y": 0.7077215313911438,
+    "z": 0.00015161704504862428,
+    "w": 0.7064915299415588
+   },
+   "localScale": {
+    "x": 3.0507307052612305,
+    "y": 2.9860999584198,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (35)",
+   "localPosition": {
+    "x": -12.444999694824219,
+    "y": 30.760000228881836,
+    "z": 45.36000061035156
+   },
+   "localRotation": {
+    "x": 0.00015161703049670905,
+    "y": -0.7064915895462036,
+    "z": 0.0001521495869383216,
+    "w": 0.7077214121818542
+   },
+   "localScale": {
+    "x": 5.063399791717529,
+    "y": 2.9860999584198,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (4)",
+   "localPosition": {
+    "x": 9.069999694824219,
+    "y": 25.549999237060547,
+    "z": 50.040000915527344
+   },
+   "localRotation": {
+    "x": -0.009397566318511963,
+    "y": -0.003469194518402219,
+    "z": 0.0013942776713520288,
+    "w": 0.9999488592147827
+   },
+   "localScale": {
+    "x": 6.210350036621094,
+    "y": 4.6884918212890625,
+    "z": 5.703421592712402
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (17)",
+   "localPosition": {
+    "x": -12.465999603271484,
+    "y": 22.690000534057617,
+    "z": 30.989999771118164
+   },
+   "localRotation": {
+    "x": 0.00015161703049670905,
+    "y": -0.7064915895462036,
+    "z": 0.0001521495869383216,
+    "w": 0.7077214121818542
+   },
+   "localScale": {
+    "x": 5.489782333374023,
+    "y": 2.9860999584198,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (23)",
+   "localPosition": {
+    "x": 12.39799976348877,
+    "y": 22.600000381469727,
+    "z": 43.81100082397461
+   },
+   "localRotation": {
+    "x": -0.00015214947052299976,
+    "y": 0.7077208161354065,
+    "z": 0.00015161719056777656,
+    "w": 0.7064921855926514
+   },
+   "localScale": {
+    "x": 13.966497421264648,
+    "y": 2.9860999584198,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (32)",
+   "localPosition": {
+    "x": 12.404999732971191,
+    "y": 28.049999237060547,
+    "z": 33.810001373291016
+   },
+   "localRotation": {
+    "x": -0.00015214965969789773,
+    "y": 0.7077215313911438,
+    "z": 0.00015161704504862428,
+    "w": 0.7064915299415588
+   },
+   "localScale": {
+    "x": 3.879056692123413,
+    "y": 3.242208957672119,
+    "z": 0.4873499870300293
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (22)",
+   "localPosition": {
+    "x": -12.598999977111816,
+    "y": 22.59000015258789,
+    "z": 42.900001525878906
+   },
+   "localRotation": {
+    "x": 0.00015161703049670905,
+    "y": -0.7064915895462036,
+    "z": 0.0001521495869383216,
+    "w": 0.7077214121818542
+   },
+   "localScale": {
+    "x": 13.966497421264648,
+    "y": 2.9860999584198,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (16)",
+   "localPosition": {
+    "x": -12.600000381469727,
+    "y": 25.450000762939453,
+    "z": 44.970001220703125
+   },
+   "localRotation": {
+    "x": 0.00015161703049670905,
+    "y": -0.7064915895462036,
+    "z": 0.0001521495869383216,
+    "w": 0.7077214121818542
+   },
+   "localScale": {
+    "x": 5.978512287139893,
+    "y": 2.9860999584198,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (2)",
+   "localPosition": {
+    "x": 1.399999976158142,
+    "y": 25.530000686645508,
+    "z": 50.04999923706055
+   },
+   "localRotation": {
+    "x": -0.009397566318511963,
+    "y": -0.003469194518402219,
+    "z": 0.0013942776713520288,
+    "w": 0.9999488592147827
+   },
+   "localScale": {
+    "x": 4.823428153991699,
+    "y": 4.6884918212890625,
+    "z": 5.703421592712402
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (36)",
+   "localPosition": {
+    "x": -12.444999694824219,
+    "y": 30.760000228881836,
+    "z": 34.16999816894531
+   },
+   "localRotation": {
+    "x": 0.00015161703049670905,
+    "y": -0.7064915895462036,
+    "z": 0.0001521495869383216,
+    "w": 0.7077214121818542
+   },
+   "localScale": {
+    "x": 5.063399791717529,
+    "y": 2.9860999584198,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (33)",
+   "localPosition": {
+    "x": 12.404999732971191,
+    "y": 28.049999237060547,
+    "z": 43.650001525878906
+   },
+   "localRotation": {
+    "x": -0.00015214965969789773,
+    "y": 0.7077215313911438,
+    "z": 0.00015161704504862428,
+    "w": 0.7064915299415588
+   },
+   "localScale": {
+    "x": 3.879056692123413,
+    "y": 3.242208957672119,
+    "z": 0.4873499870300293
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish~2",
+   "localPosition": {
+    "x": -6.010000228881836,
+    "y": 25.5,
+    "z": 50.0
+   },
+   "localRotation": {
+    "x": -0.009397566318511963,
+    "y": -0.003469194518402219,
+    "z": 0.0013942776713520288,
+    "w": 0.9999488592147827
+   },
+   "localScale": {
+    "x": 11.626873970031738,
+    "y": 4.6884918212890625,
+    "z": 5.703421592712402
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (34)",
+   "localPosition": {
+    "x": 12.404999732971191,
+    "y": 28.049999237060547,
+    "z": 47.060001373291016
+   },
+   "localRotation": {
+    "x": -0.00015214965969789773,
+    "y": 0.7077215313911438,
+    "z": 0.00015161704504862428,
+    "w": 0.7064915299415588
+   },
+   "localScale": {
+    "x": 3.879056692123413,
+    "y": 3.242208957672119,
+    "z": 0.4873499870300293
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (1)",
+   "localPosition": {
+    "x": -10.489999771118164,
+    "y": 30.860000610351562,
+    "z": 48.09000015258789
+   },
+   "localRotation": {
+    "x": -0.19452284276485443,
+    "y": -0.0025442042388021946,
+    "z": 0.0005045452853664756,
+    "w": 0.9808946251869202
+   },
+   "localScale": {
+    "x": 3.6586568355560303,
+    "y": 4.744913578033447,
+    "z": 1.001671314239502
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (20)/Lightplane_Round_Yellowish (18)",
+   "localPosition": {
+    "x": 0.5624468922615051,
+    "y": 0.0,
+    "z": 0.009068489074707031
+   },
+   "localRotation": {
+    "x": -0.0,
+    "y": -0.0,
+    "z": -0.0,
+    "w": 1.0
+   },
+   "localScale": {
+    "x": 0.6730833053588867,
+    "y": 1.0,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (39)",
+   "localPosition": {
+    "x": 12.430000305175781,
+    "y": 30.729999542236328,
+    "z": 21.469999313354492
+   },
+   "localRotation": {
+    "x": -0.00015214965969789773,
+    "y": 0.7077215313911438,
+    "z": 0.00015161704504862428,
+    "w": 0.7064915299415588
+   },
+   "localScale": {
+    "x": 5.0872063636779785,
+    "y": 4.067813396453857,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish",
+   "localPosition": {
+    "x": 2.2799999713897705,
+    "y": 30.8799991607666,
+    "z": 48.150001525878906
+   },
+   "localRotation": {
+    "x": -0.19452284276485443,
+    "y": -0.0025442042388021946,
+    "z": 0.0005045452853664756,
+    "w": 0.9808946251869202
+   },
+   "localScale": {
+    "x": 12.928007125854492,
+    "y": 4.744913578033447,
+    "z": 1.001671314239502
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (6)",
+   "localPosition": {
+    "x": 4.960000038146973,
+    "y": 22.649999618530273,
+    "z": 49.959999084472656
+   },
+   "localRotation": {
+    "x": -0.009403377771377563,
+    "y": 0.0007592598558403552,
+    "z": 0.0013545263791456819,
+    "w": 0.9999545812606812
+   },
+   "localScale": {
+    "x": 5.125149250030518,
+    "y": 4.6884918212890625,
+    "z": 5.703421592712402
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (15)",
+   "localPosition": {
+    "x": -12.598999977111816,
+    "y": 25.6299991607666,
+    "z": 23.56999969482422
+   },
+   "localRotation": {
+    "x": 0.00015161703049670905,
+    "y": -0.7064915895462036,
+    "z": 0.0001521495869383216,
+    "w": 0.7077214121818542
+   },
+   "localScale": {
+    "x": 10.604623794555664,
+    "y": 2.9860999584198,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (28)",
+   "localPosition": {
+    "x": 12.430999755859375,
+    "y": 25.44300079345703,
+    "z": 36.70000076293945
+   },
+   "localRotation": {
+    "x": -0.00015214965969789773,
+    "y": 0.7077215313911438,
+    "z": 0.00015161704504862428,
+    "w": 0.7064915299415588
+   },
+   "localScale": {
+    "x": 15.274398803710938,
+    "y": 6.6527323722839355,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (21)",
+   "localPosition": {
+    "x": -12.446000099182129,
+    "y": 28.229999542236328,
+    "z": 27.90999984741211
+   },
+   "localRotation": {
+    "x": 0.00015161703049670905,
+    "y": -0.7064915895462036,
+    "z": 0.0001521495869383216,
+    "w": 0.7077214121818542
+   },
+   "localScale": {
+    "x": 14.381797790527344,
+    "y": 2.9860999584198,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (38)",
+   "localPosition": {
+    "x": 12.430999755859375,
+    "y": 30.84600067138672,
+    "z": 32.779998779296875
+   },
+   "localRotation": {
+    "x": -0.00015214965969789773,
+    "y": 0.7077215313911438,
+    "z": 0.00015161704504862428,
+    "w": 0.7064915299415588
+   },
+   "localScale": {
+    "x": 15.274398803710938,
+    "y": 4.067813396453857,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (20)",
+   "localPosition": {
+    "x": -12.446000099182129,
+    "y": 28.229999542236328,
+    "z": 37.86000061035156
+   },
+   "localRotation": {
+    "x": 0.00015161703049670905,
+    "y": -0.7064915895462036,
+    "z": 0.0001521495869383216,
+    "w": 0.7077214121818542
+   },
+   "localScale": {
+    "x": 14.381797790527344,
+    "y": 2.9860999584198,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (37)",
+   "localPosition": {
+    "x": -12.444999694824219,
+    "y": 30.760000228881836,
+    "z": 29.6299991607666
+   },
+   "localRotation": {
+    "x": 0.00015161703049670905,
+    "y": -0.7064915895462036,
+    "z": 0.0001521495869383216,
+    "w": 0.7077214121818542
+   },
+   "localScale": {
+    "x": 5.063399791717529,
+    "y": 2.9860999584198,
+    "z": 1.0
+   }
+  },
+  {
+   "level": "level703",
+   "path": "SBG_Icebreaker_Lights/OO/LIGHT/SUPERSTRUCTURE_FRONT/EFEECTS/Lightplanes/Lightplane_Round_Yellowish (26)",
+   "localPosition": {
+    "x": 12.430000305175781,
+    "y": 22.68000030517578,
+    "z": 40.689998626708984
+   },
+   "localRotation": {
+    "x": -0.00015214965969789773,
+    "y": 0.7077215313911438,
+    "z": 0.00015161704504862428,
+    "w": 0.7064915299415588
+   },
+   "localScale": {
+    "x": 3.0507307052612305,
+    "y": 2.9860999584198,
+    "z": 1.0
+   }
+  }
+ ]
+}

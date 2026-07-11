@@ -1,0 +1,2412 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using SysIoPath = System.IO.Path;
+using System.Reflection;
+using System.Threading.Tasks;
+using Audio.SpatialSystem;
+using EFT;
+using EFT.EnvironmentEffect;
+using EFT.Interactive;
+using EFT.Game.Spawning;
+using HarmonyLib;
+using UnityEngine;
+
+namespace Manimal.Icebreaker
+{
+    // backported maps (Icebreaker) hijack a location slot that lacks some backend/prefab
+    // data real maps ship, so a handful of non-essential raid-init subsystems NRE and abort
+    // the raid. these finalizers swallow the exception so init CONTINUES past the leaf call
+    // (patching the leaf, not the async raid-init method, so nothing downstream is skipped).
+    //
+    // finalizers only run when the target actually threw — real maps never hit these paths,
+    // so they're inert there. losing audio-occlusion setup / breakable-window pooling is
+    // fine for a walkable map. add more [HarmonyPatch] blocks here as later init stages
+    // surface more shells. TODO: migrate into a proper ManimalIcebreaker client plugin,
+    // gated to the icebreaker location, before distribution.
+
+    // spatial audio needs per-location baked data + room/portal scene components + the
+    // occlusion/pool config assets. IcebreakerAcoustics rehydrates ALL of that from the
+    // sidecar (BSG's own recovered authoring + the retail audiobakedata file), and when
+    // staging succeeds we let BSG's REAL Initialize run — full room/portal occlusion.
+    // if staging fails (missing sidecar/bake), fall back to the old behavior: skip init,
+    // leave Initialized=false, the game's guards degrade audio gracefully.
+    // NOTE: the old version of this patch skipped Initialize UNCONDITIONALLY, which was
+    // silently killing spatial audio on real maps too — the icebreaker gate fixes that.
+    [HarmonyPatch(typeof(SpatialAudioSystem), "Initialize")]
+    internal static class Patch_SpatialAudioInit
+    {
+        private static bool Prefix(SpatialAudioSystem __instance, ref Task __result)
+        {
+            if (!IcebreakerAcoustics.IcebreakerLoaded())
+                return true; // real maps: untouched
+
+            if (Plugin.SpatialAudio.Value && IcebreakerAcoustics.TryPrepareSpatialAudio(__instance))
+                return true; // staged — run the real init
+
+            Plugin.Log.LogWarning("[RaidFix] skipped SpatialAudioSystem.Initialize (acoustics staging unavailable)");
+            __result = Task.CompletedTask;
+            return false; // skip original
+        }
+    }
+
+    // followup to the Initialize skip: BetterAudio.PlayAtPoint still routes every impact/
+    // gunshot sound through ProcessSourceOcclusion, which NREs on the never-initialized
+    // internals — thousands of NREs per mag dump, and Effects.Update replays the impact
+    // sound forever because PlaySound keeps throwing. gate all overloads on Initialized:
+    // return -1, the same "no occlusion" result BSG's own EOcclusionTest.None path uses
+    // (the sound itself already Play()ed before occlusion — it just stays unoccluded).
+    // silent on purpose: this fires per sound, logging would be its own spam.
+    [HarmonyPatch]
+    internal static class Patch_OcclusionWhenUninitialized
+    {
+        private static IEnumerable<MethodBase> TargetMethods()
+        {
+            return typeof(SpatialAudioSystem).GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                .Where(m => m.Name == "ProcessSourceOcclusion");
+        }
+
+        private static bool Prefix(ref int __result)
+        {
+            if (SpatialAudioSystem.Initialized)
+                return true; // real maps: run the original untouched
+            __result = -1;
+            return false;
+        }
+    }
+
+    // the resurrected RainController wires screen effects on camera set — but our
+    // fallback camera is Cam2, whose EffectsController predates RainScreenDrops (the
+    // FrostbiteEffect story again, except this one needs prefab-wired assets we don't
+    // have, so it can't be AddComponent'd). the crash: vmethod_8 -> RainScreenDrops.Init
+    // NRE -> aborts the whole raid init through PlayerCameraController.Create. swallow:
+    // every later use of rainScreenDrops_0/screenWater_0 is null-guarded (verified), so
+    // the only loss is raindrops-on-visor — on a snow map.
+    [HarmonyPatch(typeof(RainController), "method_0")]
+    internal static class Patch_RainScreenOnCam2
+    {
+        private static Exception Finalizer(Exception __exception)
+        {
+            if (__exception != null)
+                Plugin.Log.LogWarning($"[RaidFix] RainController camera hookup failed on fallback cam (visor drops off): {__exception.Message}");
+            return null;
+        }
+    }
+
+    // weapon-sway effector NREs (GClass908.Process via ProceduralWeaponAnimation) —
+    // cosmetic sway on some weapon/bot combos; a throw here escapes into Player.LateUpdate.
+    // same family as the MotionEffector.FixedTracking swallow.
+    [HarmonyPatch(typeof(GClass908), nameof(GClass908.Process))]
+    internal static class Patch_SwayEffectorNeverThrows
+    {
+        private static Exception Finalizer(Exception __exception) => null; // per-frame — silent
+    }
+
+    // stutter forensics companion: bots path via SYNCHRONOUS NavMesh.CalculatePath on the
+    // main thread — several repaths landing in one frame on a big navmesh is the classic
+    // unattributed 30-60ms hitch. count + time every call so spike lines can name it.
+    [HarmonyPatch(typeof(UnityEngine.AI.NavMesh), nameof(UnityEngine.AI.NavMesh.CalculatePath),
+        typeof(Vector3), typeof(Vector3), typeof(int), typeof(UnityEngine.AI.NavMeshPath))]
+    internal static class Patch_NavPathTiming
+    {
+        private static void Prefix(out long __state)
+        {
+            __state = System.Diagnostics.Stopwatch.GetTimestamp();
+        }
+
+        private static void Postfix(long __state)
+        {
+            RenderEnvProbe.NavCalls++;
+            RenderEnvProbe.NavMs += (System.Diagnostics.Stopwatch.GetTimestamp() - __state)
+                * 1000f / System.Diagnostics.Stopwatch.Frequency;
+        }
+    }
+
+    // belt-and-braces for the resurrected spatial path: an exception ESCAPING occlusion
+    // processing is catastrophic out of proportion — Effects.Update replays the sound
+    // forever (the infinite impact/gun-loop bug) and it aborts whatever caller flow was
+    // mid-sound (bot death drops left guns floating). degrade to -1 = unoccluded, same
+    // as BSG's own EOcclusionTest.None path. inert unless the original actually threw.
+    [HarmonyPatch]
+    internal static class Patch_OcclusionNeverThrows
+    {
+        private static int _logged;
+
+        private static IEnumerable<MethodBase> TargetMethods()
+        {
+            return typeof(SpatialAudioSystem).GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                .Where(m => m.Name == "ProcessSourceOcclusion");
+        }
+
+        private static Exception Finalizer(Exception __exception, ref int __result)
+        {
+            if (__exception == null) return null;
+            __result = -1;
+            if (_logged++ < 5)
+                Plugin.Log.LogWarning($"[RaidFix] occlusion threw (sound degraded to unoccluded): {__exception.Message}");
+            return null;
+        }
+    }
+
+    // door foley gain: the ripped clips are mixed quiet (open peaks -10dB, squeak -14dB)
+    // and BSG's hardcoded play volumes (open 0.6-0.75, shut 0.2-0.3) assume retail's
+    // gain staging — result "really quiet" doors. boost the volume arg for IB_metal_*
+    // clips (clamped at 1.0 — the normalized wavs in the next bundle carry the rest).
+    // keeps the diagnostic log so the pipeline stays observable.
+    [HarmonyPatch]
+    internal static class Patch_DoorSoundBoost
+    {
+        private static IEnumerable<MethodBase> TargetMethods()
+        {
+            return typeof(BetterAudio).GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                .Where(m =>
+                {
+                    if (m.Name != "PlayAtPoint") return false;
+                    var ps = m.GetParameters();
+                    return ps.Length >= 5 && ps[1].ParameterType == typeof(AudioClip)
+                        && ps[4].ParameterType == typeof(float);
+                });
+        }
+
+        private static void Prefix(AudioClip __1, ref float __4)
+        {
+            if (__1 == null || !__1.name.StartsWith("IB_metal", StringComparison.OrdinalIgnoreCase)) return;
+            __4 = Mathf.Min(__4 * Plugin.DoorSoundBoost.Value, 1f);
+        }
+
+        // diag retired: it proved the pool accepts our clips long ago, and a console+disk
+        // write on EVERY door sound all raid is measurable frame tax. the volume-boost
+        // prefix above is the part that still earns its keep.
+    }
+
+    [HarmonyPatch(typeof(WindowBreakerManager), "method_0")]
+    internal static class Patch_WindowBreakerPrewarm
+    {
+        private static Exception Finalizer(Exception __exception)
+        {
+            if (__exception != null)
+                Plugin.Log.LogWarning($"[RaidFix] swallowed WindowBreakerManager.method_0: {__exception.Message}");
+            return null;
+        }
+    }
+
+    // SpawnPointManagerClass.smethod_3 sets each BotZone.HasPmcBotSpawns by scanning its
+    // SpawnPointMarkers' categories. a marker in that list with a null SpawnPoint NREs the
+    // whole raid init here. HasPmcBotSpawns only matters for bot-PMC spawning (off for our
+    // walkable milestone; our player spawns are zone-less Player points), so swallow it.
+    [HarmonyPatch(typeof(SpawnPointManagerClass), "smethod_3")]
+    internal static class Patch_SpawnPmcScan
+    {
+        private static Exception Finalizer(Exception __exception)
+        {
+            if (__exception != null)
+                Plugin.Log.LogWarning($"[RaidFix] swallowed SpawnPointManagerClass.smethod_3: {__exception.Message}");
+            return null;
+        }
+    }
+
+    // Player.Init dereferences EnvironmentManager.Instance, which is null on our map — our
+    // strip pass removed the dead ripped EnvironmentManager shell (missing script). the
+    // class self-registers as a MonoBehaviourSingleton on Awake. FIRST CHOICE: rebuild
+    // the FULL retail hierarchy (manager -> TriggerGroup -> 51 IndoorTriggers from the
+    // recovered sidecar transforms) so indoor/outdoor switching actually works — footstep
+    // banks, exposure, rain muffling. fallback: the old bare manager (always Outdoor).
+    [HarmonyPatch(typeof(LocalPlayer), "Create")]
+    internal static class Patch_EnsureEnvironmentManager
+    {
+        private static void Prefix()
+        {
+            // weather stack first — LocalGame's weather/seasons block runs after player
+            // creation and is gated on WeatherController.Instance != null, so the rebuild
+            // must land here at the latest
+            if (Plugin.WeatherSystem.Value && IcebreakerAcoustics.IcebreakerLoaded())
+                IcebreakerWeather.TryBuild();
+
+            if (EnvironmentManager.Instance != null)
+                return;
+            if (Plugin.EnvTriggers.Value && IcebreakerAcoustics.TryBuildEnvironmentTriggers())
+                return; // full switcher built (manager included)
+            new GameObject("Icebreaker_EnvManager_Fix").AddComponent<EnvironmentManager>();
+            Plugin.Log.LogWarning("[RaidFix] created missing EnvironmentManager singleton (bare — no indoor triggers)");
+        }
+    }
+
+    // icebreaker is an arctic map — force the seasons pipeline to Winter for THIS map
+    // only (retail it's always frozen; the global SPT overrideSeason stays untouched so
+    // every other map keeps whatever season the server rolled). Winter is what flips
+    // RainController into its snow states, so server rain values fall as snow.
+    [HarmonyPatch(typeof(Class444), nameof(Class444.Run))]
+    internal static class Patch_ForceWinterSeason
+    {
+        private static void Prefix(ref ESeason season)
+        {
+            // pointless without the weather stack (no WeatherController -> seasons no-op)
+            if (!Plugin.WeatherSystem.Value || !Plugin.ForceWinter.Value || !IcebreakerAcoustics.IcebreakerLoaded()) return;
+            if (season == ESeason.Winter) return;
+            Plugin.Log.LogWarning($"[Weather] forcing season {season} -> Winter (icebreaker only)");
+            season = ESeason.Winter;
+        }
+    }
+
+    // ROOT CAUSE of the whole camera mess: the scene's LevelSettings supplies the FPS
+    // camera prefab (GInterface465.CameraPrefab), and OUR scene's copy is an assetripper'd
+    // shell — the top-level refs LOOK populated (fingerprinting _effectsPrefab wasn't
+    // enough), but somewhere in EffectsController.method_3's ~15 raw derefs a stripped
+    // serialized field NREs mid-Awake, the camera comes out half-built and the screen
+    // renders black with HUD burn-in. so don't fingerprint — gate on the map: if an
+    // Icebreaker scene is loaded, discard the scene settings entirely, which makes
+    // SetCameraFromPrefab fall back to the game's own built-in "Cam2" from InGameResources.
+    [HarmonyPatch(typeof(CameraClass), "SetCameraFromSettings")]
+    internal static class Patch_RejectShellCameraPrefab
+    {
+        private static void Prefix(ref CameraClass.GInterface465 settings)
+        {
+            // instrumented: log every call so we can SEE the decision instead of guessing.
+            // gate on GameWorld.LocationId (authoritative; "Suburbs" is our hijacked slot)
+            // rather than scene names, which mysteriously didn't match last run.
+            var world = Comfort.Common.Singleton<GameWorld>.Instance;
+            var loc = world != null ? world.LocationId : "<no GameWorld>";
+            var prefab = settings != null && settings.CameraPrefab != null ? settings.CameraPrefab.name : "<null>";
+            var scenes = "";
+            for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++)
+                scenes += UnityEngine.SceneManagement.SceneManager.GetSceneAt(i).name + ",";
+            Plugin.Log.LogWarning($"[RaidFix] SetCameraFromSettings: loc={loc} prefab={prefab} scenes={scenes}");
+
+            if (settings == null || settings.CameraPrefab == null)
+                return; // already headed for the Cam2 fallback
+            if (string.Equals(loc, "Suburbs", StringComparison.OrdinalIgnoreCase))
+            {
+                Plugin.Log.LogWarning("[RaidFix] icebreaker (Suburbs slot) — discarding scene camera prefab, using built-in Cam2");
+                settings = null;
+            }
+        }
+    }
+
+    // THE actual camera bug: our scene ships no camera prefab (assetripper stripped the
+    // LevelSettings field), so the game falls back to "Cam2" from Resources — and BSG's
+    // EffectsController.method_3 has exactly ONE unguarded GetComponent: FrostbiteEffect
+    // (the arctic cold effect, newer than Cam2). every retail map ships a modern camera
+    // prefab so the fallback path never runs — we're the first to hit it. give the camera
+    // the missing component before EffectsController.Awake needs it; method_3 immediately
+    // disables it anyway. FrostbiteEffect.Awake only caches a component ref, safe to add.
+    [HarmonyPatch(typeof(EffectsController), "Awake")]
+    internal static class Patch_EffectsControllerFrostbite
+    {
+        private static void Prefix(EffectsController __instance)
+        {
+            if (__instance.GetComponent<FrostbiteEffect>() == null)
+            {
+                __instance.gameObject.AddComponent<FrostbiteEffect>();
+                Plugin.Log.LogWarning("[RaidFix] added missing FrostbiteEffect to fallback camera (Cam2 predates it)");
+            }
+
+            // Cam2 gap #3: retail FPS cameras carry TOD_Camera, which scales the sky dome
+            // to the far clip, parks it on the camera every OnPreCull, and switches clear
+            // flags off Skybox. without it the resurrected TOD dome sits tiny at its scene
+            // position while the static skybox draws over everything ("i dont see anything
+            // about the sky being different"). fully self-contained (self-finds TOD_Sky,
+            // no prefab assets) — safe to add; inert when no TOD_Sky exists.
+            if (Plugin.WeatherSystem.Value && IcebreakerAcoustics.IcebreakerLoaded()
+                && __instance.GetComponent<TOD_Camera>() == null)
+            {
+                __instance.gameObject.AddComponent<TOD_Camera>();
+                Plugin.Log.LogWarning("[RaidFix] added TOD_Camera to fallback camera (sky dome now follows the camera)");
+            }
+
+            // Cam2 gap #4: FOG. WeatherController.method_9 pushes fog exclusively into
+            // TOD_Scattering.GlobalDensity on the camera and returns early when it's absent —
+            // so the blizzard fog pin was a no-op all along. self-contained like TOD_Camera
+            // (finds its own shader via GClass872, WeatherController grabs it on the
+            // OnCameraChanged that fires AFTER this prefix — verified by log order).
+            if (Plugin.WeatherSystem.Value && IcebreakerAcoustics.IcebreakerLoaded()
+                && __instance.GetComponent<TOD_Scattering>() == null)
+            {
+                // a full-screen blit with a broken shader = black raid — verify first.
+                // ALWAYS add (so WeatherController.method_1 picks it up and method_9 keeps
+                // feeding it density) but start it per config — the TickBlizzard kill-switch
+                // syncs enabled to WeatherFogPass every tick, making fog live-A/B-able in F12.
+                var scatterShader = GClass872.Find("Hidden/Time of Day/Scattering");
+                if (scatterShader != null && scatterShader.isSupported)
+                {
+                    var sc = __instance.gameObject.AddComponent<TOD_Scattering>();
+                    sc.Sky = MonoBehaviourSingleton<TOD_Sky>.Instance;
+                    sc.enabled = Plugin.WeatherFogPass.Value;
+                    Plugin.Log.LogWarning($"[RaidFix] added TOD_Scattering to fallback camera (enabled={sc.enabled} — WeatherFogPass toggles it live)");
+                }
+                else
+                    Plugin.Log.LogWarning("[RaidFix] TOD_Scattering skipped — scattering shader missing/unsupported (fog stays sky-haze only)");
+            }
+        }
+    }
+
+    // the per-frame weather tick. it died 3600+ times/raid once tod_Scattering_0 went
+    // non-null (MBOIT branch derefs) and a dead tick means no TOD hour sync -> night sun ->
+    // pitch black map. the MBOIT disarm in TickBlizzard is the real fix; this logs the FULL
+    // stack once if anything in here ever throws again (BSG's log only keeps the top frame)
+    // and silences the rest of the storm.
+    [HarmonyPatch(typeof(EFT.Weather.WeatherController), "method_4")]
+    internal static class Patch_WeatherTickDiag
+    {
+        private static bool _logged;
+        private static Exception Finalizer(Exception __exception)
+        {
+            if (__exception != null && !_logged)
+            {
+                _logged = true;
+                Plugin.Log.LogWarning($"[Weather] method_4 threw (full stack, once): {__exception}");
+            }
+            return null;
+        }
+    }
+
+    // Cam2's NightVision wakes half-initialized and NREs in OnPreCull EVERY FRAME (7184
+    // last raid). self-heal: first throw disables the component. NVG activation re-enables
+    // it, and if its internals are still broken it just disables again.
+    [HarmonyPatch(typeof(BSG.CameraEffects.NightVision), "OnPreCull")]
+    internal static class Patch_NightVisionNeverSpams
+    {
+        private static bool _logged;
+        private static Exception Finalizer(Exception __exception, BSG.CameraEffects.NightVision __instance)
+        {
+            if (__exception != null && __instance != null)
+            {
+                __instance.enabled = false;
+                if (!_logged)
+                {
+                    _logged = true;
+                    Plugin.Log.LogWarning($"[RaidFix] NightVision.OnPreCull threw ({__exception.Message}) — component disabled");
+                }
+            }
+            return null;
+        }
+    }
+
+    // safety net: if method_3 trips on yet another Cam2-era gap, don't let it kill Awake —
+    // the rest of Awake (sharpen bind, event subscriptions) still runs and the camera lives.
+    // a partially-initialized effects stack just means some per-frame effect NREs (non-fatal).
+    [HarmonyPatch(typeof(EffectsController), "method_3")]
+    internal static class Patch_EffectsControllerInit
+    {
+        private static Exception Finalizer(Exception __exception)
+        {
+            if (__exception != null)
+                Plugin.Log.LogWarning($"[RaidFix] swallowed EffectsController.method_3: {__exception.Message}\n{__exception.StackTrace}");
+            return null;
+        }
+    }
+
+    // ground truth for the black screen: log exactly what the final camera carries the
+    // moment it's set, so the next debugging round reads facts instead of theories.
+    [HarmonyPatch(typeof(CameraClass), "SetCamera", typeof(Camera))]
+    internal static class Patch_LogCameraInventory
+    {
+        private static void Postfix(Camera camera)
+        {
+            // attach a probe so a full render-env dump can be triggered on demand (F8) once
+            // the scene is fully settled — on ANY map. load a working map, press F8, load
+            // icebreaker, press F8, diff the two dumps. also auto-dumps once here at setup.
+            if (RenderEnvProbe.Instance == null)
+            {
+                var go = new GameObject("Manimal_RenderEnvProbe");
+                UnityEngine.Object.DontDestroyOnLoad(go);
+                go.AddComponent<RenderEnvProbe>();
+            }
+            RenderEnvProbe.CameraRef = camera;
+            RenderEnvProbe.Dump("at-SetCamera");
+        }
+    }
+
+    // comprehensive render-environment dumper. logs the camera flags, scene lighting
+    // (RenderSettings ambient/fog/skybox), brightest lights, and every PostProcessVolume's
+    // profile with its OVERRIDDEN parameters (tonemapper, exposure, grading, bloom...).
+    // this is what "check the camera settings on a working map" actually needs — the
+    // difference is almost never the camera itself, it's the scene's post volume + ambient.
+    internal class RenderEnvProbe : MonoBehaviour
+    {
+        internal static RenderEnvProbe Instance;
+        internal static Camera CameraRef;
+
+        private void Awake() { Instance = this; }
+
+        // the scene now provides its own environment (repaired skybox_night + skybox ambient,
+        // baked into the scene file), so NO per-frame forcing here — that would clobber it.
+        // F8 dumps the render env; F7/F6 scale the scene's ambient INTENSITY live (cooperates
+        // with skybox ambient instead of overriding it) in case it needs a brightness nudge.
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.F8))
+                Dump("F8-manual");
+
+            var onIce = false;
+            try { var w = Comfort.Common.Singleton<GameWorld>.Instance; onIce = w != null && string.Equals(w.LocationId, "Suburbs", StringComparison.OrdinalIgnoreCase); } catch { }
+            if (!onIce)
+            {
+                _iceFrames = 0; _autoRebindStage = 0; _lamps.Clear(); _lastLamp = -1f; _lastAmbient = -1f; _rendererPosMap = null; _volProbeIdx = 0; _rebindDone.Clear();
+                IcebreakerAcoustics.ResetAmbientCache();
+                var crew = GetComponent<IcebreakerCrew>();
+                if (crew != null) Destroy(crew); // fresh spawner per raid
+                var heli = GetComponent<IcebreakerHeliExfil>();
+                if (heli != null) Destroy(heli);
+                return;
+            }
+
+            TickSpikeProbe(); // stutter forensics — logs spiked frames with toggle/GC counts
+            DrainPcToggles(); // apply queued PC visibility changes under a per-frame budget
+
+            // AUTOMATIC shader rebind: our bundle's p0/* SMap shaders are broken copies; the
+            // game has the working ones. rebind at ~2s (bulk geometry loaded) and again at ~6s
+            // (catch streamed-in stragglers) so no F5 needed. two passes then done.
+            _iceFrames++;
+            if (_autoRebindStage == 0 && _iceFrames > 120) { RebindShadersToGame(); _autoRebindStage = 1; }
+            else if (_autoRebindStage == 1 && _iceFrames > 360)
+            {
+                RebindShadersToGame(); DiscoverLamps(); ApplyLamps(); AttachCullingCamera();
+                BuildDistanceCuller(); BuildLightCuller(); EnsureCullingManager();
+                if (GetComponent<IcebreakerCrew>() == null) gameObject.AddComponent<IcebreakerCrew>();
+                if (GetComponent<IcebreakerHeliExfil>() == null) gameObject.AddComponent<IcebreakerHeliExfil>();
+                _autoRebindStage = 2;
+            }
+
+            // size-classed distance culling of small props — the residual 27k draws are
+            // mostly distant clutter contributing zero pixels. same for far lights.
+            if (_autoRebindStage == 2) { TickDistanceCuller(); TickLightCuller(); TickCrossCull(); TickPcDriver(); }
+
+            // keep the ambient beds alive — the raid-start audio reset stops them once, so
+            // check every ~30 frames and replay any that stopped (cheap: cached source list)
+            if (Plugin.EnvTriggers.Value && (_iceFrames % 30) == 0)
+                IcebreakerAcoustics.KeepAmbientAlive();
+
+            // self-drive indoor/outdoor detection — BSG's polling task dies silently on the
+            // first half-spawned player it trips over; without this the env never switches
+            if (Plugin.EnvTriggers.Value && (_iceFrames % 15) == 0)
+                IcebreakerAcoustics.DriveEnvironment();
+
+            // crossfade the ambient beds by environment: wind outside, room tones inside
+            if (Plugin.EnvTriggers.Value)
+                IcebreakerAcoustics.TickAmbientBlend(Time.deltaTime);
+
+            // live config: whenever the BepInEx sliders change, apply immediately in-raid
+            if (Plugin.LampIntensity.Value != _lastLamp || Plugin.LampShadows.Value != _lastShadows)
+            {
+                _lastShadows = Plugin.LampShadows.Value;
+                ApplyLamps();
+            }
+            if (Plugin.AmbientIntensity.Value != _lastAmbient)
+            {
+                // NOTE: TOD_Sky.UpdateAmbient is EMPTY in 0.16.9 — TOD does NOT own
+                // RenderSettings.ambient (the earlier gate here was wrong and killed the
+                // slider). flat ambient stays OUR lever regardless of the weather stack.
+                _lastAmbient = Plugin.AmbientIntensity.Value;
+                RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+                float a = _lastAmbient;
+                RenderSettings.ambientLight = new Color(0.15f * a, 0.15f * a, 0.18f * a, 1f);
+                Plugin.Log.LogWarning($"[Ambient] flat ambient -> {RenderSettings.ambientLight}");
+            }
+
+            // blizzard pin — every ~30 frames is plenty (WeatherDebug values are read
+            // continuously once Enabled)
+            if (Plugin.WeatherSystem.Value && (_iceFrames % 30) == 7)
+                IcebreakerWeather.TickBlizzard();
+
+            if (Input.GetKeyDown(KeyCode.F7)) { RenderSettings.ambientIntensity *= 1.3f; Plugin.Log.LogWarning($"[RenderEnv] ambientIntensity -> {RenderSettings.ambientIntensity:F2}"); }
+            if (Input.GetKeyDown(KeyCode.F6)) { RenderSettings.ambientIntensity *= 0.77f; Plugin.Log.LogWarning($"[RenderEnv] ambientIntensity -> {RenderSettings.ambientIntensity:F2}"); }
+
+            // F5 = THE shader-rebind test, run reliably from the plugin (console Debug.Log
+            // never reached the log). our scene bundle carries a broken copy of the p0/* SMap
+            // shaders (deferred lighting/stencil variants stripped at bundle build → renders
+            // unlit-bright). the GAME has the real working copies loaded at startup, so
+            // Shader.Find(name) returns THOSE. rebinding every material to them should fix the
+            // lighting while keeping textures (identical property names). logs counts reliably.
+            if (Input.GetKeyDown(KeyCode.F5))
+                RebindShadersToGame();
+
+            // ISOLATION TESTS:
+            // F9 = toggle every scene light on/off. lights OFF isolates ambient. if interiors
+            //      become readable with lights off, the culprit is shadowless light-bleed.
+            // F10 = force ambient to near-zero (0.02 flat black-ish) to isolate the lights.
+            // F11 = bottleneck split test, 4 modes cycling:
+            //   0 normal -> 1 hide ALL -> 2 hide only BAKED (culling-managed) -> 3 hide only
+            //   UNBAKED (unmanaged) -> 0. tells us whether the frame cost lives inside or
+            //   outside the culling system's reach.
+            if (Input.GetKeyDown(KeyCode.F11))
+            {
+                _geoMode = (_geoMode + 1) % 4;
+                var baked = CollectBakedRenderers();
+                int all = 0, hid = 0;
+                foreach (var mr in UnityEngine.Object.FindObjectsOfType<MeshRenderer>())
+                {
+                    all++;
+                    bool hide = _geoMode == 1
+                        || (_geoMode == 2 && baked.Contains(mr))
+                        || (_geoMode == 3 && !baked.Contains(mr));
+                    mr.forceRenderingOff = hide;
+                    if (hide) hid++;
+                }
+                string[] names = { "NORMAL", "hide ALL", "hide BAKED-only", "hide UNBAKED-only" };
+                Plugin.Log.LogWarning($"[RenderEnv] F11 mode={names[_geoMode]}: hid {hid}/{all} meshRenderers (baked set={baked.Count})");
+            }
+
+            // F2 = per-volume attribution: cycles normal -> hide ALL of volume 1 -> volume 2
+            // -> ... -> normal. the PC camera is paused during the test so it can't overwrite
+            // our toggles. whichever volume gives the biggest fps jump when hidden is where
+            // the frame cost lives — then we dig into THAT bake.
+            if (Input.GetKeyDown(KeyCode.F2))
+            {
+                try
+                {
+                    var volType = System.Type.GetType("Koenigz.PerfectCulling.PerfectCullingVolume, PerfectCullingRuntime");
+                    var camT = System.Type.GetType("Koenigz.PerfectCulling.PerfectCullingCamera, PerfectCullingRuntime");
+                    var volsArr = UnityEngine.Object.FindObjectsOfType(volType);
+                    var fGroups = volType.GetField("bakeGroups", BindingFlags.Public | BindingFlags.Instance);
+                    var groupT = volType.Assembly.GetType("Koenigz.PerfectCulling.PerfectCullingBakeGroup");
+                    var fRs = groupT.GetField("renderers");
+                    var pcc = (CameraRef != null ? CameraRef : Camera.main)?.GetComponent(camT) as Behaviour;
+
+                    // direct renderer.enabled — no PC plumbing, so the probe can't be
+                    // defeated by inlining/batching quirks.
+                    void SetVolume(object volume, bool visible, out int count)
+                    {
+                        count = 0;
+                        var groups = fGroups.GetValue(volume) as System.Array;
+                        if (groups == null) return;
+                        foreach (var g in groups)
+                        {
+                            var rs = fRs.GetValue(g) as Renderer[];
+                            if (rs == null) continue;
+                            foreach (var r in rs) if (r != null) { r.enabled = visible; count++; }
+                        }
+                    }
+
+                    _volProbeIdx++;
+                    if (_volProbeIdx > volsArr.Length) _volProbeIdx = 0;
+
+                    if (_volProbeIdx == 0)
+                    {
+                        foreach (var v in volsArr) SetVolume(v, true, out _);
+                        if (pcc != null) pcc.enabled = true;
+                        Plugin.Log.LogWarning("[VolProbe] normal culling resumed");
+                    }
+                    else
+                    {
+                        if (pcc != null) pcc.enabled = false;
+                        int hidden = 0;
+                        for (int i = 0; i < volsArr.Length; i++)
+                        {
+                            SetVolume(volsArr[i], i != _volProbeIdx - 1, out var c);
+                            if (i == _volProbeIdx - 1) hidden = c;
+                        }
+                        var target = volsArr[_volProbeIdx - 1] as Component;
+                        Plugin.Log.LogWarning($"[VolProbe] {_volProbeIdx}/{volsArr.Length}: HIDING '{target?.name}' ({hidden} renderers set enabled=false) — note your fps");
+                    }
+                }
+                catch (Exception e) { Plugin.Log.LogWarning($"[VolProbe] failed: {e.Message}"); }
+            }
+
+            // F3 = LOD forensics. prime suspect for the 156k live renderers: ripped
+            // LODGroups lost their renderer refs, so every LOD level draws simultaneously
+            // (3-4x the intended geometry). counts groups, how many have EMPTY lod renderer
+            // lists, and how many renderers live under LODGroups.
+            if (Input.GetKeyDown(KeyCode.F3))
+            {
+                // refs + transition heights survived the rip (verified in scene files), so
+                // native unity LOD culling SHOULD be erasing distant props. if groups are
+                // DISABLED (bsg's autocull system toggles lodGroup.enabled and the rip may
+                // have serialized that state), nothing culls. report and heal in one press.
+                int groups = 0, disabled = 0, inactiveGo = 0, healed = 0;
+                foreach (var lg in UnityEngine.Object.FindObjectsOfType<LODGroup>())
+                {
+                    groups++;
+                    if (!lg.gameObject.activeInHierarchy) inactiveGo++;
+                    if (!lg.enabled)
+                    {
+                        disabled++;
+                        lg.enabled = true;
+                        healed++;
+                    }
+                }
+                Plugin.Log.LogWarning($"[LOD] {groups} LODGroups: {disabled} were DISABLED (now enabled), {inactiveGo} on inactive GOs. " +
+                                      (disabled > 0 ? "check your fps NOW." : "all were already enabled — native lod culling should be active; mystery deepens"));
+            }
+
+            // F4 = toggle ScreenSpaceReflections. the active profile runs SSR at High/
+            // Supersampled/256 iterations — a per-pixel GPU monster whose cost appears
+            // exactly when geometry covers the screen (sky early-outs), which matches the
+            // F11 behavior as well as draw calls do. cheap decisive toggle.
+            if (Input.GetKeyDown(KeyCode.F4))
+            {
+                try
+                {
+                    var ppvType = AccessTools.TypeByName("UnityEngine.Rendering.PostProcessing.PostProcessVolume");
+                    foreach (var volObj in UnityEngine.Object.FindObjectsOfType(ppvType))
+                    {
+                        var profile = GetMember(volObj, "sharedProfile") ?? GetMember(volObj, "profile");
+                        var settings = GetMember(profile, "settings") as System.Collections.IEnumerable;
+                        if (settings == null) continue;
+                        foreach (var s in settings)
+                        {
+                            if (s == null || !s.GetType().Name.Contains("ScreenSpaceReflections")) continue;
+                            var activeProp = s.GetType().GetProperty("active");
+                            bool cur = (bool)activeProp.GetValue(s);
+                            activeProp.SetValue(s, !cur);
+                            Plugin.Log.LogWarning($"[RenderEnv] F4: ScreenSpaceReflections active -> {!cur}");
+                        }
+                    }
+                }
+                catch (Exception e) { Plugin.Log.LogWarning($"[RenderEnv] F4 SSR toggle failed: {e.Message}"); }
+            }
+
+            // F12 = census of the UNBAKED renderers (the actual frame cost per the F11
+            // split): counts by scene and by top-level root so we can see what the 122k
+            // expensive renderers actually are.
+            if (Input.GetKeyDown(KeyCode.F12))
+            {
+                var baked = CollectBakedRenderers();
+                var byScene = new Dictionary<string, int>();
+                var byRoot = new Dictionary<string, int>();
+                int unbaked = 0;
+                foreach (var mr in UnityEngine.Object.FindObjectsOfType<MeshRenderer>())
+                {
+                    if (baked.Contains(mr)) continue;
+                    unbaked++;
+                    var sc = mr.gameObject.scene.name ?? "<none>";
+                    byScene.TryGetValue(sc, out var c1); byScene[sc] = c1 + 1;
+                    var t = mr.transform; while (t.parent != null) t = t.parent;
+                    var key = sc + "/" + t.name;
+                    byRoot.TryGetValue(key, out var c2); byRoot[key] = c2 + 1;
+                }
+                Plugin.Log.LogWarning($"[Census] {unbaked} UNBAKED renderers. by scene:");
+                foreach (var kv in byScene.OrderByDescending(k => k.Value))
+                    Plugin.Log.LogWarning($"[Census]   {kv.Value,7}  {kv.Key}");
+                Plugin.Log.LogWarning("[Census] top roots:");
+                foreach (var kv in byRoot.OrderByDescending(k => k.Value).Take(15))
+                    Plugin.Log.LogWarning($"[Census]   {kv.Value,7}  {kv.Key}");
+            }
+
+            // F1 = bot autopsy: every BotOwner's state, position, and body-renderer health.
+            // statue bots fail with zero log output — this makes them talk.
+            if (Input.GetKeyDown(KeyCode.F1))
+            {
+                var bots = UnityEngine.Object.FindObjectsOfType<BotOwner>();
+                Plugin.Log.LogWarning($"[BotAutopsy] {bots.Length} BotOwner(s) alive:");
+                foreach (var b in bots)
+                {
+                    try
+                    {
+                        var role = b.Profile?.Info?.Settings?.Role.ToString() ?? "?";
+                        var p = b.Transform?.position ?? Vector3.zero;
+                        var rends = b.GetComponentsInChildren<Renderer>(true);
+                        int on = 0, skinned = 0, skinnedOn = 0;
+                        foreach (var r in rends)
+                        {
+                            if (r.enabled) on++;
+                            if (r is SkinnedMeshRenderer) { skinned++; if (r.enabled && r.gameObject.activeInHierarchy) skinnedOn++; }
+                        }
+                        string layer = "?";
+                        try { layer = b.Brain?.Agent?.Name ?? "?"; } catch { }
+                        // render-state forensics for the invisible-body mystery: WHICH
+                        // mechanism hides the skinned meshes?
+                        var sb = new System.Text.StringBuilder();
+                        foreach (var r in rends)
+                        {
+                            if (!(r is SkinnedMeshRenderer smr)) continue;
+                            sb.Append($"[{r.name}: en={r.enabled} act={r.gameObject.activeInHierarchy} " +
+                                      $"fro={r.forceRenderingOff} shadow={r.shadowCastingMode} vis={r.isVisible} mat={(r.sharedMaterial != null ? r.sharedMaterial.shader?.name : "NULL")}] ");
+                            if (sb.Length > 400) break;
+                        }
+                        Plugin.Log.LogWarning($"[BotAutopsy]   body: {sb}");
+                        Plugin.Log.LogWarning($"[BotAutopsy]  '{b.name}' role={role} state={b.BotState} pos={p} " +
+                                              $"renderers={rends.Length}({on} on) skinned={skinned}({skinnedOn} on) brain={layer} " +
+                                              $"standby={b.StandBy?.StandByType.ToString() ?? "?"} healthy={(b.GetPlayer != null ? (!b.GetPlayer.HealthController?.IsAlive == false).ToString() : "?")}");
+                    }
+                    catch (Exception e) { Plugin.Log.LogWarning($"[BotAutopsy]  '{b?.name}': dump failed {e.Message}"); }
+                }
+            }
+
+            if (Input.GetKeyDown(KeyCode.F9))
+            {
+                _lightsOn = !_lightsOn;
+                int n = 0;
+                foreach (var l in UnityEngine.Object.FindObjectsOfType<Light>()) { l.enabled = _lightsOn; n++; }
+                Plugin.Log.LogWarning($"[RenderEnv] toggled {n} lights -> {(_lightsOn ? "ON" : "OFF")}");
+            }
+            // F10 = STATIC BATCHING test. ~117k live renderers = draw-call/CPU death that no
+            // visibility culling can fix (the F8 numbers show culling works and fps doesn't
+            // care). BSG's own "SBG_*" roots are their static-batch-group system — replicate
+            // with unity's runtime combiner: merges static meshes under each scene root into
+            // batched draw calls. one-shot (can't uncombine without reload).
+            if (Input.GetKeyDown(KeyCode.F10) && !_batched)
+            {
+                _batched = true;
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+                int roots = 0, candidates = 0;
+                for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++)
+                {
+                    var sc = UnityEngine.SceneManagement.SceneManager.GetSceneAt(i);
+                    if (!sc.isLoaded || sc.name == null || !sc.name.StartsWith("Icebreaker")) continue;
+                    foreach (var root in sc.GetRootGameObjects())
+                    {
+                        // the root overload only combines isStatic children — ripped scenes
+                        // lost their static flags, so it no-ops (84ms/118 roots). use the
+                        // explicit-array overload where WE pick candidates: any mesh that
+                        // isn't a door/interactive (those move — must not be batched).
+                        var gos = new List<GameObject>();
+                        foreach (var mr in root.GetComponentsInChildren<MeshRenderer>())
+                        {
+                            if (mr.GetComponentInParent<WorldInteractiveObject>() != null) continue;
+                            var mf = mr.GetComponent<MeshFilter>();
+                            if (mf == null || mf.sharedMesh == null) continue;
+                            gos.Add(mr.gameObject);
+                        }
+                        if (gos.Count == 0) continue;
+                        StaticBatchingUtility.Combine(gos.ToArray(), root);
+                        candidates += gos.Count;
+                        roots++;
+                    }
+                }
+                Plugin.Log.LogWarning($"[RenderEnv] F10: static-batched {candidates} renderers under {roots} roots in {sw.ElapsedMilliseconds}ms — compare fps now");
+            }
+        }
+
+        // CRITICAL: sharedMaterials, NOT materials. `.materials` instantiates a unique
+        // material copy per renderer — 150k unique materials meant no two renderers could
+        // ever batch together (setPass == batches == 40k == 20fps). touching each unique
+        // SHARED material once fixes every renderer using it AND keeps batching intact.
+        // materials already examined across ALL passes — mid-raid passes (F5, streamed-in
+        // gear) only pay for what's actually new. a full 2000-material single-frame sweep
+        // was a 137ms hitch, and every rebound shader compiles a fresh variant on its next
+        // draw (a second hitch the frame after).
+        private static readonly HashSet<int> _rebindDone = new HashSet<int>();
+
+        private static void RebindShadersToGame()
+        {
+            int rebound = 0, sameOrMissing = 0;
+            var seen = new HashSet<Material>();
+            var byName = new System.Collections.Generic.Dictionary<string, int>();
+            foreach (var r in UnityEngine.Object.FindObjectsOfType<Renderer>())
+            {
+                foreach (var m in r.sharedMaterials)
+                {
+                    if (m == null || m.shader == null || !seen.Add(m)) continue;
+                    if (!_rebindDone.Add(m.GetInstanceID())) continue; // handled in a prior pass
+                    var name = m.shader.name;
+                    var gameShader = Shader.Find(name);
+                    if (gameShader != null && gameShader != m.shader)
+                    {
+                        m.shader = gameShader;
+                        rebound++;
+                        byName.TryGetValue(name, out var c);
+                        byName[name] = c + 1;
+                    }
+                    else sameOrMissing++;
+                }
+            }
+            Plugin.Log.LogWarning($"[RebindShaders] unique materials={seen.Count} rebound={rebound} sameOrMissing={sameOrMissing}");
+            foreach (var kv in byName)
+                Plugin.Log.LogWarning($"[RebindShaders]   {kv.Value}x  {kv.Key}");
+        }
+
+        private static bool _lightsOn = true;
+        private static bool _batched;
+        private static int _geoMode;
+        private static int _volProbeIdx;
+        private static int _iceFrames;
+
+        // all renderers currently referenced by any perfect-culling bake group — i.e. the
+        // set the culling system actually manages. everything else renders unconditionally.
+        private static HashSet<Renderer> CollectBakedRenderers()
+        {
+            var set = new HashSet<Renderer>();
+            try
+            {
+                var volType = System.Type.GetType("Koenigz.PerfectCulling.PerfectCullingVolume, PerfectCullingRuntime");
+                if (volType == null) return set;
+                var fGroups = volType.GetField("bakeGroups", BindingFlags.Public | BindingFlags.Instance);
+                var groupType = volType.Assembly.GetType("Koenigz.PerfectCulling.PerfectCullingBakeGroup");
+                var fRenderers = groupType.GetField("renderers");
+                foreach (var v in UnityEngine.Object.FindObjectsOfType(volType))
+                {
+                    var groups = fGroups?.GetValue(v) as System.Array;
+                    if (groups == null) continue;
+                    foreach (var g in groups)
+                    {
+                        var rs = fRenderers?.GetValue(g) as Renderer[];
+                        if (rs == null) continue;
+                        foreach (var r in rs) if (r != null) set.Add(r);
+                    }
+                }
+            }
+            catch { }
+            return set;
+        }
+        private static int _autoRebindStage;
+        private static float _lastLamp = -1f;
+        private static float _lastAmbient = -1f;
+        private static bool _lastShadows;
+        // the discovered dead lamps, cached so the slider can re-drive them repeatedly (once
+        // we've set them to a real intensity they no longer look "dead", so we can't re-detect).
+        private static readonly System.Collections.Generic.List<Light> _lamps = new System.Collections.Generic.List<Light>();
+
+        // retail lamp lights serialize at intensity 0 (brightness was baked into lightmaps we
+        // don't have). a near-zero non-directional light is a dead lamp — remember it so the
+        // slider can drive it. additive: safe to call again for streamed-in stragglers.
+        private static void DiscoverLamps()
+        {
+            // lights owned by a HEALED CullingLightObject are driven by BSG's native system
+            // (intensity from _maxLightIntensity + fade curves) — ours would fight it.
+            var nativeOwned = new HashSet<Light>();
+            foreach (var clo in UnityEngine.Object.FindObjectsOfType<CullingLightObject>())
+            {
+                var l = clo.GetLight();
+                if (l != null) nativeOwned.Add(l);
+            }
+            int skipped = 0;
+            foreach (var l in UnityEngine.Object.FindObjectsOfType<Light>())
+            {
+                if (l == null || l.type == LightType.Directional || l.intensity > 0.1f || _lamps.Contains(l)) continue;
+                // MAP lights only — an ungated sweep once revived the Cam2 camera's dormant
+                // hideout flashlight to intensity 3 and it rode the player around like a halo
+                var sc = l.gameObject.scene.name;
+                if (sc == null || !sc.StartsWith("Icebreaker")) continue;
+                if (nativeOwned.Contains(l)) { skipped++; continue; }
+                _lamps.Add(l);
+            }
+            if (skipped > 0)
+                Plugin.Log.LogWarning($"[LightLamps] {skipped} lamps native-owned (CullingLightObject) — LampIntensity slider drives only the {_lamps.Count} unowned");
+        }
+
+        // occlusion culling: the scene bundle carries a PerfectCullingVolume + baked data
+        // authored with the Asset Store PC (its OWN PerfectCullingRuntime assembly — the
+        // game's built-in PC is BSG's fork missing the vanilla volume class, so we self-host;
+        // both coexist). Plugin.Awake preloads PerfectCullingRuntime.dll so the volume binds
+        // at scene load; here we give the FPS camera the PerfectCullingCamera driver that
+        // queries the bake each frame (OnPreCull) and toggles renderers.
+        private static void AttachCullingCamera()
+        {
+            try
+            {
+                var camType = System.Type.GetType("Koenigz.PerfectCulling.PerfectCullingCamera, PerfectCullingRuntime");
+                if (camType == null) { Plugin.Log.LogWarning("[Culling] PerfectCullingRuntime not loaded — no culling"); return; }
+                var volType = System.Type.GetType("Koenigz.PerfectCulling.PerfectCullingVolume, PerfectCullingRuntime");
+                if (volType == null) { Plugin.Log.LogWarning("[Culling] volume type missing"); return; }
+
+                // volumes are built ENTIRELY from sidecars (PCBK2 carries the volume's
+                // transform/size) — the bundle needs no culling objects, so rebakes are
+                // sidecar-export + client restart, never a 645MB bundle rebuild.
+                var dir = SysIoPath.Combine(SysIoPath.GetDirectoryName(typeof(Plugin).Assembly.Location)!, "culling");
+                if (System.IO.Directory.Exists(dir))
+                    foreach (var f in System.IO.Directory.GetFiles(dir, "*.pcbake"))
+                        RehydrateVolumeFromSidecar(f, volType);
+
+                var vols = UnityEngine.Object.FindObjectsOfType(volType);
+                if (vols == null || vols.Length == 0)
+                {
+                    Plugin.Log.LogWarning("[Culling] no live volumes (no sidecars?) — no culling");
+                    return;
+                }
+
+                // per-volume ground truth: OnEnable only registers a volume into AllVolumes
+                // (the list culling iterates) when volumeBakeData is non-null with data.
+                // 0/0 culled means every volume failed that gate — log which and why.
+                var bakeDataField = volType.GetField("volumeBakeData");
+                var allVolumes = volType.GetField("AllVolumes", BindingFlags.Public | BindingFlags.Static)?.GetValue(null) as System.Collections.ICollection;
+                foreach (var v in vols)
+                {
+                    var comp = v as Component;
+                    var bd = bakeDataField?.GetValue(v);
+                    string state;
+                    if (bd == null || bd.Equals(null)) state = "volumeBakeData=NULL (asset missing from bundle or unbound)";
+                    else
+                    {
+                        // WHICH class did the ScriptableObject bind to? both our shipped
+                        // PerfectCullingRuntime AND the game's Assembly-CSharp contain
+                        // Koenigz.PerfectCulling.PerfectCullingVolumeBakeData (BSG fork).
+                        // if it bound to BSG's, the layout differs and fields read null.
+                        var bt = bd.GetType();
+                        var dataF = bt.GetField("data");
+                        var dataArr = dataF?.GetValue(bd) as System.Array;
+                        var rawArr = bt.GetField("rawData")?.GetValue(bd) as System.Array;
+                        var groups = bt.GetField("numberOfGroups")?.GetValue(bd);
+                        var cellCount = bt.GetField("cellCount")?.GetValue(bd);
+                        var ver = bt.GetField("bakeDataVersion")?.GetValue(bd);
+                        var volGroups = volType.GetField("bakeGroups", BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(v) as System.Array;
+                        state = $"asm={bt.Assembly.GetName().Name} dataField={(dataF != null ? "present" : "MISSING")} data={(dataArr == null ? "null" : dataArr.Length.ToString())} " +
+                                $"rawData={(rawArr == null ? "null" : rawArr.Length.ToString())} groups={groups} cellCount={cellCount} ver={ver} volume.bakeGroups={(volGroups == null ? "null" : volGroups.Length.ToString())}";
+                    }
+                    Plugin.Log.LogWarning($"[Culling] volume '{comp?.name}': {state}");
+                }
+                Plugin.Log.LogWarning($"[Culling] AllVolumes registered: {allVolumes?.Count ?? -1} of {vols.Length}");
+
+                var cam = CameraRef != null ? CameraRef : Camera.main;
+                if (cam == null) { Plugin.Log.LogWarning("[Culling] no camera to attach to"); return; }
+                // NO PerfectCullingCamera: its OnPreCull re-executes ALL volumes in one
+                // frame on ANY cell crossing — with the fine indoor bake (4m cells) that
+                // meant a 90-105ms hitch every few steps. NeuterEditorOnlyCallbacks still
+                // runs for the BakeGroup.Toggle -> budgeted-queue patch; the volume
+                // execution itself moves to TickPcDriver: one volume per frame,
+                // round-robin, each gated by ITS OWN cell index.
+                NeuterEditorOnlyCallbacks(camType);
+                // own try: a driver-build failure must not also kill the cross-cull arm below
+                try
+                {
+                    BuildPcDriver(vols);
+                    Plugin.Log.LogWarning($"[Culling] sliced PC driver armed — {vols.Length} volume(s), 1 volume/frame, per-volume cell gating");
+                }
+                catch (Exception de) { Plugin.Log.LogWarning($"[Culling] driver build failed: {de.Message}"); }
+
+                // interior volumes only cull for cameras inside themselves — from anywhere
+                // else they render wholesale (the ship-center fps hole). arm the distance
+                // rule for out-of-volume cameras.
+                BuildCrossCull(volType);
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[Culling] attach failed: {e.Message}"); }
+        }
+
+        // rebuild a volume's bake payload + groups from the editor-exported .pcbake sidecar
+        // (see IcebreakerCulling.ExportSidecars). renderer identity = name + world position.
+        private static System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<Renderer>> _rendererPosMap;
+
+        // quantize to 5cm so tiny float drift between editor and runtime doesn't miss
+        private static string PosKey(string name, Vector3 p)
+            => $"{name}|{Mathf.RoundToInt(p.x * 20)}|{Mathf.RoundToInt(p.y * 20)}|{Mathf.RoundToInt(p.z * 20)}";
+
+        private static void RehydrateVolumeFromSidecar(string file, System.Type volType)
+        {
+            var volName = SysIoPath.GetFileNameWithoutExtension(file);
+            try
+            {
+                var asm = volType.Assembly;
+                var bdType = asm.GetType("Koenigz.PerfectCulling.PerfectCullingVolumeBakeData");
+                var visType = bdType.GetNestedType("VisibilitySet");
+                var groupType = asm.GetType("Koenigz.PerfectCulling.PerfectCullingBakeGroup");
+
+                using var r = new System.IO.BinaryReader(System.IO.File.OpenRead(file));
+                if (r.ReadString() != "PCBK3") { Plugin.Log.LogWarning($"[Culling] {volName}: old/bad sidecar format — re-export from the editor"); return; }
+                r.ReadString(); // volume name (== file name)
+                var volPos = new Vector3(r.ReadSingle(), r.ReadSingle(), r.ReadSingle());
+                var volRot = new Quaternion(r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadSingle());
+                var volSize = new Vector3(r.ReadSingle(), r.ReadSingle(), r.ReadSingle());
+                var bakeCell = new Vector3(r.ReadSingle(), r.ReadSingle(), r.ReadSingle());
+                var cellCount = new Vector3(r.ReadSingle(), r.ReadSingle(), r.ReadSingle());
+
+                // find-or-create the volume: bundle may carry an (empty) one by this name;
+                // otherwise build it fresh — disabled until fully populated, so OnEnable's
+                // registration check runs against real data.
+                Component vol = null;
+                foreach (var existing in UnityEngine.Object.FindObjectsOfType(volType))
+                    if ((existing as Component)?.name == volName) { vol = existing as Component; break; }
+                if (vol == null)
+                {
+                    var go = new GameObject(volName);
+                    go.SetActive(false);
+                    vol = go.AddComponent(volType) as Component;
+                }
+                vol.transform.SetPositionAndRotation(volPos, volRot);
+                volType.GetField("volumeSize").SetValue(vol, volSize);
+                volType.GetField("bakeCellSize").SetValue(vol, bakeCell);
+                var cellSize = new Vector3(r.ReadSingle(), r.ReadSingle(), r.ReadSingle());
+                var orientation = new Quaternion(r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadSingle());
+                int numberOfGroups = r.ReadInt32();
+
+                int cells = r.ReadInt32();
+                var dataArr = System.Array.CreateInstance(visType, cells);
+                var fCompressed = visType.GetField("compressed");
+                var fLen = visType.GetField("len");
+                for (int i = 0; i < cells; i++)
+                {
+                    ushort len = r.ReadUInt16();
+                    var bytes = r.ReadBytes(r.ReadInt32());
+                    var cell = Activator.CreateInstance(visType);
+                    fLen.SetValue(cell, len);
+                    fCompressed.SetValue(cell, bytes);
+                    dataArr.SetValue(cell, i);
+                }
+
+                // groups: resolve renderers by NAME + quantized WORLD POSITION — geometry
+                // doesn't move, so this survives the hierarchy churn that broke path-based
+                // identity across bundle rebuilds. duplicates at the same spot pop from a list.
+                if (_rendererPosMap == null)
+                {
+                    _rendererPosMap = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<Renderer>>();
+                    foreach (var rend in Resources.FindObjectsOfTypeAll<Renderer>())
+                    {
+                        if (!rend.gameObject.scene.isLoaded) continue;
+                        var k = PosKey(rend.name, rend.transform.position);
+                        if (!_rendererPosMap.TryGetValue(k, out var lst)) _rendererPosMap[k] = lst = new System.Collections.Generic.List<Renderer>(1);
+                        lst.Add(rend);
+                    }
+                }
+                int groups = r.ReadInt32(), missing = 0;
+                var groupArr = System.Array.CreateInstance(groupType, groups);
+                var fRenderers = groupType.GetField("renderers");
+                var fGroupType = groupType.GetField("groupType");
+                var userEnum = System.Enum.Parse(fGroupType.FieldType, "User");
+                for (int gi = 0; gi < groups; gi++)
+                {
+                    int rc = r.ReadInt32();
+                    var list = new System.Collections.Generic.List<Renderer>(rc);
+                    for (int ri = 0; ri < rc; ri++)
+                    {
+                        var rname = r.ReadString();
+                        var rpos = new Vector3(r.ReadSingle(), r.ReadSingle(), r.ReadSingle());
+                        if (_rendererPosMap.TryGetValue(PosKey(rname, rpos), out var candidates) && candidates.Count > 0)
+                        {
+                            // pop so identical duplicates each bind a distinct instance
+                            var rr = candidates[candidates.Count - 1];
+                            candidates.RemoveAt(candidates.Count - 1);
+                            if (rr != null) list.Add(rr); else missing++;
+                        }
+                        else missing++;
+                    }
+                    var g = Activator.CreateInstance(groupType);
+                    fRenderers.SetValue(g, list.ToArray());
+                    fGroupType.SetValue(g, userEnum);
+                    groupArr.SetValue(g, gi);
+                }
+
+                // build the bake data instance and wire everything up
+                var bd = ScriptableObject.CreateInstance(bdType);
+                bdType.GetField("cellCount").SetValue(bd, cellCount);
+                bdType.GetField("cellSize").SetValue(bd, cellSize);
+                bdType.GetField("orientation").SetValue(bd, orientation);
+                bdType.GetField("numberOfGroups").SetValue(bd, numberOfGroups);
+                bdType.GetField("data").SetValue(bd, dataArr);
+                volType.GetField("volumeBakeData").SetValue(vol, bd);
+                volType.GetField("bakeGroups", BindingFlags.Public | BindingFlags.Instance)?.SetValue(vol, groupArr);
+
+                // re-run Start (rebuilds internal renderer-state array from the new groups),
+                // then make sure OnEnable runs against the populated data so the volume
+                // registers into AllVolumes (fresh GOs were created inactive).
+                volType.GetMethod("Start", BindingFlags.Public | BindingFlags.Instance)?.Invoke(vol, null);
+                if (!vol.gameObject.activeSelf) vol.gameObject.SetActive(true);
+                else { var beh = vol as Behaviour; if (beh != null) { beh.enabled = false; beh.enabled = true; } }
+
+                Plugin.Log.LogWarning($"[Culling] rehydrated {volName}: {cells} cells, {groups} groups ({missing} renderer paths unresolved)");
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[Culling] rehydrate {volName} failed: {e}"); }
+        }
+
+        // sibling-index-qualified — MUST match the editor exporter's convention exactly.
+        // plain name paths collide massively (thousands of same-named siblings) and
+        // silently collapse the managed renderer set.
+        private static string HierarchyPath(Transform t)
+        {
+            var sb = new System.Text.StringBuilder($"{t.name}[{t.GetSiblingIndex()}]");
+            while (t.parent != null) { t = t.parent; sb.Insert(0, $"{t.name}[{t.GetSiblingIndex()}]/"); }
+            return sb.ToString();
+        }
+
+        // we ship the EDITOR-compiled PerfectCullingRuntime.dll (Library/ScriptAssemblies),
+        // so its #if UNITY_EDITOR code is baked in — LateUpdate/OnGUI are pure editor
+        // visualization (UnityEditor.Selection etc) and NRE every frame in the player.
+        // the real culling path (OnPreCull -> PerformCameraCulling) is clean runtime code.
+        // skip the editor-only callbacks. TODO: compile a proper player DLL instead.
+        private static bool _cullingNeutered;
+        private static void NeuterEditorOnlyCallbacks(System.Type camType)
+        {
+            if (_cullingNeutered) return;
+            _cullingNeutered = true;
+            var h = new Harmony("com.manimal.aidatadumper.culling");
+            foreach (var name in new[] { "LateUpdate", "OnGUI" })
+            {
+                var m = AccessTools.Method(camType, name);
+                if (m != null)
+                    h.Patch(m, prefix: new HarmonyMethod(typeof(RenderEnvProbe), nameof(SkipOriginal)));
+            }
+
+            // PC hides culled renderers via forceRenderingOff — which does NOT affect
+            // statically-batched renderers (renderer.enabled is what batching respects).
+            // patch BakeGroup.Toggle ITSELF (replacing the body — patching the tiny static
+            // ToggleRenderer inside it does nothing because the JIT inlines it) to flip
+            // renderer.enabled on the group's renderers.
+            var groupT = camType.Assembly.GetType("Koenigz.PerfectCulling.PerfectCullingBakeGroup");
+            var toggle = groupT != null ? AccessTools.Method(groupT, "Toggle") : null;
+            if (toggle != null)
+            {
+                _groupRenderersField = groupT.GetField("renderers");
+                h.Patch(toggle, prefix: new HarmonyMethod(typeof(RenderEnvProbe), nameof(ToggleGroupViaEnabled)));
+                Plugin.Log.LogWarning("[Culling] BakeGroup.Toggle replaced with renderer.enabled path (static-batching compatible)");
+            }
+            Plugin.Log.LogWarning("[Culling] editor-only callbacks neutered on PerfectCullingCamera");
+        }
+
+        private static bool SkipOriginal() => false;
+
+        private static FieldInfo _groupRenderersField;
+
+        // PC toggle amortization — the stutter forensics caught cell transitions flipping
+        // 65-84k renderer.enabled in ONE frame (65-78ms hitches, THE noticeable stutter).
+        // conditional writes alone don't help when the visible set genuinely changes that
+        // much. so: toggles land in a pending map (last-writer-wins per renderer) and a
+        // fixed budget applies per frame — a big transition settles over ~10 frames of
+        // slight pop-in instead of one giant hitch.
+        // 8000 was itself a 112ms frame when a big transition filled it — and 1500 was
+        // STILL the engine-room freeze (07-09 log: every repeatable 100-250ms spike had
+        // pcToggles pinned at ~1500; entering the fine-cell indoor volume queues a
+        // near-total set swap). 350 spreads a full volume entry over ~15 frames: a
+        // quarter second of gentle pop-in instead of a hitch.
+        private const int PcApplyBudget = 350;
+        private static readonly Dictionary<Renderer, bool> _pcPending = new Dictionary<Renderer, bool>();
+        private static readonly List<Renderer> _pcDrainScratch = new List<Renderer>(PcApplyBudget);
+
+        // thin wall deco (curtains, picture frames) lives in slivered doorway sightlines
+        // the bake's visibility sampling chronically misses at ANY resolution — pops in
+        // plain view. exempt those groups from occlusion culling entirely; the distance
+        // culler still handles them, so the render cost is a rounding error. deliberately
+        // specific patterns: 'frame_plastic' not 'frame' (door frames must stay culled).
+        private static readonly string[] PcNeverCull = { "curtains_", "frame_plastic", "arctic_picture" };
+        private static readonly Dictionary<object, bool> _pcWhitelistCache = new Dictionary<object, bool>();
+
+        private static bool IsNeverCullGroup(object group, Renderer[] rs)
+        {
+            if (_pcWhitelistCache.TryGetValue(group, out var hit)) return hit;
+            hit = false;
+            if (rs != null)
+                foreach (var r in rs)
+                {
+                    if (r == null) continue;
+                    var n = r.name.ToLowerInvariant();
+                    foreach (var pat in PcNeverCull)
+                        if (n.Contains(pat)) { hit = true; break; }
+                    if (hit) break;
+                }
+            _pcWhitelistCache[group] = hit;
+            return hit;
+        }
+
+        private static bool ToggleGroupViaEnabled(object __instance, bool isVisible)
+        {
+            // cross-volume interior cull: a PC volume only culls for cameras INSIDE it —
+            // from outside, it shows every group it owns (the ship-center fps hole: both
+            // indoor volumes render wholesale through the hull). groups force-culled by
+            // TickCrossCull stay dark no matter what the volume decides.
+            if (isVisible && _crossForced.Contains(__instance)) isVisible = false;
+            var rs = _groupRenderersField?.GetValue(__instance) as Renderer[];
+            if (!isVisible && IsNeverCullGroup(__instance, rs)) isVisible = true;
+            if (rs != null)
+                foreach (var r in rs)
+                    if (r != null && r.enabled != isVisible)
+                        _pcPending[r] = isVisible;
+                    else if (r != null)
+                        _pcPending.Remove(r); // re-decided back to current state — drop stale queue entry
+            return false; // skip original entirely
+        }
+
+        // ---- sliced PC volume driver (replaces PerfectCullingCamera's monolithic pass) ----
+        private class PcVol
+        {
+            public object Vol;
+            public int LastCell = int.MinValue;
+            public System.Reflection.MethodInfo GetIndex, GetIndices, QueueAll, QueueOne, Execute;
+        }
+        private static readonly List<PcVol> _pcVols = new List<PcVol>();
+        private static readonly List<ushort> _pcIndices = new List<ushort>(2048);
+        private static int _pcvCursor;
+        private static int _pcDriverRuns; // cumulative cell-crossing executions — proves the driver is alive in [Stutter] lines
+
+        private static void BuildPcDriver(UnityEngine.Object[] vols)
+        {
+            _pcVols.Clear();
+            foreach (var v in vols)
+            {
+                var t = v.GetType();
+                _pcVols.Add(new PcVol
+                {
+                    Vol = v,
+                    // three overloads — the bare name throws AmbiguousMatch, which aborted
+                    // the whole culling attach (no driver, no cross-cull) on 07-07's raid
+                    GetIndex = AccessTools.Method(t, "GetIndexForWorldPos", new[] { typeof(Vector3), typeof(bool).MakeByRefType() }),
+                    GetIndices = AccessTools.Method(t, "GetIndicesForWorldPos"),
+                    QueueAll = AccessTools.Method(t, "QueueToggleAllRenderers"),
+                    QueueOne = AccessTools.Method(t, "QueueToggleRenderer"),
+                    Execute = AccessTools.Method(t, "ExecuteQueue"),
+                });
+            }
+        }
+
+        private static bool _pcDriverWasOff;
+        private static void TickPcDriver()
+        {
+            // live kill switch — the curtain-pop isolation tool: flip PcDriverEnabled off,
+            // everything occlusion-culled gets restored, and if the pops stop it's the
+            // BAKE's sightline data (no slider fixes that; a rebake does)
+            if (!Plugin.PcDriverEnabled.Value)
+            {
+                if (!_pcDriverWasOff)
+                {
+                    _pcDriverWasOff = true;
+                    foreach (var vol in _pcVols)
+                    {
+                        if (vol.Vol == null || vol.QueueAll == null || vol.Execute == null) continue;
+                        try
+                        {
+                            vol.QueueAll.Invoke(vol.Vol, new object[] { true });
+                            vol.Execute.Invoke(vol.Vol, new object[] { true });
+                            vol.LastCell = int.MinValue; // re-enable reapplies from scratch
+                        }
+                        catch { }
+                    }
+                    Plugin.Log.LogWarning("[Culling] PC driver DISABLED (live) — occlusion-culled renderers restored");
+                }
+                return;
+            }
+            if (_pcDriverWasOff) { _pcDriverWasOff = false; Plugin.Log.LogWarning("[Culling] PC driver re-enabled (live)"); }
+
+            if (_pcVols.Count == 0 || CameraRef == null) return;
+            _pcvCursor = (_pcvCursor + 1) % _pcVols.Count;
+            var pv = _pcVols[_pcvCursor];
+            if (pv.Vol == null || pv.GetIndex == null) return;
+            try
+            {
+                var camPos = CameraRef.transform.position;
+                var args = new object[] { camPos, false };
+                int cell = (int)pv.GetIndex.Invoke(pv.Vol, args);
+                if (cell == pv.LastCell) return; // camera still in this volume's same cell
+                pv.LastCell = cell;
+                _pcDriverRuns++;
+
+                pv.QueueAll.Invoke(pv.Vol, new object[] { false });
+                _pcIndices.Clear();
+                pv.GetIndices.Invoke(pv.Vol, new object[] { camPos, _pcIndices });
+                if (_pcIndices.Count == 0)
+                {
+                    // empty/unbaked cell: keep everything visible rather than blanking the
+                    // world (the asset's CullNothing behaviour)
+                    pv.QueueAll.Invoke(pv.Vol, new object[] { true });
+                }
+                else
+                {
+                    var oneArgs = new object[] { 0, true, null };
+                    foreach (var idx in _pcIndices)
+                    {
+                        oneArgs[0] = (int)idx;
+                        pv.QueueOne.Invoke(pv.Vol, oneArgs);
+                    }
+                }
+                pv.Execute.Invoke(pv.Vol, new object[] { true }); // Toggle -> our prefix -> budgeted queue
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogWarning($"[Culling] driver failed on volume: {e.Message}");
+                pv.Vol = null; // don't retry a broken volume every cycle
+            }
+        }
+
+        // ---- cross-volume interior culling ----
+        private class XVol
+        {
+            public string Name;
+            public Bounds B;          // union of group bounds (the volume's real footprint)
+            public object[] Groups;
+            public Bounds[] GB;
+            public bool[] Forced;
+        }
+        private static readonly List<XVol> _xvols = new List<XVol>();
+        private static readonly HashSet<object> _crossForced = new HashSet<object>();
+        private static int _xcullTick;
+
+        // build once, lazily: interior volumes (Indoor_*) with per-group world bounds
+        private static void BuildCrossCull(System.Type volType)
+        {
+            _xvols.Clear();
+            _crossForced.Clear();
+            if (_groupRenderersField == null) return;
+            var fGroups = volType.GetField("bakeGroups", BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
+            foreach (var v in UnityEngine.Object.FindObjectsOfType(volType))
+            {
+                var comp = v as Component;
+                if (comp == null || !comp.name.Contains("Indoor")) continue;
+                var groups = fGroups?.GetValue(v) as System.Array;
+                if (groups == null || groups.Length == 0) continue;
+                var xv = new XVol { Name = comp.name, Groups = new object[groups.Length], GB = new Bounds[groups.Length], Forced = new bool[groups.Length] };
+                bool haveB = false;
+                for (int i = 0; i < groups.Length; i++)
+                {
+                    var g = groups.GetValue(i);
+                    xv.Groups[i] = g;
+                    var rs = _groupRenderersField.GetValue(g) as Renderer[];
+                    Bounds gb = default;
+                    bool haveG = false;
+                    if (rs != null)
+                        foreach (var r in rs)
+                            if (r != null)
+                            {
+                                if (!haveG) { gb = r.bounds; haveG = true; }
+                                else gb.Encapsulate(r.bounds);
+                            }
+                    xv.GB[i] = gb;
+                    if (haveG)
+                    {
+                        if (!haveB) { xv.B = gb; haveB = true; }
+                        else xv.B.Encapsulate(gb);
+                    }
+                }
+                xv.B.Expand(3f); // doorway grace at the seams
+                _xvols.Add(xv);
+                Plugin.Log.LogWarning($"[XCull] interior volume '{xv.Name}': {xv.Groups.Length} groups, bounds {xv.B.size}");
+            }
+        }
+
+        // every ~15 frames: camera outside an interior volume -> its far groups go dark.
+        // near groups stay (stairwell/doorway/window sightlines). all toggles flow through
+        // the pending queue so big flips settle under the same frame budget as PC itself.
+        private static void TickCrossCull()
+        {
+            if (!Plugin.InteriorCrossCull.Value || _xvols.Count == 0 || CameraRef == null) return;
+            if ((++_xcullTick % 15) != 0) return;
+            var cp = CameraRef.transform.position;
+            float d2 = Plugin.CrossCullDistance.Value * Plugin.CrossCullDistance.Value;
+            foreach (var xv in _xvols)
+            {
+                bool inside = xv.B.Contains(cp);
+                for (int i = 0; i < xv.Groups.Length; i++)
+                {
+                    bool wantForce = !inside && xv.GB[i].SqrDistance(cp) > d2;
+                    if (wantForce == xv.Forced[i]) continue;
+                    xv.Forced[i] = wantForce;
+                    if (wantForce) _crossForced.Add(xv.Groups[i]);
+                    else _crossForced.Remove(xv.Groups[i]);
+                    // queue the change now; PC refines un-forced groups on its next pass
+                    ToggleGroupViaEnabled(xv.Groups[i], !wantForce);
+                }
+            }
+        }
+
+        private static void DrainPcToggles()
+        {
+            if (_pcPending.Count == 0) return;
+            _pcDrainScratch.Clear();
+            int budget = PcApplyBudget;
+            foreach (var kv in _pcPending)
+            {
+                if (budget-- <= 0) break;
+                var r = kv.Key;
+                if (r != null && r.enabled != kv.Value) { r.enabled = kv.Value; _pcWrites++; }
+                _pcDrainScratch.Add(r);
+            }
+            foreach (var r in _pcDrainScratch) _pcPending.Remove(r);
+        }
+
+        // ---- stutter forensics: when a frame spikes, log what actually ran in it ----
+        // counters incremented by the three toggle paths; PC toggles fire in OnPreCull
+        // (after Update) so at Update time the accumulated counts belong to the frame
+        // whose deltaTime we're looking at.
+        private static int _pcWrites, _distWrites, _lightWrites;
+        internal static int NavCalls;
+        internal static float NavMs;
+        private static float _ftAvg = 1f / 60f;
+        private static float _lastSpikeLog;
+        private static int _gc0Prev, _gc1Prev;
+
+        private void TickSpikeProbe()
+        {
+            float dt = Time.unscaledDeltaTime;
+            int gc0 = System.GC.CollectionCount(0);
+            int gc1 = System.GC.CollectionCount(1);
+            if (dt > 0.025f && dt > _ftAvg * 2.2f && Time.unscaledTime - _lastSpikeLog > 1f)
+            {
+                _lastSpikeLog = Time.unscaledTime;
+                Plugin.Log.LogWarning($"[Stutter] {dt * 1000f:F0}ms frame (avg {_ftAvg * 1000f:F1}ms): "
+                    + $"pcToggles={_pcWrites} pcRuns={_pcDriverRuns} distCull={_distWrites} lightCull={_lightWrites} "
+                    + $"nav={NavCalls}x/{NavMs:F1}ms gc0={gc0 - _gc0Prev} gc1={gc1 - _gc1Prev} t={Time.timeSinceLevelLoad:F0}s");
+            }
+            _gc0Prev = gc0; _gc1Prev = gc1;
+            _ftAvg = Mathf.Lerp(_ftAvg, dt, 0.05f);
+            _pcWrites = _distWrites = _lightWrites = 0;
+            NavCalls = 0; NavMs = 0f;
+        }
+
+        // DISTANCE CULLING — the missing BSG system (their CullingLightObject/"GameObjects
+        // To Turn Off" grid died in the rip). the F8 counters proved the frame cost is
+        // 41.6k draw calls toward the ship center; most are tiny distant props contributing
+        // zero pixels. cull by size class: small objects vanish near, medium further, big
+        // stuff (hull/decks) never. round-robin a slice each frame — no per-frame spikes.
+        private struct DistEntry { public Renderer R; public Vector3 Pos; public float CullDist; public bool WeDisabled; }
+        private static readonly List<DistEntry> _distEntries = new List<DistEntry>();
+        private static int _distCursor;
+
+        private static void BuildDistanceCuller()
+        {
+            _distEntries.Clear();
+            foreach (var mr in UnityEngine.Object.FindObjectsOfType<MeshRenderer>())
+            {
+                // ONLY map-scene geometry — it's static so cached positions are valid.
+                // anything else (weapons/viewmodels/loot/pools live in other scenes or
+                // DontDestroyOnLoad) MOVES, and a cached-position culler will eat it —
+                // it culled the player's melee out of his hands. never again.
+                var sc = mr.gameObject.scene.name;
+                if (sc == null || !sc.StartsWith("Icebreaker")) continue;
+                if (mr.GetComponentInParent<Player>() != null) continue;
+                if (mr.GetComponentInParent<WorldInteractiveObject>() != null) continue;
+                var size = mr.bounds.size.magnitude;
+                if (size > 12f) continue; // structural — always rendered
+                float cullDist = size < 0.75f ? 40f
+                               : size < 2f ? 80f
+                               : size < 5f ? 150f
+                               : 250f;
+                // UNSCALED — CullDistanceScale is applied live in the tick so the F12
+                // slider actually works mid-raid (baked-in scale made it a dead knob)
+                _distEntries.Add(new DistEntry { R = mr, Pos = mr.bounds.center, CullDist = cullDist });
+            }
+            Plugin.Log.LogWarning($"[DistCull] tracking {_distEntries.Count} renderers (size-classed cull distances x{Plugin.CullDistanceScale.Value:F2})");
+        }
+
+        // retail maps ship a scene-resident CullingManager (jobified distance culler that
+        // drives every CullingLightObject); ours died in the rip (no SDK class -> missing-
+        // script strip). the class needs zero scene data — recreate it and BSG's light
+        // culling runs natively once the scene's CullingLightObjects have their _light refs
+        // (editor pass "Lighting 4"). CullingLightObject.Awake subscribes OnInstanceCreated,
+        // so late creation here is handled by BSG's own code.
+        private static void EnsureCullingManager()
+        {
+            try
+            {
+                if (CullingManager.Instance != null) { Plugin.Log.LogWarning("[Culling] CullingManager already present"); return; }
+                new GameObject("Icebreaker_CullingManager_Fix").AddComponent<CullingManager>();
+                Plugin.Log.LogWarning("[Culling] created CullingManager — native light culling live (if _light refs are baked)");
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[Culling] CullingManager create failed: {e.Message}"); }
+        }
+
+        // LIGHT distance culling — same idea for the 1776 realtime lights whose
+        // CullingLightObject cullers are dead shells (BSG authored 80m cull distance;
+        // the primitives survived, the refs didn't). map lights are static -> cached pos.
+        private struct LightEntry { public Light L; public Vector3 Pos; }
+        private static readonly List<LightEntry> _lightEntries = new List<LightEntry>();
+
+        private static void BuildLightCuller()
+        {
+            _lightEntries.Clear();
+
+            // if the scene ships HEALED CullingLightObjects (editor pass rebound their
+            // _light refs), BSG's native CullingManager system drives the lights — our
+            // crude 80m toggler would fight it. stand down.
+            foreach (var clo in UnityEngine.Object.FindObjectsOfType<CullingLightObject>())
+            {
+                if (clo.GetLight() != null)
+                {
+                    Plugin.Log.LogWarning("[LightCull] native CullingLightObjects detected — runtime light culler standing down");
+                    return;
+                }
+            }
+
+            foreach (var l in UnityEngine.Object.FindObjectsOfType<Light>())
+            {
+                var sc = l.gameObject.scene.name;
+                if (sc == null || !sc.StartsWith("Icebreaker")) continue;
+                if (l.type == LightType.Directional) continue;
+                _lightEntries.Add(new LightEntry { L = l, Pos = l.transform.position });
+            }
+            Plugin.Log.LogWarning($"[LightCull] tracking {_lightEntries.Count} static map lights (80m x{Plugin.CullDistanceScale.Value:F2})");
+        }
+
+        // all lights every ~15 frames — 1.8k distance checks is nothing
+        private static void TickLightCuller()
+        {
+            if (_lightEntries.Count == 0 || CameraRef == null || Time.frameCount % 15 != 0) return;
+            var camPos = CameraRef.transform.position;
+            float d = 80f * Plugin.CullDistanceScale.Value;
+            float d2 = d * d;
+            foreach (var e in _lightEntries)
+            {
+                if (e.L == null) continue;
+                bool near = (e.Pos - camPos).sqrMagnitude < d2;
+                if (e.L.enabled != near) { e.L.enabled = near; _lightWrites++; }
+            }
+        }
+
+        // ~10k checks/frame => full sweep every ~1s at 150k entries. cheap. only ever
+        // re-enables what IT disabled — never overrides the occlusion culling's hides.
+        private static void TickDistanceCuller()
+        {
+            if (_distEntries.Count == 0 || CameraRef == null) return;
+            var camPos = CameraRef.transform.position;
+            float dcScale = Plugin.CullDistanceScale.Value; // live — tune the pop-in in F12 mid-raid
+            int n = Mathf.Min(10000, _distEntries.Count);
+            // distance CHECKS are cheap; renderer.enabled WRITES are not — a fast camera
+            // move once flipped 4412 in one frame (356ms). cap writes; the sweep cursor
+            // catches the rest over the following frames.
+            int writes = 0;
+            for (int i = 0; i < n && writes < 600; i++)
+            {
+                _distCursor = (_distCursor + 1) % _distEntries.Count;
+                var e = _distEntries[_distCursor];
+                if (e.R == null) continue;
+                float cd = e.CullDist * dcScale;
+                bool near = (e.Pos - camPos).sqrMagnitude < cd * cd;
+                if (!near && e.R.enabled)
+                {
+                    e.R.enabled = false;
+                    e.WeDisabled = true;
+                    _distEntries[_distCursor] = e;
+                    _distWrites++; writes++;
+                }
+                else if (near && e.WeDisabled)
+                {
+                    e.R.enabled = true;
+                    e.WeDisabled = false;
+                    _distEntries[_distCursor] = e;
+                    _distWrites++; writes++;
+                }
+            }
+        }
+
+        // drive every discovered lamp from the config slider (live). native-owned lights
+        // (CullingLightObject) get their brightness ceiling set instead: the authored
+        // _maxLightIntensity (5) is too hot — the slider caps it, and float_1 (the cached
+        // "on" value CullingManager actually drives) must follow or nothing changes.
+        private static void ApplyLamps()
+        {
+            float v = Plugin.LampIntensity.Value;
+            var shadows = Plugin.LampShadows.Value ? LightShadows.Hard : LightShadows.None;
+            int n = 0;
+            foreach (var l in _lamps)
+                if (l != null) { l.intensity = v; l.shadows = shadows; n++; }
+
+            int natives = 0;
+            var fMax = AccessTools.Field(typeof(CullingLightObject), "_maxLightIntensity");
+            var fCached = AccessTools.Field(typeof(CullingLightObject), "float_1");
+            foreach (var clo in UnityEngine.Object.FindObjectsOfType<CullingLightObject>())
+            {
+                if (clo.GetLight() == null) continue;
+                fMax?.SetValue(clo, v);
+                fCached?.SetValue(clo, v);
+                natives++;
+            }
+            _lastLamp = v;
+            Plugin.Log.LogWarning($"[LightLamps] drove {n} plain lamps + {natives} native culling lights to intensity {v:F2} (shadows={Plugin.LampShadows.Value})");
+        }
+
+        internal static void Dump(string tag)
+        {
+            try { DumpInner(tag); }
+            catch (Exception e) { Plugin.Log.LogWarning($"[RenderEnv:{tag}] dump failed: {e.Message}"); }
+        }
+
+        // engine-level frame counters — which metric tracks the fps is the ground truth the
+        // subset-hiding tests can't give. ProfilerRecorder render counters work in players.
+        private static Unity.Profiling.ProfilerRecorder _recBatches, _recSetPass, _recTris, _recVerts, _recShadowCasters;
+        private static bool _recStarted;
+
+        private static void EnsureRecorders()
+        {
+            if (_recStarted) return;
+            _recStarted = true;
+            _recBatches = Unity.Profiling.ProfilerRecorder.StartNew(Unity.Profiling.ProfilerCategory.Render, "Batches Count");
+            _recSetPass = Unity.Profiling.ProfilerRecorder.StartNew(Unity.Profiling.ProfilerCategory.Render, "SetPass Calls Count");
+            _recTris = Unity.Profiling.ProfilerRecorder.StartNew(Unity.Profiling.ProfilerCategory.Render, "Triangles Count");
+            _recVerts = Unity.Profiling.ProfilerRecorder.StartNew(Unity.Profiling.ProfilerCategory.Render, "Vertices Count");
+            _recShadowCasters = Unity.Profiling.ProfilerRecorder.StartNew(Unity.Profiling.ProfilerCategory.Render, "Shadow Casters Count");
+        }
+
+        private static string Rec(Unity.Profiling.ProfilerRecorder r)
+            => r.Valid && r.LastValue > 0 ? (r.LastValue >= 1000000 ? $"{r.LastValue / 1000000f:F1}M" : r.LastValue >= 1000 ? $"{r.LastValue / 1000f:F1}k" : r.LastValue.ToString()) : "?";
+
+        private static void DumpInner(string tag)
+        {
+            var loc = "<no world>";
+            try { var w = Comfort.Common.Singleton<GameWorld>.Instance; if (w != null) loc = w.LocationId; } catch { }
+            var L = Plugin.Log;
+            L.LogWarning($"===== [RenderEnv:{tag}] loc={loc} =====");
+
+            var cam = CameraRef != null ? CameraRef : Camera.main;
+            if (cam != null)
+                L.LogWarning($"[RenderEnv] camera '{cam.name}': HDR={cam.allowHDR} MSAA={cam.allowMSAA} clear={cam.clearFlags} bg={cam.backgroundColor} fov={cam.fieldOfView:F1} cullMask=0x{cam.cullingMask:X}");
+
+            // the numbers that matter: what is the engine actually doing per frame
+            EnsureRecorders();
+            L.LogWarning($"[RenderEnv] FRAME: fps={1f / Mathf.Max(Time.smoothDeltaTime, 0.0001f):F0} " +
+                         $"batches={Rec(_recBatches)} setPass={Rec(_recSetPass)} tris={Rec(_recTris)} verts={Rec(_recVerts)} shadowCasters={Rec(_recShadowCasters)}");
+
+            // scene lighting — the prime suspect for blowout: bad ambient / missing bake
+            L.LogWarning($"[RenderEnv] ambient: mode={RenderSettings.ambientMode} intensity={RenderSettings.ambientIntensity:F2} " +
+                         $"light={RenderSettings.ambientLight} sky={RenderSettings.ambientSkyColor} eq={RenderSettings.ambientEquatorColor} gnd={RenderSettings.ambientGroundColor}");
+            L.LogWarning($"[RenderEnv] skybox={(RenderSettings.skybox != null ? RenderSettings.skybox.name + "/" + (RenderSettings.skybox.shader != null ? RenderSettings.skybox.shader.name : "?") : "<null>")} " +
+                         $"reflMode={RenderSettings.defaultReflectionMode} reflIntensity={RenderSettings.reflectionIntensity:F2} fog={RenderSettings.fog} fogColor={RenderSettings.fogColor} fogMode={RenderSettings.fogMode}");
+
+            // brightest lights (a scene with a 50-intensity sun would blow everything)
+            try
+            {
+                var lights = UnityEngine.Object.FindObjectsOfType<Light>();
+                Array.Sort(lights, (a, b) => b.intensity.CompareTo(a.intensity));
+                var sb = new System.Text.StringBuilder();
+                for (int i = 0; i < lights.Length && i < 8; i++)
+                    sb.Append($"{lights[i].name}({lights[i].type},i={lights[i].intensity:F1},{lights[i].color}) ");
+                L.LogWarning($"[RenderEnv] {lights.Length} lights, brightest: {sb}");
+            }
+            catch (Exception e) { L.LogWarning($"[RenderEnv] lights failed: {e.Message}"); }
+
+            // occlusion culling live stats (proof the perfect-culling camera is working)
+            try
+            {
+                var camType = System.Type.GetType("Koenigz.PerfectCulling.PerfectCullingCamera, PerfectCullingRuntime");
+                var pcc = camType != null && cam != null ? cam.GetComponent(camType) : null;
+                if (pcc != null)
+                {
+                    int total = (int)(camType.GetProperty("LastTotal")?.GetValue(pcc) ?? -1);
+                    int culled = (int)(camType.GetProperty("LastCulled")?.GetValue(pcc) ?? -1);
+                    // GROUND TRUTH: how many culling-managed renderers are actually switched
+                    // off right now. PC's ToggleRenderer uses r.enabled OR forceRenderingOff
+                    // depending on compile-time defines — count both.
+                    var managed = CollectBakedRenderers();
+                    int off = 0;
+                    foreach (var mr in managed) if (mr != null && (!mr.enabled || mr.forceRenderingOff)) off++;
+                    // did build-time static batching actually engage? isPartOfStaticBatch is
+                    // the engine's own truth per renderer.
+                    int batchedN = 0, totalN = 0;
+                    foreach (var mr in UnityEngine.Object.FindObjectsOfType<MeshRenderer>())
+                    { totalN++; if (mr.isPartOfStaticBatch) batchedN++; }
+                    L.LogWarning($"[RenderEnv] culling: {culled}/{total} groups culled | managed={managed.Count}, off={off} | staticBatched={batchedN}/{totalN}");
+                }
+                else L.LogWarning("[RenderEnv] culling: no PerfectCullingCamera on camera");
+            }
+            catch (Exception e) { L.LogWarning($"[RenderEnv] culling stats failed: {e.Message}"); }
+
+            // post-processing volumes + their profiles (tonemapping/exposure/grading live here)
+            DumpPostVolumes(L);
+
+            L.LogWarning($"===== [RenderEnv:{tag}] end =====");
+        }
+
+        private static void DumpPostVolumes(BepInEx.Logging.ManualLogSource L)
+        {
+            var ppvType = AccessTools.TypeByName("UnityEngine.Rendering.PostProcessing.PostProcessVolume");
+            if (ppvType == null) { L.LogWarning("[RenderEnv] PostProcessVolume type not found"); return; }
+            var vols = UnityEngine.Object.FindObjectsOfType(ppvType);
+            L.LogWarning($"[RenderEnv] {vols.Length} PostProcessVolume(s)");
+            foreach (var vol in vols)
+            {
+                try
+                {
+                    bool isGlobal = (bool)(GetMember(vol, "isGlobal") ?? false);
+                    float priority = ToF(GetMember(vol, "priority"));
+                    float weight = ToF(GetMember(vol, "weight"));
+                    var profile = GetMember(vol, "sharedProfile") ?? GetMember(vol, "profile");
+                    var profName = profile != null ? (profile as UnityEngine.Object)?.name : "<null>";
+                    L.LogWarning($"[RenderEnv]  vol '{(vol as UnityEngine.Object)?.name}' global={isGlobal} prio={priority:F0} weight={weight:F2} enabled={(vol as Behaviour)?.enabled} profile={profName}");
+                    if (profile == null) continue;
+                    var settings = GetMember(profile, "settings") as System.Collections.IEnumerable;
+                    if (settings == null) continue;
+                    foreach (var s in settings)
+                    {
+                        if (s == null) continue;
+                        bool active = (bool)(GetMember(s, "active") ?? true);
+                        var overridden = DumpOverriddenParams(s);
+                        L.LogWarning($"[RenderEnv]    {s.GetType().Name} active={active} {overridden}");
+                    }
+                }
+                catch (Exception e) { L.LogWarning($"[RenderEnv]  vol dump failed: {e.Message}"); }
+            }
+        }
+
+        // read every ParameterOverride<T> field that is actually overridden, as name=value
+        private static string DumpOverriddenParams(object effect)
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (var f in effect.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
+            {
+                var val = f.GetValue(effect);
+                if (val == null) continue;
+                var ovField = f.FieldType.GetField("overrideState");
+                var valField = f.FieldType.GetField("value");
+                if (ovField == null || valField == null) continue; // not a ParameterOverride
+                try
+                {
+                    if (!(bool)ovField.GetValue(val)) continue;
+                    sb.Append($"{f.Name}={valField.GetValue(val)} ");
+                }
+                catch { }
+            }
+            return sb.ToString();
+        }
+
+        private static object GetMember(object o, string name)
+        {
+            if (o == null) return null;
+            var t = o.GetType();
+            var p = t.GetProperty(name, BindingFlags.Public | BindingFlags.Instance);
+            if (p != null && p.CanRead) return p.GetValue(o);
+            var f = t.GetField(name, BindingFlags.Public | BindingFlags.Instance);
+            return f?.GetValue(o);
+        }
+
+        private static float ToF(object o) => o is float f ? f : 0f;
+    }
+
+    // player-camera setup (PlayerCameraController -> SetCameraFromSettings -> CreateBindings)
+    // applies each graphics setting by invoking CameraClass.SetXxx with the user's current
+    // value. our camera arrives missing SSAA/SSAAImpl/VolumetricLightRenderer (GetComponent
+    // returned null in method_2 — reason unconfirmed), so the whole upscaler/AA setter family
+    // NREs. all of them are cosmetic (upscaling, AA, super-sampling, aspect) — swallow the
+    // entire family in one multi-target finalizer so the bind pass completes at native res.
+    // one finalizer covers every setter; no more discovering them one restart at a time.
+    [HarmonyPatch]
+    internal static class Patch_CameraGraphicsSetters
+    {
+        private static readonly string[] Setters =
+        {
+            "SetFSR2", "SetFSR3", "SetDLSSPreset", "SetAntiAliasing", "SetSuperSampling", "SetAspectRatio",
+        };
+
+        private static IEnumerable<MethodBase> TargetMethods()
+        {
+            foreach (var name in Setters)
+            {
+                var m = AccessTools.Method(typeof(CameraClass), name);
+                if (m != null) yield return m;
+            }
+        }
+
+        private static Exception Finalizer(Exception __exception, MethodBase __originalMethod)
+        {
+            if (__exception != null)
+                Plugin.Log.LogWarning($"[RaidFix] swallowed CameraClass.{__originalMethod.Name}: {__exception.Message}");
+            return null;
+        }
+    }
+
+    // BotsController.Init runs even with bots off and calls AICoversData.RestoreData to
+    // rebuild the baked cover/voxel graph. our scene's AICoversData is a dead ripped shell
+    // (fields nulled by metadata encryption), so AIVoxelesData.RestoreData throws on a LINQ
+    // over a null collection and aborts the raid. with no bots, covers are pure dead weight —
+    // swallow and leave the graph empty. milestone 2 replaces this data outright via
+    // InjectGeneratedCovers (navmesh-generated), so this patch is walkable-only scaffolding.
+    [HarmonyPatch(typeof(AICoversData), "RestoreData")]
+    internal static class Patch_CoversRestore
+    {
+        // RESURRECTION #5: fill the holders with the RETAIL bake before RestoreData runs —
+        // when the fill lands, RestoreData executes clean like on a real map (builds its
+        // own cache, resolves ids) and the exception path below never fires. fill failure
+        // = the synthesized-generation fallback below takes over unchanged.
+        private static void Prefix(AICoversData __instance)
+        {
+            if (Plugin.RetailAIBake.Value)
+                IcebreakerAIBake.TryFill(__instance);
+
+            // heal null holder collections on the SUCCESS path too — this used to live only
+            // in the exception finalizer, so the first clean retail restore shipped an
+            // AIPlaceInfoHolder with null Places straight into every exUsec brain (silent
+            // activation death: invisible statue bots). only touches fields that are null.
+            HealAiHolders();
+        }
+
+        private static Exception Finalizer(Exception __exception, AICoversData __instance)
+        {
+            if (__exception != null)
+            {
+                Plugin.Log.LogWarning($"[RaidFix] swallowed AICoversData.RestoreData: {__exception.Message}");
+                HealAiHolders();
+
+                // if the RETAIL bake was loaded but RestoreData still died, the holders
+                // are stuck half-restored — clear them so the synthesized fallback below
+                // starts from a clean slate (last run it kept 1885 retail points but
+                // rebuilt an EMPTY voxel grid over them: covers with no cell linkage =
+                // silent statue bots)
+                if (IcebreakerAIBake.Loaded && __instance != null)
+                {
+                    Plugin.Log.LogWarning("[RaidFix] retail bake failed mid-restore — clearing for full synth fallback");
+                    __instance.Points = new List<GroupPoint>();
+                    __instance.Ways = new List<GroupPointWay>();
+                    __instance.Pathes = new List<GroupPointPath>();
+                    IcebreakerAIBake.Loaded = false;
+                }
+
+                // finish RestoreData's job manually: its LAST line builds the cover cache,
+                // and our swallow kills it microseconds earlier. every bot's activation
+                // (method_10 line 1: VoxelesPersonalData.Activate -> GetCovers -> _cache)
+                // dies on the null cache with an INTERNAL catch -> silent ActiveFail statues.
+                // empty-but-valid collections + a real cache = bots activate coverless.
+                try
+                {
+                    if (__instance != null)
+                    {
+                        if (__instance.Points == null) __instance.Points = new List<GroupPoint>();
+                        if (__instance.Ways == null) __instance.Ways = new List<GroupPointWay>();
+                        if (__instance.Pathes == null) __instance.Pathes = new List<GroupPointPath>();
+
+                        // order matters: grid first (generation buckets into it), then the
+                        // full factory-style generation (covers/cores/doors/loot/exfils),
+                        // then the cache LAST so it caches the real points.
+                        BuildVoxelGrid(__instance);
+                        if (Plugin.InjectCovers.Value)
+                            CoverScanner.TryGenerateOnEmpty(__instance);
+                        AccessTools.Field(typeof(AICoversData), "_cache").SetValue(__instance, new GClass411(__instance));
+                        Plugin.Log.LogWarning($"[RaidFix] AI skeleton ready: {__instance.Points.Count} covers, " +
+                                              $"{__instance.AICorePointsHolder?.CorePoints?.Count ?? 0} cores, cache built");
+                    }
+                }
+                catch (Exception e) { Plugin.Log.LogWarning($"[RaidFix] AI skeleton build failed: {e}"); }
+            }
+            return null;
+        }
+
+        // VOXEL GRID SYNTHESIS: bots index AICoversData.VoxelesArray by position on every
+        // BotMover.Activate (GetVoxelSafe: cell = (pos-min)/10x5x10) — a null/empty grid =
+        // IndexOutOfRange = ActiveFail statues. build the grid over the navmesh bounds with
+        // BSG's cell sizes (verified against our factory dumps). cells start empty — the
+        // cover generator populates PointsIds later; empty cells are valid (_closetsPointId
+        // 0 skips the cover-linking paths).
+        private static void BuildVoxelGrid(AICoversData covers)
+        {
+            var vox = covers.Voxels;
+            if (vox == null) { Plugin.Log.LogWarning("[RaidFix] no AIVoxelesData component — voxel grid not built"); return; }
+            if (vox.VoxelesArray != null && vox.VoxelsList != null && vox.VoxelsList.Count > 0) return; // real data present
+
+            var tri = UnityEngine.AI.NavMesh.CalculateTriangulation();
+            if (tri.vertices == null || tri.vertices.Length == 0)
+            {
+                Plugin.Log.LogWarning("[RaidFix] no navmesh loaded — voxel grid not built (bots will ActiveFail)");
+                return;
+            }
+            Vector3 min = tri.vertices[0], max = tri.vertices[0];
+            foreach (var v in tri.vertices) { min = Vector3.Min(min, v); max = Vector3.Max(max, v); }
+            min -= new Vector3(10f, 5f, 10f);
+            max += new Vector3(10f, 5f, 10f);
+            int nx = Mathf.Max(1, Mathf.CeilToInt((max.x - min.x) / 10f));
+            int ny = Mathf.Max(1, Mathf.CeilToInt((max.y - min.y) / 5f));
+            int nz = Mathf.Max(1, Mathf.CeilToInt((max.z - min.z) / 10f));
+            if (nx * ny * nz > 60000)
+            {
+                Plugin.Log.LogWarning($"[RaidFix] voxel grid too large ({nx}x{ny}x{nz}) — ushort ids would overflow; not built");
+                return;
+            }
+            vox.MinVoxelesValues = min;
+            vox.MaxVoxelesValues = max;
+            vox.MaxX = nx; vox.MaxY = ny; vox.MaxZ = nz;
+            vox.VoxelesArray = new NavGraphVoxelSimple[nx, ny, nz];
+            vox.VoxelsList = new List<NavGraphVoxelSimple>(nx * ny * nz);
+            ushort id = 1;
+            for (int x = 0; x < nx; x++)
+                for (int y = 0; y < ny; y++)
+                    for (int z = 0; z < nz; z++)
+                    {
+                        var pos = min + new Vector3(x * 10f, y * 5f, z * 10f); // cell origin (baked convention: centre = pos + (5, 2.5, 5))
+                        var cell = new NavGraphVoxelSimple(pos, x, y, z, id++);
+                        cell.DoorLinks = new List<NavMeshDoorLink>(); // only field without an initializer
+                        vox.VoxelesArray[x, y, z] = cell;
+                        vox.VoxelsList.Add(cell);
+                    }
+            Plugin.Log.LogWarning($"[RaidFix] synthesized voxel grid {nx}x{ny}x{nz} ({vox.VoxelsList.Count} cells) over navmesh bounds {min}..{max}");
+        }
+
+        // CreateOrFind only ADDs holders when the scene has none — our ripped scene HAS
+        // them as dead shells (serialized list fields nulled by metadata encryption), so
+        // every consumer LINQing over CorePoints/Places/etc. throws. sweep the whole
+        // holder family once and empty-init any null List<>/array field via reflection,
+        // so GetCorePoint & friends become clean no-hits instead of a per-caller whack-a-mole.
+        private static void HealAiHolders()
+        {
+            var holderTypes = new[]
+            {
+                typeof(AICorePointHolder), typeof(AIPlaceInfoHolder), typeof(AIManualPointsHolder),
+                typeof(AIMinesPositionsHolder), typeof(AIDangerPlacesHolder), typeof(AIDoorsHolder),
+            };
+            foreach (var t in holderTypes)
+            {
+                var holder = UnityEngine.Object.FindObjectOfType(t);
+                if (holder == null) continue;
+                int healed = 0;
+                foreach (var f in t.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+                {
+                    if (f.GetValue(holder) != null) continue;
+                    if (f.FieldType.IsArray)
+                    {
+                        f.SetValue(holder, Array.CreateInstance(f.FieldType.GetElementType(), 0));
+                        healed++;
+                    }
+                    else if (f.FieldType.IsGenericType && f.FieldType.GetGenericTypeDefinition() == typeof(List<>))
+                    {
+                        f.SetValue(holder, Activator.CreateInstance(f.FieldType));
+                        healed++;
+                    }
+                }
+                if (healed > 0)
+                    Plugin.Log.LogWarning($"[RaidFix] healed {healed} null collection(s) on {t.Name}");
+            }
+        }
+    }
+
+    // CachePoints runs right after RestoreData and pre-warms the cover-point cache; if
+    // RestoreData aborted early the cache internals may be null. cold cache is fine.
+    [HarmonyPatch(typeof(AICoversData), "CachePoints")]
+    internal static class Patch_CoversCache
+    {
+        private static Exception Finalizer(Exception __exception)
+        {
+            if (__exception != null)
+                Plugin.Log.LogWarning($"[RaidFix] swallowed AICoversData.CachePoints: {__exception.Message}");
+            return null;
+        }
+    }
+
+    // BotsController.Init does FindUnityObjectOfType<AIStationaryController>() then calls
+    // .Init on it with NO null check — a scene without one (ours) NREs inside Init itself,
+    // where no leaf finalizer can catch it. create an empty controller up front (the
+    // EnvironmentManager pattern). its Init iterates a Weapons array that may be null on a
+    // fresh component, so the finalizer below covers that too.
+    [HarmonyPatch(typeof(BotsController), "Init")]
+    internal static class Patch_EnsureStationaryController
+    {
+        // after Init: CoversData + AIPlaceInfoHolder exist, bots haven't spawned —
+        // rebuild BSG's spawn-trigger layer (tier events + group-size BD triggers)
+        private static void Postfix(BotsController __instance)
+        {
+            if (Plugin.EventSpawns.Value)
+                IcebreakerAIPlaces.TryBuild(__instance);
+
+            // sealed doors: register authored DoorState=64 doors + carve their navmesh
+            // shut (runs here because doors AND their links are live post-RefreshData)
+            try { IcebreakerSealedDoors.Setup(); }
+            catch (Exception e) { Plugin.Log.LogWarning($"[Sealed] setup failed: {e.Message}"); }
+
+            // retail lens flares (1300 lamp flares via the game's own MultiFlare stack)
+            try { IcebreakerFlares.TryBuild(); }
+            catch (Exception e) { Plugin.Log.LogWarning($"[Flares] build failed: {e}"); }
+
+            // perf: clamp EFT's 2.0 LOD bias + enforce the retail shadow split
+            try
+            {
+                QualitySettings.lodBias = Plugin.LodBiasClamp.Value;
+                Plugin.Log.LogWarning($"[Perf] lodBias clamped to {Plugin.LodBiasClamp.Value:F2} (EFT default runs 2.0)");
+                EnforceShadowProxies();
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[Perf] perf pass failed: {e.Message}"); }
+
+            // keycard self-heal: bundles built before the 1R proximity-wiring fix ship
+            // KeycardDoors with empty Proxies (GetHandle indexes Proxies[0] -> IOOR crash
+            // the moment the swipe starts) and proxies with null Link (swiper prompt dead).
+            // same nearest-within-2m pairing as the editor tool — retail data says the true
+            // pair is always <=1.3m and the next door >=2.6m away.
+            try { HealKeycardProxies(); }
+            catch (Exception e) { Plugin.Log.LogWarning($"[Keycard] heal failed: {e.Message}"); }
+
+            // door-chain autopsy (runs AFTER RestoreData + BotDoorsController.RefreshData):
+            // bots ignoring doors means one of three stages died silently — cell ids not
+            // filled, id->link reconnect empty, or links without matched Door. name it.
+            try
+            {
+                var covers = __instance.CoversData;
+                int idCells = 0, linkedCells = 0;
+                if (covers != null && covers.Voxels != null && covers.Voxels.VoxelsList != null)
+                    foreach (var v in covers.Voxels.VoxelsList)
+                    {
+                        if (v.DoorLinksIds != null && v.DoorLinksIds.Count > 0) idCells++;
+                        if (v.DoorLinks != null && v.DoorLinks.Count > 0) linkedCells++;
+                    }
+                var links = UnityEngine.Object.FindObjectsOfType<NavMeshDoorLink>();
+                int withDoor = 0, carved = 0;
+                var ids = new HashSet<int>();
+                foreach (var l in links)
+                {
+                    if (l.Door != null) withDoor++;
+                    if (l.Carver_Opened != null) carved++;
+                    ids.Add(l.Id);
+                }
+                var bdc = UnityEngine.Object.FindObjectOfType<BotDoorsController>();
+                var listField = AccessTools.Field(typeof(BotDoorsController), "_navMeshDoorLinks")?.GetValue(bdc) as List<NavMeshDoorLink>;
+                Plugin.Log.LogWarning($"[DoorDiag] cells: {idCells} with ids -> {linkedCells} reconnected | links: {links.Length} in scene, {ids.Count} distinct ids, {withDoor} door-matched, {carved} carved | controller list: {(listField != null ? listField.Count.ToString() : "null")}");
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[DoorDiag] failed: {e.Message}"); }
+        }
+
+        // the retail shadow split: maps ship dedicated low-poly _SHADOW_ proxy meshes;
+        // visual meshes cast NOTHING, proxies cast ONLY. if the rip left both casting,
+        // every shadowed light draws the shadow geometry twice. one sweep at load
+        // restores the division and reports what it changed — zero-count = rip was fine.
+        private static void EnforceShadowProxies()
+        {
+            if (!Plugin.ShadowProxyFix.Value) return;
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            int proxiesFixed = 0, visualsFixed = 0;
+            var shadowParents = new HashSet<Transform>();
+            var all = UnityEngine.Object.FindObjectsOfType<Renderer>(true);
+            foreach (var r in all)
+            {
+                if (r == null || !r.name.Contains("SHADOW")) continue;
+                if (r.shadowCastingMode != UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly)
+                {
+                    r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+                    proxiesFixed++;
+                }
+                if (r.transform.parent != null) shadowParents.Add(r.transform.parent);
+            }
+            foreach (var r in all)
+            {
+                if (r == null || r.name.Contains("SHADOW")) continue;
+                if (r.transform.parent == null || !shadowParents.Contains(r.transform.parent)) continue;
+                if (r.shadowCastingMode != UnityEngine.Rendering.ShadowCastingMode.Off)
+                {
+                    r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                    visualsFixed++;
+                }
+            }
+            Plugin.Log.LogWarning($"[Perf] shadow split: {proxiesFixed} proxies set cast-only, {visualsFixed} visuals set no-cast ({sw.ElapsedMilliseconds}ms over {all.Length} renderers)");
+        }
+
+        private static readonly System.Reflection.FieldInfo _gripsField =
+            AccessTools.Field(typeof(EFT.Interactive.WorldInteractiveObject), "Grips");
+        private static readonly System.Reflection.FieldInfo _proxyStandField =
+            AccessTools.Field(typeof(InteractiveProxy), "_interactionPosition");
+        private static readonly System.Reflection.FieldInfo _proxyViewField =
+            AccessTools.Field(typeof(InteractiveProxy), "_viewTarget");
+
+        // retail WORLD-SPACE swipe stand/view points per swiper (extract_proxy_standpoints.py,
+        // full retail TRS chain). the character's stand spot is proxy.TransformPoint(
+        // _interactionPosition) — the rip's proxy ROTATIONS are untrustworthy (same export
+        // pass mangled the lightplanes) so a mirrored basis slides the player to the wrong
+        // side of the door. positions verified <0.5m, so re-deriving the LOCAL offset from
+        // retail world truth self-corrects any rotation error. [0]=stand, [1]=view target.
+        private static readonly Dictionary<string, Vector3[]> _proxyStandWorld = new Dictionary<string, Vector3[]>
+        {
+            { "security_pass_card_captain", new[] { new Vector3(-6.295f, 34.499f, 28.319f), new Vector3(-5.504f, 35.899f, 28.299f) } },
+            { "security_pass_card_lab", new[] { new Vector3(11.604f, 18.377f, 40.545f), new Vector3(11.634f, 19.777f, 41.336f) } },
+            { "security_pass_card_living_01", new[] { new Vector3(-6.617f, 23.68f, 31.971f), new Vector3(-7.408f, 25.08f, 32.011f) } },
+            { "security_pass_card_living_02", new[] { new Vector3(6.622f, 23.68f, 33.369f), new Vector3(7.413f, 25.08f, 33.329f) } },
+            { "security_pass_card_living_03", new[] { new Vector3(6.622f, 23.68f, 25.211f), new Vector3(7.413f, 25.08f, 25.171f) } },
+            { "security_pass_card_living_04", new[] { new Vector3(-6.617f, 26.342f, 31.499f), new Vector3(-7.408f, 27.742f, 31.539f) } },
+            { "security_pass_card_living_05", new[] { new Vector3(-6.617f, 26.342f, 41.282f), new Vector3(-7.408f, 27.742f, 41.322f) } },
+            { "security_pass_card_living_06", new[] { new Vector3(6.622f, 26.342f, 24.742f), new Vector3(7.413f, 27.742f, 24.701f) } },
+            { "security_pass_card_living_07", new[] { new Vector3(-6.619f, 29.06f, 24.843f), new Vector3(-7.41f, 30.46f, 24.883f) } },
+            { "security_pass_card_living_08", new[] { new Vector3(6.622f, 29.06f, 38.964f), new Vector3(7.413f, 30.46f, 38.924f) } },
+            { "security_pass_card_tech", new[] { new Vector3(11.298f, 15.552f, 26.862f), new Vector3(10.507f, 16.862f, 26.892f) } },
+        };
+
+        private static void HealKeycardProxies()
+        {
+            var doors = UnityEngine.Object.FindObjectsOfType<EFT.Interactive.KeycardDoor>(true);
+            var proxies = UnityEngine.Object.FindObjectsOfType<InteractiveProxy>(true);
+            if (doors.Length == 0) return;
+            int linked = 0, wired = 0, orphans = 0, standFixed = 0;
+            foreach (var p in proxies)
+            {
+                // stand/view correction from retail world truth (see table above). logs how
+                // far the rip-basis point was off — >0.5m means the rip rotation really was
+                // mirrored/mangled for that swiper.
+                var swiper = p.transform.parent != null ? p.transform.parent.name : "";
+                if (_proxyStandWorld.TryGetValue(swiper, out var world) && _proxyStandField != null)
+                {
+                    var oldLocal = (Vector3)_proxyStandField.GetValue(p);
+                    float drift = Vector3.Distance(p.transform.TransformPoint(oldLocal), world[0]);
+                    _proxyStandField.SetValue(p, p.transform.InverseTransformPoint(world[0]));
+                    _proxyViewField?.SetValue(p, p.transform.InverseTransformPoint(world[1]));
+                    standFixed++;
+                    if (drift > 0.25f)
+                        Plugin.Log.LogWarning($"[Keycard] '{swiper}' stand point was {drift:F2}m off retail — rip transform confirmed bad, corrected");
+                }
+
+                if (p.Link != null) continue;
+                EFT.Interactive.KeycardDoor best = null; float bestD = 2f;
+                foreach (var d in doors)
+                {
+                    float dist = Vector3.Distance(p.transform.position, d.transform.position);
+                    if (dist < bestD) { bestD = dist; best = d; }
+                }
+                if (best != null) { p.Link = best; linked++; }
+            }
+            int gripped = 0;
+            foreach (var d in doors)
+            {
+                if (d.Proxies == null || d.Proxies.Length == 0)
+                {
+                    var mine = new List<InteractiveProxy>();
+                    foreach (var p in proxies)
+                        if (ReferenceEquals(p.Link, d)) mine.Add(p);
+                    if (mine.Count > 0) d.Proxies = mine.ToArray();
+                    else { orphans++; continue; } // GetHandle would still IOOR here — but at least we named it
+                }
+                wired++;
+                // the swipe stand point only engages when door.Grips contains the swiper's
+                // KeyGrip (DoorState=Locked): GetClosestGrip picks it, method_12 matches the
+                // proxy, and the interaction uses the proxy stand point. without it the code
+                // falls back to the BASE door stand (interactPosition1) — the slid-to-the-
+                // door's-edge swipe. KeycardDoor.OnEnable concats proxy.Grips into door.Grips
+                // natively, but only if proxy.Grips survived the bundle — verify containment
+                // and append what's missing. base OnEnable pre-seeds the door's OWN child
+                // grips, so 'non-empty' proves nothing.
+                if (_gripsField != null)
+                {
+                    var cur = new List<GripPose>((_gripsField.GetValue(d) as GripPose[]) ?? new GripPose[0]);
+                    bool changed = false;
+                    foreach (var p in d.Proxies)
+                    {
+                        if (p == null) continue;
+                        if (p.Grips == null || p.Grips.Length == 0)
+                            p.Grips = p.GetComponentsInChildren<GripPose>(true); // bundle lost them — they live on proxy/Lock/KeyGrip
+                        foreach (var g in p.Grips)
+                            if (g != null && !cur.Contains(g)) { cur.Add(g); changed = true; }
+                    }
+                    if (changed) { _gripsField.SetValue(d, cur.ToArray()); gripped++; }
+                }
+            }
+            Plugin.Log.LogWarning($"[Keycard] {doors.Length} doors: {wired} with proxies ({linked} Link(s) healed by proximity), {gripped} given swiper grips, {standFixed} stand points set from retail, {orphans} orphan(s){(orphans > 0 ? " — swipe on those will crash" : "")}");
+        }
+
+        private static void Prefix()
+        {
+            LateWaypointsPatch.Apply(); // by now every plugin assembly is loaded
+            if (UnityEngine.Object.FindObjectOfType<AIStationaryController>() == null)
+            {
+                new GameObject("Icebreaker_AIStationary_Fix").AddComponent<AIStationaryController>();
+                Plugin.Log.LogWarning("[RaidFix] created missing AIStationaryController (no stationary weapons on map)");
+            }
+
+            // ObservedCullingManager is a scene component on retail maps (missing here) that
+            // drives bot BODY visibility: bots register a culling sphere with it; without it
+            // the visibility event never fires, Auto mode resolves invisible, and every bot
+            // body is forceRenderingOff until damage forces a refresh (the floating-gear
+            // ghosts). must exist BEFORE any bot spawns — hence this prefix, not stage 2.
+            if (!Comfort.Common.Singleton<ObservedCullingManager>.Instantiated)
+            {
+                new GameObject("Icebreaker_ObservedCullingManager_Fix").AddComponent<ObservedCullingManager>();
+                Plugin.Log.LogWarning("[RaidFix] created missing ObservedCullingManager (bot body visibility)");
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(AIStationaryController), "Init")]
+    internal static class Patch_StationaryInit
+    {
+        private static Exception Finalizer(Exception __exception)
+        {
+            if (__exception != null)
+                Plugin.Log.LogWarning($"[RaidFix] swallowed AIStationaryController.Init: {__exception.Message}");
+            return null;
+        }
+    }
+
+    // the server spawn merge Destroy()s scene markers it doesn't recognize, but BotZone's
+    // authored SpawnPointMarkers list keeps the stale refs — BotZone.get_SpawnPoints then
+    // NREs mapping marker.SpawnPoint (and it's a computed property, so swallowing Init
+    // wouldn't save later callers). prune dead/null-SpawnPoint entries once, before Init
+    // uses the list; every downstream consumer (SpawnPoints, CenterOfSpawnPoints, patrol
+    // checks) sees a clean list. try/catch per-entry because destroyed unity objects can
+    // throw from property getters.
+    [HarmonyPatch(typeof(BotZone), "Init")]
+    internal static class Patch_BotZonePruneMarkers
+    {
+        private static void Prefix(BotZone __instance)
+        {
+            var list = __instance.SpawnPointMarkers;
+            if (list == null)
+            {
+                __instance.SpawnPointMarkers = new List<SpawnPointMarker>();
+                return;
+            }
+            int removed = list.RemoveAll(m =>
+            {
+                if (m == null) return true; // unity fake-null catches destroyed markers
+                try { return m.SpawnPoint == null; }
+                catch { return true; }
+            });
+            if (removed > 0)
+                Plugin.Log.LogWarning($"[RaidFix] pruned {removed} dead spawn markers from BotZone '{__instance.name}' ({list.Count} left)");
+        }
+    }
+
+    // bot door graph refresh — walks doors against the (empty) covers graph. bots-off, so
+    // a failed refresh costs nothing.
+    [HarmonyPatch(typeof(BotDoorsController), "RefreshData")]
+    internal static class Patch_BotDoorsRefresh
+    {
+        private static Exception Finalizer(Exception __exception)
+        {
+            if (__exception != null)
+                Plugin.Log.LogWarning($"[RaidFix] swallowed BotDoorsController.RefreshData: {__exception.Message}");
+            return null;
+        }
+    }
+
+    // DrakiaXYZ Waypoints postfixes BotsController.Init to link doors into its navmesh
+    // graph, and NREs on our map's door/nav state — killing the raid AFTER all of BSG's
+    // own init succeeded. swallow their postfix. can't use [HarmonyPatch]+Prepare for this:
+    // our plugin loads BEFORE Waypoints (chainloader order), so TypeByName finds nothing at
+    // startup. instead this is applied lazily from the BotsController.Init prefix above,
+    // when every plugin assembly is guaranteed loaded. bots-off makes door links moot, and
+    // Waypoints stays fully functional on real maps. no-op if Waypoints isn't installed.
+    internal static class LateWaypointsPatch
+    {
+        private static bool _done;
+
+        internal static void Apply()
+        {
+            if (_done) return;
+            _done = true;
+            var t = AccessTools.TypeByName("DrakiaXYZ.Waypoints.Patches.DoorLinkPatch");
+            if (t == null) return; // waypoints not installed
+            var target = AccessTools.Method(t, "PatchPostfix");
+            if (target == null)
+            {
+                Plugin.Log.LogWarning("[RaidFix] Waypoints DoorLinkPatch found but PatchPostfix missing — layout changed?");
+                return;
+            }
+            new Harmony("com.manimal.aidatadumper.raidfix-late").Patch(target,
+                finalizer: new HarmonyMethod(typeof(LateWaypointsPatch), nameof(SwallowFinalizer)));
+            Plugin.Log.LogWarning("[RaidFix] late-patched Waypoints DoorLinkPatch with finalizer");
+        }
+
+        private static bool _stackLogged;
+        private static Exception SwallowFinalizer(Exception __exception)
+        {
+            if (__exception != null)
+            {
+                // Waypoints' per-Door link generation is now our PRIMARY bot-door path
+                // (retail links parse clean but 0.16.9 bots ghost through them) — if it
+                // fails we need the exact line, not just the message
+                if (!_stackLogged)
+                {
+                    _stackLogged = true;
+                    Plugin.Log.LogWarning($"[RaidFix] Waypoints DoorLinkPatch threw (full stack, once): {__exception}");
+                }
+                else
+                    Plugin.Log.LogWarning($"[RaidFix] swallowed Waypoints DoorLinkPatch: {__exception.Message}");
+            }
+            return null;
+        }
+    }
+
+    // opening a door emits its state-change triggers via GClass3592.Instance.Emit — a
+    // quest/event singleton that's a dead shell on our backported map, so every door
+    // interaction NREs in WorldInteractiveObject.method_3. the door still opens (the NRE is
+    // after the swing); swallow the trigger emit — our map has no quest triggers to fire.
+    [HarmonyPatch(typeof(WorldInteractiveObject), "method_3")]
+    internal static class Patch_DoorTriggerEmit
+    {
+        private static Exception Finalizer(Exception __exception) => null;
+    }
+
+    // bot activation (BotOwner.method_10) swallows its exception INTERNALLY (try/catch ->
+    // silent ActiveFail statues), so a finalizer on method_10 itself sees nothing. instead
+    // witness every SUBSYSTEM the chain calls: finalizer-patch the Activate method(s) of
+    // every BotOwner property type — the throwing step logs itself before the internal
+    // catch eats it. inert on success, exception passes through unchanged.
+    [HarmonyPatch]
+    internal static class Patch_BotActivationWitness
+    {
+        private static IEnumerable<MethodBase> TargetMethods()
+        {
+            var seen = new HashSet<MethodBase>();
+            foreach (var prop in typeof(BotOwner).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                var t = prop.PropertyType;
+                if (!t.IsClass || t == typeof(string)) continue;
+                foreach (var m in t.GetMethods(BindingFlags.Public | BindingFlags.Instance))
+                {
+                    if (m.Name != "Activate" || m.IsAbstract || m.IsGenericMethod) continue;
+                    if (m.DeclaringType == null || m.DeclaringType.Assembly != typeof(BotOwner).Assembly) continue;
+                    if (seen.Add(m)) yield return m;
+                }
+            }
+        }
+
+        private static Exception Finalizer(Exception __exception, object __instance, MethodBase __originalMethod)
+        {
+            if (__exception != null)
+                Plugin.Log.LogError($"[BotWitness] {__originalMethod.DeclaringType?.Name}.Activate FAILED: {__exception}");
+            return __exception;
+        }
+    }
+
+    // the raid-settings "amount of bots" slider rescales every wave's slots (Medium:
+    // 0.5+(max-min)/2 — our tight 2..3 waves collapse to exactly 1 bot each). icebreaker's
+    // rogue count is retail-authored, not a preference — skip the rescale for our waves
+    // (gated by the suffixed BotZone* zone names only our map uses), keep the difficulty
+    // and tagged&cursed behavior identical to the original.
+    [HarmonyPatch(typeof(LocalGame), "smethod_7")]
+    internal static class Patch_WaveSlotsAuthored
+    {
+        private static bool Prefix(WavesSettings wavesSettings, WildSpawnWave[] waves, ref WildSpawnWave[] __result)
+        {
+            bool ours = waves != null && waves.Length > 0;
+            if (ours)
+                foreach (var w in waves)
+                    if (w.SpawnPoints == null || !w.SpawnPoints.StartsWith("BotZone") || w.SpawnPoints.Length <= "BotZone".Length)
+                    { ours = false; break; }
+            if (!ours) return true; // not our map — original behavior
+
+            foreach (var w in waves)
+            {
+                if (wavesSettings.IsTaggedAndCursed && w.WildSpawnType == WildSpawnType.assault)
+                    w.WildSpawnType = WildSpawnType.cursedAssault;
+                // retail icebreaker crew are elite rogues — hard across the board (config)
+                w.BotDifficulty = Plugin.HardBots.Value
+                    ? BotDifficulty.hard
+                    : wavesSettings.BotDifficulty.ToBotDifficulty();
+            }
+            Plugin.Log.LogWarning($"[RaidFix] wave slots kept as authored ({waves.Length} waves, bot-amount slider ignored"
+                + (Plugin.HardBots.Value ? ", difficulty forced HARD)" : ")"));
+            __result = waves;
+            return false;
+        }
+    }
+
+    // a full crew of chatty rogues in a metal box is nonstop voice-line spam — mute a
+    // random share of the crew. CAN_TALK is read by BotTalk.Activate (runs after Create)
+    // into its CanSay gate, so flipping it here silences the bot for the whole raid.
+    // bosses (knight + wedge) always keep their voice — their barks are the encounter.
+    [HarmonyPatch(typeof(BotOwner), nameof(BotOwner.Create))]
+    internal static class Patch_QuietCrew
+    {
+        private const int BdWedge = 848424; // blackdiv mod's bossWedge enum value
+
+        private static void Postfix(BotOwner __result)
+        {
+            try
+            {
+                if (__result == null || Plugin.QuietBotRatio.Value <= 0f) return;
+                var world = Comfort.Common.Singleton<GameWorld>.Instance;
+                if (world == null || !string.Equals(world.LocationId, "Suburbs", StringComparison.OrdinalIgnoreCase)) return;
+                var role = __result.Profile?.Info?.Settings?.Role;
+                if (role == null || role == WildSpawnType.bossKnight || (int)role == BdWedge) return;
+                // black division talks more than the crew (user call): an assault force
+                // coordinating out loud sells the phase — 40% of the crew's quiet chance
+                float ratio = Plugin.QuietBotRatio.Value;
+                if ((int)role == 848421) ratio *= 0.4f; // blackDivAssault enum value
+                if (UnityEngine.Random.value >= ratio) return;
+                __result.Settings.FileSettings.Mind.CAN_TALK = false;
+                Plugin.Log.LogInfo($"[RaidFix] '{__result.name}' spawned quiet ({role})");
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[RaidFix] quiet-bot flag failed: {e.Message}"); }
+        }
+    }
+
+    // the spawner resolves each bot's StartCorePoint from the spawn param's CorePointId —
+    // our server params say 0 (no baked core ids exist on a backported map) so it arrives
+    // null and every path request NREs (GoToPosition derefs StartCorePoint.ConnectionGroupId).
+    // safety net: assign the nearest generated core at creation.
+    [HarmonyPatch(typeof(BotOwner), nameof(BotOwner.Create))]
+    internal static class Patch_BotStartCorePoint
+    {
+        private static void Postfix(BotOwner __result)
+        {
+            try
+            {
+                if (__result == null || __result.StartCorePoint != null) return;
+                var covers = UnityEngine.Object.FindObjectOfType<AICoversData>();
+                var cores = covers != null && covers.AICorePointsHolder != null ? covers.AICorePointsHolder.CorePoints : null;
+                if (cores == null || cores.Count == 0) return;
+                AICorePoint best = null;
+                float bestD = float.MaxValue;
+                var pos = __result.Transform != null ? __result.Transform.position : __result.GetPlayer.Transform.position;
+                foreach (var c in cores)
+                {
+                    if (c == null) continue;
+                    float d = (c.Position - pos).sqrMagnitude;
+                    if (d < bestD) { bestD = d; best = c; }
+                }
+                __result.StartCorePoint = best;
+                Plugin.Log.LogInfo($"[RaidFix] assigned StartCorePoint {best?.Id} to '{__result.name}' ({Mathf.Sqrt(bestD):F1}m away)");
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[RaidFix] StartCorePoint assign failed: {e.Message}"); }
+        }
+    }
+
+    // spawned-player weapon procedural animation ticks every LateUpdate; MotionEffector
+    // (one of the ProceduralWeaponAnimation effectors) NREs each frame on our map. that's
+    // per-frame and non-fatal — Unity logs and continues — but it spams the log. swallow it;
+    // losing one weapon-sway effector is invisible for a walk-around. (finalizer runs every
+    // frame but is free when nothing throws.)
+    [HarmonyPatch(typeof(MotionEffector), "FixedTracking")]
+    internal static class Patch_MotionEffectorTick
+    {
+        private static Exception Finalizer(Exception __exception) => null; // silent: per-frame, would flood the log
+    }
+}
