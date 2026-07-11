@@ -1,0 +1,17 @@
+# Build output
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.idea/
+
+# Distribution zips emitted by PackageModForDistribution targets
+*.zip
+
+# IDE caches
+.vscode/
+*.swp
+
+# Claude Code local settings (machine-specific paths/permissions)
+.claude/
