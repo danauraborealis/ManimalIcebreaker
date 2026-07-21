@@ -1,0 +1,706 @@
+{
+ "levelsettings": [
+  {
+   "level": "level698",
+   "go": "---Icebreaker_ levelsettings ---",
+   "fields": {
+    "CameraPrefab": null,
+    "PrismPresetPrefab": null,
+    "PostProcessProfilePrefab": {
+     "ref": [
+      3,
+      719
+     ]
+    },
+    "skybox": null,
+    "RainBounds": {
+     "m_Center": {
+      "x": 0.30443477630615234,
+      "y": 30.670032501220703,
+      "z": -0.4214324951171875
+     },
+     "m_Extent": {
+      "x": 20.262100219726562,
+      "y": 33.4495964050293,
+      "z": 88.35319519042969
+     }
+    },
+    "AmbientMode": 3,
+    "SkyColor": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "EquatorColor": {
+     "r": 0.6039215922355652,
+     "g": 0.6352941393852234,
+     "b": 0.6509804129600525,
+     "a": 1.0
+    },
+    "GroundColor": {
+     "r": 0.6039215922355652,
+     "g": 0.6352941393852234,
+     "b": 0.6509804129600525,
+     "a": 1.0
+    },
+    "AmbientIntensity": 0.0,
+    "NightVisionSkyColor": {
+     "r": 0.03999999910593033,
+     "g": 0.03999999910593033,
+     "b": 0.03999999910593033,
+     "a": 1.0
+    },
+    "NightVisionEquatorColor": {
+     "r": 0.6039215922355652,
+     "g": 0.6352941393852234,
+     "b": 0.6509804129600525,
+     "a": 1.0
+    },
+    "NightVisionGroundColor": {
+     "r": 0.6039215922355652,
+     "g": 0.6352941393852234,
+     "b": 0.6509804129600525,
+     "a": 1.0
+    },
+    "NightVisionAmbientIntensity": 0.0,
+    "_minSmokeAmbientColor": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "SSRFactor": 1.0,
+    "fog": 1,
+    "fogColor": {
+     "r": 0.5254902243614197,
+     "g": 0.4117647111415863,
+     "b": 0.32156863808631897,
+     "a": 1.0
+    },
+    "fogDensity": 0.009999999776482582,
+    "fogEndDistance": 0.0,
+    "fogMode": 3,
+    "fogStartDistance": 0.0,
+    "SunColor": {
+     "r": 1.0,
+     "g": 0.8196078538894653,
+     "b": 0.5686274766921997,
+     "a": 1.0
+    },
+    "SunScratchesIntensity": 6.0,
+    "SunShaftsIntensity": 0.20000000298023224,
+    "SunShaftsDensity": 0.15000000596046448,
+    "SunLensFlares": 1,
+    "SunBackGroung": 1,
+    "LyingWater": 0.0,
+    "DirectionLightShadowForUnshadowedShaders": 0.0,
+    "HeightFalloff": 350.0,
+    "ZeroLevel": 900.0,
+    "_northDirection": 0.007000000216066837,
+    "MaxMapTextureMemory": {
+     "x": 100.0,
+     "y": 180.0,
+     "z": 3072.0,
+     "w": 3072.0
+    }
+   }
+  }
+ ],
+ "scripts_scene_inventory": {
+  "--- Application ---": [
+   "SinglePlayerApplication",
+   "TimeScaler"
+  ],
+  "Icebreaker_DryPlanes": [
+   "WeatherObstacle"
+  ],
+  "Icebreaker_DryPlanes_Snow": [
+   "WeatherObstacle"
+  ],
+  "Cube (12)": [
+   "ObstacleCollider"
+  ],
+  "Cube (7)": [
+   "ObstacleCollider"
+  ],
+  "Cube (5)": [
+   "ObstacleCollider"
+  ],
+  "Cube (1)": [
+   "ObstacleCollider"
+  ],
+  "CullingManager": [
+   "CullingManager",
+   "ObservedCullingManager"
+  ],
+  "Scene_Light": [
+   "SceneLights"
+  ],
+  "Sun": [
+   "RenderQueue"
+  ],
+  "RainController": [
+   "RippleController",
+   "WetRenderer",
+   "RainController",
+   "SnowRippleController",
+   "SnowWetRenderer"
+  ],
+  "Sky Dome": [
+   "TOD_Components",
+   "TOD_Time",
+   "TOD_Sky",
+   "TOD_Resources",
+   "TodLightSetter"
+  ],
+  "SnowFlakes": [
+   "SnowFlakes"
+  ],
+  "RainFall": [
+   "RainFallDrops"
+  ],
+  "Weather": [
+   "WeatherController",
+   "WinterEventVisual",
+   "CloudController"
+  ],
+  "DepthPhoto": [
+   "DepthPhotograper"
+  ],
+  "WindZone": [
+   "WindController"
+  ],
+  "ambientManager": [
+   "Tonemapping",
+   "AmbientLight",
+   "AmbientHighlight"
+  ],
+  "RainSplashController": [
+   "RainSplashController"
+  ],
+  "Cube (14)": [
+   "ObstacleCollider"
+  ],
+  "TreeWind_Fake": [
+   "TreeWind"
+  ],
+  "Cube": [
+   "ObstacleCollider"
+  ],
+  "Cube (8)": [
+   "ObstacleCollider"
+  ],
+  "Location_Scene": [
+   "LocationScene",
+   "LocationExportInfo",
+   "SeasonsMaterialsFixer"
+  ],
+  "Cube (6)": [
+   "ObstacleCollider"
+  ],
+  "PhysicsSetup": [
+   "LevelPhysicsSettings"
+  ],
+  "Cube (10)": [
+   "ObstacleCollider"
+  ],
+  "Cube (15)": [
+   "ObstacleCollider"
+  ],
+  "Cube (4)": [
+   "ObstacleCollider"
+  ],
+  "Cube (2)": [
+   "ObstacleCollider"
+  ],
+  "Cube (13)": [
+   "ObstacleCollider"
+  ],
+  "Cube (9)": [
+   "ObstacleCollider"
+  ],
+  "Cube (3)": [
+   "ObstacleCollider"
+  ],
+  "Cube (11)": [
+   "ObstacleCollider"
+  ],
+  "IndoorTrigger (8)": [
+   "IndoorTrigger"
+  ],
+  "Quad (39)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (35)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "IndoorTrigger (1)": [
+   "IndoorTrigger"
+  ],
+  "Quad (79)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (46)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (58)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (90)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (29)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "IndoorTrigger (49)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (14)": [
+   "IndoorTrigger"
+  ],
+  "Quad (86)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (71)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (43)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (92)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (34)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "IndoorTrigger (50)": [
+   "IndoorTrigger"
+  ],
+  "Quad (85)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (82)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (60)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (55)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "OnRenderObjectManager": [
+   "OnRenderObjectManager"
+  ],
+  "Quad (41)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (31)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "IndoorTrigger (11)": [
+   "IndoorTrigger"
+  ],
+  "Quad (76)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (51)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "IndoorTrigger (21)": [
+   "IndoorTrigger"
+  ],
+  "Quad (28)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (56)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "IndoorTrigger (15)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (10)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (13)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (6)": [
+   "IndoorTrigger"
+  ],
+  "Quad (32)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (87)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (81)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (49)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (59)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (69)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (50)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (61)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "IndoorTrigger (27)": [
+   "IndoorTrigger"
+  ],
+  "Quad (65)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "IndoorTrigger (18)": [
+   "IndoorTrigger"
+  ],
+  "Quad (57)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (30)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (44)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (75)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (88)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (73)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "IndoorTrigger (48)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (38)": [
+   "IndoorTrigger"
+  ],
+  "Quad (64)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "IndoorTrigger (24)": [
+   "IndoorTrigger"
+  ],
+  "Quad (94)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (53)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (80)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "IndoorTrigger (23)": [
+   "IndoorTrigger"
+  ],
+  "Quad (74)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "IndoorTrigger (46)": [
+   "IndoorTrigger"
+  ],
+  "Quad (54)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (91)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (37)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (48)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (42)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Light": [
+   "ShadowMaskExtractor"
+  ],
+  "Quad (52)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "IndoorTrigger (47)": [
+   "IndoorTrigger"
+  ],
+  "Child": [
+   "BrokenWindowPieceCollider"
+  ],
+  "IndoorTrigger (44)": [
+   "IndoorTrigger"
+  ],
+  "Quad (78)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (84)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (33)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (96)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (63)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (38)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (47)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (77)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (62)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (40)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "IndoorTrigger (26)": [
+   "IndoorTrigger"
+  ],
+  "Quad (70)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (83)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (45)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (66)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (89)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (68)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "Quad (72)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "IndoorTrigger (30)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (4)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (9)": [
+   "IndoorTrigger"
+  ],
+  "StuckPiece": [
+   "BallisticCollider",
+   "BrokenWindowPieceTemplate"
+  ],
+  "Quad (93)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "IndoorTrigger": [
+   "IndoorTrigger"
+  ],
+  "Quad (67)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "ScopeMaskRenderer": [
+   "ScopeMaskRenderer"
+  ],
+  "lightManager": [
+   "FlareSceneSettings"
+  ],
+  "IndoorTrigger (40)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTriggerParent": [
+   "TriggerGroup"
+  ],
+  "Quad (95)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "IndoorTrigger (19)": [
+   "IndoorTrigger"
+  ],
+  "Quad (36)": [
+   "DryPlane",
+   "DryPlane"
+  ],
+  "IndoorTrigger (32)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (45)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (35)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (42)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (12)": [
+   "IndoorTrigger"
+  ],
+  "---Icebreaker_ levelsettings ---": [
+   "LevelSettings"
+  ],
+  "IndoorTrigger (7)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (29)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (39)": [
+   "IndoorTrigger"
+  ],
+  "GrassTrampler": [
+   "GrassTrampler"
+  ],
+  "IndoorTrigger (43)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (37)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (22)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (25)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (36)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (2)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (5)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (3)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (17)": [
+   "IndoorTrigger"
+  ],
+  "CustomLights": [
+   "TubeLightRenderer",
+   "AreaLightRenderer"
+  ],
+  "IndoorTrigger (34)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (31)": [
+   "IndoorTrigger"
+  ],
+  "Icebreaker_EnvironmentManager": [
+   "EnvironmentManager"
+  ],
+  "IndoorTrigger (33)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (16)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (41)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (28)": [
+   "IndoorTrigger"
+  ],
+  "IndoorTrigger (20)": [
+   "IndoorTrigger"
+  ],
+  "WaterRenderer": [
+   "WaterRenderer"
+  ],
+  "ImpostorsRenderer": [
+   "ImpostorsRenderer"
+  ],
+  "_EditorDecalManager": [
+   "StaticDeferredDecalRenderer"
+  ],
+  "WindowBreakerManager": [
+   "WindowBreakerManager"
+  ]
+ }
+}

@@ -23,7 +23,7 @@ namespace Manimal.Icebreaker
         internal static ConfigEntry<bool> LampShadows;
         internal static ConfigEntry<float> CullDistanceScale;
         internal static ConfigEntry<bool> PcDriverEnabled;
-        internal static ConfigEntry<float> LodBiasClamp;
+        internal static ConfigEntry<bool> NativeCulling;
         internal static ConfigEntry<bool> ShadowProxyFix;
         internal static ConfigEntry<int> CrewRoguesMin;
         internal static ConfigEntry<int> CrewRoguesMax;
@@ -39,11 +39,33 @@ namespace Manimal.Icebreaker
         internal static ConfigEntry<bool> ForceWinter;
         internal static ConfigEntry<bool> HardBots;
         internal static ConfigEntry<bool> EventSpawns;
+        internal static ConfigEntry<bool> DiagHotkeys;
+        internal static ConfigEntry<float> WeatherDesaturate;
+        internal static ConfigEntry<bool> VolFog;
+        internal static ConfigEntry<float> VolFogDensity;
+        internal static ConfigEntry<float> VolFogNoise;
+        internal static ConfigEntry<float> VolFogNoiseScale;
+        internal static ConfigEntry<float> VolFogHeight;
+        internal static ConfigEntry<float> VolFogBaseline;
+        internal static ConfigEntry<float> VolFogMaxLength;
+        internal static ConfigEntry<float> VolFogMaxLengthFallOff;
+        internal static ConfigEntry<float> VolFogIndoorFade;
+        internal static ConfigEntry<float> VolFogVoidFalloff;
+        internal static ConfigEntry<bool> VolFogVoidDebug;
+        internal static ConfigEntry<float> VolFogVoidBlend;
+        internal static ConfigEntry<float> VolFogDeepObscurance;
+        internal static ConfigEntry<float> VolFogSkyHaze;
+        internal static ConfigEntry<float> VolFogAlpha;
+        internal static ConfigEntry<float> VolFogSpeed;
+        internal static ConfigEntry<int> VolFogDownsampling;
+        internal static ConfigEntry<Color> VolFogColor;
         internal static ConfigEntry<bool> Blizzard;
         internal static ConfigEntry<float> SnowIntensity;
         internal static ConfigEntry<float> CutsceneVolume;
         internal static ConfigEntry<float> BlizzardWind;
         internal static ConfigEntry<float> BlizzardFog;
+        internal static ConfigEntry<bool> RetailSky;
+        internal static ConfigEntry<bool> StaticSkybox;
         internal static ConfigEntry<float> TodHour;
         internal static ConfigEntry<bool> WeatherTonemap;
         internal static ConfigEntry<bool> WeatherFogPass;
@@ -90,18 +112,16 @@ namespace Manimal.Icebreaker
             CullDistanceScale = Config.Bind("Icebreaker", "CullDistanceScale", 1.0f,
                 new ConfigDescription("distance-culling aggressiveness for small props (lower = culls closer = more fps) (live)",
                     new AcceptableValueRange<float>(0.25f, 3f)));
+            NativeCulling = Config.Bind("Icebreaker", "NativeCulling", false,
+                "use BSG's restored retail culling bake (Culling_Data) instead of our own sidecar bakes — the retail bake cost fps, so OFF: our .pcbake volumes drive culling; restart raid to switch");
             PcDriverEnabled = Config.Bind("Icebreaker", "PcDriverEnabled", true,
                 "occlusion culling driver — flip OFF (live) to un-cull everything; the pop-in isolation tool: if pops stop with this off, the bake's sightline data is the culprit");
-            LodBiasClamp = Config.Bind("Icebreaker", "LodBiasClamp", 1.2f,
-                new ConfigDescription("cap unity's LOD bias on this map — EFT's graphics settings run 2.0, holding every LODGroup at high detail twice as far as authored (live)",
-                    new AcceptableValueRange<float>(0.5f, 2f)));
+            // NOTE: the old LodBiasClamp knob is gone — forcing QualitySettings.lodBias
+            // overrode the player's own Object LOD quality setting and halved loose
+            // loot visibility (loot LODGroups cull on lodBias). vanilla settings stay
+            // whatever the player configured.
             ShadowProxyFix = Config.Bind("Icebreaker", "ShadowProxyFix", true,
                 "enforce the retail shadow split at load: _SHADOW_ proxy meshes cast-only, their visual siblings cast nothing (double-cast shadows otherwise)");
-            LodBiasClamp.SettingChanged += (_, __) =>
-            {
-                UnityEngine.QualitySettings.lodBias = LodBiasClamp.Value;
-                Log.LogWarning($"[Perf] lodBias -> {LodBiasClamp.Value:F2} (live)");
-            };
             // proof-of-life in the log when the culling knobs move — 'slider does nothing'
             // reports need to distinguish dead knob from wrong suspect
             CullDistanceScale.SettingChanged += (_, __) => Log.LogWarning($"[DistCull] scale -> {CullDistanceScale.Value:F2} (live)");
@@ -144,6 +164,46 @@ namespace Manimal.Icebreaker
                 "permanent blizzard: pins WeatherDebug (snow/wind/fog) + raises the winter STORM state; also pins the TOD hour (live)");
             SnowIntensity = Config.Bind("Icebreaker", "SnowIntensity", 1.0f,
                 new ConfigDescription("snowfall intensity (WeatherDebug.Rain in winter; live)", new AcceptableValueRange<float>(0f, 1f)));
+            VolFog = Config.Bind("VolumetricFog2", "Enabled", true,
+                "the REAL volumetric fog (Volumetric Fog & Mist 2, raymarched) — needs volumetricfog.bundle next to the plugin dll (live)");
+            VolFogDensity = Config.Bind("VolumetricFog2", "Density", 0.585f,
+                new ConfigDescription("fog density (live)", new AcceptableValueRange<float>(0f, 1f)));
+            VolFogNoise = Config.Bind("VolumetricFog2", "NoiseStrength", 0.734f,
+                new ConfigDescription("how uneven/wispy the fog is — 0 = uniform soup (live)", new AcceptableValueRange<float>(0f, 1f)));
+            VolFogNoiseScale = Config.Bind("VolumetricFog2", "NoiseScale", 2.943f,
+                new ConfigDescription("size of the fog billows (live)", new AcceptableValueRange<float>(0.2f, 5f)));
+            VolFogHeight = Config.Bind("VolumetricFog2", "Height", 93.1f,
+                new ConfigDescription("fog layer thickness in meters above baseline (live)", new AcceptableValueRange<float>(1f, 200f)));
+            VolFogBaseline = Config.Bind("VolumetricFog2", "BaselineHeight", -7.1f,
+                new ConfigDescription("world Y the fog layer sits on — icebreaker deck is around sea level (live)", new AcceptableValueRange<float>(-50f, 100f)));
+            VolFogMaxLength = Config.Bind("VolumetricFog2", "MaxFogLength", 1006f,
+                new ConfigDescription("raymarch reach in meters (live)", new AcceptableValueRange<float>(100f, 2000f)));
+            VolFogMaxLengthFallOff = Config.Bind("VolumetricFog2", "MaxFogLengthFallOff", 0.6f,
+                new ConfigDescription("soft rolloff of fog contribution toward MaxFogLength — kills the bright far-field glow that silhouettes the map border (live)", new AcceptableValueRange<float>(0f, 1f)));
+            VolFogVoidFalloff = Config.Bind("VolumetricFog2", "VoidFalloff", 6f,
+                new ConfigDescription("edge sharpness of fog exclusion voids (manimal_fogvoid boxes) — higher = crisper cutoff at the box faces (live)", new AcceptableValueRange<float>(1f, 20f)));
+            VolFogVoidBlend = Config.Bind("VolumetricFog2", "VoidBlend", 0.25f,
+                new ConfigDescription("smooth-min blend between nearby voids — bridges small fog slivers in gaps between adjacent void boxes (units are relative to box size) (live)", new AcceptableValueRange<float>(0f, 1f)));
+            VolFogVoidDebug = Config.Bind("VolumetricFog2", "VoidDebug", false,
+                "DEBUG: paint fog void interiors bright red instead of clearing them — shows exactly where the exclusion boxes land (live)");
+            VolFogIndoorFade = Config.Bind("VolumetricFog2", "IndoorFadeSeconds", 1.5f,
+                new ConfigDescription("fog fade duration when entering/leaving ship interiors (Indoor_* volume bounds) (live)", new AcceptableValueRange<float>(0f, 6f)));
+            VolFogDeepObscurance = Config.Bind("VolumetricFog2", "DeepObscurance", 1.4f,
+                new ConfigDescription("darkens fog with depth — higher = distance melts into the night instead of glowing (live)", new AcceptableValueRange<float>(0f, 3f)));
+            VolFogSkyHaze = Config.Bind("VolumetricFog2", "SkyHaze", 0f,
+                new ConfigDescription("haze height against the skybox (live)", new AcceptableValueRange<float>(0f, 500f)));
+            VolFogAlpha = Config.Bind("VolumetricFog2", "Alpha", 0.612f,
+                new ConfigDescription("overall fog opacity (live)", new AcceptableValueRange<float>(0f, 1f)));
+            VolFogSpeed = Config.Bind("VolumetricFog2", "WindSpeed", 0.081f,
+                new ConfigDescription("fog drift speed (live)", new AcceptableValueRange<float>(0f, 0.5f)));
+            VolFogDownsampling = Config.Bind("VolumetricFog2", "Downsampling", 1,
+                new ConfigDescription("render at 1/N resolution — KEEP AT 1: the downsampled composite path flips/quadrants the screen under EFTs pipeline (live)", new AcceptableValueRange<int>(1, 4)));
+            VolFogColor = Config.Bind("VolumetricFog2", "FogColor", new Color(0.534f, 0.564f, 0.638f),
+                "fog tint — cold blue-gray default (live)");
+            WeatherDesaturate = Config.Bind("Icebreaker", "WeatherDesaturate", 0.23f,
+                new ConfigDescription("override the weather desaturation post effect (blizzard cloudiness pins it to max = the gray washed-out look). -1 = vanilla behavior, 0 = full color, 1 = full gray (live)", new AcceptableValueRange<float>(-1f, 1f)));
+            DiagHotkeys = Config.Bind("Icebreaker", "DiagHotkeys", false,
+                "enable the F1-F12 diagnostic hotkey suite (lights toggle, geo hide, batching tests, probes). OFF for normal play — F9 doubles as the fog tuner toggle and MUST not fight the lights toggle (live)");
             BlizzardWind = Config.Bind("Icebreaker", "BlizzardWind", 1.5f,
                 new ConfigDescription("blizzard wind magnitude (live)", new AcceptableValueRange<float>(0f, 3f)));
             BlizzardFog = Config.Bind("Icebreaker", "BlizzardFog", 0.015f,
@@ -152,6 +212,10 @@ namespace Manimal.Icebreaker
                 new ConfigDescription("pinned time-of-day hour while Blizzard is on — icebreaker is authored as a NIGHT map (skybox_night, lamp-lit); day exposes skydome seams + the out-of-map snow plane (live)", new AcceptableValueRange<float>(0f, 24f)));
             WeatherTonemap = Config.Bind("Icebreaker", "WeatherTonemap", false,
                 "enable the rebuilt weather Tonemapping screen pass (OFF fixes washed-out colors; live)");
+            StaticSkybox = Config.Bind("Icebreaker", "StaticSkybox", true,
+                "FACTORY-STYLE sky: apply the authored skybox_night material and disable the procedural dome painters (the flat white/black atmosphere + horizon seam). restart raid to A/B");
+            RetailSky = Config.Bind("Icebreaker", "RetailSky", false,
+                "apply retail 1.0's TOD_Sky atmosphere values at raid start — caused visual artifacts on the rebuilt sky, OFF by default (the StaticSkybox freeze is independent and stays on); restart raid to A/B");
             SnowFallY = Config.Bind("Icebreaker", "SnowFallY", -2f,
                 new ConfigDescription("snow flake fall vector Y — dial live until flakes fall DOWN (retail 1.0 authored -2, the 0.16.9 shader seems to read it inverted) (live)", new AcceptableValueRange<float>(-6f, 6f)));
             FogBrightness = Config.Bind("Icebreaker", "FogBrightness", 0.12f,

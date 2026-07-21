@@ -39,7 +39,7 @@ def main():
                 "Rotation": {"x": 0, "y": 0, "z": 0},
                 "IsGroupPosition": False,
                 "GroupPositions": [],
-                "IsAlwaysSpawn": True,
+                "IsAlwaysSpawn": False,  # retail scene truth; probability is the ONLY spawn knob
                 "Root": root,
                 "Items": [
                     {"_id": root, "_tpl": f["Template"], "upd": {"StackObjectsCount": 1}}

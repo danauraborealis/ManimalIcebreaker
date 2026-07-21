@@ -344,16 +344,47 @@ namespace Manimal.Icebreaker
     // pitch black map. the MBOIT disarm in TickBlizzard is the real fix; this logs the FULL
     // stack once if anything in here ever throws again (BSG's log only keeps the top frame)
     // and silences the rest of the storm.
+    // blizzard cloudiness pins the CC_Sharpen WeatherDesaturate post effect to max —
+    // the gray/muted look the moment Blizzard turns on. method_13 is the per-tick
+    // writer; land after it so the config wins the frame. -1 = hands off.
+    [HarmonyPatch(typeof(EFT.Weather.WeatherController), "method_13")]
+    internal static class Patch_WeatherDesatOverride
+    {
+        private static void Postfix(EFT.Weather.WeatherController __instance)
+        {
+            float v = Plugin.WeatherDesaturate.Value;
+            if (v < 0f) return;
+            var cc = HarmonyLib.AccessTools.Field(typeof(EFT.Weather.WeatherController), "cc_Sharpen_0")?.GetValue(__instance) as CC_Sharpen;
+            if (cc != null) cc.WeatherDesaturate = v;
+        }
+    }
+
     [HarmonyPatch(typeof(EFT.Weather.WeatherController), "method_4")]
     internal static class Patch_WeatherTickDiag
     {
-        private static bool _logged;
-        private static Exception Finalizer(Exception __exception)
+        private static int _throws;
+        private static float _nextLog;
+
+        private static Exception Finalizer(Exception __exception, EFT.Weather.WeatherController __instance)
         {
-            if (__exception != null && !_logged)
+            if (__exception == null) return null;
+            _throws++;
+            // a swallowed-every-tick method_4 means NO weather params ever push — fog
+            // renders un-parameterized defaults no matter what we tune upstream. name
+            // the null so the crash is fixable instead of invisible.
+            if (UnityEngine.Time.unscaledTime >= _nextLog)
             {
-                _logged = true;
-                Plugin.Log.LogWarning($"[Weather] method_4 threw (full stack, once): {__exception}");
+                _nextLog = UnityEngine.Time.unscaledTime + 10f;
+                string diag;
+                try
+                {
+                    var scat = HarmonyLib.AccessTools.Field(typeof(EFT.Weather.WeatherController), "tod_Scattering_0")?.GetValue(__instance) as TOD_Scattering;
+                    bool date = false;
+                    try { date = GClass4.Instance?.CurrentTime?.GameDateTime != null; } catch { }
+                    diag = $"throws={_throws} scat={scat != null} scatMBOIT={scat != null && scat.MBOIT} remapV2={__instance.MBOITFogRemapDataV2 != null} date={date} cloudsRemap={__instance.CloudsRemap != null} todCtrl={__instance.TimeOfDayController != null}";
+                }
+                catch (Exception e) { diag = "diag failed: " + e.Message; }
+                Plugin.Log.LogWarning($"[Weather] method_4 threw ({diag}): {__exception.Message}");
             }
             return null;
         }
@@ -361,7 +392,11 @@ namespace Manimal.Icebreaker
 
     // Cam2's NightVision wakes half-initialized and NREs in OnPreCull EVERY FRAME (7184
     // last raid). self-heal: first throw disables the component. NVG activation re-enables
-    // it, and if its internals are still broken it just disables again.
+    // it, and if its internals are still broken it just disables again. KNOWN USER-FACING
+    // COST: goggles show the mask overlay but no effect, and the overlay used to STICK
+    // after toggling off (the disabled component cant run its off-transition) — so the
+    // guard now also kills the TextureMask overlay, and logs the FULL stack once so the
+    // actual null site can be healed instead of muted.
     [HarmonyPatch(typeof(BSG.CameraEffects.NightVision), "OnPreCull")]
     internal static class Patch_NightVisionNeverSpams
     {
@@ -371,10 +406,21 @@ namespace Manimal.Icebreaker
             if (__exception != null && __instance != null)
             {
                 __instance.enabled = false;
+                // dont strand the player behind the goggle vignette: the off-transition
+                // lives in the component we just disabled
+                try
+                {
+                    if (__instance.TextureMask != null)
+                    {
+                        __instance.TextureMask.Mask = null;
+                        __instance.TextureMask.enabled = false;
+                    }
+                }
+                catch { }
                 if (!_logged)
                 {
                     _logged = true;
-                    Plugin.Log.LogWarning($"[RaidFix] NightVision.OnPreCull threw ({__exception.Message}) — component disabled");
+                    Plugin.Log.LogWarning($"[RaidFix] NightVision.OnPreCull threw — component disabled, mask cleared. FULL STACK (once): {__exception}");
                 }
             }
             return null;
@@ -451,6 +497,7 @@ namespace Manimal.Icebreaker
             }
 
             TickSpikeProbe(); // stutter forensics — logs spiked frames with toggle/GC counts
+            DrainPcGroupToggles(); // expand pending group flips into renderer pendings (budgeted)
             DrainPcToggles(); // apply queued PC visibility changes under a per-frame budget
 
             // AUTOMATIC shader rebind: our bundle's p0/* SMap shaders are broken copies; the
@@ -494,19 +541,52 @@ namespace Manimal.Icebreaker
             if (Plugin.AmbientIntensity.Value != _lastAmbient)
             {
                 // NOTE: TOD_Sky.UpdateAmbient is EMPTY in 0.16.9 — TOD does NOT own
-                // RenderSettings.ambient (the earlier gate here was wrong and killed the
-                // slider). flat ambient stays OUR lever regardless of the weather stack.
+                // RenderSettings.ambient. BUT the restored retail LevelSettings DOES:
+                // its Awake subscribes method_0 to Camera.onPreCull, re-applying its
+                // OWN ambient fields every frame (retail authored black/0 — the map
+                // relied on baked lightmaps we don't have). so when the singleton
+                // exists we write our fill THROUGH its fields and let the native
+                // applier do the work; direct RenderSettings writes are the fallback
+                // for pre-restore bundles.
                 _lastAmbient = Plugin.AmbientIntensity.Value;
-                RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
                 float a = _lastAmbient;
-                RenderSettings.ambientLight = new Color(0.15f * a, 0.15f * a, 0.18f * a, 1f);
-                Plugin.Log.LogWarning($"[Ambient] flat ambient -> {RenderSettings.ambientLight}");
+                var fill = new Color(0.15f * a, 0.15f * a, 0.18f * a, 1f);
+                var ls = Comfort.Common.Singleton<LevelSettings>.Instance;
+                if (ls != null)
+                {
+                    ls.AmbientMode = UnityEngine.Rendering.AmbientMode.Flat;
+                    ls.SkyColor = fill;      // Flat mode: method_0 writes SkyColor into ambientLight
+                    ls.EquatorColor = fill;
+                    ls.GroundColor = fill;
+                    ls.AmbientIntensity = a;
+                    Plugin.Log.LogWarning($"[Ambient] flat ambient -> {fill} (via LevelSettings, native per-frame apply)");
+                }
+                else
+                {
+                    RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+                    RenderSettings.ambientLight = fill;
+                    Plugin.Log.LogWarning($"[Ambient] flat ambient -> {fill} (direct — no LevelSettings in scene)");
+                }
             }
 
             // blizzard pin — every ~30 frames is plenty (WeatherDebug values are read
             // continuously once Enabled)
             if (Plugin.WeatherSystem.Value && (_iceFrames % 30) == 7)
                 IcebreakerWeather.TickBlizzard();
+
+            // per-frame: the MBOIT compute's CameraParameters buffer tracks fov (ads
+            // zoom) — self-gates to a no-op until the volumetric constructed it
+            IcebreakerWeather.TickCameraParams();
+
+            // our raymarched volumetric (VolumetricFog & Mist 2) — every 30 frames,
+            // config live-applied
+            if ((_iceFrames % 30) == 13)
+                IcebreakerVolFog.Tick();
+
+            // the F1-F12 suite below is perf-hunt archaeology — it hijacks keys real
+            // features want (F9 lights-off collided with the fog tuner) so its dead
+            // unless explicitly re-armed
+            if (!Plugin.DiagHotkeys.Value) return;
 
             if (Input.GetKeyDown(KeyCode.F7)) { RenderSettings.ambientIntensity *= 1.3f; Plugin.Log.LogWarning($"[RenderEnv] ambientIntensity -> {RenderSettings.ambientIntensity:F2}"); }
             if (Input.GetKeyDown(KeyCode.F6)) { RenderSettings.ambientIntensity *= 0.77f; Plugin.Log.LogWarning($"[RenderEnv] ambientIntensity -> {RenderSettings.ambientIntensity:F2}"); }
@@ -874,6 +954,23 @@ namespace Manimal.Icebreaker
                 Plugin.Log.LogWarning($"[LightLamps] {skipped} lamps native-owned (CullingLightObject) — LampIntensity slider drives only the {_lamps.Count} unowned");
         }
 
+        // native BSG culling gate: the restored retail bake cost fps vs our own bakes —
+        // suppress the grid's Awake entirely (no Instance, no packed load, no toggles)
+        // and AttachCullingCamera's existing fallback runs the sidecar driver instead
+        [HarmonyPatch]
+        internal static class Patch_NativeCullingGate
+        {
+            private static MethodBase TargetMethod() =>
+                HarmonyLib.AccessTools.Method(HarmonyLib.AccessTools.TypeByName("Koenigz.PerfectCulling.EFT.PerfectCullingAdaptiveGrid"), "Awake");
+
+            private static bool Prefix()
+            {
+                if (Plugin.NativeCulling.Value) return true;
+                Plugin.Log.LogWarning("[Culling] native BSG grid suppressed (NativeCulling=false) — our sidecar bakes drive culling");
+                return false;
+            }
+        }
+
         // occlusion culling: the scene bundle carries a PerfectCullingVolume + baked data
         // authored with the Asset Store PC (its OWN PerfectCullingRuntime assembly — the
         // game's built-in PC is BSG's fork missing the vanilla volume class, so we self-host;
@@ -884,6 +981,31 @@ namespace Manimal.Icebreaker
         {
             try
             {
+                // NATIVE culling stand-down: if the restored Icebreaker_Culling scene shipped,
+                // BSG's own PerfectCullingAdaptiveGrid awakes and loads the packed retail bake
+                // from StreamingAssets/Culling_Data. running our sidecar driver on top would
+                // double-toggle the same renderers — so when the native system is alive we
+                // stand down entirely. PackedData.IsValid distinguishes "component present but
+                // bake failed to load" (fall back to our driver) from "actually culling".
+                var nativeGridT = System.Type.GetType("Koenigz.PerfectCulling.EFT.PerfectCullingAdaptiveGrid, Assembly-CSharp");
+                var nativeGrid = nativeGridT?.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
+                if (nativeGrid != null && !nativeGrid.Equals(null))
+                {
+                    bool packedOk;
+                    try
+                    {
+                        var packed = nativeGridT.GetProperty("PackedData")?.GetValue(nativeGrid);
+                        packedOk = packed != null && Equals(packed.GetType().GetProperty("IsValid")?.GetValue(packed), true);
+                    }
+                    catch { packedOk = true; } // reflection drift — component alive, assume native owns culling
+                    if (packedOk)
+                    {
+                        Plugin.Log.LogWarning("[Culling] NATIVE BSG culling grid alive with valid packed data — sidecar driver standing down");
+                        return;
+                    }
+                    Plugin.Log.LogWarning("[Culling] native grid present but packed bake NOT loaded — falling back to sidecar driver");
+                }
+
                 var camType = System.Type.GetType("Koenigz.PerfectCulling.PerfectCullingCamera, PerfectCullingRuntime");
                 if (camType == null) { Plugin.Log.LogWarning("[Culling] PerfectCullingRuntime not loaded — no culling"); return; }
                 var volType = System.Type.GetType("Koenigz.PerfectCulling.PerfectCullingVolume, PerfectCullingRuntime");
@@ -1155,6 +1277,7 @@ namespace Manimal.Icebreaker
         // specific patterns: 'frame_plastic' not 'frame' (door frames must stay culled).
         private static readonly string[] PcNeverCull = { "curtains_", "frame_plastic", "arctic_picture" };
         private static readonly Dictionary<object, bool> _pcWhitelistCache = new Dictionary<object, bool>();
+        private static HashSet<Transform> _pcLcRoots; // lazy per raid
 
         private static bool IsNeverCullGroup(object group, Renderer[] rs)
         {
@@ -1167,6 +1290,17 @@ namespace Manimal.Icebreaker
                     var n = r.name.ToLowerInvariant();
                     foreach (var pat in PcNeverCull)
                         if (n.Contains(pat)) { hit = true; break; }
+                    // loot containers (PC blocks, medbags, toolboxes...) go PERMANENTLY
+                    // invisible when the bake's sightline data for them is stale — they
+                    // must never be occlusion-culled. distance culler still owns them.
+                    // NOTE: sibling-aware root check — GetComponentInParent NEVER matches
+                    // container meshes (the LootableContainer is a sibling, not a parent)
+                    if (!hit)
+                    {
+                        if (_pcLcRoots == null) _pcLcRoots = BuildLootContainerRoots();
+                        for (var w = r.transform; w != null && !hit; w = w.parent)
+                            if (_pcLcRoots.Contains(w)) hit = true;
+                    }
                     if (hit) break;
                 }
             _pcWhitelistCache[group] = hit;
@@ -1197,6 +1331,8 @@ namespace Manimal.Icebreaker
             public object Vol;
             public int LastCell = int.MinValue;
             public System.Reflection.MethodInfo GetIndex, GetIndices, QueueAll, QueueOne, Execute;
+            public object[] Groups;            // bakeGroups cached — direct toggles, no per-index reflection
+            public HashSet<int> VisSet;        // previous cell's visible group set (null until first apply)
         }
         private static readonly List<PcVol> _pcVols = new List<PcVol>();
         private static readonly List<ushort> _pcIndices = new List<ushort>(2048);
@@ -1206,9 +1342,16 @@ namespace Manimal.Icebreaker
         private static void BuildPcDriver(UnityEngine.Object[] vols)
         {
             _pcVols.Clear();
+            _pcGroupPending.Clear();
+            _pcWhitelistCache.Clear(); // stale group keys from the previous raid
+            _pcLcRoots = null;         // containers respawn per raid — rebuild lazily
             foreach (var v in vols)
             {
                 var t = v.GetType();
+                var fGroups = t.GetField("bakeGroups", BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
+                var groupsArr = fGroups?.GetValue(v) as System.Array;
+                var groups = new object[groupsArr?.Length ?? 0];
+                if (groupsArr != null) groupsArr.CopyTo(groups, 0);
                 _pcVols.Add(new PcVol
                 {
                     Vol = v,
@@ -1219,6 +1362,7 @@ namespace Manimal.Icebreaker
                     QueueAll = AccessTools.Method(t, "QueueToggleAllRenderers"),
                     QueueOne = AccessTools.Method(t, "QueueToggleRenderer"),
                     Execute = AccessTools.Method(t, "ExecuteQueue"),
+                    Groups = groups,
                 });
             }
         }
@@ -1242,6 +1386,7 @@ namespace Manimal.Icebreaker
                             vol.QueueAll.Invoke(vol.Vol, new object[] { true });
                             vol.Execute.Invoke(vol.Vol, new object[] { true });
                             vol.LastCell = int.MinValue; // re-enable reapplies from scratch
+                            vol.VisSet = null;
                         }
                         catch { }
                     }
@@ -1264,31 +1409,60 @@ namespace Manimal.Icebreaker
                 pv.LastCell = cell;
                 _pcDriverRuns++;
 
-                pv.QueueAll.Invoke(pv.Vol, new object[] { false });
+                // SET DIFF, not full reapply: the old path swept EVERY bake group (plus a
+                // reflection Invoke per visible index) in one frame on each cell change —
+                // THE engine-room-entry hitch, un-fixable by any renderer-write budget.
+                // adjacent cells differ by a handful of groups; only those get touched.
+                // group toggles land in a pending map drained N-per-frame, so even the
+                // full first-entry apply is sliced instead of a spike.
                 _pcIndices.Clear();
                 pv.GetIndices.Invoke(pv.Vol, new object[] { camPos, _pcIndices });
-                if (_pcIndices.Count == 0)
+                var newSet = new HashSet<int>();
+                foreach (var idx in _pcIndices) newSet.Add(idx);
+                bool cullNothing = newSet.Count == 0; // empty/unbaked cell: show all (asset's CullNothing behaviour)
+
+                if (pv.VisSet == null)
                 {
-                    // empty/unbaked cell: keep everything visible rather than blanking the
-                    // world (the asset's CullNothing behaviour)
-                    pv.QueueAll.Invoke(pv.Vol, new object[] { true });
+                    // first apply for this volume: full pass, sliced by the group drain
+                    for (int i = 0; i < pv.Groups.Length; i++)
+                        _pcGroupPending[pv.Groups[i]] = cullNothing || newSet.Contains(i);
                 }
                 else
                 {
-                    var oneArgs = new object[] { 0, true, null };
-                    foreach (var idx in _pcIndices)
+                    for (int i = 0; i < pv.Groups.Length; i++)
                     {
-                        oneArgs[0] = (int)idx;
-                        pv.QueueOne.Invoke(pv.Vol, oneArgs);
+                        bool was = pv.VisSet.Count == 0 || pv.VisSet.Contains(i);
+                        bool now = cullNothing || newSet.Contains(i);
+                        if (was != now) _pcGroupPending[pv.Groups[i]] = now;
                     }
                 }
-                pv.Execute.Invoke(pv.Vol, new object[] { true }); // Toggle -> our prefix -> budgeted queue
+                pv.VisSet = newSet;
             }
             catch (Exception e)
             {
                 Plugin.Log.LogWarning($"[Culling] driver failed on volume: {e.Message}");
                 pv.Vol = null; // don't retry a broken volume every cycle
             }
+        }
+
+        // group-level pending map (last-writer-wins) drained under its own budget —
+        // each drained group expands into renderer-level pendings for DrainPcToggles
+        private static readonly Dictionary<object, bool> _pcGroupPending = new Dictionary<object, bool>();
+        private static readonly List<object> _pcGroupScratch = new List<object>(1024);
+        private const int PcGroupBudget = 700;
+
+        private static void DrainPcGroupToggles()
+        {
+            if (_pcGroupPending.Count == 0) return;
+            _pcGroupScratch.Clear();
+            int budget = PcGroupBudget;
+            foreach (var kv in _pcGroupPending)
+            {
+                if (budget-- <= 0) break;
+                ToggleGroupViaEnabled(kv.Key, kv.Value);
+                _pcGroupScratch.Add(kv.Key);
+            }
+            foreach (var g in _pcGroupScratch) _pcGroupPending.Remove(g);
         }
 
         // ---- cross-volume interior culling ----
@@ -1346,6 +1520,15 @@ namespace Manimal.Icebreaker
             }
         }
 
+        // interior containment for the volumetric fog fade — same bounds the cross-cull
+        // uses (union of each Indoor_* volume's renderer bounds, +3m doorway grace)
+        internal static bool CameraInsideInterior(Vector3 p)
+        {
+            foreach (var xv in _xvols)
+                if (xv.B.Contains(p)) return true;
+            return false;
+        }
+
         // every ~15 frames: camera outside an interior volume -> its far groups go dark.
         // near groups stay (stairwell/doorway/window sightlines). all toggles flow through
         // the pending queue so big flips settle under the same frame budget as PC itself.
@@ -1371,16 +1554,32 @@ namespace Manimal.Icebreaker
             }
         }
 
+        // shows get a fat priority budget: a delayed HIDE is invisible to the player,
+        // a delayed SHOW is the turn-a-corner-and-the-wall-is-missing pop. typical
+        // corner-turn shows are a few hundred renderers = same frame now; the rare
+        // full volume-entry swap settles in 2-3 frames instead of ~15.
+        private const int PcShowBudget = 5000;
+
         private static void DrainPcToggles()
         {
             if (_pcPending.Count == 0) return;
             _pcDrainScratch.Clear();
+            int showBudget = PcShowBudget;
+            foreach (var kv in _pcPending)
+            {
+                if (!kv.Value) continue;
+                if (showBudget-- <= 0) break;
+                var r = kv.Key;
+                if (r != null && !r.enabled) { r.enabled = true; _pcWrites++; }
+                _pcDrainScratch.Add(r);
+            }
             int budget = PcApplyBudget;
             foreach (var kv in _pcPending)
             {
+                if (kv.Value) continue; // shows handled above
                 if (budget-- <= 0) break;
                 var r = kv.Key;
-                if (r != null && r.enabled != kv.Value) { r.enabled = kv.Value; _pcWrites++; }
+                if (r != null && r.enabled) { r.enabled = false; _pcWrites++; }
                 _pcDrainScratch.Add(r);
             }
             foreach (var r in _pcDrainScratch) _pcPending.Remove(r);
@@ -1420,6 +1619,23 @@ namespace Manimal.Icebreaker
         // 41.6k draw calls toward the ship center; most are tiny distant props contributing
         // zero pixels. cull by size class: small objects vanish near, medium further, big
         // stuff (hull/decks) never. round-robin a slice each frame — no per-frame spikes.
+        // container prop roots, shared by the distance culler AND the occlusion
+        // whitelist: the LootableContainer is a '_lootable' SIBLING of the visual mesh,
+        // never an ancestor — GetComponentInParent checks silently miss every container
+        internal static HashSet<Transform> BuildLootContainerRoots()
+        {
+            var lcRoots = new HashSet<Transform>();
+            foreach (var lc in UnityEngine.Object.FindObjectsOfType<EFT.Interactive.LootableContainer>(true))
+            {
+                var root = lc.transform.parent != null ? lc.transform.parent : lc.transform;
+                var walk = lc.transform;
+                for (int hop = 0; walk != null && hop < 4; hop++, walk = walk.parent)
+                    if (walk.GetComponent<LODGroup>() != null) { root = walk; break; }
+                lcRoots.Add(root);
+            }
+            return lcRoots;
+        }
+
         private struct DistEntry { public Renderer R; public Vector3 Pos; public float CullDist; public bool WeDisabled; }
         private static readonly List<DistEntry> _distEntries = new List<DistEntry>();
         private static int _distCursor;
@@ -1427,6 +1643,15 @@ namespace Manimal.Icebreaker
         private static void BuildDistanceCuller()
         {
             _distEntries.Clear();
+
+            // container PROP roots: the GetComponentInParent<WorldInteractiveObject>
+            // exclusion below never fires for container MESHES — the LootableContainer
+            // sits on a '_lootable' SIBLING, not an ancestor, so PC blocks culled at
+            // 40m and duffles at 80m ("cant see the loot until im close"). collect the
+            // prop roots and skip everything under them: containers are gameplay, not
+            // decoration.
+            var lcRoots = BuildLootContainerRoots();
+
             foreach (var mr in UnityEngine.Object.FindObjectsOfType<MeshRenderer>())
             {
                 // ONLY map-scene geometry — it's static so cached positions are valid.
@@ -1437,6 +1662,10 @@ namespace Manimal.Icebreaker
                 if (sc == null || !sc.StartsWith("Icebreaker")) continue;
                 if (mr.GetComponentInParent<Player>() != null) continue;
                 if (mr.GetComponentInParent<WorldInteractiveObject>() != null) continue;
+                bool containerProp = false;
+                for (var w = mr.transform; w != null && !containerProp; w = w.parent)
+                    if (lcRoots.Contains(w)) containerProp = true;
+                if (containerProp) continue;
                 var size = mr.bounds.size.magnitude;
                 if (size > 12f) continue; // structural — always rendered
                 float cullDist = size < 0.75f ? 40f
@@ -1962,13 +2191,11 @@ namespace Manimal.Icebreaker
             try { IcebreakerFlares.TryBuild(); }
             catch (Exception e) { Plugin.Log.LogWarning($"[Flares] build failed: {e}"); }
 
-            // perf: clamp EFT's 2.0 LOD bias + enforce the retail shadow split
-            try
-            {
-                QualitySettings.lodBias = Plugin.LodBiasClamp.Value;
-                Plugin.Log.LogWarning($"[Perf] lodBias clamped to {Plugin.LodBiasClamp.Value:F2} (EFT default runs 2.0)");
-                EnforceShadowProxies();
-            }
+            // perf: enforce the retail shadow split. the old lodBias clamp is GONE —
+            // it overrode the player's Object LOD quality setting and halved loose
+            // loot visibility distance (loot LODGroups cull on lodBias); vanilla
+            // settings stay the player's own.
+            try { EnforceShadowProxies(); }
             catch (Exception e) { Plugin.Log.LogWarning($"[Perf] perf pass failed: {e.Message}"); }
 
             // keycard self-heal: bundles built before the 1R proximity-wiring fix ship

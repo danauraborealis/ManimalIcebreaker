@@ -91,7 +91,7 @@ namespace Manimal.Icebreaker
         {
             _anim = null; _chargeProp = null; _handleIntact = null; _handleDropped = null;
             _sndSearched = false; _sndTryOpen = _sndOpenAfter = _sndExplosion = _sndExplosionReaction = null;
-            Planted = false; Exploded = false; Opened = false;
+            Planted = false; Exploded = false; Opened = false; _nextTryOpen = 0f;
             // the planted-charge prop must start hidden regardless of how the scene ships;
             // finding it now (scene just went live) also caches the transform so the
             // show/hide later doesn't depend on GameObject.Find, which can't see inactive GOs
@@ -291,6 +291,10 @@ namespace Manimal.Icebreaker
             }
         }
 
+        // prompt spam played a rattle per press, stacking into a chorus — one try-open
+        // at a time, gated by the clip's own length
+        private static float _nextTryOpen;
+
         internal static void TryOpen()
         {
             var anim = FindAnimator(null);
@@ -301,6 +305,7 @@ namespace Manimal.Icebreaker
             EnsureClips();
             if (Exploded)
             {
+                if (Opened) return; // latch — spam between press and prompt-retire double-played the drop
                 anim.SetBool("IsOpen", true);
                 Opened = true;
                 PlayAt(_sndOpenAfter, anim.transform.position, 35f);
@@ -317,6 +322,8 @@ namespace Manimal.Icebreaker
                 Plugin.Log.LogWarning($"[ChainDoor] animator has no 'IsTryOpen' bool — parameters: {string.Join(", ", Array.ConvertAll(anim.parameters, p => p.name))}");
                 return;
             }
+            if (Time.time < _nextTryOpen) return;
+            _nextTryOpen = Time.time + Mathf.Max(_sndTryOpen != null ? _sndTryOpen.length : 1.5f, 1.5f);
             PlayAt(_sndTryOpen, anim.transform.position, 35f); // the chains rattle
             var go = new GameObject("Icebreaker_ChainDoorPulse");
             var pr = go.AddComponent<PulseRunner>();
@@ -419,7 +426,13 @@ namespace Manimal.Icebreaker
                     var player = Singleton<GameWorld>.Instance?.MainPlayer;
                     // consume-first: if the charge vanished mid-hold (dropped it), no explosion
                     if (player != null && IcebreakerChainDoor.ConsumeCharge(player))
+                    {
                         IcebreakerChainDoor.OnPlanted();
+                        // the shown prompt is CACHED until the aim leaves the collider —
+                        // 'Plant' lingered after planting. clear it; the next raycast
+                        // rebuilds against Planted=true (no action)
+                        try { Owner?.ClearInteractionState(); } catch { }
+                    }
                     else
                         Plugin.Log.LogWarning("[Plant] hold finished but no charge to consume — cancelled");
                 }
@@ -470,7 +483,14 @@ namespace Manimal.Icebreaker
                     Replace(ref __result, new ActionsTypesClass
                     {
                         Name = "Open",
-                        Action = IcebreakerChainDoor.TryOpen,
+                        Action = () =>
+                        {
+                            IcebreakerChainDoor.TryOpen();
+                            // real open latches Opened — retire the cached prompt NOW,
+                            // not when the aim wanders off the collider
+                            if (IcebreakerChainDoor.Opened)
+                                try { owner?.ClearInteractionState(); } catch { }
+                        },
                     });
                 }
                 else if (interactiveSwitch.Id == IcebreakerChainDoor.ExplosionSwitchId)

@@ -24,7 +24,12 @@ public record ModMetadata : AbstractModMetadata
     public override SemanticVersioning.Version Version { get; init; } = new("0.1.0");
     public override SemanticVersioning.Range SptVersion { get; init; } = new("~4.0");
     public override List<string>? Incompatibilities { get; init; }
-    public override Dictionary<string, SemanticVersioning.Range>? ModDependencies { get; init; }
+    public override Dictionary<string, SemanticVersioning.Range>? ModDependencies { get; init; } = new()
+    {
+        // blowtorch item registration (custom parent + item clone) goes through
+        // WTT CommonLib — already a hard dependency of the icebreaker modpack
+        { "com.wtt.commonlib", new SemanticVersioning.Range("~2.0.20") }
+    };
     public override string? Url { get; init; }
     public override bool? IsBundleMod { get; init; } = true; // ships the scene + preset bundles
     public override string License { get; init; } = "MIT";
@@ -103,16 +108,31 @@ public class IcebreakerMod(
         // markers -> gen_loose_loot.py); otherwise an EMPTY set so raids run clean on
         // container loot only.
         var loosePath = SysPath.Combine(modDir, "db", "looseLoot.json");
-        LooseLoot? authoredLoose = null;
+        string? looseJson = null;
         if (System.IO.File.Exists(loosePath))
         {
-            try { authoredLoose = await jsonUtil.DeserializeFromFileAsync<LooseLoot>(loosePath); }
-            catch (Exception e) { logger.Warning($"[Icebreaker] db/looseLoot.json unreadable — running loose-loot-free: {e.Message}"); }
+            try
+            {
+                looseJson = System.IO.File.ReadAllText(loosePath);
+                if (jsonUtil.Deserialize<LooseLoot>(looseJson) is null) looseJson = null;
+            }
+            catch (Exception e)
+            {
+                looseJson = null;
+                logger.Warning($"[Icebreaker] db/looseLoot.json unreadable — running loose-loot-free: {e.Message}");
+            }
         }
-        if (authoredLoose is not null)
+        if (looseJson is not null)
         {
-            suburbs.LooseLoot = new LazyLoad<LooseLoot>(() => authoredLoose);
-            logger.Info("[Icebreaker] authored loose loot loaded");
+            // LazyLoad.Value re-invokes the factory EVERY access, and SPT's generator
+            // MUTATES spawnpoint templates during generation — so the factory must
+            // return a FRESH deserialization each raid (a cached instance degrades:
+            // pools collapse to the previously-chosen item). the fresh copy is also
+            // where per-raid randomisation happens, covering two generator gaps:
+            // it never reads GroupPositions and never rolls forced probabilities.
+            var json = looseJson;
+            suburbs.LooseLoot = new LazyLoad<LooseLoot>(() => RandomiseLooseLoot(jsonUtil.Deserialize<LooseLoot>(json)));
+            logger.Info("[Icebreaker] authored loose loot loaded (per-raid group positions + forced-spawn rolls)");
         }
         else
         {
@@ -182,4 +202,53 @@ public class IcebreakerMod(
         logger.Success("[Manimal-Icebreaker] Suburbs slot rebound to Icebreaker — enabled, icon placed, locale rebranded");
     }
 
+    private static readonly Random LootRng = new();
+
+    // per-raid loose loot post-processing, run on the fresh copy the LazyLoad
+    // factory deserializes each raid:
+    //  1. GROUPS — SPT's LocationLootGenerator never reads GroupPositions (verified
+    //     against source), so a grouped point always spawned at its template
+    //     position. pick one candidate pose per raid ourselves and bake it in.
+    //  2. FORCED — GetForcedDynamicLoot adds every forced point unconditionally
+    //     (probability is never rolled), so sub-100% specific-item spots spawned
+    //     every raid. roll them here.
+    private static LooseLoot? RandomiseLooseLoot(LooseLoot? loose)
+    {
+        if (loose is null) return null;
+
+        var all = (loose.Spawnpoints ?? []).Concat(loose.SpawnpointsForced ?? []);
+        foreach (var sp in all)
+        {
+            var t = sp.Template;
+            if (t?.IsGroupPosition != true) continue;
+            var poses = t.GroupPositions?.ToList();
+            if (poses is null || poses.Count == 0) continue;
+            var pick = poses[LootRng.Next(poses.Count)];
+            t.Position = pick.Position;
+            t.Rotation = pick.Rotation;
+            t.IsGroupPosition = false; // pose is baked now — nothing downstream needs the group
+            t.GroupPositions = [];
+        }
+
+        loose.SpawnpointsForced = (loose.SpawnpointsForced ?? [])
+            .Where(p => (p.Probability ?? 1) >= 1 || LootRng.NextDouble() < p.Probability!.Value)
+            .ToList();
+
+        return loose;
+    }
+}
+
+// registers the usable blowtorch: custom parent node (db/CustomParents) + item clone
+// of the BBQ-S43 labyrinth torch (db/CustomItems) via WTT CommonLib. parents BEFORE
+// items — the item references the parent id. the hands behavior (draw/fire/holster
+// on the custom animator) lives in the icebreaker client plugin.
+[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 2)]
+public class BlowtorchRegistration(WTTServerCommonLib.WTTServerCommonLib wttCommon) : IOnLoad
+{
+    public async Task OnLoad()
+    {
+        var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+        await wttCommon.CustomItemParentService.CreateCustomParents(assembly);
+        await wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly);
+    }
 }

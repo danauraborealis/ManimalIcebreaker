@@ -25,6 +25,12 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="WTT-ClientCommonLib">
+      <HintPath>D:\SPTDev\BepInEx\plugins\WTT-ClientCommonLib\WTT-ClientCommonLib.dll</HintPath>
+    </Reference>
+    <Reference Include="AnimationSystem.Types">
+      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\AnimationSystem.Types.dll</HintPath>
+    </Reference>
     <Reference Include="Comfort">
       <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
     </Reference>
@@ -33,6 +39,12 @@
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TerrainModule">
+      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.TerrainModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.XRModule" Condition="false">
+      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.XRModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>

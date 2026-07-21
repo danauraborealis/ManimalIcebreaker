@@ -11,7 +11,25 @@ from pathlib import Path
 SPOTS = Path(__file__).parent / "icebreaker_loose_spots.json"
 DB_LOCATIONS = Path(r"D:\SPTDev\SPT\SPT_Data\database\locations")
 ITEMS_DB = Path(r"D:\SPTDev\SPT\SPT_Data\database\templates\items.json")
+HANDBOOK = Path(r"D:\SPTDev\SPT\SPT_Data\database\templates\handbook.json")
 STIM_PARENT = "5448f3a64bdc2d60728b456a"  # Stimulator class — every injector derives from it
+
+# ENDGAME PRICE TILT (user call 07-17): this is an endgame map, so within these
+# pools the pricier handbook items should roll more often than their labs-borrowed
+# weights say. weight *= (price / pool median)^ALPHA, clamped — a 10x-median item
+# lands ~2.5x its old weight, a dirt-cheap one drops to ~0.6x. deliberately mild:
+# relative weights, so an uncapped boost would make one LEDX-tier item eat the pool.
+PRICE_TILT_POOLS = {"Tech", "Valuables", "Tools", "Food"}
+TILT_ALPHA = 0.4
+TILT_MIN, TILT_MAX = 0.6, 3.0
+
+# tpl remaps applied to authored overrideTpls AND pool entries — survives Author 12
+# re-exports (the Unity markers keep the vanilla tpl; the swap happens here).
+TPL_REPLACE = {
+    # vanilla BBQ-S43 labyrinth torch -> our USABLE blowtorch clone (quickslot
+    # draw + hold-fire burner; registered by the icebreaker server mod)
+    "67ab3d4b83869afd170fdd3f": "9a449693dff5334122ed7388",
+}
 OUTS = [
     Path(r"C:\Users\peard\Desktop\ManimalIcebreaker\icebreaker-server\db\looseLoot.json"),
     Path(r"D:\SPTDev\SPT\user\mods\ManimalIcebreaker\db\looseLoot.json"),
@@ -65,13 +83,16 @@ EXTRA_ITEMS = {
         ("5d1b2ffd86f77425243e8d17", 10000),  # NIXXOR lens
         ("590a391c86f774385a33c404", 40000),  # Magnet (common junk)
         ("6389c70ca33d8c4cdf4932c6", 8000),   # Electronic components
-        ("590c392f86f77444754deb29", 6000),   # SSD drive
+        # SSD removed — the labs PC pool already stocks it (was double-entered)
     ],
     # the backported hydraulic fluid rides with the tools (toolbox pool: sum
     # ~432k, commons 5-23k; the LOOTABLE variant — 699f0976... is the QuestItem
     # twin, dont swap them)
     "Tools": [
         ("699f09de81a6c812900a77b7", 4300),  # AMG-10 hydraulic fluid (~1%)
+        # user adds 2026-07-18: of the requested wrench/firesteel/cable-cutter/gun-lube
+        # set, only the lube was missing from the labs toolbox base pool
+        ("5bc9b355d4351e6d1509862a", 2000),  # #FireKlean gun lube (~0.5%, firesteel-tier)
     ],
     # medical hardware belongs with the meds (medbag pool: 42 items, sum ~152k,
     # commons 2-15k — weights rescaled to keep the same per-slot percentages)
@@ -125,6 +146,9 @@ EXTRA_ITEMS = {
         ("68f261f6928cd23ddf0471fd", 150),  # Mastichin figurine
         ("68f11224197b61ffe703b16f", 150),  # Hardened PMC figurine
         ("690c70a2a1461a01d605a1bd", 150),  # Elvisvista figurine
+        # backport update5 collectibles (WTT-ContentBackport required)
+        ("69f9d319c906cd16da03b374", 150),  # SheefGG piggy bank (₽71k)
+        ("69f9d547b98cc4120608692a", 150),  # DesmondPilak CD (₽53k)
     ],
     # the ration crate pool has no booze or the canister — add them
     "Food": [
@@ -133,6 +157,7 @@ EXTRA_ITEMS = {
         ("5d1b376e86f774252519444e", 300),    # Fierce Hatchling moonshine (rare)
         ("62a09f32621468534a797acb", 900),    # Pevko Light beer
         ("5d1b33a686f7742523398398", 450),    # Canister with purified water ("superwater", rare)
+        ("69774bb0a247161ff1068335", 1500),   # Can of duck pate (backported 1.0 delicacy)
     ],
 }
 
@@ -155,11 +180,58 @@ INTEL_POOL = [
     ("6389c92d52123d5dd17f8876", 90),    # Advanced Electronic Materials textbook (really rare)
     ("5c12613b86f7743bbe2c3f76", 80),    # Intelligence folder (really rare)
     ("6389c8c5dbfd5e4b95197e6b", 50),    # TerraGroup "Blue Folders" materials (really rare)
+    # backport (WTT-ContentBackport update5)
+    ("69f9d60b5de6674f08060f2a", 90),    # Dunduk floppy disk (₽67k collectible — textbook tier)
 ]
 
 
 def mongo_from(seed):
     return hashlib.md5(seed.encode()).hexdigest()[:24]
+
+
+def apply_price_tilt(pool_dists):
+    prices = {}
+    for e in json.loads(HANDBOOK.read_text(encoding="utf8"))["Items"]:
+        prices[e["Id"]] = e.get("Price") or 0
+    # backported items aren't in the static handbook — WTT-ContentBackport injects
+    # them at server runtime. pull handbookPriceRoubles straight from its configs.
+    backport = Path(r"D:\SPTDev\SPT\user\mods\WTT-ContentBackport\db\CustomItems")
+    found = 0
+    for cfg in backport.rglob("*.json"):
+        try:
+            d = json.loads(cfg.read_text(encoding="utf8"))
+        except Exception:
+            continue
+        if not isinstance(d, dict):
+            continue
+        for tpl, entry in d.items():
+            if isinstance(entry, dict) and isinstance(entry.get("handbookPriceRoubles"), (int, float)):
+                prices[tpl] = entry["handbookPriceRoubles"]
+                found += 1
+    print(f"price tilt: {found} backport item prices merged into handbook")
+    names = None
+    for name in sorted(PRICE_TILT_POOLS):
+        dist = pool_dists.get(name)
+        if not dist:
+            continue
+        priced = [(e, prices.get(e["tpl"], 0)) for e in dist]
+        known = sorted(p for _, p in priced if p > 0)
+        if not known:
+            print(f"{name} pool: no handbook prices found — tilt skipped")
+            continue
+        median = known[len(known) // 2]
+        movers = []
+        for e, p in priced:
+            if p <= 0:
+                continue  # not in handbook (odd backport tpl) — leave the hand weight
+            factor = max(TILT_MIN, min(TILT_MAX, (p / median) ** TILT_ALPHA))
+            old = e["relativeProbability"]
+            e["relativeProbability"] = max(1, int(round(old * factor)))
+            movers.append((factor, p, e["tpl"], old, e["relativeProbability"]))
+        movers.sort(reverse=True)
+        print(f"{name} pool tilt (median {median} rub): "
+              + ", ".join(f"{t[2][:8]} p={t[1]} x{t[0]:.2f} {t[3]}->{t[4]}" for t in movers[:5])
+              + f" ... {sum(1 for t in movers if t[0] > 1)} boosted / {sum(1 for t in movers if t[0] < 1)} reduced")
 
 
 def main():
@@ -181,6 +253,12 @@ def main():
         for extra_tpl, weight in EXTRA_ITEMS.get(name, []):
             dist.append({"tpl": extra_tpl, "relativeProbability": weight})
         pool_dists[name] = dist
+
+    for dist in pool_dists.values():
+        for e in dist:
+            e["tpl"] = TPL_REPLACE.get(e["tpl"], e["tpl"])
+
+    apply_price_tilt(pool_dists)
 
     # Stims pool: built from the item db, not a container — every injector at
     # uniform weight
@@ -246,6 +324,7 @@ def main():
         # forced entries roll independently of the spawnpointCount budget, so
         # probability 1 there means guaranteed every raid
         override = (s.get("overrideTpl") or "").strip()
+        override = TPL_REPLACE.get(override, override)
         if override:
             iid = mongo_from(f"iceforced_{i}_{override}")
             forced.append({

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
+using HarmonyLib;
 using UnityEngine;
 
 namespace Manimal.Icebreaker
@@ -69,7 +70,9 @@ namespace Manimal.Icebreaker
             // BdPhase which the top-up loop already respects mid-flight.
             if (Plugin.CrewBlackDiv.Value && Plugin.EventSpawns.Value)
             {
-                StartCoroutine(PreMakeTriggerSquads());
+                // premake moved BELOW the rogue fill — 18 cached BD profiles were
+                // competing with the rogue fill for the server's bot-gen queue and the
+                // crew landed minutes late, audibly around the player inside the ship
                 SubscribeEventSpawns();
                 StartCoroutine(EngineAdvanceWatch());
             }
@@ -99,19 +102,40 @@ namespace Manimal.Icebreaker
             // knight raid-start force REMOVED: retail base.json says he arrives via the
             // T1 trigger with 2 rogue escorts (SpawnKnightDetail) — never at raid start
 
-            // fill from the wave's ~6 up to the rolled target with OUR spawner — batched
-            // singles, burst activation, right at raid start
-            int guard = 0;
-            while (CountByRole(WildSpawnType.exUsec) < wantRogues && guard++ < 12 && !BdPhase)
+            // fill from the wave's count up to the rolled target with OUR spawner. ALL
+            // batches go in flight AT ONCE — the old sequential loop (await batch, 1.5s,
+            // next) stretched over minutes whenever the server's bot-gen queue was busy,
+            // and the player heard the tail of the fill land around him INSIDE the ship
+            int deficit = wantRogues - haveRogues;
+            if (deficit > 0 && !BdPhase)
             {
-                int batch = Mathf.Min(4, wantRogues - CountByRole(WildSpawnType.exUsec));
-                var zone = zones[UnityEngine.Random.Range(0, zones.Count)];
-                var t = ForceSpawnBatch(WildSpawnType.exUsec, zone, batch);
-                while (!t.IsCompleted) yield return null;
-                yield return new WaitForSeconds(1.5f);
+                var shuffled = zones.OrderBy(_ => UnityEngine.Random.value).ToList();
+                var fillTasks = new List<Task>();
+                int zi = 0;
+                for (int left = deficit; left > 0; )
+                {
+                    int batch = Mathf.Min(4, left);
+                    left -= batch;
+                    fillTasks.Add(ForceSpawnBatch(WildSpawnType.exUsec, shuffled[zi++ % shuffled.Count], batch));
+                }
+                var allFill = Task.WhenAll(fillTasks);
+                while (!allFill.IsCompleted) yield return null;
+
+                // one top-up pass for naked-profile skips
+                int shortfall = wantRogues - CountByRole(WildSpawnType.exUsec);
+                if (shortfall > 0 && !BdPhase)
+                {
+                    var t2 = ForceSpawnBatch(WildSpawnType.exUsec, shuffled[zi % shuffled.Count], shortfall);
+                    while (!t2.IsCompleted) yield return null;
+                }
             }
 
             Plugin.Log.LogWarning($"[Crew] done: {CountByRole(WildSpawnType.exUsec)} rogues, knight={CountByRole(WildSpawnType.bossKnight) > 0}");
+
+            // NOW premake the trigger squads — after the rogues are on deck, so the
+            // cache build has the bot-gen queue to itself
+            if (Plugin.CrewBlackDiv.Value && Plugin.EventSpawns.Value)
+                StartCoroutine(PreMakeTriggerSquads());
 
             // event-spawn mode (default): the resurrected retail trigger layer raises the
             // events (hides0/stern0/wedges1 + group-size ladder) — but delivery is OUR
@@ -146,10 +170,11 @@ namespace Manimal.Icebreaker
             _unsubEvents?.Invoke();
         }
 
-        // BD AI modifications (temperament rolls, mind rewires, hold/release staging,
-        // forced rush) all REMOVED per user call 07-11 — the layered brain pokes kept
-        // fighting each other ("bugging out"). black division runs vanilla brains now;
-        // we only control WHERE and WHEN they spawn.
+        // BD AI modifications (temperament rolls, mind rewires, forced rush) REMOVED per
+        // user call 07-11 — the layered brain pokes kept fighting each other ("bugging
+        // out"). black division runs vanilla brains; we control WHERE and WHEN they
+        // spawn, plus ONE staging behavior brought back 07-17: the engine squad's
+        // hold-until-trigger (patrol pause only, no brain pokes).
 
         // cultist-style pop-out: IBotGame.BotDespawn = BotDied bookkeeping + full AI
         // unregister + ReturnToPool on the GO. no death, no ragdoll, no loot. trims the
@@ -313,10 +338,12 @@ namespace Manimal.Icebreaker
                 ? eventId[eventId.Length - 1] - '0' : 0;
             if (eventId.StartsWith("hides"))
             {
-                // vanilla brains from spawn (hold/release staging removed with the rest
-                // of the BD AI pokes) — BSG's Hide Zone trigger spawns them at the
-                // lower-deck hide markers and the bots take it from there
+                // vanilla brains, but with the hold/release STAGING back (user call 07-17):
+                // the squad pauses at the lower-deck hide markers and only moves out once
+                // the player passes the engine-room trigger — spawn staging only, no
+                // temperament/mind pokes (those stay removed)
                 StartCoroutine(SpawnSquad("engine room", new[] { "BotZoneEngineHide" }, 4 + extras, null));
+                StartCoroutine(HoldEngineSquad(4 + extras));
             }
             else if (eventId.StartsWith("stern"))
                 StartCoroutine(SpawnSternDeployment(extras));
@@ -499,6 +526,120 @@ namespace Manimal.Icebreaker
             Plugin.Log.LogWarning($"[Crew] engine room black division deployed ({EngineSquadSize}x at BotZoneEngineHide)");
         }
 
+        // ENGINE SQUAD HOLD — the hides squad spawns at the cutscene but retail's ambush
+        // beat is that they're WAITING when you descend. pause their patrol layer at the
+        // hide markers and release when the player passes the engine-room trigger. spawn
+        // staging only: no aggro/mind pokes, combat still overrides the hold by design.
+        private bool _holdCombatLogged;
+
+        private IEnumerator HoldEngineSquad(int expected)
+        {
+            // release box = the authored engine trigger; fallback = glowstick box (same
+            // as EngineRoomWatch). the authored box floats at chest height (y 10.3-12.4,
+            // floor ~8.5) — fine for a physics trigger vs the player CAPSULE, but we test
+            // Player.Position which is the FEET: pad vertically so a floor-level point
+            // registers.
+            Bounds bounds;
+            var trigGo = GameObject.Find(EngineTrigger);
+            var trigCol = trigGo != null ? (trigGo.GetComponent<Collider>() ?? trigGo.GetComponentInChildren<Collider>(true)) : null;
+            if (trigCol != null) bounds = trigCol.bounds;
+            else
+            {
+                Vector3 center = EngineLandmarkFallback;
+                var lm = GameObject.Find(EngineLandmark);
+                if (lm != null) center = lm.transform.position;
+                bounds = new Bounds(center, new Vector3(12f, 8f, 12f));
+            }
+            bounds.Expand(new Vector3(0f, 5f, 0f));
+            Plugin.Log.LogWarning($"[Crew] engine squad hold armed — release box {bounds.center} size {bounds.size} ({(trigCol != null ? "bundle trigger" : "glowstick fallback")})");
+
+            var hideZone = UnityEngine.Object.FindObjectsOfType<BotZone>()
+                .FirstOrDefault(z => z.name == "BotZoneEngineHide" && z.SpawnPointMarkers != null && z.SpawnPointMarkers.Count > 0);
+            var anchor = hideZone != null ? hideZone.SpawnPointMarkers[0].transform.position : EngineLandmarkFallback;
+
+            var held = new HashSet<BotOwner>();
+            var world = Singleton<GameWorld>.Instance;
+            float giveUp = Time.time + 900f; // failsafe: never hold a squad forever
+            float nextHeavy = 0f;
+            while (Time.time < giveUp)
+            {
+                // heavy work (bot scan + re-pause) at 0.5s cadence; the box check runs
+                // per frame below
+                if (Time.time < nextHeavy) { var pp = world?.MainPlayer; if (pp != null && held.Count > 0 && bounds.Contains(pp.Position)) break; yield return null; continue; }
+                nextHeavy = Time.time + 0.5f;
+                if (held.Count < expected)
+                    foreach (var b in UnityEngine.Object.FindObjectsOfType<BotOwner>())
+                        if (b != null && b.Profile?.Info?.Settings?.Role == (WildSpawnType)BdAssault
+                            && (b.Position - anchor).sqrMagnitude < 30f * 30f && held.Add(b))
+                            Plugin.Log.LogWarning($"[Crew] engine squad member held ({held.Count}/{expected})");
+
+                // RE-pause every poll: activation and goal changes silently reset patrol
+                // status. pause only stops the patrol layer — walk in on them early and
+                // combat still runs. NOTE that means gunfire/noise alerts CAN move them
+                // (search/combat layers aren't gated) — log it once so a "spread out"
+                // sighting can be told apart from a broken hold.
+                foreach (var b in held)
+                {
+                    if (b == null || b.PatrollingData == null || b.GetPlayer == null
+                        || b.GetPlayer.HealthController == null || !b.GetPlayer.HealthController.IsAlive) continue;
+                    b.PatrollingData.Pause();
+                    if (!_holdCombatLogged)
+                    {
+                        try
+                        {
+                            if (b.Memory != null && (b.Memory.GoalEnemy != null || b.Memory.IsUnderFire))
+                            {
+                                _holdCombatLogged = true;
+                                Plugin.Log.LogWarning("[Crew] held engine squad ENGAGED early (enemy/underfire) — combat overrides the hold by design, expect repositioning");
+                            }
+                        }
+                        catch { _holdCombatLogged = true; } // Memory API drift — don't spam retries
+                    }
+                }
+
+                var p = world?.MainPlayer;
+                if (p != null && held.Count > 0 && bounds.Contains(p.Position)) break;
+                // PER-FRAME, not 0.5s: the authored box is only 2.4m deep — a sprinting
+                // player crosses it in ~0.35s and slipped between polls
+                yield return null;
+            }
+
+            // Unpause alone restores PrevStatus — which was captured at the FIRST Pause,
+            // before the patrol ever reached 'go': the squad released into a dead 'stay'
+            // with no target point and never moved. force a fresh cycle: go + new point.
+            int released = 0, deadOrGone = 0;
+            foreach (var b in held)
+            {
+                if (b == null || b.PatrollingData == null
+                    || b.GetPlayer == null || b.GetPlayer.HealthController == null
+                    || !b.GetPlayer.HealthController.IsAlive)
+                {
+                    deadOrGone++;
+                    continue;
+                }
+                try
+                {
+                    // phantom combat is the emergence-killer: they HEAR the descent
+                    // gunfight while paused (Pause only stops the patrol layer), flip to
+                    // combat/search, and a combat brain ignores patrol commands. clearing
+                    // the remembered enemy hands control back to patrol; REAL contact
+                    // re-acquires through vision instantly, so no combat ability is lost.
+                    if (b.Memory != null && b.Memory.GoalEnemy != null) b.Memory.GoalEnemy = null;
+                    b.PatrollingData.Unpause();
+                    b.PatrollingData.RefreshStatus();            // status = go, unconditionally
+                    b.PatrollingData.FindNextPoint(true, false); // pick a point + set course
+                    b.Sprint(true, true); // deploy at a run — walk-pace emergence reads as "late"
+                    released++;
+                }
+                catch (Exception e)
+                {
+                    Plugin.Log.LogWarning($"[Crew] release failed on '{b.name}': {e.Message}");
+                }
+            }
+            Plugin.Log.LogWarning($"[Crew] ENGINE SQUAD RELEASED — {released} black division moving out"
+                + (deadOrGone > 0 ? $" ({deadOrGone} of the held were dead/despawned by release time)" : ""));
+        }
+
         // BLACK DIVISION — trigger-gated (retail: they arrive after the start cutscene).
         // watch the player against the Icebreaker_StartCutsceneTrigger volume; on first
         // overlap, force-spawn the squads. type ids from the BlackDiv mod's prepatch:
@@ -508,8 +649,9 @@ namespace Manimal.Icebreaker
             "BotZoneSternTop", "BotZoneOutside_t3", "BotZoneStern", "BotZoneBack",
         };
         // BdLead (848420) intentionally unused — its server profile always generates naked
-        private const int BdAssault = 848421;
-        private const int BdWedge = 848424; // bossWedge — the black division boss
+        internal const int BdLead = 848420;
+        internal const int BdAssault = 848421;
+        internal const int BdWedge = 848424; // bossWedge — the black division boss
         private static readonly string[] WedgeZones = { "BotZoneRoomsThird", "BotZoneRoomsThirdKitchen" };
 
         private IEnumerator BlackDivisionWatch()
@@ -657,13 +799,26 @@ namespace Manimal.Icebreaker
 
         // pick N spawn points, preferring ones the player won't watch materialize:
         // anything beyond 25m of the player first (shuffled), close points only as a
-        // last resort. wraps if the zone has fewer markers than N.
-        private static List<EFT.Game.Spawning.ISpawnPoint> PickPoints(BotZone zone, int count)
+        // last resort. minPlayerDist > 0 makes the exclusion HARD (rogue fill) — a
+        // soft preference is useless once the player stands among the markers.
+        // wraps if the zone has fewer markers than N.
+        private static List<EFT.Game.Spawning.ISpawnPoint> PickPoints(BotZone zone, int count, float minPlayerDist = 0f)
         {
             var pts = zone.SpawnPoints;
             if (pts == null || pts.Length == 0) return null;
             var pool = new List<EFT.Game.Spawning.ISpawnPoint>();
             foreach (var p in pts) if (p != null) pool.Add(p);
+            if (minPlayerDist > 0f)
+            {
+                var pl = Singleton<GameWorld>.Instance?.MainPlayer;
+                if (pl != null)
+                {
+                    var farOnly = pool.FindAll(p => (p.Position - pl.Position).sqrMagnitude > minPlayerDist * minPlayerDist);
+                    if (farOnly.Count > 0) pool = farOnly;
+                    // zone entirely inside the bubble: keep the pool (spawning beats not
+                    // spawning) — the soft far-sort below still does its best
+                }
+            }
             // EngineHide spans two decks and the upper one (y~15.7+) has NO bot-walkable
             // route down to the engine room (ladder only — bots cant ladder): a squad
             // seeded up there jitters in place against an unreachable rush target
@@ -705,12 +860,15 @@ namespace Manimal.Icebreaker
                     while (ready.Count < count && pq.Count > 0)
                         ready.Add(pq.Dequeue());
                 int fromCache = ready.Count;
-                for (int i = ready.Count; i < count; i++)
+                int need = count - ready.Count;
+                if (need > 0)
                 {
-                    var d = await CreateData(role);
-                    if (d == null) continue; // naked twice — skip this bot, keep the squad
-                    await Prewarm(d);
-                    ready.Add(d);
+                    // ALL profile requests concurrently — sequential awaits made a
+                    // 4-bot batch cost 4x the server round-trip (plus 3s naked retries)
+                    var creates = new List<Task<BotCreationDataClass>>(need);
+                    for (int i = 0; i < need; i++) creates.Add(CreateAndPrewarm(role));
+                    foreach (var d in await Task.WhenAll(creates))
+                        if (d != null) ready.Add(d); // naked twice — skip that bot, keep the squad
                 }
                 // the cutscene ends the crew phase MID-FLIGHT too: a rogue batch that was
                 // still creating profiles when the trigger hit used to activate afterwards
@@ -724,7 +882,10 @@ namespace Manimal.Icebreaker
                 // ranking the same far-from-player corner first, piling the whole squad
                 // behind one door — EngineHide alone has 10 markers across two floors
                 // and both sides of the room, so spread is free when picked as a set
-                var pts = PickPoints(zone, ready.Count);
+                // rogues get a HARD 35m player-exclusion (the old far-sort was only a
+                // preference — useless once the player stands among the markers); the
+                // engine/stern trigger squads keep close spawns by design
+                var pts = PickPoints(zone, ready.Count, role == WildSpawnType.exUsec ? 35f : 0f);
                 for (int i = 0; i < ready.Count; i++)
                 {
                     var pick = pts != null ? new List<EFT.Game.Spawning.ISpawnPoint> { pts[i % pts.Count] } : null;
@@ -739,6 +900,15 @@ namespace Manimal.Icebreaker
         // (30-100ms/bot, worst on the custom blackdiv roles which are never in the raid
         // pool). this is BSG's own pre-pool call — async, spread by the job system — so
         // awaiting it first means the spawn instantiates against warm pools.
+        // create + prewarm as one awaitable unit so batches can run them all in parallel
+        private async Task<BotCreationDataClass> CreateAndPrewarm(WildSpawnType role)
+        {
+            var d = await CreateData(role);
+            if (d == null) return null;
+            await Prewarm(d);
+            return d;
+        }
+
         private static async Task Prewarm(BotCreationDataClass data)
         {
             try
@@ -818,6 +988,78 @@ namespace Manimal.Icebreaker
                 // name the null line (spawner internals vs profile request vs zone data)
                 Plugin.Log.LogWarning($"[Crew] ForceSpawn {role} failed: {e}");
             }
+        }
+    }
+
+    // HOSTILITY REWRITE (user calls 07-17) — two map-specific rules the vanilla matrix
+    // gets wrong here:
+    //  1) rogues are the ship's crew defending it: the human player is ALWAYS the enemy.
+    //     vanilla exUsec neutrality (BotsGroup.method_1: usec-kill-counter / mixed-group
+    //     checks) means a clean-record usec walks the deck unchallenged.
+    //  2) black division and the rogues are on the same side (BSG runs them friendly) —
+    //     without this the held engine squad shreds the engine-room crew before the
+    //     player ever gets below deck (last raid: ENGAGED early + empty engine room).
+    internal static class BdRogueRelations
+    {
+        internal static bool IsBd(WildSpawnType r)
+        {
+            int i = (int)r;
+            return i == IcebreakerCrew.BdLead || i == IcebreakerCrew.BdAssault || i == IcebreakerCrew.BdWedge;
+        }
+
+        internal static bool IsFriendlyPair(WildSpawnType a, WildSpawnType b)
+            => (IsBd(a) && b == WildSpawnType.exUsec) || (a == WildSpawnType.exUsec && IsBd(b));
+    }
+
+    [HarmonyPatch(typeof(BotsGroup), nameof(BotsGroup.IsPlayerEnemy))]
+    internal static class Patch_BotsGroupInitialHostility
+    {
+        [HarmonyPostfix]
+        private static void Postfix(BotsGroup __instance, IPlayer player, ref bool __result)
+        {
+            try
+            {
+                var self = __instance.InitialBotType;
+                bool selfRogue = self == WildSpawnType.exUsec;
+                if (!selfRogue && !BdRogueRelations.IsBd(self)) return;
+                if (player.AIData != null && player.AIData.IsAI)
+                {
+                    var other = player.AIData.BotOwner?.Profile?.Info?.Settings?.Role;
+                    if (other != null && BdRogueRelations.IsFriendlyPair(self, other.Value))
+                        __result = false;
+                }
+                else if (selfRogue)
+                {
+                    __result = true; // human player — no usec-neutrality on this map
+                }
+            }
+            catch { } // hostility fallback = vanilla verdict, never break group creation
+        }
+    }
+
+    // the initial matrix isn't the only entry: provocation paths (friendly fire, revenge
+    // logic) go through CheckAndAddEnemy — skip it entirely for the BD/rogue pair so one
+    // stray hit can't escalate into a ship-wide civil war.
+    [HarmonyPatch(typeof(BotsGroup), nameof(BotsGroup.CheckAndAddEnemy))]
+    internal static class Patch_BotsGroupProvokedHostility
+    {
+        [HarmonyPrefix]
+        private static bool Prefix(BotsGroup __instance, IPlayer player, ref bool __result)
+        {
+            try
+            {
+                if (player.AIData != null && player.AIData.IsAI)
+                {
+                    var other = player.AIData.BotOwner?.Profile?.Info?.Settings?.Role;
+                    if (other != null && BdRogueRelations.IsFriendlyPair(__instance.InitialBotType, other.Value))
+                    {
+                        __result = false;
+                        return false;
+                    }
+                }
+            }
+            catch { }
+            return true;
         }
     }
 }

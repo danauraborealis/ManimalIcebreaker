@@ -13,7 +13,7 @@ OUT = r"C:/Users/peard/Desktop/IcebreakerBundleOut/icebreaker.scenespreset.bundl
 BUNDLE_KEY = "assets/content/locations/icebreaker/icebreaker_scenes.bundle"
 KEEP = ["Icebreaker_Scripts", "Icebreaker_Outdoor", "Icebreaker_Indoor_01", "Icebreaker_Indoor_02",
         "Icebreaker_Indoor_03", "Icebreaker_Lights", "Icebreaker_Design_Main", "Icebreaker_Design_Stuff",
-        "Icebreaker_AI", "Icebreaker_Sound"]
+        "Icebreaker_AI", "Icebreaker_Sound", "Icebreaker_Culling"]
 
 env = UnityPy.load(SRC)
 patched = False

@@ -154,12 +154,21 @@ namespace Manimal.Icebreaker.Keypad
                 var code = groupCode[t.Group];
                 var go = panel.gameObject;
                 int layer = LayerMask.NameToLayer(InteractiveLayerName);
-                if (layer >= 0) SetLayerRecursive(go, layer);
                 if (go.GetComponent<Collider>() == null)
                 {
                     var box = go.AddComponent<BoxCollider>();
                     box.isTrigger = true;
                     box.size = KeypadConstants.InteractionBoxSize; // panel-sized fallback; a mesh COLLIDER child usually exists
+                }
+                // Interactive layer ONLY on collider-bearing objects (what the aim
+                // raycast needs) — the old recursive set moved the MESH children onto
+                // Interactive too, which is not how EFT layers props and left panels
+                // invisible-but-usable for some render/cull paths
+                if (layer >= 0)
+                {
+                    go.layer = layer;
+                    foreach (var col in go.GetComponentsInChildren<Collider>(true))
+                        col.gameObject.layer = layer;
                 }
                 GraftAudioChildren(keypadPrefab, go.transform);
                 var keypad = go.GetComponent<Keypad>() ?? go.AddComponent<Keypad>();
@@ -287,11 +296,5 @@ namespace Manimal.Icebreaker.Keypad
             t is JArray a && a.Count >= 3
                 ? new Vector3(a.Value<float>(0), a.Value<float>(1), a.Value<float>(2))
                 : Vector3.zero;
-
-        private static void SetLayerRecursive(GameObject go, int layer)
-        {
-            go.layer = layer;
-            foreach (Transform c in go.transform) SetLayerRecursive(c.gameObject, layer);
-        }
     }
 }

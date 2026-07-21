@@ -1,0 +1,27 @@
+{
+ "Lighten": 0,
+ "FromLevelSettings": 1,
+ "ScatteringSlicesComputeShader": "resources.assets#3263",
+ "ScatteringMBOITComputeShader": "resources.assets#3246",
+ "ScatteringMBOITRCPComputeShader": "resources.assets#3237",
+ "ScatteringMBOITFinalPassComputeShader": "resources.assets#3259",
+ "ScatterColorMultiplier": {
+  "r": 1.0,
+  "g": 1.0,
+  "b": 1.0,
+  "a": 0.47049999237060547
+ },
+ "ScatterGreyscale": 1.0,
+ "ScatterDensityMultiplier": 3.490000009536743,
+ "ScatterDensityPower": 2.369999885559082,
+ "ScatterDensityBias": 0.5899999737739563,
+ "HeightFalloffFactor": 1.0,
+ "SOFT_SCALE": 508.6199951171875,
+ "SOFT_CONTRAST_POWER": 1.0,
+ "DitheringTexture": "resources.assets#409",
+ "GlobalDensity": 0.0010000000474974513,
+ "HeightFalloff": 0.0010000000474974513,
+ "SunrizeGlow": 0.949999988079071,
+ "MBOITDitherScale": 1.0,
+ "ZeroLevel": 0.0
+}

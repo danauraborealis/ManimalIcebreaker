@@ -155,6 +155,117 @@ namespace Manimal.Icebreaker
         // hour the recovered Date held). StormStartedEvent escalates the winter state to
         // SetupWinterStorm — BSG's actual blizzard.
         private static bool _stormRaised;
+        private static bool _mboitChecked;
+
+        // 0.16.9 never uses MBOIT so no camera prefab carries the component — but ALL
+        // its parts ship in resources.assets (the 4 compute shaders under their real
+        // spaced names + the bayer_matrix dither). construct it with retail level525's
+        // serialized settings (analysis/icebreaker_mboit_component.json).
+        internal static MBOIT_Scattering BuildMboit(Camera cam)
+        {
+            var cs = Resources.FindObjectsOfTypeAll<ComputeShader>();
+            ComputeShader Find(string n)
+            {
+                foreach (var c in cs) if (c != null && c.name == n) return c;
+                return null;
+            }
+            var slices = Find("Scattering Slices");
+            var moments = Find("Scattering MBOIT Moments");
+            var momentsRcp = Find("Scattering MBOIT MomentsRcp");
+            var finalPass = Find("Scattering MBOIT FinalPass");
+            if (slices == null || moments == null || momentsRcp == null || finalPass == null)
+            {
+                Plugin.Log.LogWarning($"[Weather] MBOIT computes missing (slices={slices != null} moments={moments != null} rcp={momentsRcp != null} final={finalPass != null})");
+                return null;
+            }
+            Texture2D dither = null;
+            foreach (var t in Resources.FindObjectsOfTypeAll<Texture2D>())
+                if (t != null && t.name == "bayer_matrix") { dither = t; break; }
+
+            var mb = cam.gameObject.AddComponent<MBOIT_Scattering>();
+            mb.ScatteringSlicesComputeShader = slices;
+            mb.ScatteringMBOITComputeShader = moments;
+            mb.ScatteringMBOITRCPComputeShader = momentsRcp;
+            mb.ScatteringMBOITFinalPassComputeShader = finalPass;
+            if (dither != null) mb.DitheringTexture = dither;
+            // retail 1.0 RUNTIME values — straight from the 1.0 WeatherController.Awake
+            // decompile (the il2cpp WIP dump), not the optic-camera copy we used before
+            mb.Lighten = false;
+            mb.FromLevelSettings = true;
+            mb.ScatterColorMultiplier = new Color(1f, 1f, 1f, 0.4705f);
+            mb.ScatterGreyscale = 1f;
+            mb.ScatterDensityMultiplier = 2.15f;
+            mb.ScatterDensityPower = 3.19f;
+            mb.ScatterDensityBias = 0.56f;
+            mb.HeightFalloffFactor = 1f;
+            mb.SOFT_SCALE = 1627f;
+            mb.SOFT_CONTRAST_POWER = 1f;
+            mb.GlobalDensity = 0.001f;
+            mb.HeightFalloff = 0.001f;
+            mb.SunrizeGlow = 0.95f;
+            mb.MBOITDitherScale = 1f;
+            mb.ZeroLevel = 0f;
+            mb.SlicesDistributionExponent = 1.27f;
+            // SlicesFarDistance: retail 0.006 vs 0.16.9 default 0.02 (3.3x) — the froxel
+            // slice distribution knob, prime suspect for the hard fog wall. private field.
+            AccessTools.Field(typeof(MBOIT_Scattering), "float_0")?.SetValue(mb, 0.006f);
+
+            // the Scattering Slices compute reads the _StencilShadow global that BSG's
+            // AmbientLight command buffer normally provides per-frame — that system isnt
+            // running on the backport, the global is unbound, and unity refuses the whole
+            // kernel dispatch ("Property (_StencilShadow) ... is not set" = zero fog
+            // output). bind a 1x1 no-shadow texture (AmbientLight clears its RT to
+            // 0,0,0,0) so the kernel runs unshadowed.
+            var noShadow = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+            noShadow.SetPixel(0, 0, new Color(0f, 0f, 0f, 0f));
+            noShadow.Apply();
+            Shader.SetGlobalTexture("_StencilShadow", noShadow);
+
+            // same story, next dependency: the slices compute wants the CameraParameters
+            // buffer (near/far/frustum corner rays) that WindowsManager's glass system
+            // uploads per camera — also not running here. build it ourselves with
+            // WindowsManager.method_7's exact layout and refresh per frame (fov changes
+            // when aiming).
+            if (_camParamsBuf != null) { try { _camParamsBuf.Release(); } catch { } }
+            _camParamsBuf = new ComputeBuffer(20, sizeof(float));
+            _camParamsCam = cam;
+            TickCameraParams();
+            Shader.SetGlobalBuffer("CameraParameters", _camParamsBuf);
+            Plugin.Log.LogWarning("[Weather] MBOIT_Scattering CONSTRUCTED — retail 1.0 values + _StencilShadow & CameraParameters globals bound (compute can dispatch)");
+            return mb;
+        }
+        private static ComputeBuffer _camParamsBuf;
+        private static Camera _camParamsCam;
+        private static readonly float[] _camParams = new float[20];
+
+        // WindowsManager.method_7 reproduction — the CameraParameters layout the MBOIT
+        // slices compute reads: [near, far, far-near, backgroundSplit(30), then 4 far-
+        // plane corner rays as float4 (BL, BR? — matching bsg's corner order exactly)]
+        internal static void TickCameraParams()
+        {
+            var cam = _camParamsCam;
+            if (cam == null || _camParamsBuf == null) return;
+            float far = cam.farClipPlane;
+            _camParams[0] = cam.nearClipPlane;
+            _camParams[1] = far;
+            _camParams[2] = far - cam.nearClipPlane;
+            _camParams[3] = 30f; // WindowsManager.BackgroundSplitDistance default
+            float half = cam.fieldOfView * 0.5f * Mathf.Deg2Rad;
+            var fwd = new Vector3(0f, 0f, -1f) * far;
+            var right = new Vector3(1f, 0f, 0f) * (Mathf.Tan(half) * cam.aspect * far);
+            var up = new Vector3(0f, 1f, 0f) * (Mathf.Tan(half) * far);
+            Corner(4, fwd - right + up);
+            Corner(8, fwd + right + up);
+            Corner(12, fwd + right - up);
+            Corner(16, fwd - right - up);
+            _camParamsBuf.SetData(_camParams);
+        }
+
+        private static void Corner(int i, Vector3 v)
+        {
+            _camParams[i] = v.x; _camParams[i + 1] = v.y; _camParams[i + 2] = v.z; _camParams[i + 3] = 1f;
+        }
+
         private static int _blizzardTicks;
         private static bool _snowShaderFixed;
         private static int _snowRebindTries;
@@ -174,25 +285,75 @@ namespace Manimal.Icebreaker
         {
             var wc = EFT.Weather.WeatherController.Instance;
             if (wc == null || wc.WeatherDebug == null) return;
+            IcebreakerSky.TryApply(); // retail atmosphere — one-shot once the sky singleton exists
             var wd = wc.WeatherDebug;
 
-            // the sidecar-filled MBOIT remap objects are drifted junk (LayerA field warnings)
-            // but NON-NULL — that armed tod_Scattering.MBOIT, and method_4's MBOIT branch
-            // derefs the never-created GameDateTime: 3173 NREs/raid, the whole weather tick
-            // dead before fog/rain ever got pushed (and the scattering pass rendered with
-            // garbage density = the pitch-black raid). null them; plain fog path suffices.
-            // EVERY tick, not one-shot: method_1 re-arms MBOIT on camera changes, and last
-            // raid FindObjectOfType missed the still-inactive camera so MBOIT stayed true —
-            // method_4 kept dying (3684x) on the branch, just at the now-null remap instead.
-            // dead method_4 = no TOD hour sync = night sun = the pitch-black-with-speculars
-            // raid. read wc's own tod_Scattering_0 field — immune to inactive GOs.
-            wc.MBOITFogRemapDataV2 = null;
-            wc.MBOITFogRemapData = null;
+            // MBOIT VOLUMETRIC FOG (the retail-1.0 haze). history: the sidecar-filled remap
+            // objects were drifted junk (non-null) which armed tod_Scattering.MBOIT while
+            // method_4's branch deref'd a never-created GameDateTime — 3k NREs/raid, dead
+            // weather tick, the pitch-black raid. the pieces have moved since: SetDebugDate
+            // (below, every blizzard tick) CREATES that GameDateTime, and the branch's only
+            // other requirement is a valid FogRemapDataV2 — whose default-constructed record
+            // ships complete identity curves. 0.16.9 never uses this path only because no
+            // remap ASSETS exist in its files; the code+shaders are all present.
             var scat = AccessTools.Field(typeof(EFT.Weather.WeatherController), "tod_Scattering_0")?.GetValue(wc) as TOD_Scattering;
-            if (scat != null && scat.MBOIT)
+            bool dateReady = false;
+            try { dateReady = GClass4.Instance?.CurrentTime?.GameDateTime != null; } catch { }
+            if (false) // MBOIT dead end — no WindowsManager on this map; VolumetricFog&Mist2 carries the fog now
             {
-                scat.MBOIT = false;
-                Plugin.Log.LogWarning("[Weather] MBOIT disarmed on wc.tod_Scattering_0 (method_4 branch was still crashing every frame)");
+                wc.MBOITFogRemapData = null; // v1 stays dead — only junk ever lived there
+                if (wc.MBOITFogRemapDataV2 == null || wc.MBOITFogRemapDataV2.name != "manimal_fog_remap")
+                {
+                    var remap = ScriptableObject.CreateInstance<EFT.Weather.FogRemapDataV2>();
+                    remap.name = "manimal_fog_remap";
+                    // the class's default record is authoring scaffolding (density ramps
+                    // evaluated at tiny fog values ≈ invisible) — load retail 1.0's tuned
+                    // curves instead
+                    remap.Record = RetailFogRemap.Build();
+                    wc.MBOITFogRemapDataV2 = remap;
+                    Plugin.Log.LogWarning("[Weather] VOLUMETRIC fog armed — retail 1.0 remap record + MBOIT scattering");
+                }
+                if (scat != null && !scat.MBOIT) scat.MBOIT = true;
+
+                // the tuned params only reach the shader through the camera's
+                // MBOIT_Scattering image effect (method_9 target) — verify it's bound
+                if (!_mboitChecked && scat != null)
+                {
+                    _mboitChecked = true;
+                    var mb = AccessTools.Field(typeof(EFT.Weather.WeatherController), "mboit_Scattering_0")?.GetValue(wc) as MBOIT_Scattering;
+                    if (mb == null)
+                    {
+                        var cam = scat.GetComponent<Camera>();
+                        mb = cam != null ? cam.GetComponent<MBOIT_Scattering>() : null;
+                        if (mb == null && cam != null)
+                            mb = BuildMboit(cam); // 0.16.9 ships no camera prefab with it — construct from parts
+                        if (mb != null)
+                        {
+                            // TOD_Scattering one-shot-cached GetComponent<MBOIT_Scattering>()
+                            // long before we added it — its composite reads a stale null and
+                            // the volumetric output never reaches the screen. refresh it.
+                            AccessTools.Field(typeof(TOD_Scattering), "mboit_Scattering_0")?.SetValue(scat, mb);
+                            mb.Sky = MonoBehaviourSingleton<TOD_Sky>.Instance;
+                            AccessTools.Field(typeof(EFT.Weather.WeatherController), "mboit_Scattering_0")?.SetValue(wc, mb);
+                            Plugin.Log.LogWarning("[Weather] MBOIT_Scattering bound to wc — volumetric params flowing");
+                        }
+                        else
+                            Plugin.Log.LogWarning("[Weather] MBOIT_Scattering unavailable — volumetric params cant flow (prefab-default rendering)");
+                    }
+                    else
+                        Plugin.Log.LogWarning($"[Weather] MBOIT_Scattering bound ok (enabled={mb.enabled})");
+                }
+            }
+            else
+            {
+                // fallback = the proven plain-fog path
+                wc.MBOITFogRemapDataV2 = null;
+                wc.MBOITFogRemapData = null;
+                if (scat != null && scat.MBOIT)
+                {
+                    scat.MBOIT = false;
+                    Plugin.Log.LogWarning("[Weather] MBOIT disarmed (VolumetricFog off or date not ready)");
+                }
             }
             // FOG, decoupled from the sky: TOD_Scattering fogs toward the night sky's
             // scattering color (= black -> eats the lamps). GlobalFog is the same
@@ -569,6 +730,35 @@ namespace Manimal.Icebreaker
                 catch (Exception e) { Plugin.Log.LogWarning($"[Weather] GlobalFog setup threw: {e.Message}"); }
             }
 
+            // MBOIT renders THROUGH the TOD_Scattering image-effect pass — the volumetric
+            // can only show if the component itself runs. when armed, it carries the fog
+            // and GlobalFog stands down; otherwise the proven plain-fog split below.
+            bool volumetric = false; // MBOIT retired — see IcebreakerVolFog
+            if (volumetric)
+            {
+                if (_globalFog != null && _globalFog.enabled) _globalFog.enabled = false;
+                // the passes are EXCLUSIVE (TOD_Scattering.method_2): MBOIT on means the
+                // classic component turns itself OFF and MBOIT_Scattering renders instead.
+                // we used to force scat.enabled=true here — the classic veil painted over
+                // the volumetric every frame and no mboit param could ever show.
+                if (scat.enabled) scat.enabled = false;
+                var vmb = AccessTools.Field(typeof(EFT.Weather.WeatherController), "mboit_Scattering_0")?.GetValue(EFT.Weather.WeatherController.Instance) as MBOIT_Scattering;
+                if (vmb != null && !vmb.enabled)
+                {
+                    vmb.enabled = true;
+                    Plugin.Log.LogWarning("[Weather] MBOIT_Scattering pass ENABLED, classic scattering standing down (exclusive handoff)");
+                }
+                // night: the volumetric media is lit by the sky — our rebuilt night sky is
+                // near-black, so lift it with the same FogBrightness lever the fallback
+                // branch uses (this is the pitch-black-at-23:00 fix; tune live)
+                var vsky = MonoBehaviourSingleton<TOD_Sky>.Instance;
+                if (vsky != null && vsky.Night != null && Plugin.FogBrightness.Value > 0.001f)
+                    vsky.Night.ColorMultiplier = 1f + Plugin.FogBrightness.Value * 20f;
+                if ((++_fogDiagTick % 600) == 0)
+                    Plugin.Log.LogWarning($"[FogDiag] VOLUMETRIC scat.enabled={scat.enabled} MBOIT={scat.MBOIT} wdFog={Plugin.BlizzardFog.Value:0.000}");
+                return;
+            }
+
             if (_globalFog != null)
             {
                 // sky-scattering pass stays off; GlobalFog carries the fog
@@ -602,7 +792,7 @@ namespace Manimal.Icebreaker
                     // fallback lever: lift the night sky out of pure black so the
                     // scattering fog color isn't a light-eating void
                     var sky = MonoBehaviourSingleton<TOD_Sky>.Instance;
-                    if (sky != null && sky.Night != null)
+                    if (sky != null && sky.Night != null && Plugin.FogBrightness.Value > 0.001f)
                         sky.Night.ColorMultiplier = 1f + Plugin.FogBrightness.Value * 20f;
                 }
             }

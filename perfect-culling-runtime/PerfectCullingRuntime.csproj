@@ -36,6 +36,6 @@
   </ItemGroup>
 
   <Target Name="DeployToBepInEx" AfterTargets="Build">
-    <Copy SourceFiles="$(TargetPath)" DestinationFiles="D:\SPTDev\BepInEx\plugins\AIDataDumper\PerfectCullingRuntime.dll" ContinueOnError="true" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFiles="D:\SPTDev\BepInEx\plugins\ManimalIcebreaker\PerfectCullingRuntime.dll" ContinueOnError="true" />
   </Target>
 </Project>

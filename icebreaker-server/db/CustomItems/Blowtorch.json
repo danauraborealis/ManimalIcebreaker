@@ -1,0 +1,29 @@
+{
+  "9a449693dff5334122ed7388": {
+    "itemTplToClone": "67ab3d4b83869afd170fdd3f",
+    "parentId": "5c99f98d86f7745c314214b3",
+    "handbookParentId": "5b47574386f77428ca22b345",
+    "overrideProperties": {
+      "ExaminedByDefault": true,
+      "CanSellOnRagfair": true,
+      "IsUnbuyable": false,
+      "IsSecretExitRequirement": false,
+      "QuestItem": false,
+      "DiscardLimit": -1,
+      "InsuranceDisabled": false,
+      "IsSpecialSlotOnly": false,
+      "MaximumNumberOfUsage": 0,
+      "UsePrefab": { "path": "manimal/torch_container.bundle", "rcid": "" }
+    },
+    "locales": {
+      "en": {
+        "name": "BBQ-S43 gas torch",
+        "shortName": "BBQ-S43",
+        "description": "A portable gas torch with a functioning burner. Bind it to a quick slot, draw it out, and hold fire to blow the torch. This bad boy is unlikely to burn a hole in the wall, but it'll keep your hands warm on the ice."
+      }
+    },
+    "fleaPriceRoubles": 60000,
+    "handbookPriceRoubles": 60000,
+    "addtoSpecialSlots": true
+  }
+}

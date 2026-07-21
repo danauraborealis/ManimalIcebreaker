@@ -1,0 +1,27 @@
+{
+ "m_GameObject": {
+  "m_FileID": 0,
+  "m_PathID": 8
+ },
+ "m_Enabled": 1,
+ "m_Script": {
+  "m_FileID": 16777216,
+  "m_PathID": 77913391104
+ },
+ "m_Name": "",
+ "Lighten": 0,
+ "FromLevelSettings": 1,
+ "ScatteringShader": {
+  "m_FileID": 1,
+  "m_PathID": 292
+ },
+ "DitheringTexture": {
+  "m_FileID": 2,
+  "m_PathID": 409
+ },
+ "GlobalDensity": 0.0010000000474974513,
+ "HeightFalloff": 0.0010000000474974513,
+ "SunrizeGlow": 0.949999988079071,
+ "_mboit": 0,
+ "ZeroLevel": 0.0
+}

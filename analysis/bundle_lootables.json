@@ -1,14 +1,6 @@
 {
  "containers": [
   {
-   "Id": "container_Icebreaker_Loot_00050",
-   "Template": "5909d50c86f774659e6aaebe"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00010",
-   "Template": "5909d24f86f77466f56e6855"
-  },
-  {
    "Id": "container_Icebreaker_Loot_00049",
    "Template": "578f87a3245977356274f2cb"
   },
@@ -21,23 +13,11 @@
    "Template": "578f87a3245977356274f2cb"
   },
   {
-   "Id": "container_Icebreaker_Loot_00022",
-   "Template": "5909d50c86f774659e6aaebe"
-  },
-  {
-   "Id": "container_Icebreaker_Design_Main_00003",
+   "Id": "container_Icebreaker_Loot_00006",
    "Template": "578f87a3245977356274f2cb"
   },
   {
-   "Id": "container_Icebreaker_Loot_00017",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00054",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Design_Main_00006",
+   "Id": "container_Icebreaker_Loot_00051",
    "Template": "578f87a3245977356274f2cb"
   },
   {
@@ -45,183 +25,7 @@
    "Template": "578f87a3245977356274f2cb"
   },
   {
-   "Id": "container_Icebreaker_Loot_00045",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00025",
-   "Template": "5909d24f86f77466f56e6855"
-  },
-  {
-   "Id": "container_Sandbox_Design_Stuff_00190",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00001",
-   "Template": "5909d50c86f774659e6aaebe"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00051",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00012",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00011",
-   "Template": "5909d24f86f77466f56e6855"
-  },
-  {
-   "Id": "container_Test_for_export_00000",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Design_Main_00005",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Design_Main_00001",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Sandbox_Design_Stuff_00378",
-   "Template": "5909d50c86f774659e6aaebe"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00041",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00028",
-   "Template": "5909d50c86f774659e6aaebe"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00004",
-   "Template": "5909d50c86f774659e6aaebe"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00005",
-   "Template": "5909d24f86f77466f56e6855"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00014",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00021",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00057",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00008",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00002",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Design_Main_00000",
-   "Template": "5909d50c86f774659e6aaebe"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00052",
-   "Template": "5909d24f86f77466f56e6855"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00019",
-   "Template": "5909d24f86f77466f56e6855"
-  },
-  {
-   "Id": "container_Icebreaker_Design_Main_00009",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
    "Id": "container_Icebreaker_Design_Main_00002",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Design_Main_00008",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00044",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00030",
-   "Template": "5909d50c86f774659e6aaebe"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00018",
-   "Template": "5909d24f86f77466f56e6855"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00000",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00009",
-   "Template": "5909d24f86f77466f56e6855"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00048",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00007",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00023",
-   "Template": "5909d50c86f774659e6aaebe"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00053",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00029",
-   "Template": "5909d50c86f774659e6aaebe"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00055",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00026",
-   "Template": "5909d50c86f774659e6aaebe"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00013",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00006",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00003",
-   "Template": "5909d50c86f774659e6aaebe"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00027",
-   "Template": "5909d24f86f77466f56e6855"
-  },
-  {
-   "Id": "container_Icebreaker_Design_Main_00004",
-   "Template": "578f87a3245977356274f2cb"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00056",
-   "Template": "5909d50c86f774659e6aaebe"
-  },
-  {
-   "Id": "container_Icebreaker_Loot_00015",
    "Template": "578f87a3245977356274f2cb"
   },
   {
@@ -229,31 +33,203 @@
    "Template": "5909d24f86f77466f56e6855"
   },
   {
-   "Id": "container_Icebreaker_TEMP_Evgeniy_00010",
-   "Template": "59139c2186f77411564f8e42"
+   "Id": "container_Icebreaker_Loot_00015",
+   "Template": "578f87a3245977356274f2cb"
   },
   {
-   "Id": "container_Icebreaker_TEMP_Evgeniy_00013",
-   "Template": "59139c2186f77411564f8e42"
+   "Id": "container_Icebreaker_Loot_00044",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Design_Main_00000",
+   "Template": "5909d50c86f774659e6aaebe"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00012",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00057",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00010",
+   "Template": "5909d24f86f77466f56e6855"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00013",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00041",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00023",
+   "Template": "5909d50c86f774659e6aaebe"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00019",
+   "Template": "5909d24f86f77466f56e6855"
+  },
+  {
+   "Id": "container_Icebreaker_Design_Main_00006",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00009",
+   "Template": "5909d24f86f77466f56e6855"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00030",
+   "Template": "5909d50c86f774659e6aaebe"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00014",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00026",
+   "Template": "5909d50c86f774659e6aaebe"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00011",
+   "Template": "5909d24f86f77466f56e6855"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00053",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Design_Main_00009",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00027",
+   "Template": "5909d24f86f77466f56e6855"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00045",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00056",
+   "Template": "5909d50c86f774659e6aaebe"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00029",
+   "Template": "5909d50c86f774659e6aaebe"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00018",
+   "Template": "5909d24f86f77466f56e6855"
+  },
+  {
+   "Id": "container_Icebreaker_Design_Main_00004",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00054",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00028",
+   "Template": "5909d50c86f774659e6aaebe"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00005",
+   "Template": "5909d24f86f77466f56e6855"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00002",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00021",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00001",
+   "Template": "5909d50c86f774659e6aaebe"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00048",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Design_Main_00005",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00050",
+   "Template": "5909d50c86f774659e6aaebe"
+  },
+  {
+   "Id": "container_Icebreaker_Design_Main_00008",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00055",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00008",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00004",
+   "Template": "5909d50c86f774659e6aaebe"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00000",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00052",
+   "Template": "5909d24f86f77466f56e6855"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00025",
+   "Template": "5909d24f86f77466f56e6855"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00022",
+   "Template": "5909d50c86f774659e6aaebe"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00003",
+   "Template": "5909d50c86f774659e6aaebe"
+  },
+  {
+   "Id": "container_Test_for_export_00000",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00017",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Design_Main_00003",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Sandbox_Design_Stuff_00190",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Icebreaker_Loot_00007",
+   "Template": "578f87a3245977356274f2cb"
+  },
+  {
+   "Id": "container_Sandbox_Design_Stuff_00378",
+   "Template": "5909d50c86f774659e6aaebe"
+  },
+  {
+   "Id": "container_Icebreaker_Design_Main_00001",
+   "Template": "578f87a3245977356274f2cb"
   },
   {
    "Id": "container_Icebreaker_TEMP_Evgeniy_00003",
-   "Template": "59139c2186f77411564f8e42"
-  },
-  {
-   "Id": "container_Icebreaker_TEMP_Evgeniy_00022",
-   "Template": "59139c2186f77411564f8e42"
-  },
-  {
-   "Id": "container_Test_for_export_00001",
-   "Template": "59139c2186f77411564f8e42"
-  },
-  {
-   "Id": "container_Icebreaker_Indoor_02_00001",
-   "Template": "59139c2186f77411564f8e42"
-  },
-  {
-   "Id": "container_Icebreaker_TEMP_Evgeniy_00005",
    "Template": "59139c2186f77411564f8e42"
   },
   {
@@ -261,67 +237,7 @@
    "Template": "59139c2186f77411564f8e42"
   },
   {
-   "Id": "container_Icebreaker_TEMP_Evgeniy_00017",
-   "Template": "59139c2186f77411564f8e42"
-  },
-  {
-   "Id": "container_Shopping_Mall_ARRS_00006",
-   "Template": "59139c2186f77411564f8e42"
-  },
-  {
-   "Id": "container_Icebreaker_TEMP_Evgeniy_00006",
-   "Template": "59139c2186f77411564f8e42"
-  },
-  {
-   "Id": "container_Icebreaker_TEMP_Evgeniy_00011",
-   "Template": "59139c2186f77411564f8e42"
-  },
-  {
-   "Id": "container_Icebreaker_TEMP_Evgeniy_00000",
-   "Template": "59139c2186f77411564f8e42"
-  },
-  {
-   "Id": "container_Icebreaker_TEMP_Evgeniy_00020",
-   "Template": "59139c2186f77411564f8e42"
-  },
-  {
-   "Id": "container_Icebreaker_TEMP_Evgeniy_00019",
-   "Template": "59139c2186f77411564f8e42"
-  },
-  {
-   "Id": "container_Icebreaker_Indoor_02_00002",
-   "Template": "59139c2186f77411564f8e42"
-  },
-  {
-   "Id": "container_Icebreaker_TEMP_Evgeniy_00018",
-   "Template": "59139c2186f77411564f8e42"
-  },
-  {
-   "Id": "container_Icebreaker_TEMP_Evgeniy_00012",
-   "Template": "59139c2186f77411564f8e42"
-  },
-  {
-   "Id": "container_Icebreaker_TEMP_Evgeniy_00002",
-   "Template": "59139c2186f77411564f8e42"
-  },
-  {
-   "Id": "container_Icebreaker_TEMP_Evgeniy_00001",
-   "Template": "59139c2186f77411564f8e42"
-  },
-  {
-   "Id": "container_Icebreaker_TEMP_Evgeniy_00004",
-   "Template": "59139c2186f77411564f8e42"
-  },
-  {
-   "Id": "container_Icebreaker_TEMP_Evgeniy_00021",
-   "Template": "59139c2186f77411564f8e42"
-  },
-  {
-   "Id": "container_Icebreaker_TEMP_Evgeniy_00014",
-   "Template": "59139c2186f77411564f8e42"
-  },
-  {
-   "Id": "container_Icebreaker_TEMP_Evgeniy_00008",
+   "Id": "container_Icebreaker_TEMP_Evgeniy_00015",
    "Template": "59139c2186f77411564f8e42"
   },
   {
@@ -329,7 +245,91 @@
    "Template": "59139c2186f77411564f8e42"
   },
   {
-   "Id": "container_Icebreaker_TEMP_Evgeniy_00015",
+   "Id": "container_Icebreaker_Indoor_02_00002",
+   "Template": "59139c2186f77411564f8e42"
+  },
+  {
+   "Id": "container_Icebreaker_TEMP_Evgeniy_00000",
+   "Template": "59139c2186f77411564f8e42"
+  },
+  {
+   "Id": "container_Icebreaker_TEMP_Evgeniy_00013",
+   "Template": "59139c2186f77411564f8e42"
+  },
+  {
+   "Id": "container_Icebreaker_TEMP_Evgeniy_00006",
+   "Template": "59139c2186f77411564f8e42"
+  },
+  {
+   "Id": "container_Icebreaker_TEMP_Evgeniy_00019",
+   "Template": "59139c2186f77411564f8e42"
+  },
+  {
+   "Id": "container_Icebreaker_TEMP_Evgeniy_00012",
+   "Template": "59139c2186f77411564f8e42"
+  },
+  {
+   "Id": "container_Icebreaker_TEMP_Evgeniy_00017",
+   "Template": "59139c2186f77411564f8e42"
+  },
+  {
+   "Id": "container_Icebreaker_TEMP_Evgeniy_00001",
+   "Template": "59139c2186f77411564f8e42"
+  },
+  {
+   "Id": "container_Icebreaker_TEMP_Evgeniy_00014",
+   "Template": "59139c2186f77411564f8e42"
+  },
+  {
+   "Id": "container_Icebreaker_Indoor_02_00001",
+   "Template": "59139c2186f77411564f8e42"
+  },
+  {
+   "Id": "container_Icebreaker_TEMP_Evgeniy_00008",
+   "Template": "59139c2186f77411564f8e42"
+  },
+  {
+   "Id": "container_Icebreaker_TEMP_Evgeniy_00018",
+   "Template": "59139c2186f77411564f8e42"
+  },
+  {
+   "Id": "container_Test_for_export_00001",
+   "Template": "59139c2186f77411564f8e42"
+  },
+  {
+   "Id": "container_Icebreaker_TEMP_Evgeniy_00011",
+   "Template": "59139c2186f77411564f8e42"
+  },
+  {
+   "Id": "container_Icebreaker_TEMP_Evgeniy_00002",
+   "Template": "59139c2186f77411564f8e42"
+  },
+  {
+   "Id": "container_Icebreaker_TEMP_Evgeniy_00010",
+   "Template": "59139c2186f77411564f8e42"
+  },
+  {
+   "Id": "container_Icebreaker_TEMP_Evgeniy_00004",
+   "Template": "59139c2186f77411564f8e42"
+  },
+  {
+   "Id": "container_Icebreaker_TEMP_Evgeniy_00020",
+   "Template": "59139c2186f77411564f8e42"
+  },
+  {
+   "Id": "container_Icebreaker_TEMP_Evgeniy_00021",
+   "Template": "59139c2186f77411564f8e42"
+  },
+  {
+   "Id": "container_Icebreaker_TEMP_Evgeniy_00022",
+   "Template": "59139c2186f77411564f8e42"
+  },
+  {
+   "Id": "container_Icebreaker_TEMP_Evgeniy_00005",
+   "Template": "59139c2186f77411564f8e42"
+  },
+  {
+   "Id": "container_Shopping_Mall_ARRS_00006",
    "Template": "59139c2186f77411564f8e42"
   }
  ]

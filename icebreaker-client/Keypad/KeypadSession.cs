@@ -49,6 +49,7 @@ namespace Manimal.Icebreaker.Keypad
 
         private string _buffer = "";
         private SessionState _state = SessionState.Entering;
+        private bool _inputLocked;
 
         // aliases — main row + numpad digits fire the same actions; Backspace
         // + Delete both clear; Return + KeypadEnter both submit
@@ -71,6 +72,13 @@ namespace Manimal.Icebreaker.Keypad
 
             _keypad = keypad;
             _keypad.ActiveSession = this;
+
+            // block the game's own input while typing — otherwise digit keys ALSO
+            // fire quickslot switches (press 9 for the code, swap to the flare on 9).
+            // our Update reads UnityEngine.Input directly, so the keypad still hears
+            // every key while the game ignores them.
+            try { EFT.GamePlayerOwner.SetIgnoreInput(true); _inputLocked = true; }
+            catch (Exception ex) { Plugin.Log?.LogWarning($"[Keypad] input lock failed (quickslot keys will leak): {ex.Message}"); }
 
             try
             {
@@ -656,6 +664,11 @@ namespace Manimal.Icebreaker.Keypad
         {
             try
             {
+                if (_inputLocked)
+                {
+                    _inputLocked = false;
+                    try { EFT.GamePlayerOwner.SetIgnoreInput(false); } catch { }
+                }
                 if (_keypad != null && _keypad.ActiveSession == this)
                     _keypad.ActiveSession = null;
                 if (_uiInstance != null) Destroy(_uiInstance);
@@ -670,6 +683,17 @@ namespace Manimal.Icebreaker.Keypad
         {
             Plugin.Log?.LogInfo($"[Keypad] session aborted: {reason}");
             EndSession();
+        }
+
+        // teardown safety net: if the session host dies without EndSession (raid end,
+        // death mid-typing), the input lock must not outlive it
+        private void OnDestroy()
+        {
+            if (_inputLocked)
+            {
+                _inputLocked = false;
+                try { EFT.GamePlayerOwner.SetIgnoreInput(false); } catch { }
+            }
         }
 
         private enum SessionState

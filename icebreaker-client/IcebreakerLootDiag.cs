@@ -41,6 +41,63 @@ namespace Manimal.Icebreaker
         private void Dump()
         {
             var all = FindObjectsOfType<LootableContainer>(true);
+
+            // HEAL: the Author 11 rebake didnt carry _doorState, so containers shipped
+            // DoorState=None — the action menu gates Search on Shut (retail authored 2
+            // on all 83), so bound containers showed NO prompt. field write, not the
+            // property setter, to avoid door-state side effects. remove once a bundle
+            // built with the fixed whitelist ships.
+            var dsField = AccessTools.Field(typeof(WorldInteractiveObject), "_doorState");
+            int healed = 0;
+            foreach (var lc in all)
+            {
+                if (lc == null || string.IsNullOrEmpty(lc.Id)) continue; // skip prefab templates
+                try
+                {
+                    // enum-typed field — convert both ways so unbox/assign cant throw
+                    if (dsField != null && Convert.ToInt32(dsField.GetValue(lc)) == 0)
+                    {
+                        dsField.SetValue(lc, Enum.ToObject(dsField.FieldType, 2)); // EDoorState.Shut
+                        healed++;
+                    }
+                }
+                catch { }
+            }
+            if (healed > 0) Plugin.Log?.LogWarning($"[LootDiag] healed DoorState None->Shut on {healed} container(s)");
+
+            // GHOST KILL: containers that "didnt spawn" this raid get their visuals
+            // deactivated by the game, but the interactive object (collider + LC)
+            // survives — an invisible searchable spot. if the prop root has NO
+            // renderer on an ACTIVE GameObject, shut the container off entirely.
+            // active-state, not renderer.enabled — the culling driver flips enabled
+            // on distant groups and those must keep their prompts.
+            int ghosts = 0;
+            foreach (var lc in all)
+            {
+                if (lc == null || string.IsNullOrEmpty(lc.Id) || !lc.gameObject.activeInHierarchy) continue;
+                // prop root = nearest LODGroup ancestor (the prop), else the direct
+                // parent — deliberately NOT higher, or sibling props' renderers would
+                // mask a ghost under a shared scene node
+                Transform root = null;
+                var walk = lc.transform;
+                for (int hop = 0; walk != null && hop < 4; hop++, walk = walk.parent)
+                {
+                    if (walk.GetComponent<LODGroup>() != null) { root = walk; break; }
+                }
+                if (root == null) root = lc.transform.parent != null ? lc.transform.parent : lc.transform;
+                bool anyVisible = false;
+                foreach (var r in root.GetComponentsInChildren<Renderer>(true))
+                {
+                    if (r != null && r.gameObject.activeInHierarchy) { anyVisible = true; break; }
+                }
+                if (!anyVisible)
+                {
+                    lc.gameObject.SetActive(false);
+                    ghosts++;
+                }
+            }
+            if (ghosts > 0) Plugin.Log?.LogWarning($"[LootDiag] {ghosts} unspawned container(s) had live interactions — deactivated (ghost-search fix)");
+
             int enabled = 0, active = 0, withCollider = 0, bound = 0, interactiveLayer = 0;
             int shown = 0;
             // ItemOwner is a FIELD (TraderControllerClass) — set when the game binds
