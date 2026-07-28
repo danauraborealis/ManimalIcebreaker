@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
 using EFT;
@@ -34,6 +35,7 @@ namespace Manimal.Icebreaker
         // arrival (Still -> Call). the exfil opens when the skids touch down.
         private const string HeliRigName = "INTERACTIVE_Helicopter_Extraction";
         private const string CallParam = "Call_01";
+        private const string EuroTpl = "569668774bdc2da2298b4568";
         private const float ArrivalSeconds = 44f;
 
         private void Start()
@@ -46,6 +48,8 @@ namespace Manimal.Icebreaker
                 Destroy(this);
                 return;
             }
+
+            AttachFare();
 
             var zoneSrc = GameObject.Find("NotificationZone");
             if (zoneSrc == null || zoneSrc.GetComponent<BoxCollider>() == null)
@@ -98,6 +102,107 @@ namespace Manimal.Icebreaker
             catch (Exception e) { Plugin.Log.LogWarning($"[HeliExfil] wind pre-stop failed: {e.Message}"); }
 
             Plugin.Log.LogWarning("[HeliExfil] armed — heli locked until a green flare is fired in the notification zone");
+        }
+
+        // the pilot doesn't fly for free. this is the same paid extract every V-Ex uses,
+        // built the way ExfiltrationPoint.LoadSettings would have from a server exits
+        // entry: TransferItemRequirement carrying a tpl and a count. we do it in code
+        // because this exfil has no exits row at all — the point is baked in the scene and
+        // runs on its own serialized settings, so there is nothing server-side to hang a
+        // PassageRequirement off.
+        //
+        // Start() is what makes it a real till: it builds the fake stash and registers a
+        // TraderControllerClass(EOwnerType.ExfilPoint) against the point's TRANSFORM, so
+        // the money box follows the exfil when the flare gate exiles it under the map and
+        // brings it back. paying calls OnItemTransferred, which queues the player, and
+        // Met() is a QueuedPlayers check from then on.
+        //
+        // status is deliberately left alone: SetInitialStatus only forces
+        // UncompleteRequirements for SharedTimer or WorldEvent requirements, so a plain
+        // transfer requirement sits in RegularMode exactly like a vanilla car extract, and
+        // the flare lock keeps owning the status.
+        private void AttachFare()
+        {
+            try
+            {
+                int fare = Plugin.HeliExfilCost.Value;
+                if (fare <= 0) return;
+                if (_exit.Requirements != null && _exit.Requirements.OfType<TransferItemRequirement>().Any())
+                {
+                    Plugin.Log.LogInfo("[HeliExfil] exfil already carries a transfer requirement, leaving it");
+                    return;
+                }
+
+                var req = ExfiltrationRequirement.CreateRequirement(ERequirementState.TransferItem) as ExfiltrationRequirement;
+                if (req == null) { Plugin.Log.LogWarning("[HeliExfil] could not build the transfer requirement"); return; }
+
+                req.Requirement = ERequirementState.TransferItem;
+                req.Id = EuroTpl;
+                req.Count = fare;
+                // "Bring {0}", the same key every vanilla paid extract uses — the tip
+                // formats the item's ShortName in and shows any discount alongside
+                req.RequirementTip = "EXFIL_Item";
+                req.Start(_exit);
+
+                _exit.Requirements = new ExfiltrationRequirement[] { req };
+                Plugin.Log.LogWarning($"[HeliExfil] fare attached: {fare} euros to board");
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[HeliExfil] fare attach failed, ride stays free: {e.Message}"); }
+        }
+
+        // the NATIVE pay prompt. the game already has the whole flow: Proceed sets
+        // Player.ExfiltrationPoint, GamePlayerOwner.InteractionsChangedHandler polls its
+        // interaction sources, and GetActionsClass.smethod_4 builds the "EXFIL_Transfer"
+        // action whose press calls TransferExitItem — the same discounted, networked
+        // transfer a vanilla car extract runs. the catch is the source CHAIN: the exfil
+        // point is the LAST fallback in the handler, so any earlier source (a raycast
+        // interactable, an exfil-mod trigger) wins the slot outright and the pay action
+        // never surfaces. so after the native handler settles the slot, merge the pay
+        // action in instead of letting first-wins eat it. no charge without a prompt:
+        // paying is the player pressing this action, exactly like a car extract.
+        [HarmonyPatch(typeof(GamePlayerOwner), nameof(GamePlayerOwner.InteractionsChangedHandler))]
+        internal static class Patch_NativePayPrompt
+        {
+            [HarmonyPostfix]
+            private static void Postfix(GamePlayerOwner __instance)
+            {
+                try
+                {
+                    if (!IceGate.On) return;
+                    var player = __instance != null ? __instance.Player : null;
+                    if (player == null || !player.IsYourPlayer) return;
+                    var point = player.ExfiltrationPoint;
+                    if (point == null || point.Settings == null || point.Settings.Name != ExitName) return;
+                    var req = point.TransferItemRequirement;
+                    if (req == null || point.QueuedPlayers.Contains(player.ProfileId)) return;
+
+                    // native builder: returns null when already paid or when no single
+                    // stack covers the (discounted) price — same rule as a car extract
+                    var native = GetActionsClass.smethod_4(__instance, point);
+                    if (native == null || native.Actions == null || native.Actions.Count == 0) return;
+
+                    var state = __instance.AvailableInteractionState.Value;
+                    if (state == null)
+                    {
+                        native.InitSelected();
+                        __instance.AvailableInteractionState.Value = native;
+                        return;
+                    }
+
+                    string payName = native.Actions[0].Name;
+                    foreach (var a in state.Actions)
+                        if (a != null && a.Name == payName) return;   // already offered
+
+                    // fresh object on purpose: the bindable only notifies the prompt UI on
+                    // a reference change, mutating the current list would redraw nothing
+                    var merged = new ActionsReturnClass { Actions = new List<ActionsTypesClass>() };
+                    merged.Actions.AddRange(native.Actions);
+                    merged.Actions.AddRange(state.Actions);
+                    merged.InitSelected();
+                    __instance.AvailableInteractionState.Value = merged;
+                }
+                catch (Exception e) { Plugin.Log.LogWarning($"[HeliExfil] pay prompt merge failed: {e.Message}"); }
+            }
         }
 
         // reconstruct BSG's FlareShootDetectorZone over the retail NotificationZone bounds.
@@ -186,7 +291,15 @@ namespace Manimal.Icebreaker
                         anim.SetBool(CallParam, true); // Still -> Call, one-way
                         StartHeliAudio(anim);          // synced to the same moment as the animation
                         StartCoroutine(WindSchedule(anim)); // rotor-wash snow VFX on the flight timeline
-                        Plugin.Log.LogWarning($"[HeliExfil] green flare accepted — {CallParam} set, heli inbound ({ArrivalSeconds:0}s flight)");
+                        // native culling fades the parked rig's lights to intensity 0 (300m
+                        // out) and would re-fade any one-shot heal next frame — free them
+                        // from the manager for good; a flying bird's lights shine from afar,
+                        // and the rig's animation still drives blink states on top.
+                        int freed = RenderEnvProbe.FreeNativeLights(rig.transform);
+                        int lit = 0;
+                        foreach (var hl in anim.GetComponentsInChildren<Light>(true))
+                            if (!hl.enabled) { hl.enabled = true; lit++; }
+                        Plugin.Log.LogWarning($"[HeliExfil] green flare accepted — {CallParam} set, heli inbound ({ArrivalSeconds:0}s flight), {freed} native lights freed + {lit} plain re-lit");
                     }
                     else
                         Plugin.Log.LogWarning($"[HeliExfil] '{HeliRigName}' rig/animator not found — skipping the flight, unlocking on the timer anyway");

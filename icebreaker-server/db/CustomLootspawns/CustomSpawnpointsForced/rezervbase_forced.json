@@ -1,0 +1,250 @@
+{
+  "rezervbase": [
+    {
+      "locationId": "(-116.8 -6.933 47.93)",
+      "probability": 1.0,
+      "template": {
+        "Id": "boreas_amg_1",
+        "IsContainer": false,
+        "useGravity": false,
+        "randomRotation": false,
+        "Position": {
+          "x": -116.8,
+          "y": -6.933,
+          "z": 47.93
+        },
+        "Rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "IsGroupPosition": false,
+        "GroupPositions": [],
+        "IsAlwaysSpawn": true,
+        "Root": "a160f46fdb5ee9740e89fa74",
+        "Items": [
+          {
+            "_id": "a160f46fdb5ee9740e89fa74",
+            "_tpl": "699f09767852da66a7003061",
+            "upd": {
+              "StackObjectsCount": 1
+            }
+          }
+        ]
+      },
+      "itemDistribution": [
+        {
+          "composedKey": {
+            "key": "699f09767852da66a7003061"
+          },
+          "relativeProbability": 1
+        }
+      ]
+    },
+    {
+      "locationId": "(-124.2 -4.582 35.319)",
+      "probability": 1.0,
+      "template": {
+        "Id": "boreas_amg_2",
+        "IsContainer": false,
+        "useGravity": false,
+        "randomRotation": false,
+        "Position": {
+          "x": -124.2,
+          "y": -4.582,
+          "z": 35.319
+        },
+        "Rotation": {
+          "x": 0,
+          "y": 280.2324,
+          "z": 0
+        },
+        "IsGroupPosition": false,
+        "GroupPositions": [],
+        "IsAlwaysSpawn": true,
+        "Root": "6cb49f956c3314452ca7b637",
+        "Items": [
+          {
+            "_id": "6cb49f956c3314452ca7b637",
+            "_tpl": "699f09767852da66a7003061",
+            "upd": {
+              "StackObjectsCount": 1
+            }
+          }
+        ]
+      },
+      "itemDistribution": [
+        {
+          "composedKey": {
+            "key": "699f09767852da66a7003061"
+          },
+          "relativeProbability": 1
+        }
+      ]
+    },
+    {
+      "locationId": "(-128.465 -4.96 26.22)",
+      "probability": 1.0,
+      "template": {
+        "Id": "boreas_amg_3",
+        "IsContainer": false,
+        "useGravity": false,
+        "randomRotation": false,
+        "Position": {
+          "x": -128.465,
+          "y": -4.96,
+          "z": 26.22
+        },
+        "Rotation": {
+          "x": 0,
+          "y": 0.0644,
+          "z": 0
+        },
+        "IsGroupPosition": false,
+        "GroupPositions": [],
+        "IsAlwaysSpawn": true,
+        "Root": "1081438035d0bd7c0575b292",
+        "Items": [
+          {
+            "_id": "1081438035d0bd7c0575b292",
+            "_tpl": "699f09767852da66a7003061",
+            "upd": {
+              "StackObjectsCount": 1
+            }
+          }
+        ]
+      },
+      "itemDistribution": [
+        {
+          "composedKey": {
+            "key": "699f09767852da66a7003061"
+          },
+          "relativeProbability": 1
+        }
+      ]
+    },
+    {
+      "locationId": "(-163.689 -9.223 -15.199)",
+      "probability": 1.0,
+      "template": {
+        "Id": "boreas_amg_4",
+        "IsContainer": false,
+        "useGravity": false,
+        "randomRotation": false,
+        "Position": {
+          "x": -163.689,
+          "y": -9.223,
+          "z": -15.199
+        },
+        "Rotation": {
+          "x": 0,
+          "y": 9.4971,
+          "z": 0
+        },
+        "IsGroupPosition": false,
+        "GroupPositions": [],
+        "IsAlwaysSpawn": true,
+        "Root": "b7a2e2b4d4c47c139e609a40",
+        "Items": [
+          {
+            "_id": "b7a2e2b4d4c47c139e609a40",
+            "_tpl": "699f09767852da66a7003061",
+            "upd": {
+              "StackObjectsCount": 1
+            }
+          }
+        ]
+      },
+      "itemDistribution": [
+        {
+          "composedKey": {
+            "key": "699f09767852da66a7003061"
+          },
+          "relativeProbability": 1
+        }
+      ]
+    },
+    {
+      "locationId": "(-136.75 -9.13 -22.413)",
+      "probability": 1.0,
+      "template": {
+        "Id": "boreas_amg_5",
+        "IsContainer": false,
+        "useGravity": false,
+        "randomRotation": false,
+        "Position": {
+          "x": -136.75,
+          "y": -9.13,
+          "z": -22.413
+        },
+        "Rotation": {
+          "x": 90,
+          "y": 101.6171,
+          "z": 0
+        },
+        "IsGroupPosition": false,
+        "GroupPositions": [],
+        "IsAlwaysSpawn": true,
+        "Root": "fb64b2b7e7b4b2b0efe0e416",
+        "Items": [
+          {
+            "_id": "fb64b2b7e7b4b2b0efe0e416",
+            "_tpl": "699f09767852da66a7003061",
+            "upd": {
+              "StackObjectsCount": 1
+            }
+          }
+        ]
+      },
+      "itemDistribution": [
+        {
+          "composedKey": {
+            "key": "699f09767852da66a7003061"
+          },
+          "relativeProbability": 1
+        }
+      ]
+    },
+    {
+      "locationId": "(-133.044 -9.047 -29.736)",
+      "probability": 1.0,
+      "template": {
+        "Id": "boreas_amg_6",
+        "IsContainer": false,
+        "useGravity": false,
+        "randomRotation": false,
+        "Position": {
+          "x": -133.044,
+          "y": -9.047,
+          "z": -29.736
+        },
+        "Rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "IsGroupPosition": false,
+        "GroupPositions": [],
+        "IsAlwaysSpawn": true,
+        "Root": "eaa943f331a1198ade5fd5fb",
+        "Items": [
+          {
+            "_id": "eaa943f331a1198ade5fd5fb",
+            "_tpl": "699f09767852da66a7003061",
+            "upd": {
+              "StackObjectsCount": 1
+            }
+          }
+        ]
+      },
+      "itemDistribution": [
+        {
+          "composedKey": {
+            "key": "699f09767852da66a7003061"
+          },
+          "relativeProbability": 1
+        }
+      ]
+    }
+  ]
+}

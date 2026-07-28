@@ -87,8 +87,9 @@ namespace Manimal.Icebreaker
     {
         private static Exception Finalizer(Exception __exception)
         {
-            if (__exception != null)
-                Plugin.Log.LogWarning($"[RaidFix] RainController camera hookup failed on fallback cam (visor drops off): {__exception.Message}");
+            if (__exception == null) return null;
+            if (!IceGate.On) return __exception;
+            Plugin.Log.LogWarning($"[RaidFix] RainController camera hookup failed on fallback cam (visor drops off): {__exception.Message}");
             return null;
         }
     }
@@ -99,7 +100,9 @@ namespace Manimal.Icebreaker
     [HarmonyPatch(typeof(GClass908), nameof(GClass908.Process))]
     internal static class Patch_SwayEffectorNeverThrows
     {
-        private static Exception Finalizer(Exception __exception) => null; // per-frame — silent
+        // silent only on the icebreaker (per-frame); vanilla keeps its exceptions
+        private static Exception Finalizer(Exception __exception)
+            => __exception == null || IceGate.On ? null : __exception;
     }
 
     // stutter forensics companion: bots path via SYNCHRONOUS NavMesh.CalculatePath on the
@@ -141,6 +144,7 @@ namespace Manimal.Icebreaker
         private static Exception Finalizer(Exception __exception, ref int __result)
         {
             if (__exception == null) return null;
+            if (!IceGate.On) return __exception;
             __result = -1;
             if (_logged++ < 5)
                 Plugin.Log.LogWarning($"[RaidFix] occlusion threw (sound degraded to unoccluded): {__exception.Message}");
@@ -184,8 +188,9 @@ namespace Manimal.Icebreaker
     {
         private static Exception Finalizer(Exception __exception)
         {
-            if (__exception != null)
-                Plugin.Log.LogWarning($"[RaidFix] swallowed WindowBreakerManager.method_0: {__exception.Message}");
+            if (__exception == null) return null;
+            if (!IceGate.On) return __exception;
+            Plugin.Log.LogWarning($"[RaidFix] swallowed WindowBreakerManager.method_0: {__exception.Message}");
             return null;
         }
     }
@@ -199,8 +204,9 @@ namespace Manimal.Icebreaker
     {
         private static Exception Finalizer(Exception __exception)
         {
-            if (__exception != null)
-                Plugin.Log.LogWarning($"[RaidFix] swallowed SpawnPointManagerClass.smethod_3: {__exception.Message}");
+            if (__exception == null) return null;
+            if (!IceGate.On) return __exception;
+            Plugin.Log.LogWarning($"[RaidFix] swallowed SpawnPointManagerClass.smethod_3: {__exception.Message}");
             return null;
         }
     }
@@ -222,6 +228,7 @@ namespace Manimal.Icebreaker
             if (Plugin.WeatherSystem.Value && IcebreakerAcoustics.IcebreakerLoaded())
                 IcebreakerWeather.TryBuild();
 
+            if (!IceGate.On) return; // vanilla maps own their EnvironmentManager
             if (EnvironmentManager.Instance != null)
                 return;
             if (Plugin.EnvTriggers.Value && IcebreakerAcoustics.TryBuildEnvironmentTriggers())
@@ -261,24 +268,18 @@ namespace Manimal.Icebreaker
     {
         private static void Prefix(ref CameraClass.GInterface465 settings)
         {
-            // instrumented: log every call so we can SEE the decision instead of guessing.
-            // gate on GameWorld.LocationId (authoritative; "Suburbs" is our hijacked slot)
-            // rather than scene names, which mysteriously didn't match last run.
+            // gate on GameWorld.LocationId (authoritative; "Suburbs" is our hijacked
+            // slot). vanilla maps: not even a log line — this mod stays silent off-map.
             var world = Comfort.Common.Singleton<GameWorld>.Instance;
-            var loc = world != null ? world.LocationId : "<no GameWorld>";
-            var prefab = settings != null && settings.CameraPrefab != null ? settings.CameraPrefab.name : "<null>";
-            var scenes = "";
-            for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++)
-                scenes += UnityEngine.SceneManagement.SceneManager.GetSceneAt(i).name + ",";
-            Plugin.Log.LogWarning($"[RaidFix] SetCameraFromSettings: loc={loc} prefab={prefab} scenes={scenes}");
+            var loc = world != null ? world.LocationId : null;
+            if (!string.Equals(loc, "Suburbs", StringComparison.OrdinalIgnoreCase)) return;
 
+            var prefab = settings != null && settings.CameraPrefab != null ? settings.CameraPrefab.name : "<null>";
+            Plugin.Log.LogWarning($"[RaidFix] SetCameraFromSettings on icebreaker: prefab={prefab}");
             if (settings == null || settings.CameraPrefab == null)
                 return; // already headed for the Cam2 fallback
-            if (string.Equals(loc, "Suburbs", StringComparison.OrdinalIgnoreCase))
-            {
-                Plugin.Log.LogWarning("[RaidFix] icebreaker (Suburbs slot) — discarding scene camera prefab, using built-in Cam2");
-                settings = null;
-            }
+            Plugin.Log.LogWarning("[RaidFix] discarding scene camera prefab, using built-in Cam2");
+            settings = null;
         }
     }
 
@@ -294,6 +295,7 @@ namespace Manimal.Icebreaker
     {
         private static void Prefix(EffectsController __instance)
         {
+            if (!IceGate.On) return; // vanilla camera prefabs ship the component
             if (__instance.GetComponent<FrostbiteEffect>() == null)
             {
                 __instance.gameObject.AddComponent<FrostbiteEffect>();
@@ -352,7 +354,8 @@ namespace Manimal.Icebreaker
     {
         private static void Postfix(EFT.Weather.WeatherController __instance)
         {
-            float v = Plugin.WeatherDesaturate.Value;
+            if (!IceGate.On) return; // the desat lever is an icebreaker look control
+            float v = Plugin.Fog(Plugin.WeatherDesaturate).Value; // cutscene twin when profiled
             if (v < 0f) return;
             var cc = HarmonyLib.AccessTools.Field(typeof(EFT.Weather.WeatherController), "cc_Sharpen_0")?.GetValue(__instance) as CC_Sharpen;
             if (cc != null) cc.WeatherDesaturate = v;
@@ -368,6 +371,7 @@ namespace Manimal.Icebreaker
         private static Exception Finalizer(Exception __exception, EFT.Weather.WeatherController __instance)
         {
             if (__exception == null) return null;
+            if (!IceGate.On) return __exception; // vanilla weather keeps its real exceptions
             _throws++;
             // a swallowed-every-tick method_4 means NO weather params ever push — fog
             // renders un-parameterized defaults no matter what we tune upstream. name
@@ -403,6 +407,7 @@ namespace Manimal.Icebreaker
         private static bool _logged;
         private static Exception Finalizer(Exception __exception, BSG.CameraEffects.NightVision __instance)
         {
+            if (__exception != null && !IceGate.On) return __exception; // Cam2-era gap is icebreaker-only
             if (__exception != null && __instance != null)
             {
                 __instance.enabled = false;
@@ -435,8 +440,9 @@ namespace Manimal.Icebreaker
     {
         private static Exception Finalizer(Exception __exception)
         {
-            if (__exception != null)
-                Plugin.Log.LogWarning($"[RaidFix] swallowed EffectsController.method_3: {__exception.Message}\n{__exception.StackTrace}");
+            if (__exception == null) return null;
+            if (!IceGate.On) return __exception;
+            Plugin.Log.LogWarning($"[RaidFix] swallowed EffectsController.method_3: {__exception.Message}\n{__exception.StackTrace}");
             return null;
         }
     }
@@ -458,7 +464,9 @@ namespace Manimal.Icebreaker
                 go.AddComponent<RenderEnvProbe>();
             }
             RenderEnvProbe.CameraRef = camera;
-            RenderEnvProbe.Dump("at-SetCamera");
+            // the automatic env dump is a diagnostic — icebreaker only, and only with
+            // the diag suite armed (a raid on ANY map used to print this block)
+            if (Plugin.DiagHotkeys.Value && IceGate.On) RenderEnvProbe.Dump("at-SetCamera");
         }
     }
 
@@ -480,8 +488,33 @@ namespace Manimal.Icebreaker
         // with skybox ambient instead of overriding it) in case it needs a brightness nudge.
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.F8))
+            if (Plugin.DiagHotkeys.Value && IceGate.On && Input.GetKeyDown(KeyCode.F8))
+            {
                 Dump("F8-manual");
+                // native-light autopsy: the 10 nearest CullingLightObjects with their
+                // full state — separates "intensity faded" from "disabled" from
+                // "manager thinks invisible" when an area reads dark
+                try
+                {
+                    var cam = CameraRef != null ? CameraRef.transform.position : Vector3.zero;
+                    var clos = new List<CullingLightObject>(UnityEngine.Object.FindObjectsOfType<CullingLightObject>());
+                    clos.Sort((a, b) => (a.transform.position - cam).sqrMagnitude
+                        .CompareTo((b.transform.position - cam).sqrMagnitude));
+                    for (int i = 0; i < Mathf.Min(10, clos.Count); i++)
+                    {
+                        var clo = clos[i];
+                        var l = clo.GetLight();
+                        float mi = -1f;
+                        try { mi = (float)(_cloMaxIntensity ?? (_cloMaxIntensity =
+                            HarmonyLib.AccessTools.Field(typeof(CullingLightObject), "_maxLightIntensity"))).GetValue(clo); }
+                        catch { }
+                        Plugin.Log.LogWarning($"[LightAutopsy] {clo.name} d={(clo.transform.position - cam).magnitude:F0}m " +
+                            $"light={(l == null ? "NULL" : $"en={l.enabled} int={l.intensity:F2} range={l.range:F0}")} " +
+                            $"max={mi:F2} visFlag={clo.IsLightEnabled} isVis={clo.IsVisible}");
+                    }
+                }
+                catch (Exception e) { Plugin.Log.LogWarning($"[LightAutopsy] failed: {e.Message}"); }
+            }
 
             var onIce = false;
             try { var w = Comfort.Common.Singleton<GameWorld>.Instance; onIce = w != null && string.Equals(w.LocationId, "Suburbs", StringComparison.OrdinalIgnoreCase); } catch { }
@@ -504,19 +537,25 @@ namespace Manimal.Icebreaker
             // game has the working ones. rebind at ~2s (bulk geometry loaded) and again at ~6s
             // (catch streamed-in stragglers) so no F5 needed. two passes then done.
             _iceFrames++;
-            if (_autoRebindStage == 0 && _iceFrames > 120) { RebindShadersToGame(); _autoRebindStage = 1; }
+            if (_autoRebindStage == 0 && _iceFrames > 120) { _autoRebindStage = 1; StartCoroutine(RebindShadersSliced()); }
             else if (_autoRebindStage == 1 && _iceFrames > 360)
             {
-                RebindShadersToGame(); DiscoverLamps(); ApplyLamps(); AttachCullingCamera();
-                BuildDistanceCuller(); BuildLightCuller(); EnsureCullingManager();
-                if (GetComponent<IcebreakerCrew>() == null) gameObject.AddComponent<IcebreakerCrew>();
-                if (GetComponent<IcebreakerHeliExfil>() == null) gameObject.AddComponent<IcebreakerHeliExfil>();
+                // flag first so a slow init can't re-enter; the stage-2 tickers no-op
+                // until their builders fill the lists
                 _autoRebindStage = 2;
+                StartCoroutine(StageTwoInit());
             }
 
             // size-classed distance culling of small props — the residual 27k draws are
             // mostly distant clutter contributing zero pixels. same for far lights.
             if (_autoRebindStage == 2) { TickDistanceCuller(); TickLightCuller(); TickCrossCull(); TickPcDriver(); }
+
+            // aliased shader targets live in bundles that may load late — keep retrying
+            // until every stand-in material lands on its real shader. the retry only
+            // walks the pending-materials list now; it used to re-run the FULL scene
+            // sweep every 300 frames, a steady 5-second heartbeat of hitches
+            if (_aliasRetryNeeded && (_iceFrames % 300) == 43)
+                RetryAliasPending();
 
             // keep the ambient beds alive — the raid-start audio reset stops them once, so
             // check every ~30 frames and replay any that stopped (cheap: cached source list)
@@ -781,8 +820,65 @@ namespace Manimal.Icebreaker
                             if (r.enabled) on++;
                             if (r is SkinnedMeshRenderer) { skinned++; if (r.enabled && r.gameObject.activeInHierarchy) skinnedOn++; }
                         }
+                        // ACTIVE brain layer + node — the "frozen follower" forensics:
+                        // Gclass35_0 is the agent's live layer (BigBrain layers show
+                        // their custom names here), GetActiveNodeName the action inside
                         string layer = "?";
-                        try { layer = b.Brain?.Agent?.Name ?? "?"; } catch { }
+                        try
+                        {
+                            var agent = b.Brain?.Agent;
+                            var active = agent != null ? agent.Gclass35_0 : null;
+                            layer = active != null
+                                ? $"{active.Name()}/{agent.GetActiveNodeName()}"
+                                : (agent != null ? "NO-ACTIVE-LAYER" : "?");
+                        }
+                        catch (Exception le) { layer = "err:" + le.Message; }
+
+                        // VANILLA COVER forensics — the runToCover freeze: the lookup is
+                        // voxel-driven (CurVoxel neighborhood -> PointsIds -> group filter),
+                        // so count every stage to see where a starving bot loses its covers
+                        string coverInfo = "?";
+                        try
+                        {
+                            var cov = b.Covers;
+                            var vox = b.VoxelesPersonalData?.CurVoxel;
+                            int voxPts = vox?.PointsIds?.Count ?? -1;
+                            int r1 = -1, close20 = -1;
+                            string freeClose = "?";
+                            if (cov != null)
+                            {
+                                try { var vl = cov.GetVoxelesInRadius(1); int s = 0; foreach (var v in vl) s += v?.PointsIds?.Count ?? 0; r1 = s; } catch { }
+                                try { close20 = cov.GetClosePoints(p, 20f)?.Count ?? -1; } catch { }
+                                try { freeClose = cov.GetFreeClosePoint(p, 0f) != null ? "OK" : "NULL"; } catch (Exception fe) { freeClose = "err:" + fe.Message; }
+                            }
+                            coverInfo = $"grp={cov?.ConnectionGroupId.ToString() ?? "?"} core={b.StartCorePoint?.Id.ToString() ?? "null"} " +
+                                        $"voxel={(vox != null ? vox.Id.ToString() : "NULL")} voxPts={voxPts} r1Pts={r1} close20={close20} " +
+                                        $"freeClose={freeClose} haveCover={b.Memory?.BotCurrentCoverInfo?.HaveCover.ToString() ?? "?"} " +
+                                        $"curPt={(b.Memory?.CurCustomCoverPoint != null ? "set" : "null")}";
+                        }
+                        catch (Exception ce) { coverInfo = "err:" + ce.Message; }
+                        Plugin.Log.LogWarning($"[BotAutopsy]   covers: {coverInfo}");
+
+                        // VISION/STEERING forensics — the wall-stare freeze: vanilla
+                        // sight is a cone around LookDirection, so a bot parked staring
+                        // into a wall is blind from every other approach. log where the
+                        // bot is looking, whether a wall is centimeters in front of its
+                        // face, its current vision distance, and whether it knows an enemy
+                        string visInfo = "?";
+                        try
+                        {
+                            var look = b.LookDirection;
+                            float wallDist = -1f;
+                            var head = b.MyHead != null ? b.MyHead.position : p + Vector3.up * 1.5f;
+                            if (Physics.Raycast(head, look, out var hit, 30f, LayerMaskClass.HighPolyWithTerrainMask))
+                                wallDist = hit.distance;
+                            visInfo = $"visDist={b.LookSensor?.VisibleDist ?? -1f:F1} " +
+                                      $"lookHitWallAt={(wallDist < 0 ? "none" : wallDist.ToString("F1"))}m " +
+                                      $"goalEnemy={(b.Memory?.GoalEnemy != null ? "SET" : "null")} " +
+                                      $"underFire={b.Memory?.IsUnderFire.ToString() ?? "?"}";
+                        }
+                        catch (Exception ve) { visInfo = "err:" + ve.Message; }
+                        Plugin.Log.LogWarning($"[BotAutopsy]   vision: {visInfo}");
                         // render-state forensics for the invisible-body mystery: WHICH
                         // mechanism hides the skinned meshes?
                         var sb = new System.Text.StringBuilder();
@@ -802,13 +898,8 @@ namespace Manimal.Icebreaker
                 }
             }
 
-            if (Input.GetKeyDown(KeyCode.F9))
-            {
-                _lightsOn = !_lightsOn;
-                int n = 0;
-                foreach (var l in UnityEngine.Object.FindObjectsOfType<Light>()) { l.enabled = _lightsOn; n++; }
-                Plugin.Log.LogWarning($"[RenderEnv] toggled {n} lights -> {(_lightsOn ? "ON" : "OFF")}");
-            }
+            // (F9 lamp toggle removed — it collided with the fog tuner's F9 and killing
+            // every Light broke things; lamp diagnostics live in the F8 dump instead)
             // F10 = STATIC BATCHING test. ~117k live renderers = draw-call/CPU death that no
             // visibility culling can fix (the F8 numbers show culling works and fps doesn't
             // care). BSG's own "SBG_*" roots are their static-batch-group system — replicate
@@ -857,19 +948,72 @@ namespace Manimal.Icebreaker
         // draw (a second hitch the frame after).
         private static readonly HashSet<int> _rebindDone = new HashSet<int>();
 
+        // SDK stand-in shaders -> the game's REAL shaders. the deck vertex-paint
+        // materials carry byte-perfect retail values (3-layer snow/trampled/deck with
+        // height blending + footstep normals) but were bound to our flat editor
+        // stand-in — whose name has no game counterpart, so the same-name rebind
+        // below never upgraded them. alias them onto the genuine shader.
+        // (VP alias retired: the real Vert Paint Shader Solid never resolved on this
+        // map even from the shaders bundle, so the SDK stand-in got a faithful
+        // height-blend rewrite instead — it ships in the scene bundle and must NOT
+        // be swapped out at runtime.)
+        private static readonly Dictionary<string, string> ShaderAliases = new Dictionary<string, string>();
+
+        private static bool _aliasRetryNeeded;
+
+        // late loaders (the cutscene scene arrives mid-raid) call this after their
+        // content exists — _rebindDone dedupes, so re-runs only touch new materials
+        internal static void RebindNow() => RebindShadersToGame();
+
+        // SCOPED rebind for props WE spawn, usable on any map. the ripped p0/* shaders
+        // render white in deferred, and the map-wide sweep above is icebreaker-only, so
+        // anything we drop into a vanilla scene (the hovercraft on Shoreline) has to fix
+        // its own materials. matches by shader NAME against the game's loaded shaders,
+        // exactly like the map-wide pass, just confined to one hierarchy.
+        internal static int RebindShadersUnder(Transform root)
+        {
+            if (root == null) return 0;
+            int rebound = 0;
+            var seen = new HashSet<Material>();
+            foreach (var r in root.GetComponentsInChildren<Renderer>(true))
+            {
+                foreach (var m in r.sharedMaterials)
+                {
+                    if (m == null || m.shader == null || !seen.Add(m)) continue;
+                    var name = m.shader.name;
+                    var gameShader = Shader.Find(name) ?? GClass872.Find(name);
+                    if (gameShader != null && gameShader != m.shader)
+                    {
+                        m.shader = gameShader;
+                        rebound++;
+                    }
+                }
+            }
+            if (rebound > 0)
+                Plugin.Log.LogInfo($"[RebindShaders] scoped: {rebound} material(s) under '{root.name}' bound to game shaders");
+            return rebound;
+        }
+
         private static void RebindShadersToGame()
         {
+            _aliasRetryNeeded = false;
             int rebound = 0, sameOrMissing = 0;
             var seen = new HashSet<Material>();
             var byName = new System.Collections.Generic.Dictionary<string, int>();
-            foreach (var r in UnityEngine.Object.FindObjectsOfType<Renderer>())
+            // include INACTIVE (true): the exfil heli and other armed-later objects sat
+            // disabled through both rebind passes and kept the broken ripped smap copy —
+            // the "white model" bug. (rip blob's forward pass works, deferred is broken:
+            // fine in editor scene view, white in-game.)
+            foreach (var r in UnityEngine.Object.FindObjectsOfType<Renderer>(true))
             {
                 foreach (var m in r.sharedMaterials)
                 {
                     if (m == null || m.shader == null || !seen.Add(m)) continue;
                     if (!_rebindDone.Add(m.GetInstanceID())) continue; // handled in a prior pass
                     var name = m.shader.name;
-                    var gameShader = Shader.Find(name);
+                    bool aliased = ShaderAliases.TryGetValue(name, out var alias);
+                    if (aliased) name = alias;
+                    var gameShader = Shader.Find(name) ?? GClass872.Find(name);
                     if (gameShader != null && gameShader != m.shader)
                     {
                         m.shader = gameShader;
@@ -877,7 +1021,25 @@ namespace Manimal.Icebreaker
                         byName.TryGetValue(name, out var c);
                         byName[name] = c + 1;
                     }
-                    else sameOrMissing++;
+                    else
+                    {
+                        sameOrMissing++;
+                        // aliased materials MUST eventually land on the real shader —
+                        // the target lives in the global shaders bundle which may not
+                        // be loaded yet on the early pass. un-mark so pass 2 retries
+                        // (the old code marked them done on FAILURE, so the VP deck
+                        // stayed on the flat stand-in forever).
+                        if (aliased)
+                        {
+                            _rebindDone.Remove(m.GetInstanceID());
+                            _aliasRetryNeeded = true;
+                            // remembered by NAME so the retry loop touches only these
+                            // materials — the old retry re-ran this entire scene sweep
+                            // every 300 frames until the last alias resolved
+                            if (!_aliasPending.Contains(m)) _aliasPending.Add(m);
+                            Plugin.Log.LogWarning($"[RebindShaders] alias target '{name}' not resolvable yet for '{m.name}' — will retry");
+                        }
+                    }
                 }
             }
             Plugin.Log.LogWarning($"[RebindShaders] unique materials={seen.Count} rebound={rebound} sameOrMissing={sameOrMissing}");
@@ -885,7 +1047,86 @@ namespace Manimal.Icebreaker
                 Plugin.Log.LogWarning($"[RebindShaders]   {kv.Value}x  {kv.Key}");
         }
 
-        private static bool _lightsOn = true;
+        // aliased materials whose real shader wasn't loaded yet — the retry works this
+        // short list instead of re-sweeping the whole scene (the old retry paid a full
+        // FindObjectsOfType<Renderer> scan every 300 frames until the last one bound)
+        private static readonly System.Collections.Generic.List<Material> _aliasPending = new System.Collections.Generic.List<Material>();
+        private static bool _rebindRunning;
+
+        private static void RetryAliasPending()
+        {
+            int bound = 0;
+            for (int i = _aliasPending.Count - 1; i >= 0; i--)
+            {
+                var m = _aliasPending[i];
+                if (m == null || m.shader == null) { _aliasPending.RemoveAt(i); continue; }
+                if (!ShaderAliases.TryGetValue(m.shader.name, out var alias)) { _aliasPending.RemoveAt(i); continue; } // already rebound
+                var gameShader = Shader.Find(alias) ?? GClass872.Find(alias);
+                if (gameShader != null && gameShader != m.shader)
+                {
+                    m.shader = gameShader;
+                    _rebindDone.Add(m.GetInstanceID());
+                    _aliasPending.RemoveAt(i);
+                    bound++;
+                }
+            }
+            if (bound > 0) Plugin.Log.LogWarning($"[RebindShaders] alias retry bound {bound}, {_aliasPending.Count} still pending");
+            if (_aliasPending.Count == 0) _aliasRetryNeeded = false;
+        }
+
+        // the auto passes run THIS instead of the sync sweep: identical per-material work,
+        // but the scene walk yields every few thousand renderers. the sync version stacked
+        // with the other builders was the 14.3s load-in frame in the 07-27 telemetry.
+        private System.Collections.IEnumerator RebindShadersSliced()
+        {
+            if (_rebindRunning) yield break;
+            _rebindRunning = true;
+            var renderers = UnityEngine.Object.FindObjectsOfType<Renderer>(true);
+            int slice = 3000;
+            int rebound = 0;
+            var seen = new HashSet<Material>();
+            foreach (var r in renderers)
+            {
+                if (r != null)
+                    foreach (var m in r.sharedMaterials)
+                    {
+                        if (m == null || m.shader == null || !seen.Add(m)) continue;
+                        if (!_rebindDone.Add(m.GetInstanceID())) continue;
+                        var name = m.shader.name;
+                        bool aliased = ShaderAliases.TryGetValue(name, out var alias);
+                        if (aliased) name = alias;
+                        var gameShader = Shader.Find(name) ?? GClass872.Find(name);
+                        if (gameShader != null && gameShader != m.shader) { m.shader = gameShader; rebound++; }
+                        else if (aliased)
+                        {
+                            _rebindDone.Remove(m.GetInstanceID());
+                            _aliasRetryNeeded = true;
+                            if (!_aliasPending.Contains(m)) _aliasPending.Add(m);
+                        }
+                    }
+                if (--slice <= 0) { slice = 3000; yield return null; }
+            }
+            Plugin.Log.LogWarning($"[RebindShaders] sliced pass: {seen.Count} materials, {rebound} rebound, {_aliasPending.Count} alias-pending");
+            _rebindRunning = false;
+        }
+
+        // stage 2 used to run every builder in ONE frame — rebind sweep, lamp discovery,
+        // both cullers — measured at 14,292ms on 07-27. one system per frame instead; the
+        // tickers already no-op on empty lists, so arming the stage flag first is safe.
+        private System.Collections.IEnumerator StageTwoInit()
+        {
+            yield return RebindShadersSliced();
+            DiscoverLamps(); yield return null;
+            ApplyLamps(); yield return null;
+            AttachCullingCamera(); yield return null;
+            BuildDistanceCuller(); yield return null;
+            BuildLightCuller(); yield return null;
+            EnsureCullingManager();
+            if (GetComponent<IcebreakerCrew>() == null) gameObject.AddComponent<IcebreakerCrew>();
+            if (GetComponent<IcebreakerHeliExfil>() == null) gameObject.AddComponent<IcebreakerHeliExfil>();
+            IcebreakerSnowGusts.Spawn();
+        }
+
         private static bool _batched;
         private static int _geoMode;
         private static int _volProbeIdx;
@@ -965,6 +1206,10 @@ namespace Manimal.Icebreaker
 
             private static bool Prefix()
             {
+                // CRITICAL gate: vanilla maps run their own adaptive grids — suppressing
+                // those would strip occlusion culling from every real map (audit follow-up;
+                // this prefix was global for one day)
+                if (!IceGate.On) return true;
                 if (Plugin.NativeCulling.Value) return true;
                 Plugin.Log.LogWarning("[Culling] native BSG grid suppressed (NativeCulling=false) — our sidecar bakes drive culling");
                 return false;
@@ -1449,7 +1694,9 @@ namespace Manimal.Icebreaker
         // each drained group expands into renderer-level pendings for DrainPcToggles
         private static readonly Dictionary<object, bool> _pcGroupPending = new Dictionary<object, bool>();
         private static readonly List<object> _pcGroupScratch = new List<object>(1024);
-        private const int PcGroupBudget = 700;
+        // each drained group costs a reflection field read plus a renderer loop — 700 in
+        // one frame was a hidden burst on every big cell change (07-27 stutter pass)
+        private const int PcGroupBudget = 200;
 
         private static void DrainPcGroupToggles()
         {
@@ -1558,7 +1805,11 @@ namespace Manimal.Icebreaker
         // a delayed SHOW is the turn-a-corner-and-the-wall-is-missing pop. typical
         // corner-turn shows are a few hundred renderers = same frame now; the rare
         // full volume-entry swap settles in 2-3 frames instead of ~15.
-        private const int PcShowBudget = 5000;
+        // 07-27 telemetry: pcRuns present at 92% of stutter spikes. 5000 shows in one
+        // frame was seconds of renderer writes on a big cell reveal — the project's own
+        // measured line is ~350 smooth / 1500 frozen. shows keep priority over hides,
+        // big reveals just take a few frames to finish streaming in.
+        private const int PcShowBudget = 600;
 
         private static void DrainPcToggles()
         {
@@ -1728,9 +1979,124 @@ namespace Manimal.Icebreaker
             Plugin.Log.LogWarning($"[LightCull] tracking {_lightEntries.Count} static map lights (80m x{Plugin.CullDistanceScale.Value:F2})");
         }
 
+        // cutscene hold: the cullers key off CAMERA position, and the cutscene flies it
+        // hundreds of meters out — wide shots culled every deck lamp (>80m) and popped
+        // props. driver sets this for the duration; cullers resume + re-cull on release.
+        internal static bool CutsceneHold;
+
+        internal static void CutsceneShowAll()
+        {
+            // the NATIVE CullingManager also rides Camera.onPreCull — registered before
+            // the cutscene driver's stomp, so it culled from the PLAYER's stale position
+            // all cutscene (dark ship in wide shots, wedged lights). LockState(true)
+            // pauses evaluation WITHOUT unhooking anything (do NOT toggle cm.enabled —
+            // OnDisable unhooks onPreCull and only Awake re-registers: raid-long
+            // lobotomy). BSG's ForceEnable(true) would restore everything but its loop
+            // has no per-object guard and NREs on culling objects with null internals —
+            // so the restore sweep below is OURS, guarded per object.
+            try
+            {
+                var cm = CullingManager.Instance;
+                if (cm != null) cm.LockState(true);
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[CutsceneHold] native manager lock failed: {e.Message}"); }
+
+            int lights = 0, rends = 0;
+            foreach (var e in _lightEntries)
+                if (e.L != null && !e.L.enabled) { e.L.enabled = true; lights++; }
+            int native = ForceNativeLightsOn();
+            for (int i = 0; i < _distEntries.Count; i++)
+            {
+                var e = _distEntries[i];
+                if (e.R != null && e.WeDisabled)
+                {
+                    e.R.enabled = true;
+                    e.WeDisabled = false;
+                    _distEntries[i] = e;
+                    rends++;
+                }
+            }
+            Plugin.Log.LogWarning($"[CutsceneHold] forced on: {lights} tracked + {native} native lights, {rends} renderers");
+        }
+
+        // free a rig's lights from native culling FOR GOOD: force them lit at authored
+        // intensity and destroy their CullingLightObject components (the game class
+        // unregisters itself on destroy). for dynamic actors like the exfil heli, whose
+        // lights must shine mid-flight from 300m out — a distance-culled nav strobe is
+        // nonsense, and any one-shot heal gets re-faded by the manager within seconds.
+        internal static int FreeNativeLights(Transform root)
+        {
+            if (root == null) return 0;
+            if (_cloMaxIntensity == null)
+                _cloMaxIntensity = HarmonyLib.AccessTools.Field(typeof(CullingLightObject), "_maxLightIntensity");
+            int n = 0;
+            foreach (var clo in root.GetComponentsInChildren<CullingLightObject>(true))
+            {
+                var l = clo.GetLight();
+                if (l != null)
+                {
+                    l.enabled = true;
+                    try
+                    {
+                        float mi = (float)_cloMaxIntensity.GetValue(clo);
+                        if (mi > 0f) l.intensity = mi;
+                    }
+                    catch { }
+                    n++;
+                }
+                try { UnityEngine.Object.Destroy(clo); } catch { }
+            }
+            return n;
+        }
+
+        // the native system darkens lights by fading INTENSITY (float_2 multiplier), not
+        // Light.enabled — an enabled-only sweep "fixes 0" while the ship sits black.
+        // restore state + intensity ourselves: SetVisibility(true) flips the manager's
+        // internal visible flag (per-object try — flicker/volumetric refs can be null on
+        // rebaked components), then hard-write intensity back to the authored/driven
+        // ceiling (_maxLightIntensity — ApplyLamps keeps it at the LampIntensity slider).
+        private static System.Reflection.FieldInfo _cloMaxIntensity;
+        internal static int ForceNativeLightsOn()
+        {
+            if (_cloMaxIntensity == null)
+                _cloMaxIntensity = HarmonyLib.AccessTools.Field(typeof(CullingLightObject), "_maxLightIntensity");
+            int n = 0;
+            foreach (var clo in UnityEngine.Object.FindObjectsOfType<CullingLightObject>())
+            {
+                try { clo.SetVisibility(true); } catch { }
+                var l = clo.GetLight();
+                if (l == null) continue;
+                if (!l.enabled) l.enabled = true;
+                try
+                {
+                    float mi = (float)_cloMaxIntensity.GetValue(clo);
+                    if (mi > 0f && l.intensity < mi) { l.intensity = mi; n++; }
+                }
+                catch { }
+            }
+            return n;
+        }
+
+        // post-cutscene: heal every native light once more, then unlock the manager so
+        // it resumes with fresh distances from the real camera and re-culls cleanly
+        internal static void CutsceneRelease()
+        {
+            CutsceneHold = false;
+            int native = 0;
+            try { native = ForceNativeLightsOn(); } catch { }
+            try
+            {
+                var cm = CullingManager.Instance;
+                if (cm != null) cm.LockState(false);
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[CutsceneHold] release failed: {e.Message}"); }
+            Plugin.Log.LogWarning($"[CutsceneHold] released — healed {native} native lights, culling unlocked");
+        }
+
         // all lights every ~15 frames — 1.8k distance checks is nothing
         private static void TickLightCuller()
         {
+            if (CutsceneHold) return;
             if (_lightEntries.Count == 0 || CameraRef == null || Time.frameCount % 15 != 0) return;
             var camPos = CameraRef.transform.position;
             float d = 80f * Plugin.CullDistanceScale.Value;
@@ -1747,15 +2113,17 @@ namespace Manimal.Icebreaker
         // re-enables what IT disabled — never overrides the occlusion culling's hides.
         private static void TickDistanceCuller()
         {
+            if (CutsceneHold) return;
             if (_distEntries.Count == 0 || CameraRef == null) return;
             var camPos = CameraRef.transform.position;
             float dcScale = Plugin.CullDistanceScale.Value; // live — tune the pop-in in F12 mid-raid
             int n = Mathf.Min(10000, _distEntries.Count);
             // distance CHECKS are cheap; renderer.enabled WRITES are not — a fast camera
             // move once flipped 4412 in one frame (356ms). cap writes; the sweep cursor
-            // catches the rest over the following frames.
+            // catches the rest over the following frames. 600 was still ~50ms worth and
+            // showed up as dist=600 on two of the worst 07-27 spike frames.
             int writes = 0;
-            for (int i = 0; i < n && writes < 600; i++)
+            for (int i = 0; i < n && writes < 250; i++)
             {
                 _distCursor = (_distCursor + 1) % _distEntries.Count;
                 var e = _distEntries[_distCursor];
@@ -1987,6 +2355,7 @@ namespace Manimal.Icebreaker
 
         private static Exception Finalizer(Exception __exception, MethodBase __originalMethod)
         {
+            if (__exception != null && !IceGate.On) return __exception;
             if (__exception != null)
                 Plugin.Log.LogWarning($"[RaidFix] swallowed CameraClass.{__originalMethod.Name}: {__exception.Message}");
             return null;
@@ -2008,6 +2377,7 @@ namespace Manimal.Icebreaker
         // = the synthesized-generation fallback below takes over unchanged.
         private static void Prefix(AICoversData __instance)
         {
+            if (!IceGate.On) return; // vanilla covers restore untouched
             if (Plugin.RetailAIBake.Value)
                 IcebreakerAIBake.TryFill(__instance);
 
@@ -2020,6 +2390,7 @@ namespace Manimal.Icebreaker
 
         private static Exception Finalizer(Exception __exception, AICoversData __instance)
         {
+            if (__exception != null && !IceGate.On) return __exception;
             if (__exception != null)
             {
                 Plugin.Log.LogWarning($"[RaidFix] swallowed AICoversData.RestoreData: {__exception.Message}");
@@ -2161,8 +2532,9 @@ namespace Manimal.Icebreaker
     {
         private static Exception Finalizer(Exception __exception)
         {
-            if (__exception != null)
-                Plugin.Log.LogWarning($"[RaidFix] swallowed AICoversData.CachePoints: {__exception.Message}");
+            if (__exception == null) return null;
+            if (!IceGate.On) return __exception;
+            Plugin.Log.LogWarning($"[RaidFix] swallowed AICoversData.CachePoints: {__exception.Message}");
             return null;
         }
     }
@@ -2179,6 +2551,12 @@ namespace Manimal.Icebreaker
         // rebuild BSG's spawn-trigger layer (tier events + group-size BD triggers)
         private static void Postfix(BotsController __instance)
         {
+            // EVERYTHING below is icebreaker-only scene repair (flares, shadow split,
+            // sealed doors, keycard heal, spawn triggers). it used to run on every map:
+            // a vanilla raid paid a 236ms shadow sweep over 224k renderers and logged
+            // flare/door diagnostics for a scene that has none of our data.
+            if (!IceGate.On) return;
+
             if (Plugin.EventSpawns.Value)
                 IcebreakerAIPlaces.TryBuild(__instance);
 
@@ -2209,6 +2587,8 @@ namespace Manimal.Icebreaker
             // door-chain autopsy (runs AFTER RestoreData + BotDoorsController.RefreshData):
             // bots ignoring doors means one of three stages died silently — cell ids not
             // filled, id->link reconnect empty, or links without matched Door. name it.
+            // pure diagnostic, so keep it behind the diag switch.
+            if (!Plugin.DiagHotkeys.Value) return;
             try
             {
                 var covers = __instance.CoversData;
@@ -2369,6 +2749,7 @@ namespace Manimal.Icebreaker
 
         private static void Prefix()
         {
+            if (!IceGate.On) return; // audit P0: these repairs must never touch vanilla maps
             LateWaypointsPatch.Apply(); // by now every plugin assembly is loaded
             if (UnityEngine.Object.FindObjectOfType<AIStationaryController>() == null)
             {
@@ -2394,8 +2775,9 @@ namespace Manimal.Icebreaker
     {
         private static Exception Finalizer(Exception __exception)
         {
-            if (__exception != null)
-                Plugin.Log.LogWarning($"[RaidFix] swallowed AIStationaryController.Init: {__exception.Message}");
+            if (__exception == null) return null;
+            if (!IceGate.On) return __exception; // vanilla maps keep their real exceptions
+            Plugin.Log.LogWarning($"[RaidFix] swallowed AIStationaryController.Init: {__exception.Message}");
             return null;
         }
     }
@@ -2412,6 +2794,7 @@ namespace Manimal.Icebreaker
     {
         private static void Prefix(BotZone __instance)
         {
+            if (!IceGate.On) return; // vanilla zones are healthy — dont touch their lists
             var list = __instance.SpawnPointMarkers;
             if (list == null)
             {
@@ -2436,8 +2819,9 @@ namespace Manimal.Icebreaker
     {
         private static Exception Finalizer(Exception __exception)
         {
-            if (__exception != null)
-                Plugin.Log.LogWarning($"[RaidFix] swallowed BotDoorsController.RefreshData: {__exception.Message}");
+            if (__exception == null) return null;
+            if (!IceGate.On) return __exception;
+            Plugin.Log.LogWarning($"[RaidFix] swallowed BotDoorsController.RefreshData: {__exception.Message}");
             return null;
         }
     }
@@ -2473,6 +2857,9 @@ namespace Manimal.Icebreaker
         private static bool _stackLogged;
         private static Exception SwallowFinalizer(Exception __exception)
         {
+            // once installed this finalizer lives on Waypoints' patch for the whole
+            // session — vanilla raids after an icebreaker raid keep their exceptions
+            if (__exception != null && !IceGate.On) return __exception;
             if (__exception != null)
             {
                 // Waypoints' per-Door link generation is now our PRIMARY bot-door path
@@ -2497,7 +2884,10 @@ namespace Manimal.Icebreaker
     [HarmonyPatch(typeof(WorldInteractiveObject), "method_3")]
     internal static class Patch_DoorTriggerEmit
     {
-        private static Exception Finalizer(Exception __exception) => null;
+        // vanilla maps have LIVE quest/event trigger singletons — masking their emit
+        // exceptions would silently break quests (audit P0 family)
+        private static Exception Finalizer(Exception __exception)
+            => __exception == null || IceGate.On ? null : __exception;
     }
 
     // bot activation (BotOwner.method_10) swallows its exception INTERNALLY (try/catch ->
@@ -2510,25 +2900,174 @@ namespace Manimal.Icebreaker
     {
         private static IEnumerable<MethodBase> TargetMethods()
         {
+            // cover EVERYTHING method_10 calls: Activate() overloads AND the Init/
+            // InitPoints steps, on PROPERTY- and FIELD-typed members alike (the old
+            // property-Activate-only net provably missed Bot6's ActiveFail step), plus
+            // BotOwner's own method_2/method_11 sub-steps.
+            var stepNames = new HashSet<string> { "Activate", "Init", "InitPoints" };
             var seen = new HashSet<MethodBase>();
+            var memberTypes = new List<System.Type>();
             foreach (var prop in typeof(BotOwner).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                memberTypes.Add(prop.PropertyType);
+            foreach (var fld in typeof(BotOwner).GetFields(BindingFlags.Public | BindingFlags.Instance))
+                memberTypes.Add(fld.FieldType);
+            // enumerate CONCRETE implementations too: several members (Brain, Mover...)
+            // are typed as abstract bases whose Activate is abstract — enumerating the
+            // declared type finds only the (unpatchable) abstract slot while the real
+            // override lives on a subclass. sweep the assembly for every type assignable
+            // to any member type and take its DECLARED step methods.
+            var baseTypes = new List<System.Type>();
+            foreach (var t in memberTypes)
+                if (t.IsClass && t != typeof(string)) baseTypes.Add(t);
+            System.Type[] all;
+            try { all = typeof(BotOwner).Assembly.GetTypes(); }
+            catch (ReflectionTypeLoadException e) { all = System.Array.FindAll(e.Types, x => x != null); }
+            foreach (var t in all)
             {
-                var t = prop.PropertyType;
-                if (!t.IsClass || t == typeof(string)) continue;
-                foreach (var m in t.GetMethods(BindingFlags.Public | BindingFlags.Instance))
+                if (!t.IsClass || t.IsGenericTypeDefinition) continue;
+                bool relevant = false;
+                foreach (var bt in baseTypes)
+                    if (bt.IsAssignableFrom(t)) { relevant = true; break; }
+                if (!relevant) continue;
+                foreach (var m in t.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
                 {
-                    if (m.Name != "Activate" || m.IsAbstract || m.IsGenericMethod) continue;
-                    if (m.DeclaringType == null || m.DeclaringType.Assembly != typeof(BotOwner).Assembly) continue;
+                    if (!stepNames.Contains(m.Name) || m.IsAbstract || m.IsGenericMethod) continue;
+                    if (m.GetMethodBody() == null) continue;
                     if (seen.Add(m)) yield return m;
                 }
+            }
+            foreach (var name in new[] { "method_2", "method_11" })
+            {
+                var m = AccessTools.Method(typeof(BotOwner), name);
+                if (m != null && !m.IsGenericMethod && seen.Add(m)) yield return m;
             }
         }
 
         private static Exception Finalizer(Exception __exception, object __instance, MethodBase __originalMethod)
         {
-            if (__exception != null)
-                Plugin.Log.LogError($"[BotWitness] {__originalMethod.DeclaringType?.Name}.Activate FAILED: {__exception}");
+            // diagnostic only, and only ours: a vanilla-map bot throwing here is BSG's
+            // business, not something this mod should be shouting about
+            if (__exception != null && IceGate.On && Plugin.DiagHotkeys.Value)
+                Plugin.Log.LogError($"[BotWitness] {__originalMethod.DeclaringType?.Name}.{__originalMethod.Name} FAILED: {__exception}");
             return __exception;
+        }
+    }
+
+    // THE activation fix + diagnosis: BSG's method_10 aborts the ENTIRE activation on
+    // the first throw (internal catch -> silent ActiveFail statue), and the throwing
+    // step evaded every witness net (not a patchable call — likely a lazy property
+    // getter or an unlisted call). so on the icebreaker we run the mirrored step list
+    // ourselves: each step individually guarded, failures logged BY NAME with stacks,
+    // and activation continues — one broken subsystem no longer statues the bot.
+    // mirrors 0.16.9 method_10 exactly (order matters: BotState=Active lands mid-list
+    // where BSG set it).
+    [HarmonyPatch(typeof(BotOwner), "method_10")]
+    internal static class Patch_BotActivationStepwise
+    {
+        private static readonly MethodInfo _m2 = AccessTools.Method(typeof(BotOwner), "method_2");
+        private static readonly MethodInfo _m11 = AccessTools.Method(typeof(BotOwner), "method_11");
+        private static readonly FieldInfo _activateTime = AccessTools.Field(typeof(BotOwner), "_activateTime");
+
+        private static bool Prefix(BotOwner __instance)
+        {
+            if (!IceGate.On) return true; // vanilla maps: BSG's original behavior
+            var b = __instance;
+            int failed = 0;
+            void Step(string name, Action a)
+            {
+                try { a(); }
+                catch (Exception e)
+                {
+                    failed++;
+                    Plugin.Log.LogError($"[BotWitness] '{b.name}' step {name} FAILED: {e}");
+                }
+            }
+
+            Step("VoxelesPersonalData", () => b.VoxelesPersonalData.Activate(b.BotsGroup.BotGame.BotsController.CoversData));
+            Step("LookSensor", () => b.LookSensor.Activate());
+            Step("Settings", () => b.Settings.Activate());
+            Step("ExternalItemsController", () => b.ExternalItemsController.Activate());
+            Step("ItemTaker", () => b.ItemTaker.Activate());
+            Step("BewarePlantedMine", () => b.BewarePlantedMine.Activate());
+            Step("EnemyChooser", () => b.EnemyChooser.Activate());
+            Step("PlanDropItem", () => b.PlanDropItem.Activate());
+            Step("MinesData", () => b.MinesData.Activate());
+            Step("ItemDropper", () => b.ItemDropper.Activate());
+            Step("SuppressStationary", () => b.SuppressStationary.Activate());
+            Step("NavMeshCutterController", () => b.NavMeshCutterController.Activate());
+            Step("BotFollower", () => b.BotFollower.Activate());
+            Step("FriendlyTilt", () => b.FriendlyTilt.Activate());
+            Step("RandomPlanItemDropper", () => b.RandomPlanItemDropper.Activate());
+            Step("Tactic", () => b.Tactic.Activate());
+            Step("EnemiesController", () => b.EnemiesController.Activate(b.BotsGroup.BotGame.BotsController.OnlineDependenceSettings.CanPersueAxeman));
+            Step("HearingSensor", () => b.HearingSensor.Init());
+            Step("LeaveData", () => b.LeaveData.Activate(b.BotsGroup.BotZone.Modifier.LeaveDist));
+            Step("Receiver", () => b.Receiver.Init());
+            Step("Mover", () => b.Mover.Activate());
+            Step("BotTalk", () => b.BotTalk.Activate());
+            Step("LoyaltyData", () => b.LoyaltyData.Activate());
+            Step("AssaultDangerArea", () => b.AssaultDangerArea.Activate());
+            Step("DangerArea", () => b.DangerArea.Activate());
+            Step("BotPersonalStats", () => b.BotPersonalStats.Init(b, b.BotsGroup.BotZone.name));
+            Step("StandBy.InitPoints", () => b.StandBy.InitPoints(b.BotsGroup.BotZone.Modifier.DistToActivate, b.BotsGroup.BotZone.Modifier.DistToSleep));
+            Step("method_2", () => _m2.Invoke(b, null));
+            Step("FlashGrenade", () => b.FlashGrenade.Activate());
+            Step("PeaceHardAim", () => b.PeaceHardAim.Activate());
+            Step("ShootData", () => b.ShootData.Activate());
+            Step("PeaceLook", () => b.PeaceLook.Activate());
+            Step("NearDoorData", () => b.NearDoorData.Activate());
+            Step("AIData", () => b.AIData.Activate());
+            Step("UnityEditorRunChecker", () => b.UnityEditorRunChecker.Activate());
+            Step("NightVision", () => b.NightVision.Activate());
+            Step("SearchData", () => b.SearchData.Activate());
+            Step("Medecine", () => b.Medecine.Activate());
+            b.BotState = EBotState.Active;
+            Step("Memory", () => b.Memory.Activate());
+            Step("SuppressShoot", () => b.SuppressShoot.Activate());
+            Step("EatDrinkData", () => b.EatDrinkData.Activate());
+            Step("SecondWeaponData", () => b.SecondWeaponData.Activate());
+            Step("BotLay", () => b.BotLay.Activate());
+            Step("SuppressGrenade", () => b.SuppressGrenade.Activate());
+            Step("method_11", () => _m11.Invoke(b, null));
+            Step("Brain", () => b.Brain.Activate());
+            Step("PatrollingData", () => b.PatrollingData.Activate());
+            Step("WeaponManager", () => b.WeaponManager.Activate());
+            Step("BotFollower.TryFindBoss", () => b.BotFollower.TryFindBoss());
+            try { _activateTime?.SetValue(b, Time.time); } catch { }
+
+            if (failed > 0)
+                Plugin.Log.LogError($"[BotWitness] '{b.name}' activated WITH {failed} failed step(s) — see above (BSG would have statued it)");
+            return false; // original skipped — we ran the whole sequence
+        }
+    }
+
+    // outcome reporter (kept for vanilla-path visibility and as a backstop)
+    [HarmonyPatch(typeof(BotOwner), "method_10")]
+    internal static class Patch_BotActivationOutcome
+    {
+        private static void Postfix(BotOwner __instance)
+        {
+            try
+            {
+                if (!IceGate.On || !Plugin.DiagHotkeys.Value) return; // ours + armed only
+                if (__instance == null || __instance.BotState != EBotState.ActiveFail) return;
+                // no witnessed step threw -> the NRE lives in a property-getter chain
+                // used as an ARGUMENT in method_10. probe every deref of those chains.
+                string diag;
+                try
+                {
+                    var bg = __instance.BotsGroup;
+                    var game = bg?.BotGame;
+                    var bc = game != null ? game.BotsController : null;
+                    var zone = bg?.BotZone;
+                    object modifier = null;
+                    try { modifier = zone != null ? (object)zone.Modifier : null; } catch (Exception mz) { modifier = "THREW:" + mz.Message; }
+                    diag = $"BotsGroup={(bg != null)} BotGame={(game != null)} BotsController={(bc != null)} CoversData={(bc?.CoversData != null)} BotZone={(zone != null ? zone.name : "NULL")} Modifier={(modifier ?? "NULL")}";
+                }
+                catch (Exception e) { diag = "probe threw: " + e.Message; }
+                Plugin.Log.LogError($"[BotWitness] '{__instance.name}' role={__instance.Profile?.Info?.Settings?.Role} ACTIVATION FAILED — chain probe: {diag}");
+            }
+            catch { }
         }
     }
 
@@ -2542,12 +3081,16 @@ namespace Manimal.Icebreaker
     {
         private static bool Prefix(WavesSettings wavesSettings, WildSpawnWave[] waves, ref WildSpawnWave[] __result)
         {
+            // audit P0: the old gate was a naming-convention heuristic (every wave named
+            // BotZone*) — identity now comes from the location id captured at smethod_6;
+            // the wave-shape check remains only as secondary validation
+            if (!IceGate.On) return true;
             bool ours = waves != null && waves.Length > 0;
             if (ours)
                 foreach (var w in waves)
                     if (w.SpawnPoints == null || !w.SpawnPoints.StartsWith("BotZone") || w.SpawnPoints.Length <= "BotZone".Length)
                     { ours = false; break; }
-            if (!ours) return true; // not our map — original behavior
+            if (!ours) return true; // icebreaker but waves dont look authored — leave alone
 
             foreach (var w in waves)
             {
@@ -2606,6 +3149,7 @@ namespace Manimal.Icebreaker
         {
             try
             {
+                if (!IceGate.On) return; // vanilla maps have real baked core ids
                 if (__result == null || __result.StartCorePoint != null) return;
                 var covers = UnityEngine.Object.FindObjectOfType<AICoversData>();
                 var cores = covers != null && covers.AICorePointsHolder != null ? covers.AICorePointsHolder.CorePoints : null;
@@ -2634,6 +3178,10 @@ namespace Manimal.Icebreaker
     [HarmonyPatch(typeof(MotionEffector), "FixedTracking")]
     internal static class Patch_MotionEffectorTick
     {
-        private static Exception Finalizer(Exception __exception) => null; // silent: per-frame, would flood the log
+        // silent swallow ONLY on the icebreaker (per-frame, logging would flood);
+        // vanilla maps keep their exceptions — this was masking every FixedTracking
+        // throw everywhere (audit P0)
+        private static Exception Finalizer(Exception __exception)
+            => __exception == null || IceGate.On ? null : __exception;
     }
 }

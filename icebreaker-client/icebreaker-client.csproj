@@ -61,6 +61,9 @@
     <Reference Include="UnityEngine.AudioModule">
       <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.DirectorModule">
+      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.DirectorModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.VideoModule">
       <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.VideoModule.dll</HintPath>
     </Reference>

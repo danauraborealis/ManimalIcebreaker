@@ -1,0 +1,195 @@
+{
+ "level550": [
+  {
+   "class": "CommonAssets.Scripts.Game.LabyrinthEvent.TrapSyncable",
+   "go": "Trap_hole_cap_01 (1)",
+   "fields": {
+    "m_Enabled": 1,
+    "m_Name": "",
+    "TrapType": 1651930761
+   }
+  },
+  {
+   "class": "CommonAssets.Scripts.Game.LabyrinthEvent.TrapSyncable",
+   "go": "Trap_hole_cap_01 (1)",
+   "fields": {
+    "m_Enabled": 1,
+    "m_Name": "",
+    "TrapType": -1032300646
+   }
+  },
+  {
+   "class": "CommonAssets.Scripts.Game.LabyrinthEvent.TrapSyncable",
+   "go": "Trap_hole_cap_01 (1)",
+   "fields": {
+    "m_Enabled": 1,
+    "m_Name": "",
+    "TrapType": 846972059
+   }
+  },
+  {
+   "class": "CommonAssets.Scripts.Game.LabyrinthEvent.TrapSyncable",
+   "go": "Trap_hole_cap_01 (1)",
+   "fields": {
+    "m_Enabled": 1,
+    "m_Name": "",
+    "TrapType": 1407340024
+   }
+  },
+  {
+   "class": "CommonAssets.Scripts.Game.LabyrinthEvent.TrapSyncable",
+   "go": "Trap_hole_cap_01 (1)",
+   "fields": {
+    "m_Enabled": 1,
+    "m_Name": "",
+    "TrapType": 719823005
+   }
+  },
+  {
+   "class": "CommonAssets.Scripts.Game.LabyrinthEvent.TrapSyncable",
+   "go": "Trap_hole_cap_01 (1)",
+   "fields": {
+    "m_Enabled": 1,
+    "m_Name": "",
+    "TrapType": -1930002518
+   }
+  },
+  {
+   "class": "CommonAssets.Scripts.Game.LabyrinthEvent.TrapSyncable",
+   "go": "Trap_hole_cap_01 (1)",
+   "fields": {
+    "m_Enabled": 1,
+    "m_Name": "",
+    "TrapType": -1160202647
+   }
+  },
+  {
+   "class": "CommonAssets.Scripts.Game.LabyrinthEvent.TrapSyncable",
+   "go": "Trap_hole_cap_01 (1)",
+   "fields": {
+    "m_Enabled": 1,
+    "m_Name": "",
+    "TrapType": 1359397522
+   }
+  },
+  {
+   "class": "CommonAssets.Scripts.Game.LabyrinthEvent.TrapSyncable",
+   "go": "Trap_hole_cap_01 (1)",
+   "fields": {
+    "m_Enabled": 1,
+    "m_Name": "",
+    "TrapType": 2011606347
+   }
+  }
+ ],
+ "level552": [
+  {
+   "class": "CommonAssets.Scripts.Game.LabyrinthEvent.TrapSyncable",
+   "go": "INTERACTIVE_Spikes_trap_01_set",
+   "fields": {
+    "m_Enabled": 1,
+    "m_Name": "",
+    "TrapType": -1786960011
+   }
+  },
+  {
+   "class": "CommonAssets.Scripts.Game.LabyrinthEvent.TrapSyncable",
+   "go": "INTERACTIVE_Spikes_trap_01_set",
+   "fields": {
+    "m_Enabled": 1,
+    "m_Name": "",
+    "TrapType": 478472866
+   }
+  },
+  {
+   "class": "CommonAssets.Scripts.Game.LabyrinthEvent.TrapSyncable",
+   "go": "INTERACTIVE_Spikes_trap_01_set",
+   "fields": {
+    "m_Enabled": 1,
+    "m_Name": "",
+    "TrapType": 1909370705
+   }
+  },
+  {
+   "class": "CommonAssets.Scripts.Game.LabyrinthEvent.TrapSyncable",
+   "go": "INTERACTIVE_Spikes_trap_01_set",
+   "fields": {
+    "m_Enabled": 1,
+    "m_Name": "",
+    "TrapType": -1105909508
+   }
+  },
+  {
+   "class": "CommonAssets.Scripts.Game.LabyrinthEvent.TrapSyncable",
+   "go": "INTERACTIVE_Spikes_trap_01_set",
+   "fields": {
+    "m_Enabled": 1,
+    "m_Name": "",
+    "TrapType": 170667536
+   }
+  },
+  {
+   "class": "CommonAssets.Scripts.Game.LabyrinthEvent.TrapSyncable",
+   "go": "INTERACTIVE_Spikes_trap_01_set",
+   "fields": {
+    "m_Enabled": 1,
+    "m_Name": "",
+    "TrapType": -1387164459
+   }
+  },
+  {
+   "class": "CommonAssets.Scripts.Game.LabyrinthEvent.TrapSyncable",
+   "go": "INTERACTIVE_Spikes_trap_01_set",
+   "fields": {
+    "m_Enabled": 1,
+    "m_Name": "",
+    "TrapType": -1274469012
+   }
+  },
+  {
+   "class": "CommonAssets.Scripts.Game.LabyrinthEvent.TrapSyncable",
+   "go": "INTERACTIVE_Spikes_trap_01_set",
+   "fields": {
+    "m_Enabled": 1,
+    "m_Name": "",
+    "TrapType": -1654312030
+   }
+  },
+  {
+   "class": "CommonAssets.Scripts.Game.LabyrinthEvent.TrapSyncable",
+   "go": "INTERACTIVE_Spikes_trap_01_set",
+   "fields": {
+    "m_Enabled": 1,
+    "m_Name": "",
+    "TrapType": 217857348
+   }
+  },
+  {
+   "class": "CommonAssets.Scripts.Game.LabyrinthEvent.TrapSyncable",
+   "go": "INTERACTIVE_Spikes_trap_01_set",
+   "fields": {
+    "m_Enabled": 1,
+    "m_Name": "",
+    "TrapType": -2063468982
+   }
+  },
+  {
+   "class": "CommonAssets.Scripts.Game.LabyrinthEvent.TrapSyncable",
+   "go": "INTERACTIVE_Spikes_trap_01_set",
+   "fields": {
+    "m_Enabled": 1,
+    "m_Name": "",
+    "TrapType": 1769372445
+   }
+  },
+  {
+   "class": "CommonAssets.Scripts.Game.LabyrinthEvent.TrapSyncable",
+   "go": "INTERACTIVE_Spikes_trap_01_set",
+   "fields": {
+    "m_Enabled": 1,
+    "m_Name": "",
+    "TrapType": 293823045
+   }
+  }
+ ]
+}

@@ -132,10 +132,13 @@ namespace Manimal.Icebreaker
 
             Plugin.Log.LogWarning($"[Crew] done: {CountByRole(WildSpawnType.exUsec)} rogues, knight={CountByRole(WildSpawnType.bossKnight) > 0}");
 
-            // NOW premake the trigger squads — after the rogues are on deck, so the
-            // cache build has the bot-gen queue to itself
+            // NOW prepare the trigger squads — after the rogues are on deck, so the
+            // build has the bot-gen queue to itself. pool mode goes one further than
+            // the profile premake: the bots are fully SPAWNED into an off-map pen and
+            // events teleport them in, so the instantiation + gear-bundle cost lands
+            // here in the quiet early raid (the ice climb) instead of on a trigger frame
             if (Plugin.CrewBlackDiv.Value && Plugin.EventSpawns.Value)
-                StartCoroutine(PreMakeTriggerSquads());
+                StartCoroutine(Plugin.CrewPreSpawnPool.Value ? PoolSpawnTriggerSquads() : PreMakeTriggerSquads());
 
             // event-spawn mode (default): the resurrected retail trigger layer raises the
             // events (hides0/stern0/wedges1 + group-size ladder) — but delivery is OUR
@@ -168,6 +171,8 @@ namespace Manimal.Icebreaker
         private void OnDestroy()
         {
             _unsubEvents?.Invoke();
+            // statics must not leak bots into the next raid's pool
+            _penPending.Clear(); _penIntake.Clear(); _pool.Clear(); _penSlot = 0;
         }
 
         // BD AI modifications (temperament rolls, mind rewires, forced rush) REMOVED per
@@ -855,6 +860,12 @@ namespace Manimal.Icebreaker
         {
             try
             {
+                // pen bots first — a teleport costs nothing and the squad appears
+                // instantly; anything beyond the pool runs the classic pipeline below
+                int fromPen = DeliverFromPool(role, zone, count);
+                count -= fromPen;
+                if (count <= 0) return;
+
                 var ready = new List<BotCreationDataClass>(count);
                 if (_preMade.TryGetValue((int)role, out var pq))
                     while (ready.Count < count && pq.Count > 0)
@@ -962,8 +973,182 @@ namespace Manimal.Icebreaker
             catch (Exception e) { Plugin.Log.LogWarning($"[Crew] premake {role} failed: {e.Message}"); }
         }
 
+        // ---- PRE-SPAWN POOL (user call 07-27) ----
+        // the profile premake killed the server round-trip, but the trigger frame still
+        // paid instantiation + cold gear bundles (the 6.4s frame in the 07-25 log). pool
+        // mode spawns the whole roster during the quiet early raid, whisks each bot to a
+        // pen far off the map, and events TELEPORT them in — the same delivery points,
+        // the same hold/release staging, none of the cost.
+        //
+        // each squad pen-spawns INTO ITS DESTINATION ZONE first (so BotsGroup/patrol data
+        // point at the right part of the ship) and only then moves to the pen — the pen
+        // itself is a bare collider slab below the ice, out of earshot and sight, where
+        // paused patrol + distance keep the bots dormant.
+        private struct PenEntry { public BotOwner Bot; public string ZoneName; }
+        private static readonly Dictionary<string, (int role, string zone)> _penPending = new Dictionary<string, (int, string)>();
+        private static readonly List<BotOwner> _penIntake = new List<BotOwner>();
+        private static readonly Dictionary<int, List<PenEntry>> _pool = new Dictionary<int, List<PenEntry>>();
+        private static readonly Vector3 PenBase = new Vector3(350f, -58f, 0f);
+        private static int _penSlot;
+
+        private IEnumerator PoolSpawnTriggerSquads()
+        {
+            _penPending.Clear(); _penIntake.Clear(); _pool.Clear(); _penSlot = 0;
+
+            var slab = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            slab.name = "Icebreaker_BotPen";
+            slab.transform.position = PenBase + Vector3.down;
+            slab.transform.localScale = new Vector3(30f, 1f, 30f);
+            var mr = slab.GetComponent<MeshRenderer>();
+            if (mr != null) mr.enabled = false;
+
+            // destination-true plan, one entry per bot; counts mirror the premake's
+            // (base squads + a little extras headroom). shortfalls beyond the pool fall
+            // back to the normal premake/create path inside ForceSpawnBatch.
+            var plan = new List<(WildSpawnType role, string zone)>();
+            void Add(int n, WildSpawnType r, string z) { for (int i = 0; i < n; i++) plan.Add((r, z)); }
+            Add(5, (WildSpawnType)BdAssault, "BotZoneEngineHide");  // hides0 squad + headroom
+            Add(4, (WildSpawnType)BdAssault, "BotZoneSternTop");    // stern first team + headroom
+            Add(6, (WildSpawnType)BdAssault, "BotZoneStern");       // stern second + third teams
+            Add(4, (WildSpawnType)BdAssault, WedgeZones[0]);        // wedge detail + headroom
+            Add(1, (WildSpawnType)BdWedge, WedgeZones[0]);          // the boss himself
+
+            var zonesByName = UnityEngine.Object.FindObjectsOfType<BotZone>()
+                .Where(z => z.SpawnPointMarkers != null && z.SpawnPointMarkers.Count > 0)
+                .GroupBy(z => z.name).ToDictionary(g => g.Key, g => g.First());
+
+            foreach (var (role, zoneName) in plan)
+            {
+                if (!zonesByName.TryGetValue(zoneName, out var zone))
+                {
+                    Plugin.Log.LogWarning($"[Crew] pool: no zone '{zoneName}' — {role} skipped");
+                    continue;
+                }
+                // live event spawns keep absolute priority on the generator queue
+                while (_squadSpawnBusy) yield return new WaitForSeconds(0.5f);
+                var t = PoolMakeOne(role, zone);
+                while (!t.IsCompleted) yield return null;
+                yield return new WaitForSeconds(2f); // pace the queue — the naked-profile lesson
+            }
+            int total = 0; foreach (var l in _pool.Values) total += l.Count;
+            Plugin.Log.LogWarning($"[Crew] pen pool built: {total} bots spawned + parked ({_penIntake.Count} still settling)");
+        }
+
+        private async Task PoolMakeOne(WildSpawnType role, BotZone zone)
+        {
+            try
+            {
+                var data = await CreateData(role);
+                if (data == null) return;
+                await Prewarm(data);
+                // tag the profiles so Patch_PenIntake recognizes the bots at Create
+                foreach (var pr in data.Profiles) _penPending[pr.Id] = ((int)role, zone.name);
+                _spawner.TryToSpawnInZoneInner(zone, data, 1, false, true, PickPoints(zone, 1, 35f), true);
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[Crew] pool make {role} failed: {e.Message}"); }
+        }
+
+        // intake runs a frame late on purpose: teleporting inside the Create postfix
+        // races the activation chain's own placement, and PatrollingData may not exist
+        // yet. the bot spawns at a far marker (35m player exclusion), stands there for
+        // a frame or two, then vanishes into the pen.
+        private void Update()
+        {
+            if (_penIntake.Count == 0) return;
+            for (int i = _penIntake.Count - 1; i >= 0; i--)
+            {
+                var b = _penIntake[i];
+                if (b == null) { _penIntake.RemoveAt(i); continue; }
+                if (b.GetPlayer == null || b.PatrollingData == null) continue; // not settled yet
+                _penIntake.RemoveAt(i);
+                if (!_penPending.TryGetValue(b.ProfileId, out var info)) continue;
+                _penPending.Remove(b.ProfileId);
+                var slot = PenBase + new Vector3((_penSlot % 5) * 2.5f, 0f, (_penSlot / 5) * 2.5f);
+                _penSlot++;
+                try { b.GetPlayer.Teleport(slot); }
+                catch (Exception e) { Plugin.Log.LogWarning($"[Crew] pen teleport failed for '{b.name}': {e.Message}"); }
+                try { b.PatrollingData.Pause(); } catch { }
+                if (!_pool.TryGetValue(info.role, out var list)) _pool[info.role] = list = new List<PenEntry>();
+                list.Add(new PenEntry { Bot = b, ZoneName = info.zone });
+                Plugin.Log.LogInfo($"[Crew] penned '{b.name}' ({(WildSpawnType)info.role}) for {info.zone}");
+            }
+        }
+
+        [HarmonyPatch(typeof(BotOwner), nameof(BotOwner.Create))]
+        internal static class Patch_PenIntake
+        {
+            [HarmonyPostfix]
+            private static void Postfix(BotOwner __result)
+            {
+                try
+                {
+                    if (__result == null || _penPending.Count == 0) return;
+                    var pid = __result.ProfileId;
+                    if (pid != null && _penPending.ContainsKey(pid)) _penIntake.Add(__result);
+                }
+                catch { }
+            }
+        }
+
+        // events call this through ForceSpawnBatch/ForceSpawn: zone-matched pen bots
+        // first (their patrol data already points here), any same-role bot second,
+        // the normal spawn path covers whatever's left
+        private int DeliverFromPool(WildSpawnType role, BotZone zone, int count)
+        {
+            if (!Plugin.CrewPreSpawnPool.Value) return 0;
+            if (!_pool.TryGetValue((int)role, out var list) || list.Count == 0) return 0;
+            var picks = new List<BotOwner>();
+            for (int pass = 0; pass < 2 && picks.Count < count; pass++)
+                for (int i = list.Count - 1; i >= 0 && picks.Count < count; i--)
+                {
+                    var e = list[i];
+                    if (e.Bot == null || e.Bot.IsDead) { list.RemoveAt(i); continue; }
+                    if (pass == 0 && e.ZoneName != zone.name) continue;
+                    picks.Add(e.Bot);
+                    list.RemoveAt(i);
+                }
+            if (picks.Count == 0) return 0;
+
+            var pts = PickPoints(zone, picks.Count, 0f); // trigger squads spawn close by design
+            for (int i = 0; i < picks.Count; i++)
+            {
+                var b = picks[i];
+                var pos = pts != null ? pts[i % pts.Count].Position : zone.transform.position;
+                try { b.GetPlayer.Teleport(pos); }
+                catch (Exception e) { Plugin.Log.LogWarning($"[Crew] pool delivery teleport failed: {e.Message}"); }
+                ReanchorCore(b, pos);
+                try { b.PatrollingData.Unpause(); } catch { }
+            }
+            Plugin.Log.LogWarning($"[Crew] delivered {picks.Count}/{count}x {role} from the pen into {zone.name}");
+            return picks.Count;
+        }
+
+        // the pen anchored StartCorePoint near the pen-spawn marker; after the delivery
+        // teleport the anchor must follow, or path requests reference the wrong graph
+        // neighborhood (same nearest-core logic as RaidFix's spawn safety net)
+        private static void ReanchorCore(BotOwner bot, Vector3 pos)
+        {
+            try
+            {
+                var covers = UnityEngine.Object.FindObjectOfType<AICoversData>();
+                var cores = covers != null && covers.AICorePointsHolder != null ? covers.AICorePointsHolder.CorePoints : null;
+                if (cores == null || cores.Count == 0) return;
+                AICorePoint best = null;
+                float bestD = float.MaxValue;
+                foreach (var c in cores)
+                {
+                    if (c == null) continue;
+                    float d = (c.Position - pos).sqrMagnitude;
+                    if (d < bestD) { bestD = d; best = c; }
+                }
+                if (best != null) bot.StartCorePoint = best;
+            }
+            catch { }
+        }
+
         private async Task ForceSpawn(WildSpawnType role, BotZone zone)
         {
+            if (DeliverFromPool(role, zone, 1) > 0) return;
             try
             {
                 BotCreationDataClass data = null;
@@ -1019,6 +1204,7 @@ namespace Manimal.Icebreaker
         {
             try
             {
+                if (!IceGate.On) return; // audit P0: rogue/BD relations are icebreaker lore, not lighthouse's
                 var self = __instance.InitialBotType;
                 bool selfRogue = self == WildSpawnType.exUsec;
                 if (!selfRogue && !BdRogueRelations.IsBd(self)) return;
@@ -1048,6 +1234,7 @@ namespace Manimal.Icebreaker
         {
             try
             {
+                if (!IceGate.On) return true;
                 if (player.AIData != null && player.AIData.IsAI)
                 {
                     var other = player.AIData.BotOwner?.Profile?.Info?.Settings?.Role;

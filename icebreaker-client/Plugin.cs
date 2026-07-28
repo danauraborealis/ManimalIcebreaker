@@ -27,6 +27,7 @@ namespace Manimal.Icebreaker
         internal static ConfigEntry<bool> ShadowProxyFix;
         internal static ConfigEntry<int> CrewRoguesMin;
         internal static ConfigEntry<int> CrewRoguesMax;
+        internal static ConfigEntry<bool> CrewPreSpawnPool;
         internal static ConfigEntry<bool> CrewKnight;
         internal static ConfigEntry<bool> CrewBlackDiv;
         internal static ConfigEntry<bool> SpatialAudio;
@@ -49,6 +50,7 @@ namespace Manimal.Icebreaker
         internal static ConfigEntry<float> VolFogBaseline;
         internal static ConfigEntry<float> VolFogMaxLength;
         internal static ConfigEntry<float> VolFogMaxLengthFallOff;
+        internal static ConfigEntry<float> VolFogWallShade;
         internal static ConfigEntry<float> VolFogIndoorFade;
         internal static ConfigEntry<float> VolFogVoidFalloff;
         internal static ConfigEntry<bool> VolFogVoidDebug;
@@ -62,6 +64,47 @@ namespace Manimal.Icebreaker
         internal static ConfigEntry<bool> Blizzard;
         internal static ConfigEntry<float> SnowIntensity;
         internal static ConfigEntry<float> CutsceneVolume;
+        internal static ConfigEntry<bool> TimelineCutscene;
+        internal static ConfigEntry<bool> Tripwires;
+        internal static ConfigEntry<bool> BotFriendlyFire;
+        internal static ConfigEntry<bool> HovercraftTransit;
+        internal static ConfigEntry<float> TransitX;
+        internal static ConfigEntry<float> TransitY;
+        internal static ConfigEntry<float> TransitZ;
+        internal static ConfigEntry<float> TransitZoneX;
+        internal static ConfigEntry<float> TransitZoneY;
+        internal static ConfigEntry<float> TransitZoneZ;
+        internal static ConfigEntry<float> TransitZoneSizeX;
+        internal static ConfigEntry<float> TransitZoneSizeY;
+        internal static ConfigEntry<float> TransitZoneSizeZ;
+        internal static ConfigEntry<float> TransitZoneRotY;
+        internal static ConfigEntry<int> TransitCost;
+        internal static ConfigEntry<int> TransitActivateAfterSec;
+        internal static ConfigEntry<int> HeliExfilCost;
+        internal static ConfigEntry<bool> SnowGusts;
+        internal static ConfigEntry<float> SnowGustsDensity;
+        internal static ConfigEntry<float> SnowGustsSize;
+        internal static ConfigEntry<float> SnowGustsSpeed;
+        internal static ConfigEntry<float> SnowGustsOpacity;
+        internal static ConfigEntry<float> SnowGustsReach;
+        internal static ConfigEntry<float> TransitRotX;
+        internal static ConfigEntry<float> TransitRotY;
+        internal static ConfigEntry<float> TransitRotZ;
+        internal static ConfigEntry<float> TripwireChance;
+        internal static ConfigEntry<string> TripwireTpl;
+        // cutscene fog PROFILE: twin entries for every look-affecting fog value. while
+        // IcebreakerVolFog.CutsceneProfile is on, Fog()/FogColorEntry route reads (and
+        // the F9 tuner's writes) to these instead — tune the cutscene without touching
+        // the raid look. defaults copy the main entries' defaults at bind time.
+        private static readonly System.Collections.Generic.Dictionary<ConfigEntry<float>, ConfigEntry<float>>
+            _fogTwin = new System.Collections.Generic.Dictionary<ConfigEntry<float>, ConfigEntry<float>>();
+        private static ConfigEntry<Color> _csVolFogColor;
+
+        internal static ConfigEntry<float> Fog(ConfigEntry<float> main)
+            => IcebreakerVolFog.CutsceneProfile && _fogTwin.TryGetValue(main, out var twin) ? twin : main;
+
+        internal static ConfigEntry<Color> FogColorEntry
+            => IcebreakerVolFog.CutsceneProfile && _csVolFogColor != null ? _csVolFogColor : VolFogColor;
         internal static ConfigEntry<float> BlizzardWind;
         internal static ConfigEntry<float> BlizzardFog;
         internal static ConfigEntry<bool> RetailSky;
@@ -87,12 +130,12 @@ namespace Manimal.Icebreaker
         private void Awake()
         {
             Log = Logger;
-            AutoDump = Config.Bind("General", "AutoDumpOnRaidLoad", true,
-                "dump automatically right after the game restores the ai data at raid load");
-            DumpKey = Config.Bind("General", "DumpHotkey", new KeyboardShortcut(KeyCode.F9),
-                "re-dump on demand mid-raid");
-            GenerateKey = Config.Bind("General", "GenerateHotkey", new KeyboardShortcut(KeyCode.F10),
-                "run the prototype cover scanner on the current map and dump the result — freezes the game for a bit");
+            AutoDump = Config.Bind("General", "AutoDumpOnRaidLoad", false,
+                "dump the ai data right after the game restores it at raid load (icebreaker only — dev diagnostic)");
+            DumpKey = Config.Bind("General", "DumpHotkey", new KeyboardShortcut(KeyCode.None),
+                "re-dump on demand mid-raid (icebreaker only; F9 is the fog tuner — bind something else)");
+            GenerateKey = Config.Bind("General", "GenerateHotkey", new KeyboardShortcut(KeyCode.None),
+                "run the prototype cover scanner on the current map and dump the result — freezes the game for a bit (icebreaker only)");
             IndentJson = Config.Bind("General", "IndentJson", false,
                 "pretty-print the json — files get roughly 3x bigger");
             InjectCovers = Config.Bind("Experimental", "InjectGeneratedCovers", false,
@@ -126,10 +169,14 @@ namespace Manimal.Icebreaker
             // reports need to distinguish dead knob from wrong suspect
             CullDistanceScale.SettingChanged += (_, __) => Log.LogWarning($"[DistCull] scale -> {CullDistanceScale.Value:F2} (live)");
             PcDriverEnabled.SettingChanged += (_, __) => Log.LogWarning($"[Culling] PcDriverEnabled -> {PcDriverEnabled.Value}");
-            CrewRoguesMin = Config.Bind("Icebreaker", "CrewRoguesMin", 9,
+            CrewPreSpawnPool = Config.Bind("Icebreaker", "CrewPreSpawnPool", true,
+                "pre-spawn the trigger squads into an off-map pen during the early raid and TELEPORT them in when events fire — removes the mid-raid spawn hitches. off = the old behavior (profiles premade, bots spawned on demand)");
+            // defaults trimmed a squad below retail's 9-15 (user call 07-27) — the full
+            // roster plus the trigger squads made the ship feel overcrowded
+            CrewRoguesMin = Config.Bind("Icebreaker", "CrewRoguesMin", 6,
                 new ConfigDescription("min rogue crew size — each raid rolls a random target in [min,max] (retail: 9-15)",
                     new AcceptableValueRange<int>(0, 20)));
-            CrewRoguesMax = Config.Bind("Icebreaker", "CrewRoguesMax", 15,
+            CrewRoguesMax = Config.Bind("Icebreaker", "CrewRoguesMax", 11,
                 new ConfigDescription("max rogue crew size — each raid rolls a random target in [min,max] (retail: 9-15)",
                     new AcceptableValueRange<int>(0, 20)));
             CrewKnight = Config.Bind("Icebreaker", "CrewKnight", true,
@@ -166,42 +213,65 @@ namespace Manimal.Icebreaker
                 new ConfigDescription("snowfall intensity (WeatherDebug.Rain in winter; live)", new AcceptableValueRange<float>(0f, 1f)));
             VolFog = Config.Bind("VolumetricFog2", "Enabled", true,
                 "the REAL volumetric fog (Volumetric Fog & Mist 2, raymarched) — needs volumetricfog.bundle next to the plugin dll (live)");
-            VolFogDensity = Config.Bind("VolumetricFog2", "Density", 0.585f,
+            VolFogDensity = Config.Bind("VolumetricFog2", "Density", 0.356f,
                 new ConfigDescription("fog density (live)", new AcceptableValueRange<float>(0f, 1f)));
-            VolFogNoise = Config.Bind("VolumetricFog2", "NoiseStrength", 0.734f,
+            VolFogNoise = Config.Bind("VolumetricFog2", "NoiseStrength", 0.35f,
                 new ConfigDescription("how uneven/wispy the fog is — 0 = uniform soup (live)", new AcceptableValueRange<float>(0f, 1f)));
-            VolFogNoiseScale = Config.Bind("VolumetricFog2", "NoiseScale", 2.943f,
+            VolFogNoiseScale = Config.Bind("VolumetricFog2", "NoiseScale", 3.373f,
                 new ConfigDescription("size of the fog billows (live)", new AcceptableValueRange<float>(0.2f, 5f)));
-            VolFogHeight = Config.Bind("VolumetricFog2", "Height", 93.1f,
+            VolFogHeight = Config.Bind("VolumetricFog2", "Height", 162.4f,
                 new ConfigDescription("fog layer thickness in meters above baseline (live)", new AcceptableValueRange<float>(1f, 200f)));
-            VolFogBaseline = Config.Bind("VolumetricFog2", "BaselineHeight", -7.1f,
+            VolFogBaseline = Config.Bind("VolumetricFog2", "BaselineHeight", -27.96f,
                 new ConfigDescription("world Y the fog layer sits on — icebreaker deck is around sea level (live)", new AcceptableValueRange<float>(-50f, 100f)));
-            VolFogMaxLength = Config.Bind("VolumetricFog2", "MaxFogLength", 1006f,
+            VolFogMaxLength = Config.Bind("VolumetricFog2", "MaxFogLength", 744f,
                 new ConfigDescription("raymarch reach in meters (live)", new AcceptableValueRange<float>(100f, 2000f)));
-            VolFogMaxLengthFallOff = Config.Bind("VolumetricFog2", "MaxFogLengthFallOff", 0.6f,
-                new ConfigDescription("soft rolloff of fog contribution toward MaxFogLength — kills the bright far-field glow that silhouettes the map border (live)", new AcceptableValueRange<float>(0f, 1f)));
-            VolFogVoidFalloff = Config.Bind("VolumetricFog2", "VoidFalloff", 6f,
+            VolFogMaxLengthFallOff = Config.Bind("VolumetricFog2", "MaxFogLengthFallOff", 0f,
+                new ConfigDescription("width of the distance-wall ramp as a fraction of MaxFogLength — fog climbs to FULLY OPAQUE at MaxFogLength, hiding the far field entirely (live)", new AcceptableValueRange<float>(0f, 1f)));
+            VolFogWallShade = Config.Bind("VolumetricFog2", "WallShade", 0f,
+                new ConfigDescription("brightness of the opaque distance wall as a fraction of the fog color — low = far field fades into dark gloom, 1 = full fog color (live)", new AcceptableValueRange<float>(0f, 1f)));
+            VolFogVoidFalloff = Config.Bind("VolumetricFog2", "VoidFalloff", 5.54f,
                 new ConfigDescription("edge sharpness of fog exclusion voids (manimal_fogvoid boxes) — higher = crisper cutoff at the box faces (live)", new AcceptableValueRange<float>(1f, 20f)));
-            VolFogVoidBlend = Config.Bind("VolumetricFog2", "VoidBlend", 0.25f,
+            VolFogVoidBlend = Config.Bind("VolumetricFog2", "VoidBlend", 0.711f,
                 new ConfigDescription("smooth-min blend between nearby voids — bridges small fog slivers in gaps between adjacent void boxes (units are relative to box size) (live)", new AcceptableValueRange<float>(0f, 1f)));
             VolFogVoidDebug = Config.Bind("VolumetricFog2", "VoidDebug", false,
                 "DEBUG: paint fog void interiors bright red instead of clearing them — shows exactly where the exclusion boxes land (live)");
             VolFogIndoorFade = Config.Bind("VolumetricFog2", "IndoorFadeSeconds", 1.5f,
                 new ConfigDescription("fog fade duration when entering/leaving ship interiors (Indoor_* volume bounds) (live)", new AcceptableValueRange<float>(0f, 6f)));
-            VolFogDeepObscurance = Config.Bind("VolumetricFog2", "DeepObscurance", 1.4f,
+            VolFogDeepObscurance = Config.Bind("VolumetricFog2", "DeepObscurance", 0.867f,
                 new ConfigDescription("darkens fog with depth — higher = distance melts into the night instead of glowing (live)", new AcceptableValueRange<float>(0f, 3f)));
             VolFogSkyHaze = Config.Bind("VolumetricFog2", "SkyHaze", 0f,
                 new ConfigDescription("haze height against the skybox (live)", new AcceptableValueRange<float>(0f, 500f)));
-            VolFogAlpha = Config.Bind("VolumetricFog2", "Alpha", 0.612f,
+            VolFogAlpha = Config.Bind("VolumetricFog2", "Alpha", 1f,
                 new ConfigDescription("overall fog opacity (live)", new AcceptableValueRange<float>(0f, 1f)));
-            VolFogSpeed = Config.Bind("VolumetricFog2", "WindSpeed", 0.081f,
+            VolFogSpeed = Config.Bind("VolumetricFog2", "WindSpeed", 0.156f,
                 new ConfigDescription("fog drift speed (live)", new AcceptableValueRange<float>(0f, 0.5f)));
             VolFogDownsampling = Config.Bind("VolumetricFog2", "Downsampling", 1,
                 new ConfigDescription("render at 1/N resolution — KEEP AT 1: the downsampled composite path flips/quadrants the screen under EFTs pipeline (live)", new AcceptableValueRange<int>(1, 4)));
-            VolFogColor = Config.Bind("VolumetricFog2", "FogColor", new Color(0.534f, 0.564f, 0.638f),
+            VolFogColor = Config.Bind("VolumetricFog2", "FogColor", new Color(0.467f, 0.459f, 0.424f),
                 "fog tint — cold blue-gray default (live)");
-            WeatherDesaturate = Config.Bind("Icebreaker", "WeatherDesaturate", 0.23f,
+            WeatherDesaturate = Config.Bind("Icebreaker", "WeatherDesaturate", 0.295f,
                 new ConfigDescription("override the weather desaturation post effect (blizzard cloudiness pins it to max = the gray washed-out look). -1 = vanilla behavior, 0 = full color, 1 = full gray (live)", new AcceptableValueRange<float>(-1f, 1f)));
+
+            // cutscene fog profile twins — tuned independently via F9 while the cutscene
+            // is up (P pauses). defaults = the user's baked cutscene look (2026-07-22):
+            // thinner, lower-noise fog with a closer wall and much lighter desat, so the
+            // helicopter shots read clearly through the storm.
+            var csBaked = new System.Collections.Generic.Dictionary<ConfigEntry<float>, float>
+            {
+                { VolFogDensity, 0.156f }, { VolFogNoise, 0.233f }, { VolFogNoiseScale, 2.066f },
+                { VolFogHeight, 200f }, { VolFogBaseline, -27.96f }, { VolFogMaxLength, 617.3f },
+                { VolFogMaxLengthFallOff, 0f }, { VolFogWallShade, 0f }, { VolFogVoidFalloff, 5.54f },
+                { VolFogVoidBlend, 0.711f }, { VolFogDeepObscurance, 0.867f }, { VolFogSkyHaze, 0f },
+                { VolFogAlpha, 1f }, { VolFogSpeed, 0.156f }, { WeatherDesaturate, 0.128f },
+            };
+            foreach (var kv in csBaked)
+            {
+                _fogTwin[kv.Key] = Config.Bind("VolumetricFog2.Cutscene",
+                    kv.Key.Definition.Key, kv.Value,
+                    $"cutscene-profile twin of {kv.Key.Definition.Section}.{kv.Key.Definition.Key} (live)");
+            }
+            _csVolFogColor = Config.Bind("VolumetricFog2.Cutscene", "FogColor",
+                new Color(0.482f, 0.455f, 0.420f), "cutscene-profile fog tint (live)");
             DiagHotkeys = Config.Bind("Icebreaker", "DiagHotkeys", false,
                 "enable the F1-F12 diagnostic hotkey suite (lights toggle, geo hide, batching tests, probes). OFF for normal play — F9 doubles as the fog tuner toggle and MUST not fight the lights toggle (live)");
             BlizzardWind = Config.Bind("Icebreaker", "BlizzardWind", 1.5f,
@@ -228,6 +298,69 @@ namespace Manimal.Icebreaker
                 "enable the storm flake layers (+12k flakes, ~double density) (live)");
             CutsceneVolume = Config.Bind("Icebreaker", "CutsceneVolume", 1f,
                 new ConfigDescription("cutscene video volume (live — adjustable mid-video via F12)", new AcceptableValueRange<float>(0f, 1f)));
+            TimelineCutscene = Config.Bind("Icebreaker", "TimelineCutscene", true,
+                "play the in-engine helicopter cutscene at the story trigger (falls back to the video if the cutscene scene/timeline is unavailable)");
+            HovercraftTransit = Config.Bind("Icebreaker", "HovercraftTransit", true,
+                "spawn the smugglers' hovercraft transit on the Shoreline coast once the Boreas chain is finished (takes you to the icebreaker)");
+            TransitX = Config.Bind("Icebreaker", "TransitX", -312.0199f,
+                new ConfigDescription("hovercraft transit position X on Shoreline (live)", new AcceptableValueRange<float>(-2000f, 2000f)));
+            TransitY = Config.Bind("Icebreaker", "TransitY", -65.899f,
+                new ConfigDescription("hovercraft transit position Y on Shoreline (live)", new AcceptableValueRange<float>(-500f, 500f)));
+            TransitZ = Config.Bind("Icebreaker", "TransitZ", 527.0115f,
+                new ConfigDescription("hovercraft transit position Z on Shoreline (live)", new AcceptableValueRange<float>(-2000f, 2000f)));
+            // FULL euler, not just heading: the ripped prefab carries the OBJ axis
+            // correction on X (270), so overwriting rotation with yaw alone lays it flat
+            TransitRotX = Config.Bind("Icebreaker", "TransitRotX", 270f,
+                new ConfigDescription("hovercraft rotation X (270 = the OBJ axis correction) (live)", new AcceptableValueRange<float>(0f, 360f)));
+            TransitRotY = Config.Bind("Icebreaker", "TransitRotY", 40f,
+                new ConfigDescription("hovercraft rotation Y, its heading (live)", new AcceptableValueRange<float>(0f, 360f)));
+            TransitRotZ = Config.Bind("Icebreaker", "TransitRotZ", 0f,
+                new ConfigDescription("hovercraft rotation Z (live)", new AcceptableValueRange<float>(0f, 360f)));
+            // the boarding trigger has its own transform: it sits beside the craft rather
+            // than inside it, and is a flattened box aligned to the hull, not a cube
+            TransitZoneX = Config.Bind("Icebreaker", "TransitZoneX", -310.3848f,
+                new ConfigDescription("transit trigger position X (live)", new AcceptableValueRange<float>(-2000f, 2000f)));
+            TransitZoneY = Config.Bind("Icebreaker", "TransitZoneY", -63.49909f,
+                new ConfigDescription("transit trigger position Y (live)", new AcceptableValueRange<float>(-500f, 500f)));
+            TransitZoneZ = Config.Bind("Icebreaker", "TransitZoneZ", 531.0692f,
+                new ConfigDescription("transit trigger position Z (live)", new AcceptableValueRange<float>(-2000f, 2000f)));
+            TransitZoneSizeX = Config.Bind("Icebreaker", "TransitZoneSizeX", 8f,
+                new ConfigDescription("transit trigger box size X in meters (live)", new AcceptableValueRange<float>(0.5f, 60f)));
+            TransitZoneSizeY = Config.Bind("Icebreaker", "TransitZoneSizeY", 3f,
+                new ConfigDescription("transit trigger box size Y in meters (live)", new AcceptableValueRange<float>(0.5f, 60f)));
+            TransitZoneSizeZ = Config.Bind("Icebreaker", "TransitZoneSizeZ", 3f,
+                new ConfigDescription("transit trigger box size Z in meters (live)", new AcceptableValueRange<float>(0.5f, 60f)));
+            TransitCost = Config.Bind("Icebreaker", "TransitCost", 400000,
+                new ConfigDescription("rouble price shown for the hovercraft crossing (live)", new AcceptableValueRange<int>(0, 5000000)));
+            TransitZoneRotY = Config.Bind("Icebreaker", "TransitZoneRotY", 40f,
+                new ConfigDescription("transit trigger heading, match the craft (live)", new AcceptableValueRange<float>(0f, 360f)));
+            // all six are read every frame, so the gusts can be dialled in mid-raid
+            SnowGusts = Config.Bind("Icebreaker", "SnowGusts", true,
+                "wind-driven sheets of blown snow around the player, on top of the native flakes (live)");
+            SnowGustsDensity = Config.Bind("Icebreaker", "SnowGustsDensity", 14f,
+                new ConfigDescription("gust puffs spawned per second at full storm (live)", new AcceptableValueRange<float>(0f, 120f)));
+            SnowGustsSize = Config.Bind("Icebreaker", "SnowGustsSize", 7f,
+                new ConfigDescription("puff diameter in metres — big and soft is what reads as smoke (live)", new AcceptableValueRange<float>(0.5f, 40f)));
+            SnowGustsSpeed = Config.Bind("Icebreaker", "SnowGustsSpeed", 1.6f,
+                new ConfigDescription("multiplier on the weather's own wind speed (live)", new AcceptableValueRange<float>(0.1f, 8f)));
+            SnowGustsOpacity = Config.Bind("Icebreaker", "SnowGustsOpacity", 0.16f,
+                new ConfigDescription("peak alpha per puff — low is the whole trick, they stack (live)", new AcceptableValueRange<float>(0.01f, 1f)));
+            SnowGustsReach = Config.Bind("Icebreaker", "SnowGustsReach", 45f,
+                new ConfigDescription("how far upwind and how wide the gusts spawn, in metres (live)", new AcceptableValueRange<float>(5f, 150f)));
+            HeliExfilCost = Config.Bind("Icebreaker", "HeliExfilCost", 2400,
+                new ConfigDescription("euros the pilot charges to board the helicopter exfil, 0 for a free ride (read at raid start)",
+                    new AcceptableValueRange<int>(0, 1000000)));
+            TransitActivateAfterSec = Config.Bind("Icebreaker", "TransitActivateAfterSec", 30,
+                new ConfigDescription("seconds before the crossing opens, listed red with a countdown until then (every vanilla transit uses 60)",
+                    new AcceptableValueRange<int>(0, 600)));
+            BotFriendlyFire = Config.Bind("Icebreaker", "BotFriendlyFire", false,
+                "allow bots to damage ALLIED bots (default off: crew sprays through squadmates in tight corridors and revenge-aggro wipes whole squads — real bot-vs-bot fights are always lethal regardless)");
+            Tripwires = Config.Bind("Icebreaker", "Tripwires", true,
+                "plant the authored grenade tripwires (manimal_tripwire* markers) at raid start");
+            TripwireChance = Config.Bind("Icebreaker", "TripwireChance", 1f,
+                new ConfigDescription("per-marker chance a tripwire is armed this raid (labyrinth-style variety below 1)", new AcceptableValueRange<float>(0f, 1f)));
+            TripwireTpl = Config.Bind("Icebreaker", "TripwireTpl", "6a5d6a5f4ed8c025a0a2cff0",
+                "grenade template planted on the wires (default: Manimal CS gas grenade)");
             SnowSpread = Config.Bind("Icebreaker", "SnowSpread", 14f,
                 new ConfigDescription("flake volume spread around the camera — retail 20; SMALLER packs the same flakes denser (live)", new AcceptableValueRange<float>(8f, 30f)));
             WeatherFogPass = Config.Bind("Icebreaker", "WeatherFogPass", false,
@@ -287,6 +420,7 @@ namespace Manimal.Icebreaker
 
         private void Update()
         {
+            if (!IceGate.On) return; // every manimal-icebreaker diagnostic is map-gated
             if (DumpKey.Value.IsDown())
                 AiDump.TryDump(Object.FindObjectOfType<AICoversData>(), "hotkey");
             if (GenerateKey.Value.IsDown())
@@ -303,7 +437,7 @@ namespace Manimal.Icebreaker
         [HarmonyPostfix]
         private static void Postfix(AICoversData __instance)
         {
-            if (Plugin.AutoDump.Value)
+            if (IceGate.On && Plugin.AutoDump.Value)
                 AiDump.TryDump(__instance, "raid-load");
         }
     }
@@ -317,7 +451,7 @@ namespace Manimal.Icebreaker
         [HarmonyPrefix]
         private static void Prefix(AICoversData __instance)
         {
-            if (Plugin.InjectCovers.Value)
+            if (IceGate.On && Plugin.InjectCovers.Value)
                 CoverScanner.TryInjectIntoCovers(__instance);
         }
     }

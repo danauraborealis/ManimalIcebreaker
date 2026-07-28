@@ -1,0 +1,45 @@
+{
+  "lighthouse": [
+    {
+      "locationId": "(35.525 12.84 -846.307)",
+      "probability": 1.0,
+      "template": {
+        "Id": "boreas_directive_1",
+        "IsContainer": false,
+        "useGravity": false,
+        "randomRotation": false,
+        "Position": {
+          "x": 35.525,
+          "y": 12.84,
+          "z": -846.307
+        },
+        "Rotation": {
+          "x": 0.5845,
+          "y": 48.5987,
+          "z": 0
+        },
+        "IsGroupPosition": false,
+        "GroupPositions": [],
+        "IsAlwaysSpawn": true,
+        "Root": "9fb4450bb5a348200dcb88f3",
+        "Items": [
+          {
+            "_id": "9fb4450bb5a348200dcb88f3",
+            "_tpl": "6a63fa5726a91c3479b6c575",
+            "upd": {
+              "StackObjectsCount": 1
+            }
+          }
+        ]
+      },
+      "itemDistribution": [
+        {
+          "composedKey": {
+            "key": "6a63fa5726a91c3479b6c575"
+          },
+          "relativeProbability": 1
+        }
+      ]
+    }
+  ]
+}

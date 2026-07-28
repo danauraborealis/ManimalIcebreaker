@@ -1,0 +1,1087 @@
+[
+  {
+    "CanBeFirstDialogue": false,
+    "Id": "b41c8c4e87753b77b08a26c6",
+    "MainVariable": "b41c8c4e87753b77b08a26c6",
+    "Trader": "656f0f98d80a697f855d34b1",
+    "SubTraders": [],
+    "Lines": [
+      {
+        "Actions": [
+          {
+            "saveScope": "Dialogue",
+            "type": "SetVariable",
+            "value": 1,
+            "variableId": "b41c8c4e87753b77b08a26c6",
+            "id": "169f43c66c619a28bfc8d52a"
+          }
+        ],
+        "AnimationData": {
+          "animations": [],
+          "lipSyncs": [],
+          "media": {
+            "image": null,
+            "music": null,
+            "sound": null
+          },
+          "secondaryAnimations": [],
+          "subtitles": [
+            {
+              "end": 5,
+              "id": "8e4e10a6c18d4c390c0a29dd",
+              "start": 0
+            }
+          ]
+        },
+        "DialogSide": "Player",
+        "IconType": "QuestionMark",
+        "Id": "9eed2bdeda1c1b550ff403b4",
+        "Trigger": {
+          "Conditions": [
+            {
+              "Conditions": [
+                {
+                  "operator": "==",
+                  "type": "VariableValue",
+                  "value": 0,
+                  "variableId": "b41c8c4e87753b77b08a26c6"
+                },
+                {
+                  "QuestId": "e857e9c34949ecbf1cf5a5b2",
+                  "Status": [
+                    1
+                  ],
+                  "type": "QuestStatus"
+                }
+              ],
+              "type": "LogicalSubGroup"
+            }
+          ],
+          "type": "MainLogicalGroup"
+        }
+      },
+      {
+        "Actions": [
+          {
+            "saveScope": "Dialogue",
+            "type": "SetVariable",
+            "value": 2,
+            "variableId": "b41c8c4e87753b77b08a26c6",
+            "id": "32056be07c46f2f9331e0cc6"
+          }
+        ],
+        "AnimationData": {
+          "animations": [],
+          "lipSyncs": [],
+          "media": {
+            "image": null,
+            "music": null,
+            "sound": null
+          },
+          "secondaryAnimations": [],
+          "subtitles": [
+            {
+              "end": 5,
+              "id": "6e825f2498c5ad44a9ca6a94",
+              "start": 0
+            }
+          ]
+        },
+        "DialogSide": "Npc",
+        "IconType": "DialogBubble",
+        "Id": "8ee04fc9fcde085d570010f4",
+        "Trigger": {
+          "Conditions": [
+            {
+              "Conditions": [
+                {
+                  "operator": "==",
+                  "type": "VariableValue",
+                  "value": 1,
+                  "variableId": "b41c8c4e87753b77b08a26c6"
+                }
+              ],
+              "type": "LogicalSubGroup"
+            }
+          ],
+          "type": "MainLogicalGroup"
+        }
+      },
+      {
+        "Actions": [
+          {
+            "saveScope": "Dialogue",
+            "type": "SetVariable",
+            "value": 3,
+            "variableId": "b41c8c4e87753b77b08a26c6",
+            "id": "47ec5d543d990a45d707c763"
+          }
+        ],
+        "AnimationData": {
+          "animations": [],
+          "lipSyncs": [],
+          "media": {
+            "image": null,
+            "music": null,
+            "sound": null
+          },
+          "secondaryAnimations": [],
+          "subtitles": [
+            {
+              "end": 5,
+              "id": "94746837a85f80fdba38268e",
+              "start": 0
+            }
+          ]
+        },
+        "DialogSide": "Player",
+        "IconType": "DialogBubble",
+        "Id": "f6a8d13f76a1218af9d817fe",
+        "Trigger": {
+          "Conditions": [
+            {
+              "Conditions": [
+                {
+                  "operator": "==",
+                  "type": "VariableValue",
+                  "value": 2,
+                  "variableId": "b41c8c4e87753b77b08a26c6"
+                }
+              ],
+              "type": "LogicalSubGroup"
+            }
+          ],
+          "type": "MainLogicalGroup"
+        }
+      },
+      {
+        "Actions": [
+          {
+            "saveScope": "Dialogue",
+            "type": "SetVariable",
+            "value": 4,
+            "variableId": "b41c8c4e87753b77b08a26c6",
+            "id": "127d61a98df05421853d0f26"
+          }
+        ],
+        "AnimationData": {
+          "animations": [],
+          "lipSyncs": [],
+          "media": {
+            "image": null,
+            "music": null,
+            "sound": null
+          },
+          "secondaryAnimations": [],
+          "subtitles": [
+            {
+              "end": 5,
+              "id": "a891ed97a9e16462852c3db4",
+              "start": 0
+            }
+          ]
+        },
+        "DialogSide": "Npc",
+        "IconType": "DialogBubble",
+        "Id": "c2bf2c6460c5488f7dc093e2",
+        "Trigger": {
+          "Conditions": [
+            {
+              "Conditions": [
+                {
+                  "operator": "==",
+                  "type": "VariableValue",
+                  "value": 3,
+                  "variableId": "b41c8c4e87753b77b08a26c6"
+                }
+              ],
+              "type": "LogicalSubGroup"
+            }
+          ],
+          "type": "MainLogicalGroup"
+        }
+      },
+      {
+        "Actions": [
+          {
+            "saveScope": "Dialogue",
+            "type": "SetVariable",
+            "value": 5,
+            "variableId": "b41c8c4e87753b77b08a26c6",
+            "id": "8ec06db9fbb41d953ad57008"
+          }
+        ],
+        "AnimationData": {
+          "animations": [],
+          "lipSyncs": [],
+          "media": {
+            "image": null,
+            "music": null,
+            "sound": null
+          },
+          "secondaryAnimations": [],
+          "subtitles": [
+            {
+              "end": 5,
+              "id": "b9a1786e47ebac11eb5690c0",
+              "start": 0
+            }
+          ]
+        },
+        "DialogSide": "Player",
+        "IconType": "DialogBubble",
+        "Id": "3caee0e36c3d9d9067645562",
+        "Trigger": {
+          "Conditions": [
+            {
+              "Conditions": [
+                {
+                  "operator": "==",
+                  "type": "VariableValue",
+                  "value": 4,
+                  "variableId": "b41c8c4e87753b77b08a26c6"
+                }
+              ],
+              "type": "LogicalSubGroup"
+            }
+          ],
+          "type": "MainLogicalGroup"
+        }
+      },
+      {
+        "Actions": [
+          {
+            "saveScope": "Dialogue",
+            "type": "SetVariable",
+            "value": 6,
+            "variableId": "b41c8c4e87753b77b08a26c6",
+            "id": "3d112c706b97d165ac93baa7"
+          }
+        ],
+        "AnimationData": {
+          "animations": [],
+          "lipSyncs": [],
+          "media": {
+            "image": null,
+            "music": null,
+            "sound": null
+          },
+          "secondaryAnimations": [],
+          "subtitles": [
+            {
+              "end": 5,
+              "id": "b650a9af55982ba8388503dd",
+              "start": 0
+            }
+          ]
+        },
+        "DialogSide": "Npc",
+        "IconType": "DialogBubble",
+        "Id": "3a24d5c1ce2e4b4afcb46ca9",
+        "Trigger": {
+          "Conditions": [
+            {
+              "Conditions": [
+                {
+                  "operator": "==",
+                  "type": "VariableValue",
+                  "value": 5,
+                  "variableId": "b41c8c4e87753b77b08a26c6"
+                }
+              ],
+              "type": "LogicalSubGroup"
+            }
+          ],
+          "type": "MainLogicalGroup"
+        }
+      },
+      {
+        "Actions": [
+          {
+            "saveScope": "Dialogue",
+            "type": "SetVariable",
+            "value": 7,
+            "variableId": "b41c8c4e87753b77b08a26c6",
+            "id": "9cd1bb8b8bd5d813ef2d46ea"
+          }
+        ],
+        "AnimationData": {
+          "animations": [],
+          "lipSyncs": [],
+          "media": {
+            "image": null,
+            "music": null,
+            "sound": null
+          },
+          "secondaryAnimations": [],
+          "subtitles": [
+            {
+              "end": 5,
+              "id": "59a4b5677a658fbaa88a1140",
+              "start": 0
+            }
+          ]
+        },
+        "DialogSide": "Player",
+        "IconType": "DialogBubble",
+        "Id": "18d4221be47f0942b6f50c98",
+        "Trigger": {
+          "Conditions": [
+            {
+              "Conditions": [
+                {
+                  "operator": "==",
+                  "type": "VariableValue",
+                  "value": 6,
+                  "variableId": "b41c8c4e87753b77b08a26c6"
+                }
+              ],
+              "type": "LogicalSubGroup"
+            }
+          ],
+          "type": "MainLogicalGroup"
+        }
+      },
+      {
+        "Actions": [
+          {
+            "saveScope": "Dialogue",
+            "type": "SetVariable",
+            "value": 8,
+            "variableId": "b41c8c4e87753b77b08a26c6",
+            "id": "f6e7dfd3d49c713250a5f367"
+          }
+        ],
+        "AnimationData": {
+          "animations": [],
+          "lipSyncs": [],
+          "media": {
+            "image": null,
+            "music": null,
+            "sound": null
+          },
+          "secondaryAnimations": [],
+          "subtitles": [
+            {
+              "end": 5,
+              "id": "19558361325fc436c5464b21",
+              "start": 0
+            }
+          ]
+        },
+        "DialogSide": "Npc",
+        "IconType": "DialogBubble",
+        "Id": "7281595e33a5639ed6a03eae",
+        "Trigger": {
+          "Conditions": [
+            {
+              "Conditions": [
+                {
+                  "operator": "==",
+                  "type": "VariableValue",
+                  "value": 7,
+                  "variableId": "b41c8c4e87753b77b08a26c6"
+                }
+              ],
+              "type": "LogicalSubGroup"
+            }
+          ],
+          "type": "MainLogicalGroup"
+        }
+      },
+      {
+        "Actions": [
+          {
+            "saveScope": "Dialogue",
+            "type": "SetVariable",
+            "value": 9,
+            "variableId": "b41c8c4e87753b77b08a26c6",
+            "id": "28d9a9bf8816bb7bd8b133e4"
+          }
+        ],
+        "AnimationData": {
+          "animations": [],
+          "lipSyncs": [],
+          "media": {
+            "image": null,
+            "music": null,
+            "sound": null
+          },
+          "secondaryAnimations": [],
+          "subtitles": [
+            {
+              "end": 5,
+              "id": "c8fd653a3169a8d1a9dac372",
+              "start": 0
+            }
+          ]
+        },
+        "DialogSide": "Player",
+        "IconType": "DialogBubble",
+        "Id": "724d9f0e82ea46c19763843c",
+        "Trigger": {
+          "Conditions": [
+            {
+              "Conditions": [
+                {
+                  "operator": "==",
+                  "type": "VariableValue",
+                  "value": 8,
+                  "variableId": "b41c8c4e87753b77b08a26c6"
+                }
+              ],
+              "type": "LogicalSubGroup"
+            }
+          ],
+          "type": "MainLogicalGroup"
+        }
+      },
+      {
+        "Actions": [
+          {
+            "saveScope": "Dialogue",
+            "type": "SetVariable",
+            "value": 10,
+            "variableId": "b41c8c4e87753b77b08a26c6",
+            "id": "2358553a5da0406530b8cb05"
+          }
+        ],
+        "AnimationData": {
+          "animations": [],
+          "lipSyncs": [],
+          "media": {
+            "image": null,
+            "music": null,
+            "sound": null
+          },
+          "secondaryAnimations": [],
+          "subtitles": [
+            {
+              "end": 5,
+              "id": "f6dfb5a58b27f64e50d9b21c",
+              "start": 0
+            }
+          ]
+        },
+        "DialogSide": "Npc",
+        "IconType": "DialogBubble",
+        "Id": "c59a8481b7b963ab822948e8",
+        "Trigger": {
+          "Conditions": [
+            {
+              "Conditions": [
+                {
+                  "operator": "==",
+                  "type": "VariableValue",
+                  "value": 9,
+                  "variableId": "b41c8c4e87753b77b08a26c6"
+                }
+              ],
+              "type": "LogicalSubGroup"
+            }
+          ],
+          "type": "MainLogicalGroup"
+        }
+      },
+      {
+        "Actions": [
+          {
+            "needNotification": true,
+            "questId": "e857e9c34949ecbf1cf5a5b2",
+            "type": "AcceptQuest",
+            "id": "2e03c69b6c9d2c2da9400b8d"
+          },
+          {
+            "saveScope": "Dialogue",
+            "type": "SetVariable",
+            "value": 11,
+            "variableId": "b41c8c4e87753b77b08a26c6",
+            "id": "8aef67692a79b5f1654fda0b"
+          }
+        ],
+        "AnimationData": {
+          "animations": [],
+          "lipSyncs": [],
+          "media": {
+            "image": null,
+            "music": null,
+            "sound": null
+          },
+          "secondaryAnimations": [],
+          "subtitles": [
+            {
+              "end": 5,
+              "id": "3cde7199a9fd62014c93088a",
+              "start": 0
+            }
+          ]
+        },
+        "DialogSide": "Player",
+        "IconType": "IndexFinger",
+        "Id": "03b48a90b697fbbde9a8a324",
+        "Trigger": {
+          "Conditions": [
+            {
+              "Conditions": [
+                {
+                  "operator": "==",
+                  "type": "VariableValue",
+                  "value": 10,
+                  "variableId": "b41c8c4e87753b77b08a26c6"
+                }
+              ],
+              "type": "LogicalSubGroup"
+            }
+          ],
+          "type": "MainLogicalGroup"
+        }
+      },
+      {
+        "Actions": [
+          {
+            "dialogId": "67f6916731de488b189fac00",
+            "needNotification": false,
+            "splitterNodeId": "67f6918754f2d0fff89860f8",
+            "type": "SwitchDialog",
+            "id": "808862a4220cc3e5880233f8"
+          },
+          {
+            "saveScope": "Dialogue",
+            "type": "SetVariable",
+            "value": 99,
+            "variableId": "b41c8c4e87753b77b08a26c6",
+            "id": "22cdd210b35958df485051d3"
+          }
+        ],
+        "AnimationData": {
+          "animations": [],
+          "lipSyncs": [],
+          "media": {
+            "image": null,
+            "music": null,
+            "sound": null
+          },
+          "secondaryAnimations": [],
+          "subtitles": [
+            {
+              "end": 5,
+              "id": "d400bfcb7b5e26ab3df346b3",
+              "start": 0
+            }
+          ]
+        },
+        "DialogSide": "Player",
+        "IconType": "BackArrow",
+        "Id": "a8c6a5af8b9a8e5d87df4d0d",
+        "Trigger": {
+          "Conditions": [
+            {
+              "Conditions": [
+                {
+                  "operator": "==",
+                  "type": "VariableValue",
+                  "value": 10,
+                  "variableId": "b41c8c4e87753b77b08a26c6"
+                }
+              ],
+              "type": "LogicalSubGroup"
+            }
+          ],
+          "type": "MainLogicalGroup"
+        }
+      },
+      {
+        "Actions": [
+          {
+            "saveScope": "Dialogue",
+            "type": "SetVariable",
+            "value": 12,
+            "variableId": "b41c8c4e87753b77b08a26c6",
+            "id": "5a66f300f83156d1247c3e6f"
+          }
+        ],
+        "AnimationData": {
+          "animations": [],
+          "lipSyncs": [],
+          "media": {
+            "image": null,
+            "music": null,
+            "sound": null
+          },
+          "secondaryAnimations": [],
+          "subtitles": [
+            {
+              "end": 5,
+              "id": "b4bcfd7231ad05a39c75e781",
+              "start": 0
+            }
+          ]
+        },
+        "DialogSide": "Npc",
+        "IconType": "DialogBubble",
+        "Id": "c06d43d7c190942aa81075fd",
+        "Trigger": {
+          "Conditions": [
+            {
+              "Conditions": [
+                {
+                  "operator": "==",
+                  "type": "VariableValue",
+                  "value": 11,
+                  "variableId": "b41c8c4e87753b77b08a26c6"
+                }
+              ],
+              "type": "LogicalSubGroup"
+            }
+          ],
+          "type": "MainLogicalGroup"
+        }
+      },
+      {
+        "Actions": [
+          {
+            "saveScope": "Dialogue",
+            "type": "SetVariable",
+            "value": 13,
+            "variableId": "b41c8c4e87753b77b08a26c6",
+            "id": "122c8d14a61610f52c31a8a0"
+          }
+        ],
+        "AnimationData": {
+          "animations": [],
+          "lipSyncs": [],
+          "media": {
+            "image": null,
+            "music": null,
+            "sound": null
+          },
+          "secondaryAnimations": [],
+          "subtitles": [
+            {
+              "end": 5,
+              "id": "78c40e44ae074dac12e7695a",
+              "start": 0
+            }
+          ]
+        },
+        "DialogSide": "Player",
+        "IconType": "QuestionMark",
+        "Id": "33c49a2cbba1c6a508646c0c",
+        "Trigger": {
+          "Conditions": [
+            {
+              "Conditions": [
+                {
+                  "operator": "==",
+                  "type": "VariableValue",
+                  "value": 12,
+                  "variableId": "b41c8c4e87753b77b08a26c6"
+                }
+              ],
+              "type": "LogicalSubGroup"
+            }
+          ],
+          "type": "MainLogicalGroup"
+        }
+      },
+      {
+        "Actions": [
+          {
+            "saveScope": "Dialogue",
+            "type": "SetVariable",
+            "value": 14,
+            "variableId": "b41c8c4e87753b77b08a26c6",
+            "id": "8e1e0cd539588d9537f5d7a5"
+          }
+        ],
+        "AnimationData": {
+          "animations": [],
+          "lipSyncs": [],
+          "media": {
+            "image": null,
+            "music": null,
+            "sound": null
+          },
+          "secondaryAnimations": [],
+          "subtitles": [
+            {
+              "end": 5,
+              "id": "30f0c73136883a00f5783400",
+              "start": 0
+            }
+          ]
+        },
+        "DialogSide": "Npc",
+        "IconType": "DialogBubble",
+        "Id": "754a7a9c96771c372092fe46",
+        "Trigger": {
+          "Conditions": [
+            {
+              "Conditions": [
+                {
+                  "operator": "==",
+                  "type": "VariableValue",
+                  "value": 13,
+                  "variableId": "b41c8c4e87753b77b08a26c6"
+                }
+              ],
+              "type": "LogicalSubGroup"
+            }
+          ],
+          "type": "MainLogicalGroup"
+        }
+      },
+      {
+        "Actions": [
+          {
+            "saveScope": "Dialogue",
+            "type": "SetVariable",
+            "value": 15,
+            "variableId": "b41c8c4e87753b77b08a26c6",
+            "id": "a27cb8611d17def977b4425e"
+          }
+        ],
+        "AnimationData": {
+          "animations": [],
+          "lipSyncs": [],
+          "media": {
+            "image": null,
+            "music": null,
+            "sound": null
+          },
+          "secondaryAnimations": [],
+          "subtitles": [
+            {
+              "end": 5,
+              "id": "57eb3c167642e8459fe40ece",
+              "start": 0
+            }
+          ]
+        },
+        "DialogSide": "Player",
+        "IconType": "DialogBubble",
+        "Id": "111c20576bdc48be702b5399",
+        "Trigger": {
+          "Conditions": [
+            {
+              "Conditions": [
+                {
+                  "operator": "==",
+                  "type": "VariableValue",
+                  "value": 14,
+                  "variableId": "b41c8c4e87753b77b08a26c6"
+                }
+              ],
+              "type": "LogicalSubGroup"
+            }
+          ],
+          "type": "MainLogicalGroup"
+        }
+      },
+      {
+        "Actions": [
+          {
+            "saveScope": "Dialogue",
+            "type": "SetVariable",
+            "value": 16,
+            "variableId": "b41c8c4e87753b77b08a26c6",
+            "id": "d410498c2d9118f1b2f85f73"
+          }
+        ],
+        "AnimationData": {
+          "animations": [],
+          "lipSyncs": [],
+          "media": {
+            "image": null,
+            "music": null,
+            "sound": null
+          },
+          "secondaryAnimations": [],
+          "subtitles": [
+            {
+              "end": 5,
+              "id": "346d9b7486b08f6c3dce0cc8",
+              "start": 0
+            }
+          ]
+        },
+        "DialogSide": "Npc",
+        "IconType": "DialogBubble",
+        "Id": "6d8b2cc413664633fb860761",
+        "Trigger": {
+          "Conditions": [
+            {
+              "Conditions": [
+                {
+                  "operator": "==",
+                  "type": "VariableValue",
+                  "value": 15,
+                  "variableId": "b41c8c4e87753b77b08a26c6"
+                }
+              ],
+              "type": "LogicalSubGroup"
+            }
+          ],
+          "type": "MainLogicalGroup"
+        }
+      },
+      {
+        "Actions": [
+          {
+            "dialogId": "67f6916731de488b189fac00",
+            "needNotification": false,
+            "splitterNodeId": "67f6918754f2d0fff89860f8",
+            "type": "SwitchDialog",
+            "id": "138f683238b415abcc99adf0"
+          },
+          {
+            "saveScope": "Dialogue",
+            "type": "SetVariable",
+            "value": 99,
+            "variableId": "b41c8c4e87753b77b08a26c6",
+            "id": "90aa5c2ce7efc96e26c09162"
+          }
+        ],
+        "AnimationData": {
+          "animations": [],
+          "lipSyncs": [],
+          "media": {
+            "image": null,
+            "music": null,
+            "sound": null
+          },
+          "secondaryAnimations": [],
+          "subtitles": [
+            {
+              "end": 5,
+              "id": "5a18a909bb0c4029d7afc66e",
+              "start": 0
+            }
+          ]
+        },
+        "DialogSide": "Player",
+        "IconType": "IndexFinger",
+        "Id": "a927b7c99be7f01b63af236a",
+        "Trigger": {
+          "Conditions": [
+            {
+              "Conditions": [
+                {
+                  "operator": "==",
+                  "type": "VariableValue",
+                  "value": 16,
+                  "variableId": "b41c8c4e87753b77b08a26c6"
+                }
+              ],
+              "type": "LogicalSubGroup"
+            }
+          ],
+          "type": "MainLogicalGroup"
+        }
+      },
+      {
+        "Actions": [
+          {
+            "dialogId": "67f6916731de488b189fac00",
+            "needNotification": false,
+            "splitterNodeId": "67f6918754f2d0fff89860f8",
+            "type": "SwitchDialog",
+            "id": "a51231097afaf4fe726bf397"
+          },
+          {
+            "saveScope": "Dialogue",
+            "type": "SetVariable",
+            "value": 99,
+            "variableId": "b41c8c4e87753b77b08a26c6",
+            "id": "7479adcab2f902851927afc2"
+          }
+        ],
+        "AnimationData": {
+          "animations": [],
+          "lipSyncs": [],
+          "media": {
+            "image": null,
+            "music": null,
+            "sound": null
+          },
+          "secondaryAnimations": [],
+          "subtitles": [
+            {
+              "end": 5,
+              "id": "ad772bba7a93ff3766e6ddc4",
+              "start": 0
+            }
+          ]
+        },
+        "DialogSide": "Player",
+        "IconType": "DialogBubble",
+        "Id": "8c29228e70cac5168739f05b",
+        "Trigger": {
+          "Conditions": [
+            {
+              "Conditions": [
+                {
+                  "operator": "==",
+                  "type": "VariableValue",
+                  "value": 0,
+                  "variableId": "b41c8c4e87753b77b08a26c6"
+                },
+                {
+                  "QuestId": "e857e9c34949ecbf1cf5a5b2",
+                  "Status": [
+                    "Started"
+                  ],
+                  "type": "QuestStatus"
+                }
+              ],
+              "type": "LogicalSubGroup"
+            }
+          ],
+          "type": "MainLogicalGroup"
+        }
+      },
+      {
+        "Actions": [
+          {
+            "needNotification": true,
+            "questId": "e857e9c34949ecbf1cf5a5b2",
+            "type": "FinishQuest",
+            "id": "ba17c5a3472bf61c6a3e7878"
+          },
+          {
+            "saveScope": "Dialogue",
+            "type": "SetVariable",
+            "value": 30,
+            "variableId": "b41c8c4e87753b77b08a26c6",
+            "id": "14d75d99d5477353f531c2ae"
+          }
+        ],
+        "AnimationData": {
+          "animations": [],
+          "lipSyncs": [],
+          "media": {
+            "image": null,
+            "music": null,
+            "sound": null
+          },
+          "secondaryAnimations": [],
+          "subtitles": [
+            {
+              "end": 5,
+              "id": "d22e0435ff1975a7958c404b",
+              "start": 0
+            }
+          ]
+        },
+        "DialogSide": "Player",
+        "IconType": "QuestIcon",
+        "Id": "fd28adc3b5264c68cc93ec6b",
+        "Trigger": {
+          "Conditions": [
+            {
+              "Conditions": [
+                {
+                  "operator": "==",
+                  "type": "VariableValue",
+                  "value": 0,
+                  "variableId": "b41c8c4e87753b77b08a26c6"
+                },
+                {
+                  "QuestId": "e857e9c34949ecbf1cf5a5b2",
+                  "Status": [
+                    "AvailableForFinish"
+                  ],
+                  "type": "QuestStatus"
+                }
+              ],
+              "type": "LogicalSubGroup"
+            }
+          ],
+          "type": "MainLogicalGroup"
+        }
+      },
+      {
+        "Actions": [
+          {
+            "dialogId": "67f6916731de488b189fac00",
+            "needNotification": false,
+            "splitterNodeId": "67f6918754f2d0fff89860f8",
+            "type": "SwitchDialog",
+            "id": "6b82311a5e329466ed0bc001"
+          },
+          {
+            "saveScope": "Dialogue",
+            "type": "SetVariable",
+            "value": 99,
+            "variableId": "b41c8c4e87753b77b08a26c6",
+            "id": "b34011547e9546f44c5f237a"
+          }
+        ],
+        "AnimationData": {
+          "animations": [],
+          "lipSyncs": [],
+          "media": {
+            "image": null,
+            "music": null,
+            "sound": null
+          },
+          "secondaryAnimations": [],
+          "subtitles": [
+            {
+              "end": 5,
+              "id": "cffef4041c32303b4f23fdff",
+              "start": 0
+            }
+          ]
+        },
+        "DialogSide": "Npc",
+        "IconType": "DialogBubble",
+        "Id": "06bd44922a2200fa1ab8b247",
+        "Trigger": {
+          "Conditions": [
+            {
+              "Conditions": [
+                {
+                  "operator": "==",
+                  "type": "VariableValue",
+                  "value": 30,
+                  "variableId": "b41c8c4e87753b77b08a26c6"
+                }
+              ],
+              "type": "LogicalSubGroup"
+            }
+          ],
+          "type": "MainLogicalGroup"
+        }
+      }
+    ],
+    "StartPoints": {
+      "9eed2bdeda1c1b550ff403b4": 0
+    },
+    "localization": {
+      "en": {
+        "8e4e10a6c18d4c390c0a29dd": "Listen, is there any chance to work something out with the smugglers for a more convenient way to reach the ship?",
+        "6e825f2498c5ad44a9ca6a94": "Something wrong with the hovercraft we arranged for you?",
+        "94746837a85f80fdba38268e": "The pickup point's bad. Too risky.",
+        "a891ed97a9e16462852c3db4": "Told you already, they're not exactly fans of your kind...",
+        "b9a1786e47ebac11eb5690c0": "I wouldn't be asking if it wasn't important. I'm ready to pay well and put in the work if it makes getting to the icebreaker easier.",
+        "b650a9af55982ba8388503dd": "We've got a whole damn icebreaker sitting around now? And Rosatom just decided to leave something that big in Tarkov?",
+        "59a4b5677a658fbaa88a1140": "Yeah, but it's a private ship. Nothing to do with the government.",
+        "19558361325fc436c5464b21": "Then I'm not asking whose it is. I'd like to stay alive, if you catch my drift.",
+        "c8fd653a3169a8d1a9dac372": "So what about transport? Can you find out if there's a better route?",
+        "f6dfb5a58b27f64e50d9b21c": "If I were you, I'd drop it right now. They've got some shit going on with those USEC defectors, so they've got zero time for you and your requests.",
+        "3cde7199a9fd62014c93088a": "Then maybe I help them deal with those USECs?",
+        "d400bfcb7b5e26ab3df346b3": "Even if I pay a lot?",
+        "b4bcfd7231ad05a39c75e781": "Hell if I know. If you're that desperate, go help. No one's stopping you.",
+        "78c40e44ae074dac12e7695a": "What exactly is going on with the Rogues?",
+        "30f0c73136883a00f5783400": "Don't know the details, and I'm not getting into it. Go ask them yourself, they'll shoot you first and ask questions never.",
+        "57eb3c167642e8459fe40ece": "Got it. If I thin out some of those Rogues, the smugglers won't mind, right?",
+        "346d9b7486b08f6c3dce0cc8": "I already told you, do what you want. I've got enough shit on my plate as it is.",
+        "5a18a909bb0c4029d7afc66e": "Alright. I'll come back once I deal with the Rogues.",
+        "ad772bba7a93ff3766e6ddc4": "Still working through the Rogues.",
+        "d22e0435ff1975a7958c404b": "The Rogues are thinned out. That should buy the smugglers some breathing room.",
+        "cffef4041c32303b4f23fdff": "That's a dent in them, alright. I'll pass the word along. They should be a lot more talkative now."
+      }
+    }
+  }
+]

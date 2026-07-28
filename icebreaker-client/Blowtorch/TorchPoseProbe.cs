@@ -19,6 +19,7 @@ namespace Manimal.Icebreaker.Blowtorch
             [HarmonyPostfix]
             private static void Postfix()
             {
+                if (!IceGate.On) return; // diag probe is icebreaker-only
                 new GameObject("Icebreaker_TorchPoseProbe").AddComponent<TorchPoseProbe>();
             }
         }

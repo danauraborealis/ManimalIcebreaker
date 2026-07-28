@@ -1,0 +1,115 @@
+[
+ {
+  "pathID": 12346,
+  "class": "CommonAssets.Scripts.Cutscenes.CutsceneObjects",
+  "go": "CutsceneRoot",
+  "fields": {
+   "m_Enabled": 1,
+   "m_Name": "",
+   "cutsceneId": "Icebreaker_1",
+   "activateOnStart": [
+    {
+     "ref": "CutsceneRoot/Canvas"
+    }
+   ],
+   "deactivateOnStart": [],
+   "activateOnEnd": [],
+   "deactivateOnEnd": [
+    {
+     "ref": "CutsceneRoot/Canvas"
+    }
+   ]
+  }
+ },
+ {
+  "pathID": 12349,
+  "class": "UnityEngine.Timeline.SignalReceiver",
+  "go": "CutsceneRoot/TimelineDirector",
+  "fields": {
+   "m_Enabled": 1,
+   "m_Name": "",
+   "m_Events": {
+    "m_Signals": [
+     {
+      "externalRef": [
+       6,
+       45777
+      ]
+     },
+     {
+      "externalRef": [
+       6,
+       45776
+      ]
+     }
+    ],
+    "m_Events": [
+     {
+      "m_PersistentCalls": {
+       "m_Calls": [
+        {
+         "m_Target": {
+          "ref": "CutsceneRoot/TimelineDirector <MonoBehaviour>"
+         },
+         "m_TargetAssemblyTypeName": "CommonAssets.Scripts.Cutscenes.CutscenePlayableDirector, Assembly-CSharp",
+         "m_MethodName": "OnSignalEmit",
+         "m_Mode": 5,
+         "m_Arguments": {
+          "m_ObjectArgument": null,
+          "m_ObjectArgumentAssemblyTypeName": "UnityEngine.Object, UnityEngine",
+          "m_IntArgument": 0,
+          "m_FloatArgument": 0.0,
+          "m_StringArgument": "switch_to_outdoor",
+          "m_BoolArgument": 0
+         },
+         "m_CallState": 2
+        }
+       ]
+      }
+     },
+     {
+      "m_PersistentCalls": {
+       "m_Calls": [
+        {
+         "m_Target": {
+          "ref": "CutsceneRoot/TimelineDirector <MonoBehaviour>"
+         },
+         "m_TargetAssemblyTypeName": "CommonAssets.Scripts.Cutscenes.CutscenePlayableDirector, Assembly-CSharp",
+         "m_MethodName": "OnSignalEmit",
+         "m_Mode": 5,
+         "m_Arguments": {
+          "m_ObjectArgument": null,
+          "m_ObjectArgumentAssemblyTypeName": "UnityEngine.Object, UnityEngine",
+          "m_IntArgument": 0,
+          "m_FloatArgument": 0.0,
+          "m_StringArgument": "reset_environment",
+          "m_BoolArgument": 0
+         },
+         "m_CallState": 2
+        }
+       ]
+      }
+     }
+    ]
+   }
+  }
+ },
+ {
+  "pathID": 12350,
+  "class": "CommonAssets.Scripts.Cutscenes.CutscenePlayableDirector",
+  "go": "CutsceneRoot/TimelineDirector",
+  "fields": {
+   "m_Enabled": 1,
+   "m_Name": ""
+  }
+ },
+ {
+  "pathID": 12352,
+  "class": "CommonAssets.Scripts.Cutscenes.CutsceneCameraReference",
+  "go": "CutsceneRoot/CutsceneCamera/CameraAddEffect/Camera",
+  "fields": {
+   "m_Enabled": 1,
+   "m_Name": ""
+  }
+ }
+]

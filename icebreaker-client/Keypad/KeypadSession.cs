@@ -61,6 +61,38 @@ namespace Manimal.Icebreaker.Keypad
             KeyCode.Keypad5, KeyCode.Keypad6, KeyCode.Keypad7, KeyCode.Keypad8, KeyCode.Keypad9,
         };
 
+        // everything the number row can fire by default binding — weapon selects and
+        // fast slots. movement/interaction commands are untouched.
+        private static readonly EFT.InputSystem.ECommand[] DigitCommands =
+        {
+            EFT.InputSystem.ECommand.SelectFirstPrimaryWeapon,
+            EFT.InputSystem.ECommand.SelectSecondPrimaryWeapon,
+            EFT.InputSystem.ECommand.SelectSecondaryWeapon,
+            EFT.InputSystem.ECommand.QuickSelectSecondaryWeapon,
+            EFT.InputSystem.ECommand.SelectFastSlot4,
+            EFT.InputSystem.ECommand.SelectFastSlot5,
+            EFT.InputSystem.ECommand.SelectFastSlot6,
+            EFT.InputSystem.ECommand.SelectFastSlot7,
+            EFT.InputSystem.ECommand.SelectFastSlot8,
+            EFT.InputSystem.ECommand.SelectFastSlot9,
+            EFT.InputSystem.ECommand.SelectFastSlot0,
+            EFT.InputSystem.ECommand.PressSlot4,
+            EFT.InputSystem.ECommand.PressSlot5,
+            EFT.InputSystem.ECommand.PressSlot6,
+            EFT.InputSystem.ECommand.PressSlot7,
+            EFT.InputSystem.ECommand.PressSlot8,
+            EFT.InputSystem.ECommand.PressSlot9,
+            EFT.InputSystem.ECommand.PressSlot0,
+        };
+
+        // idempotent — success path releases early, teardown paths release again
+        private void ReleaseDigitLock()
+        {
+            if (!_inputLocked) return;
+            _inputLocked = false;
+            try { EFT.GamePlayerOwner.RemoveIgnoreInputCommands(DigitCommands); } catch { }
+        }
+
         public void Begin(Keypad keypad)
         {
             if (keypad == null)
@@ -73,11 +105,13 @@ namespace Manimal.Icebreaker.Keypad
             _keypad = keypad;
             _keypad.ActiveSession = this;
 
-            // block the game's own input while typing — otherwise digit keys ALSO
-            // fire quickslot switches (press 9 for the code, swap to the flare on 9).
+            // block ONLY the digit-bound game commands while typing — otherwise digit
+            // keys ALSO fire quickslot switches (press 9 for the code, swap to the
+            // flare on 9). movement/look/lean stay fully live: BSG ships a per-command
+            // ignore set (PlayerOwner.ignoredCommands) for exactly this.
             // our Update reads UnityEngine.Input directly, so the keypad still hears
-            // every key while the game ignores them.
-            try { EFT.GamePlayerOwner.SetIgnoreInput(true); _inputLocked = true; }
+            // every key while the game ignores just these.
+            try { EFT.GamePlayerOwner.AddIgnoreInputCommands(DigitCommands); _inputLocked = true; }
             catch (Exception ex) { Plugin.Log?.LogWarning($"[Keypad] input lock failed (quickslot keys will leak): {ex.Message}"); }
 
             try
@@ -531,6 +565,10 @@ namespace Manimal.Icebreaker.Keypad
                 KeypadConstants.FlashHoldSeconds,
                 KeypadConstants.FlashFadeOutSeconds));
 
+            // code accepted — give the digit keys back IMMEDIATELY; the SUCCESS
+            // display lingers but the player is done typing
+            ReleaseDigitLock();
+
             // mark unlocked BEFORE the door flip so even if the door change
             // errors, the action patch still greys out further attempts
             _keypad.Unlocked = true;
@@ -664,11 +702,7 @@ namespace Manimal.Icebreaker.Keypad
         {
             try
             {
-                if (_inputLocked)
-                {
-                    _inputLocked = false;
-                    try { EFT.GamePlayerOwner.SetIgnoreInput(false); } catch { }
-                }
+                ReleaseDigitLock();
                 if (_keypad != null && _keypad.ActiveSession == this)
                     _keypad.ActiveSession = null;
                 if (_uiInstance != null) Destroy(_uiInstance);
@@ -689,11 +723,7 @@ namespace Manimal.Icebreaker.Keypad
         // death mid-typing), the input lock must not outlive it
         private void OnDestroy()
         {
-            if (_inputLocked)
-            {
-                _inputLocked = false;
-                try { EFT.GamePlayerOwner.SetIgnoreInput(false); } catch { }
-            }
+            ReleaseDigitLock();
         }
 
         private enum SessionState

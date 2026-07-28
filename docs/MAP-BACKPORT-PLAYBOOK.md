@@ -199,6 +199,12 @@ Keep every data sidecar next to the plugin DLL and load paths relative to
 
 ## Trap list (each of these cost real time — have your assistant check them)
 
+- **AssetRipper script GUIDs are per-run, NOT deterministic.** Importing a second
+  map's export into an SDK whose stubs came from an earlier export means every
+  script reference lands on Missing Script. Fix is mechanical: index class-name →
+  guid on both sides and rewrite the imported YAML (scenes AND .playable/.prefab
+  assets). Do the same against Library/PackageCache for Unity package classes
+  (Timeline, uGUI, TMP) — AssetRipper decompiles its own copies of those too.
 - StreamingAssets-first bundle resolution (Phase 5.2).
 - Container Ids regenerate on every SDK rebake (Phase 6.4).
 - LazyLoad<T> silent deserialization failure (Phase 6.3).
@@ -236,3 +242,25 @@ Keep every data sidecar next to the plugin DLL and load paths relative to
   straggler distances). One raid of numbers repeatedly solved what days of
   theorizing didn't.
 - Run a raid after every phase. Never stack two untested systems.
+
+## Shader stand-in forensics (learned on the deck VP shader, July 2026)
+
+When a BSG shader can't be bound at runtime and needs an SDK stand-in:
+1. **Read the real shader's property STRINGS before writing any math** — dump it from
+   the game's `shaders` bundle via UnityPy's ShaderConverter. Even without DXBC
+   disassembly, BSG's property annotations document the conventions (e.g.
+   `_MainTex0 ("Base (RGB) Smoothness (A)")` = per-pixel gloss lives in diffuse
+   alpha × the scalar — a flat scalar reads glossy-wrong).
+2. **Vertex colors are the blend driver and they're fragile**: `PlayerSettings ->
+   Optimize Mesh Data (StripUnusedMeshComponents)` strips COLOR from static-batch
+   combines when the stand-in reads color via a custom vertex function (usage
+   analysis blind spot). Turn it OFF and RESTART the editor before building (the
+   build uses the in-memory value).
+3. Surface-shader gotchas: `uv_TexName` in Input auto-declares `_TexName_ST`
+   (redeclaration error), but that auto-declaration is NOT referenceable from user
+   code either — route raw UVs through a texture with identity ST instead.
+4. **Transparent/forward stand-ins flicker in EFT's deferred world** (per-object
+   forward light lists churn, worsened by any light-toggling system). Decal-type
+   stand-ins should be ambient-SH-lit (stable) instead of realtime-lit.
+5. Verify texture ALPHA survived the rip before trusting alpha-driven features
+   (precedent: melt-dissolve _MainTex, then the smoothness maps).

@@ -17,7 +17,22 @@ namespace Manimal.Icebreaker.Blowtorch
     // land (with a timeout ceiling so a missed transition can never hang the swap).
     public class BlowtorchController : Player.UsableItemController
     {
-        internal const int HandsLayer = 1; // Base(0) / Hands(1) / LActions(2)
+        internal const int HandsLayer = 1; // Base(0) / Hands(1) / LActions(2) — as AUTHORED
+        // ...but the controller that ships answers only layer 0 (a rebake stripped the
+        // layers), and addressing the missing layer made Unity log 'Invalid Layer Index'
+        // on every CanInteract poll — 1,636 lines in one raid, each paying the
+        // BepInEx+UnityExplorer capture cost: THE once-per-second stutter of 07-27.
+        // clamp once against the animator we actually have.
+        private int _liveLayer = -1;
+        internal int Layer
+        {
+            get
+            {
+                if (_liveLayer < 0 && TorchAnimator != null)
+                    _liveLayer = Mathf.Min(HandsLayer, TorchAnimator.layerCount - 1);
+                return _liveLayer < 0 ? 0 : _liveLayer;
+            }
+        }
         private static readonly int FiringHash = Animator.StringToHash("Firing");
         internal Animator TorchAnimator;
         private bool _firing;
@@ -66,7 +81,7 @@ namespace Manimal.Icebreaker.Blowtorch
                 // normalize to Off before the draw op flips Active.
                 _firing = false;
                 TorchAnimator.SetBool(FiringHash, false);
-                TorchAnimator.Play("Off", HandsLayer, 0f);
+                TorchAnimator.Play("Off", Layer, 0f);
                 TorchAnimator.Update(0f);
             }
             else
@@ -188,7 +203,7 @@ namespace Manimal.Icebreaker.Blowtorch
         {
             if (TorchAnimator == null) return false;
             return CurrentHandsOperation is TorchIdleOp
-                   && TorchAnimator.GetCurrentAnimatorStateInfo(HandsLayer).IsName("idle");
+                   && TorchAnimator.GetCurrentAnimatorStateInfo(Layer).IsName("idle");
         }
 
         // no sights on a torch — swallow ADS before the base sets IsAiming (which
@@ -255,7 +270,7 @@ namespace Manimal.Icebreaker.Blowtorch
                 TorchAnimator.SetBool(FiringHash, want);
                 // dont wait for the graph's transition windows (exit-time on the idle
                 // loop reads as input lag) — the flame follows the trigger NOW
-                TorchAnimator.CrossFade(want ? "torch_start" : "torch_end", 0.05f, HandsLayer);
+                TorchAnimator.CrossFade(want ? "torch_start" : "torch_end", 0.05f, Layer);
                 SetBurnerAudio(want);
             }
         }
@@ -285,7 +300,7 @@ namespace Manimal.Icebreaker.Blowtorch
             while (Time.unscaledTime < stop)
             {
                 if (TorchAnimator == null) break;
-                if (reached(TorchAnimator.GetCurrentAnimatorStateInfo(HandsLayer))) break;
+                if (reached(TorchAnimator.GetCurrentAnimatorStateInfo(Layer))) break;
                 yield return null;
             }
             done();
@@ -304,7 +319,7 @@ namespace Manimal.Icebreaker.Blowtorch
                 // dont sit in Off waiting for the transition window (exit-time reads
                 // as equip lag) — the draw starts the moment the prefab is up
                 if (c.TorchAnimator != null)
-                    c.TorchAnimator.CrossFade("draw", 0.02f, HandsLayer, 0f);
+                    c.TorchAnimator.CrossFade("draw", 0.02f, c.Layer, 0f);
                 c.PollDrawDone(() =>
                 {
                     try { FastForward(); }
@@ -356,7 +371,7 @@ namespace Manimal.Icebreaker.Blowtorch
                 // strands the animator in a torch state until the poll timeout
                 // force-swaps with no visible put-away. jump straight to holster.
                 if (c.TorchAnimator != null)
-                    c.TorchAnimator.CrossFade("holster", 0.05f, HandsLayer);
+                    c.TorchAnimator.CrossFade("holster", 0.05f, c.Layer);
                 // body-side mirror of the draw fix: FirstAction==2 is the ONLY way the
                 // body enters its idle_to_out lowering anim — vanilla graphs fire it as
                 // a ThirdAction(2) event from the put-away clip; ours has no events

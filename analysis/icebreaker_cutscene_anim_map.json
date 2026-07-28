@@ -1,0 +1,200 @@
+{
+ "mapping": {
+  "3530": {
+   "file": "Recorded_5.anim",
+   "name": "Recorded",
+   "how": "stoptime 31.600"
+  },
+  "3514": {
+   "file": "Recorded (4)_0.anim",
+   "name": "Recorded (4)",
+   "how": "stoptime 27.000"
+  },
+  "3449": {
+   "file": "Recorded (5)_0.anim",
+   "name": "Recorded (5)",
+   "how": "stoptime 28.283"
+  },
+  "3295": {
+   "file": "Recorded (8).anim",
+   "name": "Recorded (8)",
+   "how": "stoptime 5.467"
+  },
+  "3370": {
+   "file": "Recorded (9)_0.anim",
+   "name": "Recorded (9)",
+   "how": "stoptime 28.283"
+  },
+  "3464": {
+   "file": "Recorded (10).anim",
+   "name": "Recorded (10)",
+   "how": "stoptime 28.283"
+  },
+  "3493": {
+   "file": "Recorded (6)_0.anim",
+   "name": "Recorded (6)",
+   "how": "stoptime 15.267"
+  },
+  "3271": {
+   "file": "Recorded (7).anim",
+   "name": "Recorded (7)",
+   "how": "stoptime 6.800"
+  },
+  "3448": {
+   "file": "Recorded (11)_0.anim",
+   "name": "Recorded (11)",
+   "how": "stoptime 5.467"
+  },
+  "3308": {
+   "file": "Recorded (12).anim",
+   "name": "Recorded (12)",
+   "how": "stoptime 10.783"
+  },
+  "3428": {
+   "file": "Recorded (14).anim",
+   "name": "Recorded (14)",
+   "how": "stoptime 15.267"
+  },
+  "3397": {
+   "file": "Recorded (15)_0.anim",
+   "name": "Recorded (15)",
+   "how": "stoptime 10.017"
+  },
+  "3513": {
+   "file": "Recorded (13)_0.anim",
+   "name": "Recorded (13)",
+   "how": "stoptime 10.933"
+  },
+  "3382": {
+   "file": "Recorded (16).anim",
+   "name": "Recorded (16)",
+   "how": "stoptime 15.267"
+  },
+  "3427": {
+   "file": "Recorded (1)_0.anim",
+   "name": "Recorded (1)",
+   "how": "stoptime 28.550"
+  },
+  "3479": {
+   "file": "Cutscene_Icebtreaker_HH60_Loop.anim",
+   "name": "Cutscene_Icebtreaker_HH60_Loop",
+   "how": "unique-name"
+  },
+  "3495": {
+   "file": "Cutscene_Icebtreaker_HH60_Doorgunner_L.anim",
+   "name": "Cutscene_Icebtreaker_HH60_Doorgunner_L",
+   "how": "unique-name"
+  },
+  "3372": {
+   "file": "Cutscene_Icebtreaker_HH60_Doorgunner_L_Fire.anim",
+   "name": "Cutscene_Icebtreaker_HH60_Doorgunner_L_Fire",
+   "how": "unique-name"
+  },
+  "3504": {
+   "file": "Recorded (2)_2.anim",
+   "name": "Recorded (2)",
+   "how": "stoptime 24.200"
+  },
+  "3364": {
+   "file": "Shot5_Rope_Spiral.anim",
+   "name": "Shot5_Rope_Spiral",
+   "how": "unique-name"
+  },
+  "3294": {
+   "file": "Cutscene_Icebtreaker_HH60_Doorgunner_R.anim",
+   "name": "Cutscene_Icebtreaker_HH60_Doorgunner_R",
+   "how": "unique-name"
+  },
+  "3357": {
+   "file": "Recorded (3).anim",
+   "name": "Recorded (3)",
+   "how": "stoptime 29.050"
+  },
+  "3274": {
+   "file": "Cutscene_Icebtreaker_Helicopter_RopeHelper.anim",
+   "name": "Cutscene_Icebtreaker_Helicopter_RopeHelper",
+   "how": "unique-name"
+  },
+  "3360": {
+   "file": "Cutscene_Icebreaker_Helicopter_Gunner_L_Fire.anim",
+   "name": "Cutscene_Icebreaker_Helicopter_Gunner_L_Fire",
+   "how": "unique-name"
+  },
+  "3321": {
+   "file": "Cutscene_Icebreaker_Helicopter_Gunner_L.anim",
+   "name": "Cutscene_Icebreaker_Helicopter_Gunner_L",
+   "how": "unique-name"
+  },
+  "3395": {
+   "file": "Cutscene_Icebtreaker_Helicopter_Gunner_R.anim",
+   "name": "Cutscene_Icebtreaker_Helicopter_Gunner_R",
+   "how": "unique-name"
+  },
+  "3509": {
+   "file": "Cutscene_Icebtreaker_Helicopter_Pilot00.anim",
+   "name": "Cutscene_Icebtreaker_Helicopter_Pilot00",
+   "how": "unique-name"
+  },
+  "3524": {
+   "file": "Cutscene_Icebtreaker_Helicopter_Pilot01.anim",
+   "name": "Cutscene_Icebtreaker_Helicopter_Pilot01",
+   "how": "unique-name"
+  },
+  "3371": {
+   "file": "Cutscene_Icebtreaker_Helicopter_Crew00.anim",
+   "name": "Cutscene_Icebtreaker_Helicopter_Crew00",
+   "how": "unique-name"
+  },
+  "3362": {
+   "file": "Cutscene_Icebtreaker_Helicopter_Jumper00.anim",
+   "name": "Cutscene_Icebtreaker_Helicopter_Jumper00",
+   "how": "unique-name"
+  },
+  "3502": {
+   "file": "Cutscene_Icebtreaker_Helicopter_Jumper01_Boss.anim",
+   "name": "Cutscene_Icebtreaker_Helicopter_Jumper01_Boss",
+   "how": "unique-name"
+  },
+  "3531": {
+   "file": "Cutscene_Icebtreaker_Helipad_Jumper02_Boss_short.anim",
+   "name": "Cutscene_Icebtreaker_Helipad_Jumper02_Boss_short",
+   "how": "unique-name"
+  },
+  "3317": {
+   "file": "Cutscene_Icebtreaker_Helipad_Jumper00.anim",
+   "name": "Cutscene_Icebtreaker_Helipad_Jumper00",
+   "how": "unique-name"
+  },
+  "3491": {
+   "file": "Cutscene_Icebtreaker_Helipad_Jumper01.anim",
+   "name": "Cutscene_Icebtreaker_Helipad_Jumper01",
+   "how": "unique-name"
+  },
+  "3432": {
+   "file": "Cutscene_Icebtreaker_Helipad_Aimer_R.anim",
+   "name": "Cutscene_Icebtreaker_Helipad_Aimer_R",
+   "how": "unique-name"
+  },
+  "3346": {
+   "file": "Cutscene_Icebtreaker_Helipad_Aimer_L_run.anim",
+   "name": "Cutscene_Icebtreaker_Helipad_Aimer_L_run",
+   "how": "unique-name"
+  },
+  "3262": {
+   "file": "Cutscene_Icebtreaker_Helipad_Aimer_L.anim",
+   "name": "Cutscene_Icebtreaker_Helipad_Aimer_L",
+   "how": "unique-name"
+  },
+  "3501": {
+   "file": "Rope_L_Anim.anim",
+   "name": "Rope_L_Anim",
+   "how": "unique-name"
+  },
+  "3355": {
+   "file": "Rope_R_Anim.anim",
+   "name": "Rope_R_Anim",
+   "how": "unique-name"
+  }
+ },
+ "problems": []
+}

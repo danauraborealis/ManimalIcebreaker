@@ -1,0 +1,158 @@
+{
+ "3530": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3530_Recorded.anim",
+  "name": "Recorded"
+ },
+ "3514": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3514_Recorded_4.anim",
+  "name": "Recorded (4)"
+ },
+ "3449": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3449_Recorded_5.anim",
+  "name": "Recorded (5)"
+ },
+ "3295": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3295_Recorded_8.anim",
+  "name": "Recorded (8)"
+ },
+ "3370": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3370_Recorded_9.anim",
+  "name": "Recorded (9)"
+ },
+ "3464": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3464_Recorded_10.anim",
+  "name": "Recorded (10)"
+ },
+ "3493": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3493_Recorded_6.anim",
+  "name": "Recorded (6)"
+ },
+ "3271": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3271_Recorded_7.anim",
+  "name": "Recorded (7)"
+ },
+ "3448": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3448_Recorded_11.anim",
+  "name": "Recorded (11)"
+ },
+ "3308": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3308_Recorded_12.anim",
+  "name": "Recorded (12)"
+ },
+ "3428": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3428_Recorded_14.anim",
+  "name": "Recorded (14)"
+ },
+ "3397": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3397_Recorded_15.anim",
+  "name": "Recorded (15)"
+ },
+ "3513": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3513_Recorded_13.anim",
+  "name": "Recorded (13)"
+ },
+ "3382": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3382_Recorded_16.anim",
+  "name": "Recorded (16)"
+ },
+ "3427": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3427_Recorded_1.anim",
+  "name": "Recorded (1)"
+ },
+ "3479": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3479_Cutscene_Icebtreaker_HH60_Loop.anim",
+  "name": "Cutscene_Icebtreaker_HH60_Loop"
+ },
+ "3495": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3495_Cutscene_Icebtreaker_HH60_Doorgunner_L.anim",
+  "name": "Cutscene_Icebtreaker_HH60_Doorgunner_L"
+ },
+ "3372": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3372_Cutscene_Icebtreaker_HH60_Doorgunner_L_Fire.anim",
+  "name": "Cutscene_Icebtreaker_HH60_Doorgunner_L_Fire"
+ },
+ "3504": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3504_Recorded_2.anim",
+  "name": "Recorded (2)"
+ },
+ "3364": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3364_Shot5_Rope_Spiral.anim",
+  "name": "Shot5_Rope_Spiral"
+ },
+ "3294": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3294_Cutscene_Icebtreaker_HH60_Doorgunner_R.anim",
+  "name": "Cutscene_Icebtreaker_HH60_Doorgunner_R"
+ },
+ "3357": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3357_Recorded_3.anim",
+  "name": "Recorded (3)"
+ },
+ "3274": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3274_Cutscene_Icebtreaker_Helicopter_RopeHelper.anim",
+  "name": "Cutscene_Icebtreaker_Helicopter_RopeHelper"
+ },
+ "3360": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3360_Cutscene_Icebreaker_Helicopter_Gunner_L_Fire.anim",
+  "name": "Cutscene_Icebreaker_Helicopter_Gunner_L_Fire"
+ },
+ "3321": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3321_Cutscene_Icebreaker_Helicopter_Gunner_L.anim",
+  "name": "Cutscene_Icebreaker_Helicopter_Gunner_L"
+ },
+ "3395": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3395_Cutscene_Icebtreaker_Helicopter_Gunner_R.anim",
+  "name": "Cutscene_Icebtreaker_Helicopter_Gunner_R"
+ },
+ "3509": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3509_Cutscene_Icebtreaker_Helicopter_Pilot00.anim",
+  "name": "Cutscene_Icebtreaker_Helicopter_Pilot00"
+ },
+ "3524": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3524_Cutscene_Icebtreaker_Helicopter_Pilot01.anim",
+  "name": "Cutscene_Icebtreaker_Helicopter_Pilot01"
+ },
+ "3371": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3371_Cutscene_Icebtreaker_Helicopter_Crew00.anim",
+  "name": "Cutscene_Icebtreaker_Helicopter_Crew00"
+ },
+ "3362": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3362_Cutscene_Icebtreaker_Helicopter_Jumper00.anim",
+  "name": "Cutscene_Icebtreaker_Helicopter_Jumper00"
+ },
+ "3502": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3502_Cutscene_Icebtreaker_Helicopter_Jumper01_Boss.anim",
+  "name": "Cutscene_Icebtreaker_Helicopter_Jumper01_Boss"
+ },
+ "3531": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3531_Cutscene_Icebtreaker_Helipad_Jumper02_Boss_short.anim",
+  "name": "Cutscene_Icebtreaker_Helipad_Jumper02_Boss_short"
+ },
+ "3317": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3317_Cutscene_Icebtreaker_Helipad_Jumper00.anim",
+  "name": "Cutscene_Icebtreaker_Helipad_Jumper00"
+ },
+ "3491": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3491_Cutscene_Icebtreaker_Helipad_Jumper01.anim",
+  "name": "Cutscene_Icebtreaker_Helipad_Jumper01"
+ },
+ "3432": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3432_Cutscene_Icebtreaker_Helipad_Aimer_R.anim",
+  "name": "Cutscene_Icebtreaker_Helipad_Aimer_R"
+ },
+ "3346": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3346_Cutscene_Icebtreaker_Helipad_Aimer_L_run.anim",
+  "name": "Cutscene_Icebtreaker_Helipad_Aimer_L_run"
+ },
+ "3262": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3262_Cutscene_Icebtreaker_Helipad_Aimer_L.anim",
+  "name": "Cutscene_Icebtreaker_Helipad_Aimer_L"
+ },
+ "3501": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3501_Rope_L_Anim.anim",
+  "name": "Rope_L_Anim"
+ },
+ "3355": {
+  "asset": "Assets/Icebreaker_Import/CutsceneAnims/ICB_CS_3355_Rope_R_Anim.anim",
+  "name": "Rope_R_Anim"
+ }
+}

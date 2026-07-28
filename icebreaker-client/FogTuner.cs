@@ -18,7 +18,8 @@ namespace Manimal.Icebreaker
             [HarmonyPostfix]
             private static void Postfix()
             {
-                IcebreakerVolFog.ResetForRaid();
+                IcebreakerVolFog.ResetForRaid(); // statics reset is safe/needed everywhere
+                if (!IceGate.On) return;         // the tuner (and its F9 key) is icebreaker-only
                 new GameObject("Icebreaker_FogTuner").AddComponent<FogTuner>();
             }
         }
@@ -66,35 +67,42 @@ namespace Manimal.Icebreaker
         {
             _scroll = GUILayout.BeginScrollView(_scroll, GUILayout.Height(_win.height - 30));
 
+            // Plugin.Fog() routes every entry to its VolumetricFog2.Cutscene twin while
+            // the cutscene profile is live — same sliders tune either look
+            if (IcebreakerVolFog.CutsceneProfile)
+                GUILayout.Label("=== CUTSCENE PROFILE — edits only the cutscene look ===");
+
             Plugin.VolFog.Value = GUILayout.Toggle(Plugin.VolFog.Value, "volumetric fog enabled");
 
             GUILayout.Label("— shape —");
-            Slider(Plugin.VolFogDensity, "density", 0f, 1f, "0.00");
-            Slider(Plugin.VolFogNoise, "noise strength", 0f, 1f, "0.00");
-            Slider(Plugin.VolFogNoiseScale, "noise scale (billow size)", 0.2f, 5f, "0.00");
-            Slider(Plugin.VolFogHeight, "height (m)", 1f, 200f, "0");
-            Slider(Plugin.VolFogBaseline, "baseline Y (m)", -50f, 100f, "0.0");
-            Slider(Plugin.VolFogMaxLength, "max fog length (m)", 100f, 2000f, "0");
-            Slider(Plugin.VolFogMaxLengthFallOff, "max length falloff (far-glow killer)", 0f, 1f, "0.00");
-            Slider(Plugin.VolFogVoidFalloff, "void edge sharpness", 1f, 20f, "0.0");
-            Slider(Plugin.VolFogVoidBlend, "void blend (bridge gaps)", 0f, 1f, "0.00");
+            Slider(Plugin.Fog(Plugin.VolFogDensity), "density", 0f, 1f, "0.00");
+            Slider(Plugin.Fog(Plugin.VolFogNoise), "noise strength", 0f, 1f, "0.00");
+            Slider(Plugin.Fog(Plugin.VolFogNoiseScale), "noise scale (billow size)", 0.2f, 5f, "0.00");
+            Slider(Plugin.Fog(Plugin.VolFogHeight), "height (m)", 1f, 200f, "0");
+            Slider(Plugin.Fog(Plugin.VolFogBaseline), "baseline Y (m)", -50f, 100f, "0.0");
+            Slider(Plugin.Fog(Plugin.VolFogMaxLength), "max fog length (m)", 100f, 2000f, "0");
+            Slider(Plugin.Fog(Plugin.VolFogMaxLengthFallOff), "wall ramp width (opaque at max len)", 0f, 1f, "0.00");
+            Slider(Plugin.Fog(Plugin.VolFogWallShade), "wall darkness (0=black gloom)", 0f, 1f, "0.00");
+            Slider(Plugin.Fog(Plugin.VolFogVoidFalloff), "void edge sharpness", 1f, 20f, "0.0");
+            Slider(Plugin.Fog(Plugin.VolFogVoidBlend), "void blend (bridge gaps)", 0f, 1f, "0.00");
             Plugin.VolFogVoidDebug.Value = GUILayout.Toggle(Plugin.VolFogVoidDebug.Value, "void DEBUG (paint voids red)");
-            Slider(Plugin.VolFogDeepObscurance, "deep obscurance (darken w/ depth)", 0f, 3f, "0.00");
-            Slider(Plugin.VolFogSkyHaze, "sky haze", 0f, 500f, "0");
-            Slider(Plugin.VolFogAlpha, "alpha", 0f, 1f, "0.00");
-            Slider(Plugin.VolFogSpeed, "wind speed", 0f, 0.5f, "0.000");
+            Slider(Plugin.Fog(Plugin.VolFogDeepObscurance), "deep obscurance (darken w/ depth)", 0f, 3f, "0.00");
+            Slider(Plugin.Fog(Plugin.VolFogSkyHaze), "sky haze", 0f, 500f, "0");
+            Slider(Plugin.Fog(Plugin.VolFogAlpha), "alpha", 0f, 1f, "0.00");
+            Slider(Plugin.Fog(Plugin.VolFogSpeed), "wind speed", 0f, 0.5f, "0.000");
 
             GUILayout.Label("— color —");
-            var c = Plugin.VolFogColor.Value;
+            var colorEntry = Plugin.FogColorEntry;
+            var c = colorEntry.Value;
             float r = SliderRaw("  r", c.r, 0f, 1f, "0.00");
             float g = SliderRaw("  g", c.g, 0f, 1f, "0.00");
             float b = SliderRaw("  b", c.b, 0f, 1f, "0.00");
-            if (r != c.r || g != c.g || b != c.b) Plugin.VolFogColor.Value = new Color(r, g, b);
+            if (r != c.r || g != c.g || b != c.b) colorEntry.Value = new Color(r, g, b);
 
             GUILayout.Label("— perf / misc —");
             int ds = (int)SliderRaw("downsampling", Plugin.VolFogDownsampling.Value, 1f, 4f, "0");
             if (ds != Plugin.VolFogDownsampling.Value) Plugin.VolFogDownsampling.Value = ds;
-            Slider(Plugin.WeatherDesaturate, "weather desaturate (-1 = vanilla)", -1f, 1f, "0.00");
+            Slider(Plugin.Fog(Plugin.WeatherDesaturate), "weather desaturate (-1 = vanilla)", -1f, 1f, "0.00");
 
             GUILayout.Space(8);
             if (GUILayout.Button("DUMP to log")) Dump();

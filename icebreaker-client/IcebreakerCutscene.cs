@@ -26,8 +26,26 @@ namespace Manimal.Icebreaker
 
         public static void TryPlay()
         {
-            if (_played || !Available) return;
+            if (_played) return;
+            // the real in-engine timeline cutscene when the scene shipped in the bundle
+            // and Author 17 populated it; the video stays as the fallback path
+            if (Plugin.TimelineCutscene.Value && IcebreakerTimelineCutscene.Available)
+            {
+                _played = true;
+                IcebreakerTimelineCutscene.Play();
+                return;
+            }
+            if (!Available) return;
             _played = true;
+            var go = new GameObject("Icebreaker_Cutscene");
+            go.AddComponent<IcebreakerCutscene>();
+        }
+
+        // fallback entry for the timeline driver when the scene/timeline turns out
+        // broken at runtime — _played is already latched by then, so bypass it
+        public static void PlayVideoNow()
+        {
+            if (!Available) return;
             var go = new GameObject("Icebreaker_Cutscene");
             go.AddComponent<IcebreakerCutscene>();
         }

@@ -18,6 +18,7 @@ namespace Manimal.Icebreaker
             [HarmonyPostfix]
             private static void Postfix()
             {
+                if (!IceGate.On) return; // diag probe is icebreaker-only
                 new GameObject("Icebreaker_SkyProbe").AddComponent<SkyProbe>();
             }
         }

@@ -1,0 +1,36 @@
+{
+  "6a63fa5726a91c3479b6c575": {
+    "itemTplToClone": "60915994c49cf53e4772cc38",
+    "parentId": "5448ecbe4bdc2d60728b4568",
+    "handbookParentId": "5b619f1a86f77450a702a6f3",
+    "overrideProperties": {
+      "ExaminedByDefault": true,
+      "QuestItem": true,
+      "CanSellOnRagfair": false,
+      "Weight": 0.3,
+      "Height": 2,
+      "Width": 1,
+	  "Prefab": {
+        "path": "assets/content/items/infosubject/item_info_note_folder/item_info_note_icebreaker_paradigm.bundle",
+        "rcid": ""
+      },
+      "StackMaxSize": 1,
+      "BackgroundColor": "yellow"
+    },
+    "locales": {
+      "en": {
+        "name": "Paradigm Shipping directive",
+        "shortName": "Directive",
+        "description": "This Paradigm Shipping folder contains one of the latest directives regarding operations at cargo terminal #3."
+      }
+    },
+    "addtoItemBlacklist": true,
+    "addtoInventorySlots": [],
+    "addtoModSlots": false,
+    "modSlot": [],
+    "fleaPriceRoubles": 50000,
+    "handbookPriceRoubles": 50000,
+    "addtoBots": false,
+    "addtoStaticLootContainers": false
+  }
+}

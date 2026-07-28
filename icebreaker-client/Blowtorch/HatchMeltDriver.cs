@@ -53,6 +53,7 @@ namespace Manimal.Icebreaker.Blowtorch
             [HarmonyPostfix]
             private static void Postfix()
             {
+                if (!IceGate.On) return; // hatch rig only exists on the icebreaker
                 new GameObject("Icebreaker_HatchMelt").AddComponent<HatchMeltDriver>();
             }
         }

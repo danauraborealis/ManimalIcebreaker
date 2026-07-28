@@ -1,0 +1,23 @@
+{
+ "levelphysics": [
+  {
+   "level": "level698",
+   "go": "PhysicsSetup",
+   "fields": {
+    "_mbpBounds": {
+     "m_Center": {
+      "x": 0.0,
+      "y": 50.0,
+      "z": 0.0
+     },
+     "m_Extent": {
+      "x": 360.0,
+      "y": 50.0,
+      "z": 400.0
+     }
+    },
+    "_mbpSubdivisions": 16
+   }
+  }
+ ]
+}

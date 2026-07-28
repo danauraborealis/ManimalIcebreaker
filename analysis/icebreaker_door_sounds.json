@@ -1,0 +1,1804 @@
+{
+ "doors": [
+  {
+   "class": "KeycardDoor",
+   "level": "level700",
+   "go": "SBG_Icebreaker_Indoor_01/SOO_LOD0/DOOR~1/Icebreaker_interior_door_01_set~3/Icebreaker_interior_door_01_door",
+   "OpenSound": [],
+   "ShutSound": [
+    "metal_door_1_close_01",
+    "metal_door_1_close_02",
+    "metal_door_1_close_03"
+   ],
+   "SqueakSound": [
+    "metal_door_1_open_01",
+    "metal_door_1_open_02",
+    "metal_door_1_open_03"
+   ]
+  },
+  {
+   "class": "KeycardDoor",
+   "level": "level700",
+   "go": "SBG_Icebreaker_Indoor_01/SOO_LOD0/DOOR~1/Icebreaker_interior_door_01_set~2/Icebreaker_interior_door_01_door",
+   "OpenSound": [],
+   "ShutSound": [
+    "metal_door_1_close_01",
+    "metal_door_1_close_02",
+    "metal_door_1_close_03"
+   ],
+   "SqueakSound": [
+    "metal_door_1_open_01",
+    "metal_door_1_open_02",
+    "metal_door_1_open_03"
+   ]
+  },
+  {
+   "class": "KeycardDoor",
+   "level": "level700",
+   "go": "SBG_Icebreaker_Indoor_01/SOO_LOD0/DOOR~1/Icebreaker_interior_door_01_set (1)/Icebreaker_interior_door_01_door",
+   "OpenSound": [],
+   "ShutSound": [
+    "metal_door_1_close_01",
+    "metal_door_1_close_02",
+    "metal_door_1_close_03"
+   ],
+   "SqueakSound": [
+    "metal_door_1_open_01",
+    "metal_door_1_open_02",
+    "metal_door_1_open_03"
+   ]
+  },
+  {
+   "class": "KeycardDoor",
+   "level": "level700",
+   "go": "SBG_Icebreaker_Indoor_01/SOO_LOD0/DOOR~1/Ship_Door_interior_01_set (6)/Icebreaker_interior_door_01_door",
+   "OpenSound": [],
+   "ShutSound": [
+    "metal_door_1_close_01",
+    "metal_door_1_close_02",
+    "metal_door_1_close_03"
+   ],
+   "SqueakSound": [
+    "metal_door_1_open_01",
+    "metal_door_1_open_02",
+    "metal_door_1_open_03"
+   ]
+  },
+  {
+   "class": "KeycardDoor",
+   "level": "level700",
+   "go": "SBG_Icebreaker_Indoor_01/SOO_LOD0/DOOR~1/Icebreaker_interior_door_01_set (3)~1/Icebreaker_interior_door_01_door",
+   "OpenSound": [],
+   "ShutSound": [
+    "metal_door_1_close_01",
+    "metal_door_1_close_02",
+    "metal_door_1_close_03"
+   ],
+   "SqueakSound": [
+    "metal_door_1_open_01",
+    "metal_door_1_open_02",
+    "metal_door_1_open_03"
+   ]
+  },
+  {
+   "class": "KeycardDoor",
+   "level": "level700",
+   "go": "SBG_Icebreaker_Indoor_01/SOO_LOD0/DOOR~1/Icebreaker_interior_door_01_set~5/Icebreaker_interior_door_01_door",
+   "OpenSound": [],
+   "ShutSound": [
+    "metal_door_1_close_01",
+    "metal_door_1_close_02",
+    "metal_door_1_close_03"
+   ],
+   "SqueakSound": [
+    "metal_door_1_open_01",
+    "metal_door_1_open_02",
+    "metal_door_1_open_03"
+   ]
+  },
+  {
+   "class": "KeycardDoor",
+   "level": "level700",
+   "go": "SBG_Icebreaker_Indoor_01/SOO_LOD0/DOOR~1/Icebreaker_interior_door_01_set/Icebreaker_interior_door_01_door",
+   "OpenSound": [],
+   "ShutSound": [
+    "metal_door_1_close_01",
+    "metal_door_1_close_02",
+    "metal_door_1_close_03"
+   ],
+   "SqueakSound": [
+    "metal_door_1_open_01",
+    "metal_door_1_open_02",
+    "metal_door_1_open_03"
+   ]
+  },
+  {
+   "class": "KeycardDoor",
+   "level": "level700",
+   "go": "SBG_Icebreaker_Indoor_01/SOO_LOD0/DOOR~1/Icebreaker_interior_door_01_set (1)~3/Icebreaker_interior_door_01_door",
+   "OpenSound": [],
+   "ShutSound": [
+    "metal_door_1_close_01",
+    "metal_door_1_close_02",
+    "metal_door_1_close_03"
+   ],
+   "SqueakSound": [
+    "metal_door_1_open_01",
+    "metal_door_1_open_02",
+    "metal_door_1_open_03"
+   ]
+  },
+  {
+   "class": "KeycardDoor",
+   "level": "level700",
+   "go": "SBG_Icebreaker_Indoor_01/SOO_LOD0/DOOR~1/Icebreaker_interior_door_01_set (1)~1/Icebreaker_interior_door_01_door",
+   "OpenSound": [],
+   "ShutSound": [
+    "metal_door_1_close_01",
+    "metal_door_1_close_02",
+    "metal_door_1_close_03"
+   ],
+   "SqueakSound": [
+    "metal_door_1_open_01",
+    "metal_door_1_open_02",
+    "metal_door_1_open_03"
+   ]
+  },
+  {
+   "class": "KeycardDoor",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~1/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "KeycardDoor",
+   "level": "level704",
+   "go": "Exterior_door_02_Decals_02/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level700",
+   "go": "SBG_Icebreaker_Indoor_01/SOO_LOD0/DOOR~1/Ship_Door_interior_02~1/Icebreaker_interior_door_02_door_1",
+   "OpenSound": [],
+   "ShutSound": [
+    "metal_door_2_close_01",
+    "metal_door_2_close_02",
+    "metal_door_2_close_03"
+   ],
+   "SqueakSound": [
+    "metal_door_2_open_01",
+    "metal_door_2_open_02",
+    "metal_door_2_open_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level700",
+   "go": "SBG_Icebreaker_Indoor_01/SOO_LOD0/DOOR/Exterior_door_02_Decals_02/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level700",
+   "go": "SBG_Icebreaker_Indoor_01/SOO_LOD0/DOOR~1/interior_door_01_Decals_01~4/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level700",
+   "go": "SBG_Icebreaker_Indoor_01/SOO_LOD0/DOOR~1/interior_door_01_Decals_01~8/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level700",
+   "go": "SBG_Icebreaker_Indoor_01/SOO_LOD0/DOOR~1/interior_door_01_Decals_01~6/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level700",
+   "go": "SBG_Icebreaker_Indoor_01/SOO_LOD0/DOOR~1/interior_door_01_Decals_01~7/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level700",
+   "go": "SBG_Icebreaker_Indoor_01/SOO_LOD0/DOOR~1/interior_door_01_Decals_01~3/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level700",
+   "go": "SBG_Icebreaker_Indoor_01/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~3/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level700",
+   "go": "SBG_Icebreaker_Indoor_01/SOO_LOD0/DOOR~1/interior_door_01_Decals_01~2/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Icebreaker_interior_door_01_set/Icebreaker_interior_door_01_door",
+   "OpenSound": [],
+   "ShutSound": [
+    "metal_door_1_close_01",
+    "metal_door_1_close_02",
+    "metal_door_1_close_03"
+   ],
+   "SqueakSound": [
+    "metal_door_1_open_01",
+    "metal_door_1_open_02",
+    "metal_door_1_open_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~83/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~86/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~102/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02 (10)/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~3/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~80/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~94/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~72/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~98/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02 (11)/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~20/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~96/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~81/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~64/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~40/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~75/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~95/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02 (3)/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02 (20)/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~17/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~55/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~93/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~36/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02 (13)/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~6/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02 (21)/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~28/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~2/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~87/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~50/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~56/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02 (28)/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~52/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~29/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02 (18)/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~51/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02 (37)/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~97/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~53/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level701",
+   "go": "SBG_Icebreaker_Indoor_02/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~12/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level702",
+   "go": "SBG_Icebreaker_Indoor_03/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~10/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level702",
+   "go": "SBG_Icebreaker_Indoor_03/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~7/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level702",
+   "go": "SBG_Icebreaker_Indoor_03/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~12/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level702",
+   "go": "SBG_Icebreaker_Indoor_03/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~14/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level702",
+   "go": "SBG_Icebreaker_Indoor_03/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~15/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Exterior_door_01_Snow_Effect_Decals_01~22/Exterior_door_01_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Ship_Door_interior_01_set/Icebreaker_interior_door_01_door",
+   "OpenSound": [],
+   "ShutSound": [
+    "metal_door_1_close_01",
+    "metal_door_1_close_02",
+    "metal_door_1_close_03"
+   ],
+   "SqueakSound": [
+    "metal_door_1_open_01",
+    "metal_door_1_open_02",
+    "metal_door_1_open_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Ship_Door_interior_01_set~1/Icebreaker_interior_door_01_door",
+   "OpenSound": [],
+   "ShutSound": [
+    "metal_door_1_close_01",
+    "metal_door_1_close_02",
+    "metal_door_1_close_03"
+   ],
+   "SqueakSound": [
+    "metal_door_1_open_01",
+    "metal_door_1_open_02",
+    "metal_door_1_open_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Ship_Door_interior_01_set~3/Icebreaker_interior_door_01_door",
+   "OpenSound": [],
+   "ShutSound": [
+    "metal_door_1_close_01",
+    "metal_door_1_close_02",
+    "metal_door_1_close_03"
+   ],
+   "SqueakSound": [
+    "metal_door_1_open_01",
+    "metal_door_1_open_02",
+    "metal_door_1_open_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Ship_Door_interior_01_set~2/Icebreaker_interior_door_01_door",
+   "OpenSound": [],
+   "ShutSound": [
+    "metal_door_1_close_01",
+    "metal_door_1_close_02",
+    "metal_door_1_close_03"
+   ],
+   "SqueakSound": [
+    "metal_door_1_open_01",
+    "metal_door_1_open_02",
+    "metal_door_1_open_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Exterior_door_02_Snow_Effect_Decals_01~41/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Exterior_door_02_Snow_Effect_Decals_01~28/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Exterior_door_02_Snow_Effect_Decals_01~8/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Exterior_door_02_Snow_Effect_Decals_01~31/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Exterior_door_02_Snow_Effect_Decals_01~42/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Exterior_door_02_Snow_Effect_Decals_01~38/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Exterior_door_02_Snow_Effect_Decals_01~17/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Exterior_door_02_Snow_Effect_Decals_01~33/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Exterior_door_02_Snow_Effect_Decals_01~15/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Exterior_door_02_Snow_Effect_Decals_01~10/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Exterior_door_02_Snow_Effect_Decals_01~44/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Exterior_door_02_Snow_Effect_Decals_01~29/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Exterior_door_02_Snow_Effect_Decals_01~43/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Exterior_door_02_Snow_Effect_Decals_01~45/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Exterior_door_02_Snow_Effect_Decals_01~30/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/interior_door_01_Decals_01~1/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/interior_door_01_Decals_01~2/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Exterior_door_02_Decals_02/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/interior_door_01_Decals_01/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/interior_door_01_Decals_01~3/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "SBG_Icebreaker_Design_Stuff/SOO_LOD0/DOOR/Exterior_door_02_Decals_02~1/Exterior_door_02_door",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  },
+  {
+   "class": "Door",
+   "level": "level704",
+   "go": "INTERACTIVE_Exterior_door_02_chain/Exterior_door_02_destroyed_rotate",
+   "OpenSound": [
+    "IB_metal_door_open_01",
+    "IB_metal_door_open_02",
+    "IB_metal_door_open_03"
+   ],
+   "ShutSound": [
+    "IB_metal_door_close_01",
+    "IB_metal_door_close_02",
+    "IB_metal_door_close_03"
+   ],
+   "SqueakSound": [
+    "IB_metal_door_squeak_01",
+    "IB_metal_door_squeak_02",
+    "IB_metal_door_squeak_03"
+   ]
+  }
+ ]
+}

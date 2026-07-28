@@ -13,6 +13,11 @@ namespace Manimal.Icebreaker
     // rides the render camera as an image effect; the optic camera never gets it.
     internal static class IcebreakerVolFog
     {
+        // cutscene look profile: while true, Plugin.Fog()/FogColorEntry route every
+        // look read (and the F9 tuner) to the VolumetricFog2.Cutscene twin entries.
+        // set/cleared by the cutscene driver around playback.
+        internal static bool CutsceneProfile;
+
         private static VolumetricFogAndMist.VolumetricFog _fog;
         private static bool _dead; // bundle missing/broken — stop retrying this raid
 
@@ -52,9 +57,9 @@ namespace Manimal.Icebreaker
             Shader.SetGlobalVectorArray("_MVoidPos", _voidPos);
             Shader.SetGlobalVectorArray("_MVoidInvHalf", _voidInvHalf);
             // negative falloff flips the shader into red-void debug visualization
-            float falloff = Plugin.VolFogVoidFalloff.Value;
+            float falloff = Plugin.Fog(Plugin.VolFogVoidFalloff).Value;
             Shader.SetGlobalFloat("_MVoidFallOff", Plugin.VolFogVoidDebug.Value ? -falloff : falloff);
-            Shader.SetGlobalFloat("_MVoidBlend", Plugin.VolFogVoidBlend.Value);
+            Shader.SetGlobalFloat("_MVoidBlend", Plugin.Fog(Plugin.VolFogVoidBlend).Value);
         }
 
         private static string AreasJsonPath =>
@@ -72,6 +77,21 @@ namespace Manimal.Icebreaker
             // Manimal -> Export Fog Areas, or hand-edited) — hot-reloaded on change, no
             // scene bundle rebuild in the loop
             _voidCount = 0;
+            // the SDK markers ship in the scene bundle WITH their editor-visualization
+            // BoxColliders — strip them ALWAYS, even when the json is the data source
+            // (the old strip lived only in the marker-parsing path below, so with a
+            // json present the colliders survived = 15 invisible walls in the ship)
+            foreach (var t in Resources.FindObjectsOfTypeAll<Transform>())
+            {
+                if (t == null || !t.gameObject.scene.isLoaded) continue;
+                if (!t.name.StartsWith("manimal_fogvoid", StringComparison.OrdinalIgnoreCase) &&
+                    !t.name.StartsWith("manimal_fogarea", StringComparison.OrdinalIgnoreCase)) continue;
+                foreach (var col in t.GetComponents<Collider>())
+                {
+                    UnityEngine.Object.Destroy(col);
+                    Plugin.Log.LogWarning($"[VolFog] stripped marker collider on '{t.name}'");
+                }
+            }
             if (System.IO.File.Exists(AreasJsonPath))
             {
                 try
@@ -268,6 +288,21 @@ namespace Manimal.Icebreaker
             // re-push every tick — engine/scene transitions can reset global state,
             // and this also makes the falloff slider live
             if (_voidCount > 0) PushVoids();
+            PushDistanceWall();
+        }
+
+        // maps MaxFogLength/MaxLengthFallOff onto the shader's distance WALL: fog
+        // opacity ramps UP with pixel distance, fully opaque at MaxFogLength — the far
+        // field (and the snow terrain border) disappears into it. falloff = ramp width
+        // as a fraction of max length. WallShade darkens the wall vs the lit fog color
+        // so the far field reads as gloom, not glow.
+        private static void PushDistanceWall()
+        {
+            float end = Plugin.Fog(Plugin.VolFogMaxLength).Value;
+            float start = end * (1f - Mathf.Clamp01(Plugin.Fog(Plugin.VolFogMaxLengthFallOff).Value));
+            Shader.SetGlobalFloat("_MDistWallStart", start);
+            Shader.SetGlobalFloat("_MDistWallInvRange", 1f / Mathf.Max(end - start, 1f));
+            Shader.SetGlobalFloat("_MDistWallShade", Plugin.Fog(Plugin.VolFogWallShade).Value);
         }
 
         // shared param push — the camera fog in global mode, or each authored area
@@ -285,28 +320,28 @@ namespace Manimal.Icebreaker
                 // under EFT's render pipeline — inline rendering only
                 f.downsampling = Plugin.VolFogDownsampling.Value;
                 f.forceComposition = false;
-                f.skyHaze = Plugin.VolFogSkyHaze.Value;
+                f.skyHaze = Plugin.Fog(Plugin.VolFogSkyHaze).Value;
             }
             f.preset = FOG_PRESET.Custom;
-            f.density = Plugin.VolFogDensity.Value;
-            f.noiseStrength = Plugin.VolFogNoise.Value;
-            f.noiseScale = Plugin.VolFogNoiseScale.Value;
+            f.density = Plugin.Fog(Plugin.VolFogDensity).Value;
+            f.noiseStrength = Plugin.Fog(Plugin.VolFogNoise).Value;
+            f.noiseScale = Plugin.Fog(Plugin.VolFogNoiseScale).Value;
             if (isCamera)
             {
                 // areas take height/baseline from their authored box; only the global
                 // layer uses the sliders
-                f.height = Plugin.VolFogHeight.Value;
-                f.baselineHeight = Plugin.VolFogBaseline.Value;
+                f.height = Plugin.Fog(Plugin.VolFogHeight).Value;
+                f.baselineHeight = Plugin.Fog(Plugin.VolFogBaseline).Value;
             }
             f.heightFallOff = 0.6f;
             f.distance = 0f;
-            f.maxFogLength = Plugin.VolFogMaxLength.Value;
-            f.maxFogLengthFallOff = Plugin.VolFogMaxLengthFallOff.Value;
-            f.deepObscurance = Plugin.VolFogDeepObscurance.Value;
-            f.color = Plugin.VolFogColor.Value;
-            f.skyColor = Plugin.VolFogColor.Value;
-            f.alpha = Plugin.VolFogAlpha.Value;
-            f.speed = Plugin.VolFogSpeed.Value;
+            f.maxFogLength = Plugin.Fog(Plugin.VolFogMaxLength).Value;
+            f.maxFogLengthFallOff = Plugin.Fog(Plugin.VolFogMaxLengthFallOff).Value;
+            f.deepObscurance = Plugin.Fog(Plugin.VolFogDeepObscurance).Value;
+            f.color = Plugin.FogColorEntry.Value;
+            f.skyColor = Plugin.FogColorEntry.Value;
+            f.alpha = Plugin.Fog(Plugin.VolFogAlpha).Value;
+            f.speed = Plugin.Fog(Plugin.VolFogSpeed).Value;
             f.windDirection = new Vector3(-1f, 0f, -0.35f); // blizzard wind heading
             // area instances render the dither pattern way stronger than the global
             // layer did — heavy visible grain inside the boxes. no dither for areas.

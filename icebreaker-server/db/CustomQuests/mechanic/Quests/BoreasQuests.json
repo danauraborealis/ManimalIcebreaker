@@ -1,0 +1,386 @@
+{
+  "ff56532d9100ce03006493e9": {
+    "QuestName": "Boreas - Part 1",
+    "_id": "ff56532d9100ce03006493e9",
+    "traderId": "5a7c2eca46aef81a7ca2145d",
+    "type": "PickUp",
+    "location": "5704e3c2d2720bac5b8b4567",
+    "image": "/files/quest/icon/Boreas_Banner",
+    "acceptanceAndFinishingSource": "eft",
+    "arenaLocations": [],
+    "instantComplete": false,
+    "isKey": false,
+    "secretQuest": false,
+    "gameModes": [],
+    "progressSource": "eft",
+    "rankingModes": [],
+    "side": "Pmc",
+    "canShowNotificationsInGame": true,
+    "restartable": false,
+    "status": 0,
+    "description": "ff56532d9100ce03006493e9 description",
+    "startedMessageText": "ff56532d9100ce03006493e9 startedMessageText",
+    "successMessageText": "ff56532d9100ce03006493e9 successMessageText",
+    "failMessageText": "ff56532d9100ce03006493e9 failMessageText",
+    "acceptPlayerMessage": "ff56532d9100ce03006493e9 acceptPlayerMessage",
+    "declinePlayerMessage": "ff56532d9100ce03006493e9 declinePlayerMessage",
+    "completePlayerMessage": "ff56532d9100ce03006493e9 completePlayerMessage",
+    "changeQuestMessageText": "ff56532d9100ce03006493e9 changeQuestMessageText",
+    "name": "ff56532d9100ce03006493e9 name",
+    "note": "ff56532d9100ce03006493e9 note",
+    "conditions": {
+      "AvailableForFinish": [
+        {
+          "conditionType": "LeaveItemAtLocation",
+          "dogtagLevel": 0,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "80627eaca06d7a50d838c784",
+          "index": 0,
+          "isEncoded": false,
+          "maxDurability": 100,
+          "minDurability": 0,
+          "onlyFoundInRaid": false,
+          "parentId": "",
+          "plantTime": 20,
+          "target": [
+            "590c2e1186f77425357b6124"
+          ],
+          "value": 1,
+          "visibilityConditions": [],
+          "zoneId": "boreas_part1_repair"
+        }
+      ],
+      "AvailableForStart": [
+        {
+          "compareMethod": ">=",
+          "conditionType": "TraderLoyalty",
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "ddddc8217a1f742fdae9bddd",
+          "index": 0,
+          "parentId": "",
+          "target": "5a7c2eca46aef81a7ca2145d",
+          "value": 3,
+          "visibilityConditions": []
+        }
+      ],
+      "Fail": []
+    },
+    "rewards": {
+      "Fail": [],
+      "Started": [],
+      "Success": [
+        {
+          "availableInGameEditions": [],
+          "id": "ac18b1a93a09ec11829f9b06",
+          "index": 0,
+          "type": "Experience",
+          "value": 7000,
+          "unknown": false,
+          "isHidden": false
+        },
+        {
+          "availableInGameEditions": [],
+          "id": "9d8521a10ff09e979bff7336",
+          "index": 1,
+          "target": "5a7c2eca46aef81a7ca2145d",
+          "type": "TraderStanding",
+          "value": 0.02,
+          "unknown": false,
+          "isHidden": false
+        },
+        {
+          "availableInGameEditions": [],
+          "findInRaid": false,
+          "id": "0cd1a49fd3337bd299d7b00c",
+          "index": 2,
+          "isEncoded": false,
+          "isHidden": false,
+          "items": [
+            {
+              "_id": "901147cf6747a82eeef4614a",
+              "_tpl": "5449016a4bdc2d6f028b456f",
+              "upd": {
+                "StackObjectsCount": 35000
+              }
+            }
+          ],
+          "target": "901147cf6747a82eeef4614a",
+          "type": "Item",
+          "unknown": false,
+          "value": 35000
+        }
+      ]
+    }
+  },
+  "07c1ecde2c4652876fc769b1": {
+    "QuestName": "Boreas - Part 2",
+    "_id": "07c1ecde2c4652876fc769b1",
+    "traderId": "5a7c2eca46aef81a7ca2145d",
+    "type": "PickUp",
+    "location": "5704e4dad2720bb55b8b4567",
+    "image": "/files/quest/icon/Boreas_Banner",
+    "acceptanceAndFinishingSource": "eft",
+    "arenaLocations": [],
+    "instantComplete": false,
+    "isKey": false,
+    "secretQuest": false,
+    "gameModes": [],
+    "progressSource": "eft",
+    "rankingModes": [],
+    "side": "Pmc",
+    "canShowNotificationsInGame": true,
+    "restartable": false,
+    "status": 0,
+    "description": "07c1ecde2c4652876fc769b1 description",
+    "startedMessageText": "07c1ecde2c4652876fc769b1 startedMessageText",
+    "successMessageText": "07c1ecde2c4652876fc769b1 successMessageText",
+    "failMessageText": "07c1ecde2c4652876fc769b1 failMessageText",
+    "acceptPlayerMessage": "07c1ecde2c4652876fc769b1 acceptPlayerMessage",
+    "declinePlayerMessage": "07c1ecde2c4652876fc769b1 declinePlayerMessage",
+    "completePlayerMessage": "07c1ecde2c4652876fc769b1 completePlayerMessage",
+    "changeQuestMessageText": "07c1ecde2c4652876fc769b1 changeQuestMessageText",
+    "name": "07c1ecde2c4652876fc769b1 name",
+    "note": "07c1ecde2c4652876fc769b1 note",
+    "conditions": {
+      "AvailableForFinish": [
+        {
+          "conditionType": "FindItem",
+          "countInRaid": false,
+          "dogtagLevel": 0,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "7af670b7b771dad781eafb0a",
+          "index": 0,
+          "isEncoded": false,
+          "maxDurability": 100,
+          "minDurability": 0,
+          "onlyFoundInRaid": false,
+          "parentId": "",
+          "target": [
+            "6a63fa5726a91c3479b6c575"
+          ],
+          "value": 1,
+          "visibilityConditions": []
+        },
+        {
+          "conditionType": "HandoverItem",
+          "dogtagLevel": 0,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "5babe420cdde71285254a662",
+          "index": 1,
+          "isEncoded": false,
+          "maxDurability": 100,
+          "minDurability": 0,
+          "onlyFoundInRaid": false,
+          "parentId": "",
+          "target": [
+            "6a63fa5726a91c3479b6c575"
+          ],
+          "value": 1,
+          "visibilityConditions": [
+            {
+              "conditionType": "CompleteCondition",
+              "id": "7ba7a4ef37e0873f1292e029",
+              "target": "7af670b7b771dad781eafb0a"
+            }
+          ]
+        }
+      ],
+      "AvailableForStart": [
+        {
+          "availableAfter": 0,
+          "conditionType": "Quest",
+          "dispersion": 0,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "35c74e3e6100631431f5a0c5",
+          "index": 0,
+          "parentId": "",
+          "status": [
+            4
+          ],
+          "target": "ff56532d9100ce03006493e9",
+          "visibilityConditions": []
+        }
+      ],
+      "Fail": []
+    },
+    "rewards": {
+      "Fail": [],
+      "Started": [],
+      "Success": [
+        {
+          "availableInGameEditions": [],
+          "id": "eca3f047b8009f319ac229bf",
+          "index": 0,
+          "type": "Experience",
+          "value": 9000,
+          "unknown": false,
+          "isHidden": false
+        },
+        {
+          "availableInGameEditions": [],
+          "id": "34ebe714210ef2b9b8c42654",
+          "index": 1,
+          "target": "5a7c2eca46aef81a7ca2145d",
+          "type": "TraderStanding",
+          "value": 0.02,
+          "unknown": false,
+          "isHidden": false
+        },
+        {
+          "availableInGameEditions": [],
+          "findInRaid": false,
+          "id": "a9b0206ba457974bae0764b5",
+          "index": 2,
+          "isEncoded": false,
+          "isHidden": false,
+          "items": [
+            {
+              "_id": "4e1c2761cdc6bef85256d994",
+              "_tpl": "5449016a4bdc2d6f028b456f",
+              "upd": {
+                "StackObjectsCount": 45000
+              }
+            }
+          ],
+          "target": "4e1c2761cdc6bef85256d994",
+          "type": "Item",
+          "unknown": false,
+          "value": 45000
+        }
+      ]
+    }
+  },
+  "9d5e3f7d6320a7fd139a2772": {
+    "QuestName": "Boreas - Part 3",
+    "_id": "9d5e3f7d6320a7fd139a2772",
+    "traderId": "5a7c2eca46aef81a7ca2145d",
+    "type": "Completion",
+    "location": "any",
+    "image": "/files/quest/icon/Boreas_Banner",
+    "acceptanceAndFinishingSource": "eft",
+    "arenaLocations": [],
+    "instantComplete": false,
+    "isKey": false,
+    "secretQuest": false,
+    "gameModes": [],
+    "progressSource": "eft",
+    "rankingModes": [],
+    "side": "Pmc",
+    "canShowNotificationsInGame": true,
+    "restartable": false,
+    "status": 0,
+    "description": "9d5e3f7d6320a7fd139a2772 description",
+    "startedMessageText": "9d5e3f7d6320a7fd139a2772 startedMessageText",
+    "successMessageText": "9d5e3f7d6320a7fd139a2772 successMessageText",
+    "failMessageText": "9d5e3f7d6320a7fd139a2772 failMessageText",
+    "acceptPlayerMessage": "",
+    "declinePlayerMessage": "",
+    "completePlayerMessage": "",
+    "changeQuestMessageText": "",
+    "name": "9d5e3f7d6320a7fd139a2772 name",
+    "note": "9d5e3f7d6320a7fd139a2772 note",
+    "conditions": {
+      "AvailableForFinish": [
+        {
+          "availableAfter": 0,
+          "conditionType": "Quest",
+          "dispersion": 0,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "82c33ef9da1054dac7e059bd",
+          "index": 0,
+          "parentId": "",
+          "status": [
+            4
+          ],
+          "target": "29c44a1b8bed96c51db5bf78",
+          "visibilityConditions": []
+        },
+        {
+          "availableAfter": 0,
+          "conditionType": "Quest",
+          "dispersion": 0,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "6caf3eb17fdc63f4ffc3554f",
+          "index": 1,
+          "parentId": "",
+          "status": [
+            4
+          ],
+          "target": "6ae67821fba98a599d75d6b6",
+          "visibilityConditions": []
+        }
+      ],
+      "AvailableForStart": [
+        {
+          "availableAfter": 0,
+          "conditionType": "Quest",
+          "dispersion": 0,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "705402f6a2412d057b827bd5",
+          "index": 0,
+          "parentId": "",
+          "status": [
+            4
+          ],
+          "target": "07c1ecde2c4652876fc769b1",
+          "visibilityConditions": []
+        }
+      ],
+      "Fail": []
+    },
+    "rewards": {
+      "Fail": [],
+      "Started": [],
+      "Success": [
+        {
+          "availableInGameEditions": [],
+          "id": "268a93bbb3138454c3f6802d",
+          "index": 0,
+          "type": "Experience",
+          "value": 14000,
+          "unknown": false,
+          "isHidden": false
+        },
+        {
+          "availableInGameEditions": [],
+          "id": "aa2f879c6caaa5fbfb5c1db8",
+          "index": 1,
+          "target": "5a7c2eca46aef81a7ca2145d",
+          "type": "TraderStanding",
+          "value": 0.03,
+          "unknown": false,
+          "isHidden": false
+        },
+        {
+          "availableInGameEditions": [],
+          "findInRaid": false,
+          "id": "374ddfe75c6e432af080e2c3",
+          "index": 2,
+          "isEncoded": false,
+          "isHidden": false,
+          "items": [
+            {
+              "_id": "eaafc014a18b566e6a9949b0",
+              "_tpl": "5449016a4bdc2d6f028b456f",
+              "upd": {
+                "StackObjectsCount": 70000
+              }
+            }
+          ],
+          "target": "eaafc014a18b566e6a9949b0",
+          "type": "Item",
+          "unknown": false,
+          "value": 70000
+        }
+      ]
+    }
+  }
+}
