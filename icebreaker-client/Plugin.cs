@@ -4,12 +4,18 @@ using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
 
+// the fika sync addon subscribes to the chain-door/sealed-door world-event hooks
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ManimalIcebreakerFika")]
+
 namespace Manimal.Icebreaker
 {
     // dumps the fully-restored AICoversData (cover graph, core points, voxel grid,
     // patrol/loot/exfil points, bot zones) to json at raid load. ground truth for
     // reverse-engineering BSG's ai point baker so we can build one for custom maps.
     [BepInPlugin(BuildInfo.ModGuid, "Manimal-Icebreaker", BuildInfo.Version)]
+    // soft: loads AFTER fika when fika is installed (so the runtime compat patches can
+    // resolve its types at Awake), changes nothing when it isn't
+    [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
         internal static ManualLogSource Log;
@@ -138,7 +144,7 @@ namespace Manimal.Icebreaker
                 "run the prototype cover scanner on the current map and dump the result — freezes the game for a bit (icebreaker only)");
             IndentJson = Config.Bind("General", "IndentJson", false,
                 "pretty-print the json — files get roughly 3x bigger");
-            InjectCovers = Config.Bind("Experimental", "InjectGeneratedCovers", false,
+            InjectCovers = Config.Bind("Experimental", "InjectGeneratedCovers", true,
                 "EXPERIMENT: at raid load, replace the map's baked cover points with scanner-generated ones. " +
                 "adds ~10-30s to load. bots then use OUR points — for validating the custom-map baker");
 
@@ -152,7 +158,7 @@ namespace Manimal.Icebreaker
                     new AcceptableValueRange<float>(0f, 3f)));
             LampShadows = Config.Bind("Icebreaker", "LampShadows", false,
                 "let the revived lamps cast realtime shadows — much prettier, much heavier (1500+ lights)");
-            CullDistanceScale = Config.Bind("Icebreaker", "CullDistanceScale", 1.0f,
+            CullDistanceScale = Config.Bind("Icebreaker", "CullDistanceScale", 0.5f,
                 new ConfigDescription("distance-culling aggressiveness for small props (lower = culls closer = more fps) (live)",
                     new AcceptableValueRange<float>(0.25f, 3f)));
             NativeCulling = Config.Bind("Icebreaker", "NativeCulling", false,
@@ -169,8 +175,13 @@ namespace Manimal.Icebreaker
             // reports need to distinguish dead knob from wrong suspect
             CullDistanceScale.SettingChanged += (_, __) => Log.LogWarning($"[DistCull] scale -> {CullDistanceScale.Value:F2} (live)");
             PcDriverEnabled.SettingChanged += (_, __) => Log.LogWarning($"[Culling] PcDriverEnabled -> {PcDriverEnabled.Value}");
-            CrewPreSpawnPool = Config.Bind("Icebreaker", "CrewPreSpawnPool", true,
-                "pre-spawn the trigger squads into an off-map pen during the early raid and TELEPORT them in when events fire — removes the mid-raid spawn hitches. off = the old behavior (profiles premade, bots spawned on demand)");
+            // default OFF (user call 07-28): the pen cant actually hold bots — the mover
+            // keeps a ship-side path and drags escapees back to the nearest navmesh edge
+            // (black division surfacing on the starboard walkway). the spawn hitches the
+            // pool was built for turned out to be init-burst/log-storm bugs, since fixed;
+            // premake+prewarm makes on-demand spawns cheap enough.
+            CrewPreSpawnPool = Config.Bind("Icebreaker", "CrewPreSpawnPool", false,
+                "pre-spawn the trigger squads into an off-map pen during the early raid and TELEPORT them in when events fire. off (default) = profiles premade + bundles prewarmed, bots spawned on demand through the real pipeline");
             // defaults trimmed a squad below retail's 9-15 (user call 07-27) — the full
             // roster plus the trigger squads made the ship feel overcrowded
             CrewRoguesMin = Config.Bind("Icebreaker", "CrewRoguesMin", 6,
@@ -187,16 +198,16 @@ namespace Manimal.Icebreaker
                 "resurrect BSG's spatial audio (room/portal occlusion) from the recovered retail bake — needs the acoustics sidecar next to the dll");
             EnvTriggers = Config.Bind("Icebreaker", "EnvironmentTriggers", true,
                 "rebuild the retail indoor/outdoor switcher volumes (indoor sound banks, exposure, rain muffling)");
-            QuietBotRatio = Config.Bind("Icebreaker", "QuietBotRatio", 0.5f,
+            QuietBotRatio = Config.Bind("Icebreaker", "QuietBotRatio", 0.3f,
                 new ConfigDescription("chance each non-boss bot spawns voice-muted (cuts the constant voiceline spam; knight + wedge always talk)",
                     new AcceptableValueRange<float>(0f, 1f)));
-            DoorSoundBoost = Config.Bind("Icebreaker", "DoorSoundBoost", 2.0f,
+            DoorSoundBoost = Config.Bind("Icebreaker", "DoorSoundBoost", 4.0f,
                 new ConfigDescription("gain multiplier for door open/close/squeak foley (ripped clips are mixed quiet; play volume clamps at 1.0)",
                     new AcceptableValueRange<float>(0.5f, 4f)));
-            ZoneToneVolume = Config.Bind("Icebreaker", "ZoneToneVolume", 0.35f,
+            ZoneToneVolume = Config.Bind("Icebreaker", "ZoneToneVolume", 0.25f,
                 new ConfigDescription("volume scale for the indoor zone room-tones (live; tames the loud living-room tone)",
                     new AcceptableValueRange<float>(0f, 1f)));
-            WindIndoorFraction = Config.Bind("Icebreaker", "WindIndoorFraction", 0.20f,
+            WindIndoorFraction = Config.Bind("Icebreaker", "WindIndoorFraction", 0.10f,
                 new ConfigDescription("how much of the outdoor wind bleeds through indoors (live; 0 = silent inside, 1 = full)",
                     new AcceptableValueRange<float>(0f, 1f)));
             WeatherSystem = Config.Bind("Icebreaker", "WeatherSystem", true,
@@ -274,7 +285,7 @@ namespace Manimal.Icebreaker
                 new Color(0.482f, 0.455f, 0.420f), "cutscene-profile fog tint (live)");
             DiagHotkeys = Config.Bind("Icebreaker", "DiagHotkeys", false,
                 "enable the F1-F12 diagnostic hotkey suite (lights toggle, geo hide, batching tests, probes). OFF for normal play — F9 doubles as the fog tuner toggle and MUST not fight the lights toggle (live)");
-            BlizzardWind = Config.Bind("Icebreaker", "BlizzardWind", 1.5f,
+            BlizzardWind = Config.Bind("Icebreaker", "BlizzardWind", 2.0f,
                 new ConfigDescription("blizzard wind magnitude (live)", new AcceptableValueRange<float>(0f, 3f)));
             BlizzardFog = Config.Bind("Icebreaker", "BlizzardFog", 0.015f,
                 new ConfigDescription("blizzard fog density — EFT fog values are tiny (clear ~0.0013, heavy ~0.03) (live)", new AcceptableValueRange<float>(0f, 0.1f)));
@@ -294,7 +305,7 @@ namespace Manimal.Icebreaker
                 "fog tint (multiplied by FogBrightness) — cold gray-blue default (live)");
             SnowFlakeSize = Config.Bind("Icebreaker", "SnowFlakeSize", 0.3f,
                 new ConfigDescription("flake size multiplier vs retail (1 = retail; smaller = finer snow) (live)", new AcceptableValueRange<float>(0.15f, 2f)));
-            SnowStormDensity = Config.Bind("Icebreaker", "SnowStormDensity", true,
+            SnowStormDensity = Config.Bind("Icebreaker", "SnowStormDensity", false,
                 "enable the storm flake layers (+12k flakes, ~double density) (live)");
             CutsceneVolume = Config.Bind("Icebreaker", "CutsceneVolume", 1f,
                 new ConfigDescription("cutscene video volume (live — adjustable mid-video via F12)", new AcceptableValueRange<float>(0f, 1f)));
@@ -337,9 +348,9 @@ namespace Manimal.Icebreaker
             // all six are read every frame, so the gusts can be dialled in mid-raid
             SnowGusts = Config.Bind("Icebreaker", "SnowGusts", true,
                 "wind-driven sheets of blown snow around the player, on top of the native flakes (live)");
-            SnowGustsDensity = Config.Bind("Icebreaker", "SnowGustsDensity", 14f,
+            SnowGustsDensity = Config.Bind("Icebreaker", "SnowGustsDensity", 120f,
                 new ConfigDescription("gust puffs spawned per second at full storm (live)", new AcceptableValueRange<float>(0f, 120f)));
-            SnowGustsSize = Config.Bind("Icebreaker", "SnowGustsSize", 7f,
+            SnowGustsSize = Config.Bind("Icebreaker", "SnowGustsSize", 20f,
                 new ConfigDescription("puff diameter in metres — big and soft is what reads as smoke (live)", new AcceptableValueRange<float>(0.5f, 40f)));
             SnowGustsSpeed = Config.Bind("Icebreaker", "SnowGustsSpeed", 1.6f,
                 new ConfigDescription("multiplier on the weather's own wind speed (live)", new AcceptableValueRange<float>(0.1f, 8f)));
@@ -414,7 +425,9 @@ namespace Manimal.Icebreaker
             }
             catch (System.Exception e) { Log.LogWarning($"PerfectCullingRuntime preload failed: {e.Message}"); }
 
-            new Harmony(BuildInfo.ModGuid).PatchAll();
+            var harmony = new Harmony(BuildInfo.ModGuid);
+            harmony.PatchAll();
+            IcebreakerFikaCompat.TryApply(harmony); // no-op without fika
             Log.LogInfo($"Manimal-Icebreaker {BuildInfo.Version} loaded");
         }
 

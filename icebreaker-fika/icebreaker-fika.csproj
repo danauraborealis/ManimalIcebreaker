@@ -1,0 +1,87 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>Manimal.Icebreaker.Fika</RootNamespace>
+    <AssemblyName>ManimalIcebreakerFika</AssemblyName>
+    <Nullable>disable</Nullable>
+    <Authors>Manimal</Authors>
+    <AssemblyVersion>$(ModVersion).0</AssemblyVersion>
+    <FileVersion>$(AssemblyVersion)</FileVersion>
+    <Configurations>Debug;Release</Configurations>
+    <Version>$(ModVersion)</Version>
+    <LangVersion>latest</LangVersion>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Private=false everywhere: nothing but our own dll ships from this project -->
+    <Reference Include="BepInEx">
+      <HintPath>$(SPTPath)\BepInEx\core\BepInEx.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(SPTPath)\BepInEx\core\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Comfort">
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <!-- the real runtime dll from the fika test install — compile-time only, never shipped -->
+    <Reference Include="Fika.Core">
+      <HintPath>$(FikaPath)\BepInEx\plugins\Fika\Fika.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\icebreaker-client\icebreaker-client.csproj">
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+
+  <Target Name="GenerateBuildInfo" BeforeTargets="CoreCompile">
+    <PropertyGroup>
+      <BuildInfoFile>$(IntermediateOutputPath)BuildInfo.g.cs</BuildInfoFile>
+    </PropertyGroup>
+    <ItemGroup>
+      <_BuildInfoLines Remove="@(_BuildInfoLines)" />
+      <_BuildInfoLines Include="// auto-generated from Directory.Build.props — do not edit" />
+      <_BuildInfoLines Include="namespace $(RootNamespace)" />
+      <_BuildInfoLines Include="{" />
+      <_BuildInfoLines Include="    internal static class BuildInfo" />
+      <_BuildInfoLines Include="    {" />
+      <_BuildInfoLines Include="        public const string Version = %22$(ModVersion)%22%3B" />
+      <_BuildInfoLines Include="        public const string ModGuid = %22$(ModGuid).fika%22%3B" />
+      <_BuildInfoLines Include="    }" />
+      <_BuildInfoLines Include="}" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(BuildInfoFile)" Lines="@(_BuildInfoLines)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <Compile Include="$(BuildInfoFile)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- deploys to BOTH installs: the plain SPT deploy gets it too (BepInEx skips it
+       there — hard fika dependency unmet — and the release harvest picks it up from
+       that folder, ladders-style: one zip, addon dormant without fika). the fika
+       install is where coop testing actually runs. -->
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SPTPath)\BepInEx\plugins\ManimalIcebreaker" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(FikaPath)\BepInEx\plugins\ManimalIcebreaker" Condition="Exists('$(FikaPath)')" />
+  </Target>
+
+</Project>

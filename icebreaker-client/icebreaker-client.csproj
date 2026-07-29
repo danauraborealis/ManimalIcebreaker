@@ -128,11 +128,16 @@
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <MakeDir Directories="D:\SPTDev\BepInEx\plugins\ManimalIcebreaker" />
     <Exec Command="copy &quot;$(TargetPath)&quot; &quot;D:\SPTDev\BepInEx\plugins\ManimalIcebreaker\$(TargetFileName)&quot;" />
+    <!-- keep the fika coop-test install's dll current too (payload/bundles mirrored by hand) -->
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(FikaPath)\BepInEx\plugins\ManimalIcebreaker" Condition="Exists('$(FikaPath)')" />
   </Target>
 
+  <!-- per-build: DLL-ONLY update zip, for testers who already have the full install.
+       the full package is ~2GB (scene bundle) so it lives behind the explicit
+       PackageRelease target below, not behind every compile. -->
   <Target Name="PackageModForDistribution" AfterTargets="Build">
     <PropertyGroup>
-      <ZipFileName>Manimal-Icebreaker-client-$(ModVersion).zip</ZipFileName>
+      <ZipFileName>Manimal-Icebreaker-client-DLL-UPDATE-$(ModVersion).zip</ZipFileName>
       <TempPackageDir>$(ProjectDir)obj\Package</TempPackageDir>
       <ModPackageDir>$(TempPackageDir)\BepInEx\plugins\ManimalIcebreaker</ModPackageDir>
     </PropertyGroup>
@@ -141,7 +146,11 @@
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModPackageDir)" />
     <ZipDirectory SourceDirectory="$(TempPackageDir)" DestinationFile="$(ProjectDir)$(ZipFileName)" Overwrite="true" />
     <RemoveDir Directories="$(TempPackageDir)" />
-    <Message Text="--- mod packaged at: $(ProjectDir)$(ZipFileName) ---" Importance="high" />
+    <Message Text="--- dll-update zip at: $(ProjectDir)$(ZipFileName) (full package: package-release.ps1) ---" Importance="high" />
   </Target>
+
+  <!-- the FULL release (single zip, BepInEx + SPT + EscapeFromTarkov_Data trees) is
+       built by package-release.ps1 at the repo root — it needs both projects' DLLs,
+       so it doesn't live in either csproj -->
 
 </Project>

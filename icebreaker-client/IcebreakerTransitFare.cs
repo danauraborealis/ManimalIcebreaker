@@ -152,7 +152,18 @@ namespace Manimal.Icebreaker
         private static int CarriedRoubles(Player player)
             => RoubleStacks(player).Sum(i => i.StackObjectsCount);
 
-        private static bool TryTakeFare(Player player, int cost)
+        // internal: the fika compat patch charges through this too (FikaPlayer.vmethod_3
+        // is the confirm moment in coop — see IcebreakerFikaCompat)
+        //
+        // the SANCTIONED op pattern (verified against the assembly + fika source):
+        // create with simulate:TRUE (validates + builds the changeset, applies nothing),
+        // then dispatch through TryRunNetworkTransaction — which executes it ONCE via
+        // vmethod_1, the exact method fika overrides to replicate inventory to peers.
+        // BSG's bot looting (BotDeadBodyWork) and fika's own quest item removal both do
+        // exactly this. simulate:false applies inline and is INVISIBLE to fika — and
+        // combining simulate:false WITH the transaction double-executes (the old
+        // chain-door flashing-item bug).
+        internal static bool TryTakeFare(Player player, int cost)
         {
             var inv = player.InventoryController;
             if (inv == null) { Plugin.Log.LogWarning("[Fare] no inventory controller"); return false; }
@@ -166,39 +177,47 @@ namespace Manimal.Icebreaker
                 return false;
             }
 
-            // the till: a fake stash owned like an exfil point, so the move is a real
-            // network transaction rather than a local edit
-            var fakeStash = Singleton<ItemFactoryClass>.Instance.CreateFakeStash(null);
-            var till = new TraderControllerClass(fakeStash, "IcebreakerFare", "IcebreakerFare", true, EOwnerType.ExfilPoint);
-
+            // validate EVERYTHING before applying ANYTHING (all-or-nothing): each op is
+            // simulated against its own throwaway till so simulated ops can't fight
+            // over the same grid slot
             int remaining = cost;
+            var dispatch = new List<Action>();
             foreach (var stack in stacks)
             {
                 if (remaining <= 0) break;
-                var grid = ((StashItemClass)till.RootItem).Grid;
-                var slot = grid.FindLocationForItem(stack);
-                if (slot == null) { Plugin.Log.LogWarning("[Fare] till full, aborting"); break; }
+                var fakeStash = Singleton<ItemFactoryClass>.Instance.CreateFakeStash(null);
+                var till = new TraderControllerClass(fakeStash, "IcebreakerFare", "IcebreakerFare", true, EOwnerType.ExfilPoint);
+                var slot = ((StashItemClass)till.RootItem).Grid.FindLocationForItem(stack);
+                if (slot == null) { Plugin.Log.LogWarning("[Fare] till has no room for a stack, aborting"); break; }
 
                 int take = Mathf.Min(remaining, stack.StackObjectsCount);
-                var op = take >= stack.StackObjectsCount
-                    ? (object)InteractionsHandlerClass.Move(stack, slot, inv, false)
-                    : InteractionsHandlerClass.SplitExact(stack, take, slot, inv, inv, false);
-
-                bool ok = op is GStruct154<GClass3411> m ? m.Succeeded
-                        : op is GStruct154<GClass3424> s && s.Succeeded;
-                if (!ok) { Plugin.Log.LogWarning("[Fare] transfer operation failed"); break; }
+                if (take >= stack.StackObjectsCount)
+                {
+                    var m = InteractionsHandlerClass.Move(stack, slot, inv, true);
+                    if (m.Failed) { Plugin.Log.LogWarning($"[Fare] move validation failed: {m.Error}"); break; }
+                    dispatch.Add(() => inv.TryRunNetworkTransaction(m, r =>
+                    { if (!r.Succeed) Plugin.Log.LogWarning($"[Fare] move execution failed post-validation: {r.Error}"); }));
+                }
+                else
+                {
+                    var s = InteractionsHandlerClass.SplitExact(stack, take, slot, inv, inv, true);
+                    if (s.Failed) { Plugin.Log.LogWarning($"[Fare] split validation failed: {s.Error}"); break; }
+                    dispatch.Add(() => inv.TryRunNetworkTransaction(s, r =>
+                    { if (!r.Succeed) Plugin.Log.LogWarning($"[Fare] split execution failed post-validation: {r.Error}"); }));
+                }
                 remaining -= take;
             }
 
             if (remaining > 0)
             {
                 Notify("The smugglers wave you off, the payment did not go through");
-                Plugin.Log.LogWarning($"[Fare] incomplete, {remaining} short of {cost} — transit blocked");
+                Plugin.Log.LogWarning($"[Fare] validation incomplete, {remaining} short of {cost} — transit blocked, nothing charged");
                 return false;
             }
 
+            foreach (var d in dispatch) d();
             Notify($"Paid {cost:N0} roubles for the crossing");
-            Plugin.Log.LogWarning($"[Fare] collected {cost} roubles");
+            Plugin.Log.LogWarning($"[Fare] collected {cost} roubles ({dispatch.Count} ops dispatched)");
             return true;
         }
 

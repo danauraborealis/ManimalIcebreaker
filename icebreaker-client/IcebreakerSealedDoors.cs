@@ -69,11 +69,35 @@ namespace Manimal.Icebreaker
             s.Sealing = sealing;
         }
 
+        // world-event hook for the fika sync addon — same contract as the chain door's:
+        // raised on LOCAL commits only, remote applications are suppressed so a received
+        // event never echoes back out. fika does NOT replicate these changes itself
+        // (they're direct DoorState writes, not the player-interaction path it syncs).
+        internal static event Action<string, bool> SealEvent; // doorId, sealing
+        private static bool _remoteApply;
+
+        internal static void ApplyRemote(string doorId, bool sealing)
+        {
+            _remoteApply = true;
+            try
+            {
+                foreach (var kv in Registry)
+                    if (kv.Key != null && kv.Key.Id == doorId) { Complete(kv.Key, sealing); return; }
+                Plugin.Log.LogWarning($"[Sealed] remote seal event for unknown door '{doorId}'");
+            }
+            finally { _remoteApply = false; }
+        }
+
         internal static void Complete(Door door, bool sealing)
         {
             if (!Registry.TryGetValue(door, out var link)) return;
             ApplySealed(door, link, sealing);
             Plugin.Log.LogInfo($"[Sealed] '{door.Id}' {(sealing ? "RESEALED" : "unsealed")}");
+            if (!_remoteApply)
+            {
+                try { SealEvent?.Invoke(door.Id, sealing); }
+                catch (Exception e) { Plugin.Log.LogWarning($"[Sealed] world-event hook failed: {e.Message}"); }
+            }
         }
 
         // hold-to-complete session — the BoatInteractionSession pattern: vanilla

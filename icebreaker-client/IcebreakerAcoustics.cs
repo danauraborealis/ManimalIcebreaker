@@ -681,7 +681,7 @@ namespace Manimal.Icebreaker
             var doors = UnityEngine.Object.FindObjectsOfType<Door>();
             if (doors.Length == 0) return;
 
-            var pairs = new List<(float d2, Door door, string doorId)>();
+            var pairs = new List<(float d2, Door door, string doorId, string origId)>();
             var portalByRow = new List<(SpatialAudioPortal p, string doorId)>();
             foreach (var row in Rows(sound, "SpatialAudioPortal"))
             {
@@ -692,22 +692,45 @@ namespace Manimal.Icebreaker
                 foreach (var d in doors)
                 {
                     float d2 = (d.transform.position - p.transform.position).sqrMagnitude;
-                    if (d2 < 15f * 15f) pairs.Add((d2, d, doorId));
+                    if (d2 < 15f * 15f) pairs.Add((d2, d, doorId, d.Id));
                 }
             }
-            pairs.Sort((a, b) => a.d2.CompareTo(b.d2));
+            // MACHINE-INDEPENDENT order: fika syncs doors BY ID across peers, so every
+            // machine must stamp identically. distance ties are real on this ship
+            // (symmetric double doors flank portals at equal d2) and the old
+            // distance-only sort broke ties by FindObjectsOfType enumeration order —
+            // one flipped claim on one peer cascades and the by-id door sync then
+            // drives the WRONG door on that peer. tiebreak on the authored ids, which
+            // ship identically in the bundle on every machine.
+            pairs.Sort((a, b) =>
+            {
+                int c = a.d2.CompareTo(b.d2);
+                if (c != 0) return c;
+                c = string.CompareOrdinal(a.doorId, b.doorId);
+                return c != 0 ? c : string.CompareOrdinal(a.origId, b.origId);
+            });
 
             var doneDoors = new HashSet<Door>();
             var doneIds = new HashSet<string>();
-            int stamped = 0;
-            foreach (var (d2, door, doorId) in pairs)
+            int stamped = 0, renamed = 0;
+            foreach (var (d2, door, doorId, _) in pairs)
             {
                 if (doneDoors.Contains(door) || doneIds.Contains(doorId)) continue;
                 doneDoors.Add(door);
                 doneIds.Add(doorId);
-                door.Id = doorId;
+                if (door.Id != doorId)
+                {
+                    // every REAL rename logged (07-28 coop door-sync hunt): fika resolves
+                    // door packets by Id, and unresolvable ids mean the wire ids and the
+                    // world registry disagree — this shows exactly which doors changed
+                    if (++renamed <= 12)
+                        Plugin.Log.LogWarning($"[Acoustics] door id RENAME '{door.Id}' -> '{doorId}' at {door.transform.position}");
+                    door.Id = doorId;
+                }
                 stamped++;
             }
+            if (renamed > 12) Plugin.Log.LogWarning($"[Acoustics] ...{renamed} renames total");
+            if (renamed == 0) Plugin.Log.LogWarning("[Acoustics] all stamped ids already matched the authored ids (no renames)");
             Plugin.Log.LogWarning($"[Acoustics] stamped retail DoorIDs: {stamped} doors bound "
                 + $"({portalByRow.Count - stamped} portal ids unmatched, {doors.Length - stamped} doors unbound)");
         }

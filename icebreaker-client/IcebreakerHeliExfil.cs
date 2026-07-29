@@ -49,6 +49,8 @@ namespace Manimal.Icebreaker
                 return;
             }
 
+            _live = this; // remote heli-call applies route through the live component
+
             AttachFare();
 
             var zoneSrc = GameObject.Find("NotificationZone");
@@ -283,8 +285,36 @@ namespace Manimal.Icebreaker
                 if (ev.ZoneEventType == GClass3552.EZoneEventType.FiredPlayerAddedInShotList
                     || ev.ZoneEventType == GClass3552.EZoneEventType.PlayerByPartyAddedInShotList)
                 {
-                    _called = true; // one flare is enough — further shots are fireworks
-                    var rig = GameObject.Find(HeliRigName);
+                    CallHeli(remote: false);
+                }
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[HeliExfil] event handling failed: {e.Message}"); }
+        }
+
+        // world-event hook for the fika sync addon, same contract as the chain door's:
+        // one flare calls the bird for EVERYONE — the flight/audio/exfil-unlock runs
+        // locally on each peer, only the call moment crosses the wire.
+        internal static event Action HeliCalled;
+        private static IcebreakerHeliExfil _live; // the raid's component, for remote applies
+
+        internal static void ApplyRemoteCall()
+        {
+            if (_live != null) _live.CallHeli(remote: true);
+            else Plugin.Log.LogWarning("[HeliExfil] remote heli call but no live exfil component — ignored");
+        }
+
+        private void CallHeli(bool remote)
+        {
+            try
+            {
+                if (_called) return;
+                _called = true; // one flare is enough — further shots are fireworks
+                if (!remote)
+                {
+                    try { HeliCalled?.Invoke(); }
+                    catch (Exception e) { Plugin.Log.LogWarning($"[HeliExfil] world-event hook failed: {e.Message}"); }
+                }
+                var rig = GameObject.Find(HeliRigName);
                     var anim = rig != null ? rig.GetComponentInChildren<Animator>(true) : null;
                     if (anim != null)
                     {
@@ -307,9 +337,8 @@ namespace Manimal.Icebreaker
                         "The helicopter has been signaled — inbound, hold the pad",
                         ENotificationDurationType.Long, ENotificationIconType.Default, Color.green);
                     StartCoroutine(HeliArrival());
-                }
             }
-            catch (Exception e) { Plugin.Log.LogWarning($"[HeliExfil] event handling failed: {e.Message}"); }
+            catch (Exception e) { Plugin.Log.LogWarning($"[HeliExfil] heli call failed: {e.Message}"); }
         }
 
         // the heli + pilots rendered transparent/unlit: the bundle carries AssetRipper
@@ -531,6 +560,7 @@ namespace Manimal.Icebreaker
 
         private void OnDestroy()
         {
+            if (_live == this) _live = null;
             _unsubscribe?.Invoke();
             _unsubscribe = null;
         }

@@ -26,6 +26,47 @@ namespace Manimal.Icebreaker
         internal static bool Exploded; // fuse ran out — Try_open now really opens
         internal static bool Opened;   // door dropped — no more interactions
 
+        // world-event hooks for the fika sync addon (ManimalIcebreakerFika): raised on
+        // LOCAL commits, suppressed while applying a REMOTE peer's event so the addon
+        // never echoes a received event back out. base mod behaves identically with
+        // nobody subscribed. post-plant fuse/explosion is deterministic, so syncing
+        // just "plant" and "open" reproduces the whole sequence on every peer.
+        internal static event Action<string> WorldEvent; // "plant" | "open"
+        private static bool _remoteApply;
+        private static void RaiseWorld(string ev)
+        {
+            if (_remoteApply) return;
+            try { WorldEvent?.Invoke(ev); }
+            catch (Exception e) { Plugin.Log.LogWarning($"[ChainDoor] world-event hook failed: {e.Message}"); }
+        }
+
+        internal static void ApplyRemote(string ev)
+        {
+            _remoteApply = true;
+            try
+            {
+                if (ev == "plant") { if (!Planted) OnPlanted(); }
+                else if (ev == "open" && !Opened)
+                {
+                    if (Exploded) TryOpen();
+                    // remote opened before OUR fuse ran out (few-ms skew): wait it out
+                    else new GameObject("Icebreaker_ChainDoorRemoteOpen").AddComponent<RemoteOpenWaiter>();
+                }
+            }
+            finally { _remoteApply = false; }
+        }
+
+        private class RemoteOpenWaiter : MonoBehaviour
+        {
+            private IEnumerator Start()
+            {
+                float deadline = Time.time + FuseSeconds + 5f;
+                while (!Exploded && Time.time < deadline) yield return null;
+                if (Exploded && !Opened) ApplyRemote("open");
+                Destroy(gameObject);
+            }
+        }
+
         private static Animator _anim;
 
         internal static Animator FindAnimator(Component from)
@@ -147,20 +188,24 @@ namespace Manimal.Icebreaker
             return null;
         }
 
-        // consume the charge the way the game destroys the cultist amulet:
-        // RemoveWithoutRestrictions executes ONCE and that's it. the first version did
-        // Remove(simulate:false) — which already executes — and THEN ran the op again
-        // through TryRunNetworkTransaction: double-execution, the flashing-item bug.
+        // consume the charge the way fika's own quest controller destroys a quest item:
+        // Remove with simulate:TRUE (validate only, nothing applied), then dispatch the
+        // op through TryRunNetworkTransaction — one execution, and it goes through
+        // vmethod_1, the method fika overrides to replicate inventory to peers.
+        // the flashing-item bug of the first version was simulate:FALSE (already
+        // applied) COMBINED with the transaction: that pairing double-executes.
         internal static bool ConsumeCharge(Player player)
         {
             var item = FindCharge(player);
             if (item == null) return false;
-            var op = InteractionsHandlerClass.RemoveWithoutRestrictions(item, player.InventoryController);
+            var op = InteractionsHandlerClass.Remove(item, player.InventoryController, true);
             if (op.Failed)
             {
-                Plugin.Log.LogWarning($"[Plant] charge remove op failed: {op.Error}");
+                Plugin.Log.LogWarning($"[Plant] charge remove validation failed: {op.Error}");
                 return false;
             }
+            player.InventoryController.TryRunNetworkTransaction(op, r =>
+            { if (!r.Succeed) Plugin.Log.LogWarning($"[Plant] charge remove execution failed post-validation: {r.Error}"); });
             Plugin.Log.LogInfo($"[Plant] consumed charge '{item.Name.Localized()}' ({item.Id})");
             return true;
         }
@@ -180,6 +225,7 @@ namespace Manimal.Icebreaker
             PlayAt(_sndTimer, at, 30f);
             new GameObject("Icebreaker_ChainDoorFuse").AddComponent<FuseRunner>();
             Plugin.Log.LogInfo($"[Plant] charge set — detonation in {FuseSeconds:0}s");
+            RaiseWorld("plant");
         }
 
         // the explosion particle rig: a 'VFX' GO with a root ParticleSystem + children.
@@ -311,6 +357,7 @@ namespace Manimal.Icebreaker
                 PlayAt(_sndOpenAfter, anim.transform.position, 35f);
                 new GameObject("Icebreaker_ChainDoorHandleSwap").AddComponent<HandleSwapRunner>().Target = anim;
                 Plugin.Log.LogInfo("[ChainDoor] IsOpen set — door drop");
+                RaiseWorld("open");
                 return;
             }
 

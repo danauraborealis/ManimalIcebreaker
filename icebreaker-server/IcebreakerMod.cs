@@ -694,6 +694,11 @@ public class IcebreakerLockRouter(
         return _finalQuestId;
     }
 
+    // mutation + serialization must be ATOMIC: LocationBase instances are shared with
+    // the db, so with concurrent fika sessions one profile's flag flip could land
+    // inside another profile's serialization window and leak the wrong lock state.
+    private static readonly object SerializeGate = new();
+
     private static ValueTask<string> LockLocations(
         SPTarkov.Server.Core.Controllers.LocationController locationController,
         SPTarkov.Server.Core.Helpers.ProfileHelper profileHelper,
@@ -703,7 +708,10 @@ public class IcebreakerLockRouter(
     {
         var response = locationController.GenerateAll(sessionID);
         var questId = FinalQuestId();
-        if (!string.IsNullOrEmpty(questId))
+        if (string.IsNullOrEmpty(questId))
+            return new ValueTask<string>(httpResponseUtil.GetBody(response));
+
+        lock (SerializeGate)
         {
             try
             {
@@ -725,7 +733,7 @@ public class IcebreakerLockRouter(
                 }
             }
             catch (Exception e) { logger.Warning($"[Icebreaker] map lock check failed (leaving unlocked): {e.Message}"); }
+            return new ValueTask<string>(httpResponseUtil.GetBody(response));
         }
-        return new ValueTask<string>(httpResponseUtil.GetBody(response));
     }
 }

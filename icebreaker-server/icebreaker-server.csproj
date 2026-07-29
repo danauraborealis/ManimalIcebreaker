@@ -38,4 +38,7 @@
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(DevModDir)" />
   </Target>
 
+  <!-- the FULL release (single zip, BepInEx + SPT + EscapeFromTarkov_Data trees) is
+       built by package-release.ps1 at the repo root -->
+
 </Project>

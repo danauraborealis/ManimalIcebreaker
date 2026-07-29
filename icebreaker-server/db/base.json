@@ -1579,6 +1579,26 @@
       "PlayersCountPVE": 0,
       "ExfiltrationType": "Individual",
       "PassageRequirement": "None"
+    },
+    {
+      "Chance": 100,
+      "ChancePVE": 100,
+      "Count": 0,
+      "CountPVE": 0,
+      "EntryPoints": "Icebreaker",
+      "EventAvailable": false,
+      "ExfiltrationTime": 8,
+      "ExfiltrationTimePVE": 8,
+      "Id": "",
+      "MaxTime": 0,
+      "MaxTimePVE": 0,
+      "MinTime": 0,
+      "MinTimePVE": 0,
+      "Name": "Icebreaker_Exit_Heli",
+      "PlayersCount": 0,
+      "PlayersCountPVE": 0,
+      "ExfiltrationType": "Individual",
+      "PassageRequirement": "None"
     }
   ],
   "filter_ex": [],

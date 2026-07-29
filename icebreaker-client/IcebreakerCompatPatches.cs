@@ -84,10 +84,16 @@ namespace Manimal.Icebreaker
     [HarmonyPatch(typeof(LookSensor), "method_2")]
     internal static class Patch_DayVisionOnLitShip
     {
+        // proof-of-life: fika bots felt blind (07-28 coop) and the first question is
+        // whether this postfix even runs there — one line per raid answers it
+        private static int _applications;
+
         [HarmonyPostfix]
         private static void Postfix(LookSensor __instance)
         {
             if (!IceGate.On) return;
+            if (++_applications == 200)
+                Plugin.Log.LogWarning("[Vision] day-vision lift is live (200 applications this raid)");
             try
             {
                 var bo = __instance.BotOwner;

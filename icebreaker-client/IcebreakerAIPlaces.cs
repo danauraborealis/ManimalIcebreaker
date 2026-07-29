@@ -213,15 +213,17 @@ namespace Manimal.Icebreaker
             base.Dispose();
         }
 
+        // IsHumanPlayer, not IsYourPlayer: same bot exclusion (spawn-frame trips), but a
+        // fika teammate — an ObservedPlayer on the host, never IsYourPlayer — counts too
         private void OnEnter(Player p)
         {
-            if (EnterRaise && p != null && p.IsYourPlayer)
+            if (EnterRaise && FikaBridge.IsHumanPlayer(p))
                 Singleton<BotEventHandler>.Instance?.AnyEvent(EventName);
         }
 
         private void OnExit(Player p)
         {
-            if (ExitRaise && p != null && p.IsYourPlayer)
+            if (ExitRaise && FikaBridge.IsHumanPlayer(p))
                 Singleton<BotEventHandler>.Instance?.AnyEvent(EventName);
         }
     }
@@ -262,10 +264,11 @@ namespace Manimal.Icebreaker
         private void OnEnter(Player player)
         {
             if (_fired || _table == null) return; // waves are one-shot (Activated flag) anyway
-            // IsYourPlayer, not !IsAI: bots trip the boxes during their spawn frame (IsAI not
+            // IsHumanPlayer, not !IsAI: bots trip the boxes during their spawn frame (IsAI not
             // set yet / staging position) and burned the one-shots at raid start — the engine
-            // squad was fully deployed on patrol before the player ever reached the trigger
-            if (player == null || !player.IsYourPlayer) return;
+            // squad was fully deployed on patrol before the player ever reached the trigger.
+            // fika teammates count (ObservedPlayer on the host is never IsYourPlayer).
+            if (!FikaBridge.IsHumanPlayer(player)) return;
             _fired = true;
             int size = GroupSize();
             foreach (var (min, max, name) in _table)
@@ -281,15 +284,14 @@ namespace Manimal.Icebreaker
 
         private static int GroupSize()
         {
+            // the same roster every other coop-aware path uses (CoopHandler.HumanPlayers
+            // via the bridge, MainPlayer fallback) — RegisteredPlayers can disagree with
+            // it around late joins / extractions, and two sources of truth is one too many
             try
             {
-                var world = Singleton<GameWorld>.Instance;
-                if (world == null) return 1;
-                int n = 0;
-                foreach (var p in world.RegisteredPlayers)
-                    if (p != null && !p.IsAI && p.HealthController != null && p.HealthController.IsAlive)
-                        n++;
-                return Mathf.Max(1, n);
+                var humans = new System.Collections.Generic.List<Player>();
+                FikaBridge.CollectHumans(humans);
+                return Mathf.Max(1, humans.Count);
             }
             catch { return 1; }
         }

@@ -6,5 +6,6 @@
     <ModUsername>Manimal</ModUsername>
     <ModDisplayName>Icebreaker</ModDisplayName>
     <SPTPath>D:\SPTDev</SPTPath>
+    <FikaPath>D:\SPTDevFika</FikaPath>
   </PropertyGroup>
 </Project>

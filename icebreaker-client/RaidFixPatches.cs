@@ -220,7 +220,11 @@ namespace Manimal.Icebreaker
     [HarmonyPatch(typeof(LocalPlayer), "Create")]
     internal static class Patch_EnsureEnvironmentManager
     {
-        private static void Prefix()
+        // ALSO re-anchored onto FikaPlayer.Create by IcebreakerFikaCompat: fika's player
+        // never goes through LocalPlayer.Create, so this prefix alone left coop raids
+        // with no EnvironmentManager — Player.Init NRE'd on it and loading froze at 25%
+        // (07-28 coop test, found by the InitDiag sweep)
+        internal static void EnsureEnvAndWeather()
         {
             // weather stack first — LocalGame's weather/seasons block runs after player
             // creation and is gated on WeatherController.Instance != null, so the rebuild
@@ -229,6 +233,21 @@ namespace Manimal.Icebreaker
                 IcebreakerWeather.TryBuild();
 
             if (!IceGate.On) return; // vanilla maps own their EnvironmentManager
+
+            // ObservedCullingManager drives observed BODY visibility (bots solo, remote
+            // players AND bots on fika clients — same observed-body path). retail scenes
+            // ship it; ours doesn't. the original fix created it in the
+            // BotsController.Init prefix, which only runs where BOTS run — the host —
+            // so fika clients had no manager, every observed body's visibility resolved
+            // invisible, and clients got the floating-gear ghosts (07-29 probe:
+            // forceRenderingOff on body skins, gear clean, damage un-hides). this
+            // anchor runs on every peer before any player body builds.
+            if (!Comfort.Common.Singleton<ObservedCullingManager>.Instantiated)
+            {
+                new GameObject("Icebreaker_ObservedCullingManager_Fix").AddComponent<ObservedCullingManager>();
+                Plugin.Log.LogWarning("[RaidFix] created missing ObservedCullingManager (observed body visibility)");
+            }
+
             if (EnvironmentManager.Instance != null)
                 return;
             if (Plugin.EnvTriggers.Value && IcebreakerAcoustics.TryBuildEnvironmentTriggers())
@@ -236,6 +255,21 @@ namespace Manimal.Icebreaker
             new GameObject("Icebreaker_EnvManager_Fix").AddComponent<EnvironmentManager>();
             Plugin.Log.LogWarning("[RaidFix] created missing EnvironmentManager singleton (bare — no indoor triggers)");
         }
+
+        private static void Prefix() => EnsureEnvAndWeather();
+    }
+
+    // UNIVERSAL safety net for the same fix: fika keeps inventing player-creation paths
+    // (LocalPlayer.Create solo, FikaPlayer.Create coop, a third branch for headless
+    // hosts — 07-29 headless test: envMgr=NULL yet again) and anchoring per-path is
+    // whack-a-mole. every one of them funnels through Player.Init, which is also
+    // exactly where EnvironmentManager gets dereferenced — and the ensure is
+    // idempotent, so running it per-player (bots included) costs one null check.
+    [HarmonyPatch(typeof(Player), nameof(Player.Init))]
+    internal static class Patch_EnsureEnvBeforeAnyPlayerInit
+    {
+        [HarmonyPrefix]
+        private static void Prefix() => Patch_EnsureEnvironmentManager.EnsureEnvAndWeather();
     }
 
     // icebreaker is an arctic map — force the seasons pipeline to Winter for THIS map
@@ -1122,9 +1156,69 @@ namespace Manimal.Icebreaker
             BuildDistanceCuller(); yield return null;
             BuildLightCuller(); yield return null;
             EnsureCullingManager();
+            HealDoorRegistry(); yield return null; // fika door sync resolves by this registry
+            // fika CLIENTS never run BotsController.Init, where the host's scene-repair
+            // block lives — so sealed doors sat in their unparseable authored state 64
+            // (no prompt at all), keycard proxies stayed broken, flares degraded and the
+            // shadow split never ran (07-29 client test). run the player-facing subset
+            // here for clients only; every host flavor already ran the full block.
+            if (!FikaBridge.BotsAuthority)
+            {
+                try { IcebreakerSealedDoors.Setup(); }
+                catch (Exception e) { Plugin.Log.LogWarning($"[Sealed] client setup failed: {e.Message}"); }
+                try { IcebreakerFlares.TryBuild(); }
+                catch (Exception e) { Plugin.Log.LogWarning($"[Flares] client build failed: {e.Message}"); }
+                try { Patch_EnsureStationaryController.HealKeycardProxies(); }
+                catch (Exception e) { Plugin.Log.LogWarning($"[Keycard] client heal failed: {e.Message}"); }
+                try { Patch_EnsureStationaryController.EnforceShadowProxies(); }
+                catch (Exception e) { Plugin.Log.LogWarning($"[Perf] client shadow split failed: {e.Message}"); }
+                yield return null;
+            }
             if (GetComponent<IcebreakerCrew>() == null) gameObject.AddComponent<IcebreakerCrew>();
             if (GetComponent<IcebreakerHeliExfil>() == null) gameObject.AddComponent<IcebreakerHeliExfil>();
             IcebreakerSnowGusts.Spawn();
+        }
+
+        // fika resolves every cross-peer door/keycard interaction via World.FindDoor's
+        // id dictionary, and on this backported map the world build misses the doors
+        // entirely (built from LocationScene registration our ripped scenes never
+        // perform) — every interaction packet arrived 'component exists, id
+        // unresolvable' on BOTH peers (07-28 coop), so no door state ever synced.
+        // register everything the dictionary lacks through the public API. sorted so
+        // every machine registers identical instances if an id is ever duplicated.
+        // runs from StageTwoInit (proven to run on fika clients) — idempotent.
+        internal static void HealDoorRegistry()
+        {
+            try
+            {
+                if (!IceGate.On) return;
+                var gw = Comfort.Common.Singleton<GameWorld>.Instance;
+                var world = gw != null ? gw.World_0 : null;
+                if (world == null) { Plugin.Log.LogWarning("[DoorHeal] no World_0 yet — registry heal skipped"); return; }
+                var dict = AccessTools.Field(typeof(World), "dictionary_1")?.GetValue(world)
+                    as System.Collections.Generic.Dictionary<string, EFT.Interactive.WorldInteractiveObject>;
+                if (dict == null) { Plugin.Log.LogWarning("[DoorHeal] registry dictionary not found — heal skipped"); return; }
+
+                var all = UnityEngine.Object.FindObjectsOfType<EFT.Interactive.WorldInteractiveObject>();
+                System.Array.Sort(all, (a, b) =>
+                {
+                    int c = string.CompareOrdinal(a.Id, b.Id);
+                    if (c != 0) return c;
+                    var pa = a.transform.position; var pb = b.transform.position;
+                    c = pa.x.CompareTo(pb.x); if (c != 0) return c;
+                    c = pa.y.CompareTo(pb.y); if (c != 0) return c;
+                    return pa.z.CompareTo(pb.z);
+                });
+                int had = dict.Count, healed = 0;
+                foreach (var w in all)
+                {
+                    if (w == null || string.IsNullOrEmpty(w.Id) || dict.ContainsKey(w.Id)) continue;
+                    world.RegisterWorldInteractionObject(w);
+                    healed++;
+                }
+                Plugin.Log.LogWarning($"[DoorHeal] registry had {had} of {all.Length} scene interactables — registered {healed} missing");
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[DoorHeal] failed: {e.Message}"); }
         }
 
         private static bool _batched;
@@ -2619,7 +2713,7 @@ namespace Manimal.Icebreaker
         // visual meshes cast NOTHING, proxies cast ONLY. if the rip left both casting,
         // every shadowed light draws the shadow geometry twice. one sweep at load
         // restores the division and reports what it changed — zero-count = rip was fine.
-        private static void EnforceShadowProxies()
+        internal static void EnforceShadowProxies()
         {
             if (!Plugin.ShadowProxyFix.Value) return;
             var sw = System.Diagnostics.Stopwatch.StartNew();
@@ -2629,6 +2723,12 @@ namespace Manimal.Icebreaker
             foreach (var r in all)
             {
                 if (r == null || !r.name.Contains("SHADOW")) continue;
+                // NEVER players: character bodies carry their own shadow meshes, and in
+                // fika the observed copies of already-spawned bots EXIST at sweep time —
+                // flipping their body renderers cast-only made them invisible until a
+                // hit rebuilt the part (07-28 coop: floating-gear rogues, knight fine
+                // because he spawned after the sweep)
+                if (r.GetComponentInParent<Player>() != null) continue;
                 if (r.shadowCastingMode != UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly)
                 {
                     r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
@@ -2639,6 +2739,7 @@ namespace Manimal.Icebreaker
             foreach (var r in all)
             {
                 if (r == null || r.name.Contains("SHADOW")) continue;
+                if (r.GetComponentInParent<Player>() != null) continue;
                 if (r.transform.parent == null || !shadowParents.Contains(r.transform.parent)) continue;
                 if (r.shadowCastingMode != UnityEngine.Rendering.ShadowCastingMode.Off)
                 {
@@ -2677,7 +2778,7 @@ namespace Manimal.Icebreaker
             { "security_pass_card_tech", new[] { new Vector3(11.298f, 15.552f, 26.862f), new Vector3(10.507f, 16.862f, 26.892f) } },
         };
 
-        private static void HealKeycardProxies()
+        internal static void HealKeycardProxies()
         {
             var doors = UnityEngine.Object.FindObjectsOfType<EFT.Interactive.KeycardDoor>(true);
             var proxies = UnityEngine.Object.FindObjectsOfType<InteractiveProxy>(true);

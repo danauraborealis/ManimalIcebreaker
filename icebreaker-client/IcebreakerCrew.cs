@@ -44,12 +44,33 @@ namespace Manimal.Icebreaker
             // bot is ours. the old 12s grace just delayed the crew's arrival.
             yield return new WaitForSeconds(2f);
 
-            var botGame = Singleton<IBotGame>.Instance;
-            _controller = botGame?.BotsController;
-            _spawner = _controller?.BotSpawner;
+            // fika client: bots are the host's job and arrive as network replicas —
+            // running the crew here would grow a second, local-only ghost crew. the
+            // cutscene watcher stays: the video is a local presentation beat, each
+            // player sees it when THEY cross the box (bot side effects gated inside).
+            if (!FikaBridge.BotsAuthority)
+            {
+                Plugin.Log.LogWarning("[Crew] fika client — crew is host-authoritative, arming local cutscene watcher only");
+                if (Plugin.CrewBlackDiv.Value && Plugin.EventSpawns.Value)
+                    StartCoroutine(EngineAdvanceWatch());
+                yield break;
+            }
+
+            // POLL, don't check once: under fika the IBotGame singleton lands on its own
+            // schedule and a single 2s-mark check lost the race (07-28 raid: "no
+            // BotSpawner — giving up" and with it the cutscene watcher, the event
+            // bridge, and the knight all died together, events buffering forever)
+            float spawnerDeadline = Time.time + 60f;
+            while (_spawner == null && Time.time < spawnerDeadline)
+            {
+                var botGame = Singleton<IBotGame>.Instance;
+                _controller = botGame?.BotsController;
+                _spawner = _controller?.BotSpawner;
+                if (_spawner == null) yield return new WaitForSeconds(0.5f);
+            }
             if (_spawner == null)
             {
-                Plugin.Log.LogWarning("[Crew] no BotSpawner — crew spawner giving up");
+                Plugin.Log.LogWarning("[Crew] no BotSpawner after 60s — crew spawner giving up");
                 yield break;
             }
 
@@ -298,27 +319,70 @@ namespace Manimal.Icebreaker
             var col = triggerGo.GetComponent<Collider>() ?? triggerGo.GetComponentInChildren<Collider>(true);
             if (col != null) bounds = col.bounds;
             else bounds = new Bounds(triggerGo.transform.position, new Vector3(8f, 6f, 8f));
-            bounds.Expand(new Vector3(2f, 3f, 2f)); // feet-point vs authored box, same lesson as the release box
+            // pad DOWNWARD only: we test the player's FEET against BSG's chest-height
+            // box, so only floor-level reach is needed. the old symmetric Expand(2,3,2)
+            // also grew the box 1.5m UP — past the ceiling, onto the deck above, where
+            // standing feet counted as inside (07-28: cutscene fired from the upper deck)
+            bounds = PadDown(bounds, 1f, 1.5f);
+            Plugin.Log.LogWarning($"[Crew] cutscene box armed — centre {bounds.center} size {bounds.size} ({(col != null ? "authored collider" : "8x6x8 fallback")})");
 
+            // two half-lives in coop: the VIDEO is per-player (plays when YOU cross the
+            // box), the STORY BEAT (BD phase, engine squad, progress door) is
+            // host-authoritative and fires when ANY human crosses first. solo both
+            // halves trip on the same tick, exactly the old behavior.
             var world = Singleton<GameWorld>.Instance;
+            bool videoPlayed = false, beatFired = false;
             while (true)
             {
                 var p = world?.MainPlayer;
-                if (p != null && bounds.Contains(p.Position))
+                if (!videoPlayed && p != null && bounds.Contains(p.Position))
                 {
-                    Plugin.Log.LogWarning("[Crew] CUTSCENE TRIGGER — video, rogue spawns stopped, black division phase");
+                    videoPlayed = true;
+                    Plugin.Log.LogWarning($"[Crew] CUTSCENE TRIGGER — video, rogue spawns stopped, black division phase (player at {p.Position})");
                     BdPhase = true;                // A+B: no more rogue top-ups from here on
                     IcebreakerCutscene.TryPlay();  // BD infiltration video while the real ones deploy below
+                    // the progress-door unlock is a DIRECT state write fika never
+                    // replicates (07-28 coop: client's cutscene left their door locked) —
+                    // unlock LOCALLY on every peer's own video beat, idempotent
+                    UnlockDoorById(ProgressDoorId);
+                }
+                if (!beatFired && FikaBridge.BotsAuthority && FikaBridge.AnyHumanIn(bounds))
+                {
+                    beatFired = true;
+                    if (!videoPlayed) Plugin.Log.LogWarning("[Crew] cutscene box tripped by a teammate — BD phase begins (your video still plays when you cross)");
+                    BdPhase = true;
                     OnSpawnEvent("hides0");        // no-op if the BSG box already queued them
                     // the forward-progress door out of the engine section ships Locked —
                     // without this the player is walled in after the cutscene. the DoorState
                     // setter raises OnDoorStateChanged, so nav links/carvers follow along.
-                    UnlockDoorById("door_Icebreaker_Indoor_02_00073");
-                    yield break;
+                    UnlockDoorById(ProgressDoorId);
+                    // + broadcast via the fika addon so peers who never cross the box
+                    // unlock too (their own video beat also covers them, belt+braces)
+                    try { ProgressDoorUnlocked?.Invoke(); }
+                    catch (Exception e) { Plugin.Log.LogWarning($"[Crew] progress-door hook failed: {e.Message}"); }
                 }
+                if (videoPlayed && (beatFired || !FikaBridge.BotsAuthority)) yield break;
                 yield return new WaitForSeconds(0.5f);
             }
         }
+
+        // horizontal pad both ways, vertical pad DOWN only — the boxes are authored at
+        // chest height and we compare against the player's feet
+        private static Bounds PadDown(Bounds b, float xz, float down)
+        {
+            var min = b.min; var max = b.max;
+            min.x -= xz; max.x += xz;
+            min.z -= xz; max.z += xz;
+            min.y -= down;
+            b.SetMinMax(min, max);
+            return b;
+        }
+
+        internal const string ProgressDoorId = "door_Icebreaker_Indoor_02_00073";
+
+        // fika sync hooks for the cutscene progress door (see EngineAdvanceWatch)
+        internal static event Action ProgressDoorUnlocked;
+        internal static void ApplyRemoteProgressDoor() => UnlockDoorById(ProgressDoorId);
 
         internal static void UnlockDoorById(string id)
         {
@@ -343,17 +407,19 @@ namespace Manimal.Icebreaker
                 ? eventId[eventId.Length - 1] - '0' : 0;
             if (eventId.StartsWith("hides"))
             {
-                // vanilla brains, but with the hold/release STAGING back (user call 07-17):
-                // the squad pauses at the lower-deck hide markers and only moves out once
-                // the player passes the engine-room trigger — spawn staging only, no
-                // temperament/mind pokes (those stay removed)
-                StartCoroutine(SpawnSquad("engine room", new[] { "BotZoneEngineHide" }, 4 + extras, null));
-                StartCoroutine(HoldEngineSquad(4 + extras));
+                // vanilla brains, but with the hold/release STAGING back (user call 07-17),
+                // now split (user call 07-28): 2 are already IN the room when the doors
+                // open, the rest push in as reinforcements when the player descends past
+                // the release trigger. spawn staging only, no temperament/mind pokes.
+                StartCoroutine(SpawnSquad("engine room", new[] { "BotZoneEngineHide" }, 2, null));
+                StartCoroutine(HoldEngineSquad(2, 2 + extras));
             }
             else if (eventId.StartsWith("stern"))
                 StartCoroutine(SpawnSternDeployment(extras));
+            // no bossWedge (user call 07-28): the boss slot spawns as one more assault,
+            // same squad size, plain black division across the wedge zones
             else if (eventId.StartsWith("wedges"))
-                StartCoroutine(SpawnSquad("wedge detail", WedgeZones, 3 + (extras - 1), (WildSpawnType)BdWedge));
+                StartCoroutine(SpawnSquad("wedge detail", WedgeZones, 4 + (extras - 1), null));
             // retail base.json truth (recovered 07-09): T1 = the knight + 2 rogue escorts
             // at Mash_t1 (he was never a raid-start spawn); T3/T4 = BD deployments at the
             // outside/inside zones we previously never delivered
@@ -509,8 +575,7 @@ namespace Manimal.Icebreaker
             var world = Singleton<GameWorld>.Instance;
             while (true)
             {
-                var p = world?.MainPlayer;
-                if (p != null && bounds.Contains(p.Position)) break;
+                if (FikaBridge.AnyHumanIn(bounds)) break; // any human, coop-aware
                 yield return new WaitForSeconds(0.5f);
             }
 
@@ -537,7 +602,7 @@ namespace Manimal.Icebreaker
         // staging only: no aggro/mind pokes, combat still overrides the hold by design.
         private bool _holdCombatLogged;
 
-        private IEnumerator HoldEngineSquad(int expected)
+        private IEnumerator HoldEngineSquad(int expected, int reinforcements = 0)
         {
             // release box = the authored engine trigger; fallback = glowstick box (same
             // as EngineRoomWatch). the authored box floats at chest height (y 10.3-12.4,
@@ -555,7 +620,7 @@ namespace Manimal.Icebreaker
                 if (lm != null) center = lm.transform.position;
                 bounds = new Bounds(center, new Vector3(12f, 8f, 12f));
             }
-            bounds.Expand(new Vector3(0f, 5f, 0f));
+            bounds = PadDown(bounds, 0f, 2.5f); // feet vs chest-height box — floor reach only, never up
             Plugin.Log.LogWarning($"[Crew] engine squad hold armed — release box {bounds.center} size {bounds.size} ({(trigCol != null ? "bundle trigger" : "glowstick fallback")})");
 
             var hideZone = UnityEngine.Object.FindObjectsOfType<BotZone>()
@@ -570,13 +635,21 @@ namespace Manimal.Icebreaker
             {
                 // heavy work (bot scan + re-pause) at 0.5s cadence; the box check runs
                 // per frame below
-                if (Time.time < nextHeavy) { var pp = world?.MainPlayer; if (pp != null && held.Count > 0 && bounds.Contains(pp.Position)) break; yield return null; continue; }
+                // any human trips the release, not just the host (coop)
+                if (Time.time < nextHeavy) { if (held.Count > 0 && FikaBridge.AnyHumanIn(bounds)) break; yield return null; continue; }
                 nextHeavy = Time.time + 0.5f;
                 if (held.Count < expected)
                     foreach (var b in UnityEngine.Object.FindObjectsOfType<BotOwner>())
+                    {
+                        if (held.Count >= expected) break; // one sweep used to add 5/4
+                        // IsPenBot: a pool bot in pen transit stands at its birth marker
+                        // for a frame or two — the 07-28 raid held one, and it spent the
+                        // rest of the raid paused under the ice
                         if (b != null && b.Profile?.Info?.Settings?.Role == (WildSpawnType)BdAssault
-                            && (b.Position - anchor).sqrMagnitude < 30f * 30f && held.Add(b))
+                            && (b.Position - anchor).sqrMagnitude < 30f * 30f
+                            && !IsPenBot(b) && held.Add(b))
                             Plugin.Log.LogWarning($"[Crew] engine squad member held ({held.Count}/{expected})");
+                    }
 
                 // RE-pause every poll: activation and goal changes silently reset patrol
                 // status. pause only stops the patrol layer — walk in on them early and
@@ -602,8 +675,7 @@ namespace Manimal.Icebreaker
                     }
                 }
 
-                var p = world?.MainPlayer;
-                if (p != null && held.Count > 0 && bounds.Contains(p.Position)) break;
+                if (held.Count > 0 && FikaBridge.AnyHumanIn(bounds)) break;
                 // PER-FRAME, not 0.5s: the authored box is only 2.4m deep — a sprinting
                 // player crosses it in ~0.35s and slipped between polls
                 yield return null;
@@ -643,6 +715,40 @@ namespace Manimal.Icebreaker
             }
             Plugin.Log.LogWarning($"[Crew] ENGINE SQUAD RELEASED — {released} black division moving out"
                 + (deadOrGone > 0 ? $" ({deadOrGone} of the held were dead/despawned by release time)" : ""));
+
+            // reinforcement wave (user call 07-28): the other half of the squad stayed in
+            // the pen and pushes in the moment the trigger blows. 12m hard player
+            // exclusion keeps the teleport off-screen (they appear behind machinery/doors
+            // and run in — if every lower-deck marker is inside 12m PickPoints keeps the
+            // full set, so a visible materialize is possible but unlikely). pen shortfall
+            // falls back to a classic spawn: pays the old hitch, but only if the pen ran dry.
+            if (reinforcements > 0 && hideZone != null)
+            {
+                var reinf = new List<BotOwner>();
+                int got = DeliverFromPool((WildSpawnType)BdAssault, hideZone, reinforcements, 12f, reinf);
+                foreach (var b in reinf)
+                {
+                    try
+                    {
+                        // same dead-'stay' fix as the release above — Unpause alone
+                        // restores a pre-'go' status and they'd stand at the drop point
+                        b.PatrollingData.RefreshStatus();
+                        b.PatrollingData.FindNextPoint(true, false);
+                        b.Sprint(true, true); // it's a push, not a patrol
+                    }
+                    catch (Exception e) { Plugin.Log.LogWarning($"[Crew] reinforcement cycle failed on '{b.name}': {e.Message}"); }
+                }
+                for (int i = got; i < reinforcements; i++)
+                {
+                    // same 12m off-screen rule as the pool path — these spawn while the
+                    // player is standing in the release box
+                    var t = ForceSpawn((WildSpawnType)BdAssault, hideZone, 12f);
+                    while (!t.IsCompleted) yield return null;
+                }
+                Plugin.Log.LogWarning($"[Crew] ENGINE REINFORCEMENTS — {reinforcements} pushing in ({got} from the pen)");
+            }
+            else if (reinforcements > 0)
+                Plugin.Log.LogWarning("[Crew] reinforcements skipped — BotZoneEngineHide not found");
         }
 
         // BLACK DIVISION — trigger-gated (retail: they arrive after the start cutscene).
@@ -681,8 +787,7 @@ namespace Manimal.Icebreaker
             var world = Singleton<GameWorld>.Instance;
             while (true)
             {
-                var p = world?.MainPlayer;
-                if (p != null && bounds.Contains(p.Position)) break;
+                if (FikaBridge.AnyHumanIn(bounds)) break; // any human, coop-aware
                 yield return new WaitForSeconds(0.5f);
             }
 
@@ -705,26 +810,23 @@ namespace Manimal.Icebreaker
                     yield return new WaitForSeconds(2.5f);
                 }
             }
-            // bossWedge — the black division boss — holds the third-deck rooms with a
-            // 3-man detail distributed between RoomsThird and RoomsThirdKitchen
+            // third-deck rooms detail: 4 plain assaults distributed between RoomsThird
+            // and RoomsThirdKitchen (the bossWedge slot became an assault, user call 07-28)
             var wedgeNames = new HashSet<string>(WedgeZones);
             var wedgeZones = UnityEngine.Object.FindObjectsOfType<BotZone>()
                 .Where(z => wedgeNames.Contains(z.name) && z.SpawnPointMarkers != null && z.SpawnPointMarkers.Count > 0)
                 .ToList();
             if (wedgeZones.Count > 0)
             {
-                var t2 = ForceSpawn((WildSpawnType)BdWedge, wedgeZones[UnityEngine.Random.Range(0, wedgeZones.Count)]);
-                while (!t2.IsCompleted) yield return null;
-                yield return new WaitForSeconds(2.5f);
-                for (int i = 0; i < 3; i++)
+                for (int i = 0; i < 4; i++)
                 {
-                    t2 = ForceSpawn((WildSpawnType)BdAssault, wedgeZones[i % wedgeZones.Count]);
+                    var t2 = ForceSpawn((WildSpawnType)BdAssault, wedgeZones[i % wedgeZones.Count]);
                     while (!t2.IsCompleted) yield return null;
                     yield return new WaitForSeconds(2.5f);
                 }
-                Plugin.Log.LogWarning("[Crew] bossWedge deployed with 3-man detail (RoomsThird/RoomsThirdKitchen)");
+                Plugin.Log.LogWarning("[Crew] 4-man detail deployed (RoomsThird/RoomsThirdKitchen)");
             }
-            else Plugin.Log.LogWarning("[Crew] wedge zones missing — bossWedge skipped");
+            else Plugin.Log.LogWarning("[Crew] wedge zones missing — rooms detail skipped");
 
             Plugin.Log.LogWarning($"[Crew] black division deployed: {bdZones.Count} squads + wedge");
         }
@@ -813,12 +915,24 @@ namespace Manimal.Icebreaker
             if (pts == null || pts.Length == 0) return null;
             var pool = new List<EFT.Game.Spawning.ISpawnPoint>();
             foreach (var p in pts) if (p != null) pool.Add(p);
+            // markers with a living bot already on them are out — back-to-back squad
+            // deliveries into the same zone (the two stern teams) reshuffled the same
+            // marker set and teleported bots into each other (07-28 raid)
+            var living = UnityEngine.Object.FindObjectsOfType<BotOwner>();
+            var free = pool.FindAll(p =>
+            {
+                foreach (var b in living)
+                    if (b != null && !b.IsDead && (b.Position - p.Position).sqrMagnitude < 4f)
+                        return false;
+                return true;
+            });
+            if (free.Count > 0) pool = free; // all occupied: keep the full set, wrap-offset handles it
             if (minPlayerDist > 0f)
             {
-                var pl = Singleton<GameWorld>.Instance?.MainPlayer;
-                if (pl != null)
                 {
-                    var farOnly = pool.FindAll(p => (p.Position - pl.Position).sqrMagnitude > minPlayerDist * minPlayerDist);
+                    // nearest HUMAN, not MainPlayer — in coop a bot materializing in
+                    // front of a remote teammate is just as ugly as in front of the host
+                    var farOnly = pool.FindAll(p => FikaBridge.NearestHumanSqr(p.Position) > minPlayerDist * minPlayerDist);
                     if (farOnly.Count > 0) pool = farOnly;
                     // zone entirely inside the bubble: keep the pool (spawning beats not
                     // spawning) — the soft far-sort below still does its best
@@ -840,11 +954,18 @@ namespace Manimal.Icebreaker
                 int j = UnityEngine.Random.Range(i, pool.Count);
                 (pool[i], pool[j]) = (pool[j], pool[i]);
             }
-            var player = Singleton<GameWorld>.Instance?.MainPlayer;
-            if (player != null)
-                pool.Sort((a, b) =>
-                    (((b.Position - player.Position).sqrMagnitude > 625f) ? 1 : 0)
-                    - (((a.Position - player.Position).sqrMagnitude > 625f) ? 1 : 0));
+            // soft preference: points no human is near (>25m) rank first. humans are
+            // collected once — the comparator runs O(n log n) times
+            var humans = new List<Player>();
+            FikaBridge.CollectHumans(humans);
+            bool Far(EFT.Game.Spawning.ISpawnPoint sp)
+            {
+                foreach (var h in humans)
+                    if ((sp.Position - h.Position).sqrMagnitude <= 625f) return false;
+                return true;
+            }
+            if (humans.Count > 0)
+                pool.Sort((a, b) => (Far(b) ? 1 : 0) - (Far(a) ? 1 : 0));
             var result = new List<EFT.Game.Spawning.ISpawnPoint>(count);
             for (int i = 0; i < count; i++) result.Add(pool[i % pool.Count]);
             return result;
@@ -941,11 +1062,11 @@ namespace Manimal.Icebreaker
 
         private IEnumerator PreMakeTriggerSquads()
         {
-            // engine 4 + stern 3+3+3+3 + wedge detail 3 = 19 assaults, 1 wedge boss.
-            // extras beyond the cache fall back to on-demand creation (still prewarmed).
+            // full event roster: engine 2+2 + stern 3+3+3 + wedge 4 + T3 3 + T4 5
+            // = 25 assaults (the wedge boss slot is a plain assault now, user call
+            // 07-28). extras beyond the cache fall back to on-demand creation.
             var wants = new List<WildSpawnType>();
-            for (int i = 0; i < 19; i++) wants.Add((WildSpawnType)BdAssault);
-            wants.Add((WildSpawnType)BdWedge);
+            for (int i = 0; i < 25; i++) wants.Add((WildSpawnType)BdAssault);
             foreach (var role in wants)
             {
                 // event spawns get absolute priority on the server generator — premake
@@ -1002,16 +1123,22 @@ namespace Manimal.Icebreaker
             var mr = slab.GetComponent<MeshRenderer>();
             if (mr != null) mr.enabled = false;
 
-            // destination-true plan, one entry per bot; counts mirror the premake's
-            // (base squads + a little extras headroom). shortfalls beyond the pool fall
-            // back to the normal premake/create path inside ForceSpawnBatch.
+            // destination-true plan, one entry per bot, counts EXACTLY mirroring the
+            // events — headroom bots turned out to be poison: a spare EngineHide bot
+            // delivered cross-zone by the old any-role fallback kept its birth-zone
+            // patrol data and trekked home across the ship (07-28 raid: piles of black
+            // division wandering the stern). shortfalls fall back to the classic
+            // premake/create path inside ForceSpawnBatch, which spawns INTO the zone.
+            // T4 (5x Inside_t4) is deliberately not pooled: late-raid + rare, and the
+            // pen already flirts with the alive-bot budget next to the rogue waves.
             var plan = new List<(WildSpawnType role, string zone)>();
             void Add(int n, WildSpawnType r, string z) { for (int i = 0; i < n; i++) plan.Add((r, z)); }
-            Add(5, (WildSpawnType)BdAssault, "BotZoneEngineHide");  // hides0 squad + headroom
-            Add(4, (WildSpawnType)BdAssault, "BotZoneSternTop");    // stern first team + headroom
+            Add(4, (WildSpawnType)BdAssault, "BotZoneEngineHide");  // hides0 squad
+            Add(3, (WildSpawnType)BdAssault, "BotZoneSternTop");    // stern first team
             Add(6, (WildSpawnType)BdAssault, "BotZoneStern");       // stern second + third teams
-            Add(4, (WildSpawnType)BdAssault, WedgeZones[0]);        // wedge detail + headroom
-            Add(1, (WildSpawnType)BdWedge, WedgeZones[0]);          // the boss himself
+            Add(2, (WildSpawnType)BdAssault, WedgeZones[0]);        // wedge detail (4 assault,
+            Add(2, (WildSpawnType)BdAssault, WedgeZones[1]);        //   no boss) splits across both zones
+            Add(3, (WildSpawnType)BdAssault, "BotZoneOutside_t3");  // T3 deployment
 
             var zonesByName = UnityEngine.Object.FindObjectsOfType<BotZone>()
                 .Where(z => z.SpawnPointMarkers != null && z.SpawnPointMarkers.Count > 0)
@@ -1090,13 +1217,20 @@ namespace Manimal.Icebreaker
             }
         }
 
-        // events call this through ForceSpawnBatch/ForceSpawn: zone-matched pen bots
-        // first (their patrol data already points here), any same-role bot second,
-        // the normal spawn path covers whatever's left
-        private int DeliverFromPool(WildSpawnType role, BotZone zone, int count)
+        // events call this through ForceSpawnBatch/ForceSpawn: exact zone-matched pen
+        // bots first, wedge-FAMILY matches second (the wedge event splits its squad
+        // across both RoomsThird zones nondeterministically, so a bot tagged for one
+        // is at home in the other). NO any-zone pass: a cross-zone teleport keeps the
+        // bot's birth-zone patrol data and it walks home across the ship — the 07-28
+        // wandering piles. shortfalls go to the classic spawn path, which is correct.
+        private static readonly HashSet<string> WedgeFamily = new HashSet<string>(WedgeZones);
+
+        private int DeliverFromPool(WildSpawnType role, BotZone zone, int count,
+            float minPlayerDist = 0f, List<BotOwner> deliveredOut = null)
         {
             if (!Plugin.CrewPreSpawnPool.Value) return 0;
             if (!_pool.TryGetValue((int)role, out var list) || list.Count == 0) return 0;
+            bool zoneIsWedge = WedgeFamily.Contains(zone.name);
             var picks = new List<BotOwner>();
             for (int pass = 0; pass < 2 && picks.Count < count; pass++)
                 for (int i = list.Count - 1; i >= 0 && picks.Count < count; i--)
@@ -1104,23 +1238,46 @@ namespace Manimal.Icebreaker
                     var e = list[i];
                     if (e.Bot == null || e.Bot.IsDead) { list.RemoveAt(i); continue; }
                     if (pass == 0 && e.ZoneName != zone.name) continue;
+                    if (pass == 1 && !(zoneIsWedge && WedgeFamily.Contains(e.ZoneName))) continue;
                     picks.Add(e.Bot);
                     list.RemoveAt(i);
                 }
             if (picks.Count == 0) return 0;
 
-            var pts = PickPoints(zone, picks.Count, 0f); // trigger squads spawn close by design
+            var pts = PickPoints(zone, picks.Count, minPlayerDist); // trigger squads spawn close by default
             for (int i = 0; i < picks.Count; i++)
             {
                 var b = picks[i];
                 var pos = pts != null ? pts[i % pts.Count].Position : zone.transform.position;
+                // wrapped onto an already-used point (zone has fewer free markers than
+                // bots): ring-offset so nobody teleports inside a squadmate
+                if (pts == null || i >= pts.Count)
+                {
+                    float ang = i * 2.4f; // golden-angle-ish, no two offsets align
+                    pos += new Vector3(Mathf.Cos(ang), 0f, Mathf.Sin(ang)) * 1.6f;
+                }
                 try { b.GetPlayer.Teleport(pos); }
                 catch (Exception e) { Plugin.Log.LogWarning($"[Crew] pool delivery teleport failed: {e.Message}"); }
                 ReanchorCore(b, pos);
                 try { b.PatrollingData.Unpause(); } catch { }
+                deliveredOut?.Add(b);
             }
             Plugin.Log.LogWarning($"[Crew] delivered {picks.Count}/{count}x {role} from the pen into {zone.name}");
             return picks.Count;
+        }
+
+        // the hold scan and other role-based sweeps must never claim a bot that is
+        // pen-parked or still in transit to the pen — it would be held (and released)
+        // 60m under the ice
+        internal static bool IsPenBot(BotOwner b)
+        {
+            if (b == null) return false;
+            var pid = b.ProfileId;
+            if (pid != null && _penPending.ContainsKey(pid)) return true;
+            foreach (var l in _pool.Values)
+                foreach (var e in l)
+                    if (ReferenceEquals(e.Bot, b)) return true;
+            return false;
         }
 
         // the pen anchored StartCorePoint near the pen-spawn marker; after the delivery
@@ -1146,9 +1303,9 @@ namespace Manimal.Icebreaker
             catch { }
         }
 
-        private async Task ForceSpawn(WildSpawnType role, BotZone zone)
+        private async Task ForceSpawn(WildSpawnType role, BotZone zone, float minPlayerDist = 0f)
         {
-            if (DeliverFromPool(role, zone, 1) > 0) return;
+            if (DeliverFromPool(role, zone, 1, minPlayerDist) > 0) return;
             try
             {
                 BotCreationDataClass data = null;
@@ -1164,7 +1321,7 @@ namespace Manimal.Icebreaker
                 // pre-pick a point: SelectAISpawnPoints refuses once a zone saturates; a
                 // forced explicit point bypasses that gate (speed-cola lesson). PickPoints
                 // also prefers markers the player isn't staring at.
-                _spawner.TryToSpawnInZoneInner(zone, data, 1, false, true, PickPoints(zone, 1), true);
+                _spawner.TryToSpawnInZoneInner(zone, data, 1, false, true, PickPoints(zone, 1, minPlayerDist), true);
                 Plugin.Log.LogInfo($"[Crew] forced {role} into {zone.name}");
             }
             catch (Exception e)
