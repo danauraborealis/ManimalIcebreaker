@@ -86,6 +86,11 @@ namespace Manimal.Icebreaker
             _sceneLoaded = _scene.IsValid() && _scene.isLoaded;
             if (!_sceneLoaded) { Bail("cutscene scene failed to load"); yield break; }
 
+            // the raid-start pass deferred this scene's 3 volumetric beams (the BD heli's
+            // main spot among them) because the scene wasn't loaded yet — claim them now
+            try { IcebreakerVolumetricLights.Restore(); }
+            catch (System.Exception e) { Plugin.Log.LogWarning($"[Volumetric] cutscene pass failed: {e.Message}"); }
+
             // locate the rig inside the loaded scene
             GameObject cutsceneRoot = null;
             foreach (var rgo in _scene.GetRootGameObjects())
@@ -270,10 +275,11 @@ namespace Manimal.Icebreaker
 
         private void Bail(string why)
         {
-            Plugin.Log.LogWarning($"[TimelineCutscene] {why} — falling back to video");
+            // no video fallback anymore (mp4 removed 07-30) — a broken timeline just
+            // skips the cinematic; the story beat already fired from the watcher
+            Plugin.Log.LogWarning($"[TimelineCutscene] {why} — cutscene skipped");
             Restore();
             if (_sceneLoaded) { SceneManager.UnloadSceneAsync(_scene); _sceneLoaded = false; }
-            IcebreakerCutscene.PlayVideoNow();
             Destroy(gameObject);
         }
 

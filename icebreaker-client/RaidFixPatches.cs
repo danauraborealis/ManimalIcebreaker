@@ -555,7 +555,14 @@ namespace Manimal.Icebreaker
             if (!onIce)
             {
                 _iceFrames = 0; _autoRebindStage = 0; _lamps.Clear(); _lastLamp = -1f; _lastAmbient = -1f; _rendererPosMap = null; _volProbeIdx = 0; _rebindDone.Clear();
-                IcebreakerAcoustics.ResetAmbientCache();
+                // ONLY when the map is genuinely gone. the sound scene loads (and gets its
+                // authored volumes cached + muted for the load screen) well before GameWorld
+                // reports a location, and every frame in that gap lands here — wiping the
+                // cache while the sources sit at volume 0, which strands them silent for the
+                // raid. the window is a blink when you host, but a fika HEADLESS client sits
+                // in it waiting on the host: silent wind + dead zone tones, 07-31
+                if (!IcebreakerAcoustics.IcebreakerLoaded())
+                    IcebreakerAcoustics.ResetAmbientCache();
                 var crew = GetComponent<IcebreakerCrew>();
                 if (crew != null) Destroy(crew); // fresh spawner per raid
                 var heli = GetComponent<IcebreakerHeliExfil>();
@@ -993,6 +1000,18 @@ namespace Manimal.Icebreaker
         // be swapped out at runtime.)
         private static readonly Dictionary<string, string> ShaderAliases = new Dictionary<string, string>();
 
+        // NEVER rebind these — keep the bundle's own compiled stand-in (user call 07-30).
+        // the game ships a compiled Cloth/ClothShader pair in its own sharedassets5, so
+        // the name sweep silently swapped the cutscene cloth onto it — which made four
+        // successive stand-in fixes render exactly zero frames while the pre-release
+        // client's shader (older than the 1.0 materials we author for) kept tearing.
+        // our stand-in is the known quantity: tolerance cutout, Cull Off, seam-safe wind.
+        private static readonly HashSet<string> RebindExclude = new HashSet<string>
+        {
+            "Cloth/ClothShader",
+            "Cloth/ClothShader_backface",
+        };
+
         private static bool _aliasRetryNeeded;
 
         // late loaders (the cutscene scene arrives mid-raid) call this after their
@@ -1015,6 +1034,7 @@ namespace Manimal.Icebreaker
                 {
                     if (m == null || m.shader == null || !seen.Add(m)) continue;
                     var name = m.shader.name;
+                    if (RebindExclude.Contains(name)) continue;   // bundle stand-in stays
                     var gameShader = Shader.Find(name) ?? GClass872.Find(name);
                     if (gameShader != null && gameShader != m.shader)
                     {
@@ -1045,6 +1065,7 @@ namespace Manimal.Icebreaker
                     if (m == null || m.shader == null || !seen.Add(m)) continue;
                     if (!_rebindDone.Add(m.GetInstanceID())) continue; // handled in a prior pass
                     var name = m.shader.name;
+                    if (RebindExclude.Contains(name)) { sameOrMissing++; continue; }   // bundle stand-in stays
                     bool aliased = ShaderAliases.TryGetValue(name, out var alias);
                     if (aliased) name = alias;
                     var gameShader = Shader.Find(name) ?? GClass872.Find(name);
@@ -1127,6 +1148,7 @@ namespace Manimal.Icebreaker
                         if (m == null || m.shader == null || !seen.Add(m)) continue;
                         if (!_rebindDone.Add(m.GetInstanceID())) continue;
                         var name = m.shader.name;
+                        if (RebindExclude.Contains(name)) continue;   // bundle stand-in stays
                         bool aliased = ShaderAliases.TryGetValue(name, out var alias);
                         if (aliased) name = alias;
                         var gameShader = Shader.Find(name) ?? GClass872.Find(name);
@@ -1150,13 +1172,26 @@ namespace Manimal.Icebreaker
         private System.Collections.IEnumerator StageTwoInit()
         {
             yield return RebindShadersSliced();
+            // retail's ambient audio subsystem, rebuilt from the sidecar. early in stage
+            // two: the sound scene is live by now and the sooner the loops start the less
+            // of the raid opens in silence
+            IcebreakerAmbientAudio.TryRestore(); yield return null;
+            FreeHovercraftLights(); yield return null;
             DiscoverLamps(); yield return null;
             ApplyLamps(); yield return null;
+            // after ApplyLamps on purpose: VolumetricLight.CheckIntensity refuses to
+            // register a beam whose light sits under 0.001, and most of the 49 are
+            // authored at intensity 0 and only get lit by the lamp pass above
+            IcebreakerVolumetricLights.Restore(); yield return null;
             AttachCullingCamera(); yield return null;
             BuildDistanceCuller(); yield return null;
             BuildLightCuller(); yield return null;
             EnsureCullingManager();
             HealDoorRegistry(); yield return null; // fika door sync resolves by this registry
+            // ALWAYS, fog on or off — a fog-off player collides with the markers' editor
+            // colliders otherwise (invisible walls at doorways/hatch, 07-29 coop test)
+            try { IcebreakerVolFog.StripMarkerColliders(); }
+            catch (Exception e) { Plugin.Log.LogWarning($"[VolFog] marker strip failed: {e.Message}"); }
             // fika CLIENTS never run BotsController.Init, where the host's scene-repair
             // block lives — so sealed doors sat in their unparseable authored state 64
             // (no prompt at all), keycard proxies stayed broken, flares degraded and the
@@ -1174,6 +1209,10 @@ namespace Manimal.Icebreaker
                 catch (Exception e) { Plugin.Log.LogWarning($"[Perf] client shadow split failed: {e.Message}"); }
                 yield return null;
             }
+            // host-side only: bots exist on the authority, so a client watchdog would
+            // be watching observed puppets that never move under their own power anyway
+            if (FikaBridge.BotsAuthority && GetComponent<IcebreakerStuckBots>() == null)
+                gameObject.AddComponent<IcebreakerStuckBots>();
             if (GetComponent<IcebreakerCrew>() == null) gameObject.AddComponent<IcebreakerCrew>();
             if (GetComponent<IcebreakerHeliExfil>() == null) gameObject.AddComponent<IcebreakerHeliExfil>();
             IcebreakerSnowGusts.Spawn();
@@ -1614,7 +1653,14 @@ namespace Manimal.Icebreaker
         // plain view. exempt those groups from occlusion culling entirely; the distance
         // culler still handles them, so the render cost is a rounding error. deliberately
         // specific patterns: 'frame_plastic' not 'frame' (door frames must stay culled).
-        private static readonly string[] PcNeverCull = { "curtains_", "frame_plastic", "arctic_picture" };
+        // 'combination_lock' (passcode keypads) and 'cpu_panel' (the wall monitors beside
+        // them) are the same failure as the curtains, one step worse: flush wall mounts in
+        // a doorway sliver, so the bake calls them hidden from a cell you're STANDING in.
+        // the mesh vanishes while the collider stays — a keypad you can use but not see.
+        // proven by the 07-30 A/B: both reappear the instant PcDriverEnabled goes off.
+        // gameplay-critical, so they get the loot-container treatment: occlusion never
+        // touches them, the distance culler still owns them past its own range.
+        private static readonly string[] PcNeverCull = { "curtains_", "frame_plastic", "arctic_picture", "combination_lock", "cpu_panel" };
         private static readonly Dictionary<object, bool> _pcWhitelistCache = new Dictionary<object, bool>();
         private static HashSet<Transform> _pcLcRoots; // lazy per raid
 
@@ -2111,6 +2157,24 @@ namespace Manimal.Icebreaker
                 }
             }
             Plugin.Log.LogWarning($"[CutsceneHold] forced on: {lights} tracked + {native} native lights, {rends} renderers");
+        }
+
+        // the parked hovercraft's two spots (G_spot_1/G_spot_2 in Design_Main, the only
+        // underscore-named G_spots in the map — the ship rigs use "G_spot (1)" style, so
+        // exact-name matching cant catch strays). their CullingLightObjects hold them at
+        // intensity 0 (dark, 07-28 coop test); free them like the exfil heli's lights.
+        // runs BEFORE DiscoverLamps: freed lights sit at the authored ceiling (5), so the
+        // dead-lamp sweep skips them and the LampIntensity slider never drags them down.
+        private static void FreeHovercraftLights()
+        {
+            int freed = 0;
+            foreach (var name in new[] { "G_spot_1", "G_spot_2" })
+            {
+                var go = GameObject.Find(name);
+                if (go != null) freed += FreeNativeLights(go.transform);
+            }
+            if (freed > 0)
+                Plugin.Log.LogWarning($"[LightLamps] hovercraft spots freed from native culling ({freed})");
         }
 
         // free a rig's lights from native culling FOR GOOD: force them lit at authored
@@ -2651,8 +2715,10 @@ namespace Manimal.Icebreaker
             // flare/door diagnostics for a scene that has none of our data.
             if (!IceGate.On) return;
 
-            if (Plugin.EventSpawns.Value)
-                IcebreakerAIPlaces.TryBuild(__instance);
+            // unconditional now: the retail trigger layer IS the spawn system since the
+            // legacy watchers were deleted (08-01). CrewBlackDiv is the on/off switch, and
+            // with it off the events simply fire with nothing subscribed.
+            IcebreakerAIPlaces.TryBuild(__instance);
 
             // sealed doors: register authored DoorState=64 doors + carve their navmesh
             // shut (runs here because doors AND their links are live post-RefreshData)
@@ -3206,36 +3272,6 @@ namespace Manimal.Icebreaker
                 + (Plugin.HardBots.Value ? ", difficulty forced HARD)" : ")"));
             __result = waves;
             return false;
-        }
-    }
-
-    // a full crew of chatty rogues in a metal box is nonstop voice-line spam — mute a
-    // random share of the crew. CAN_TALK is read by BotTalk.Activate (runs after Create)
-    // into its CanSay gate, so flipping it here silences the bot for the whole raid.
-    // bosses (knight + wedge) always keep their voice — their barks are the encounter.
-    [HarmonyPatch(typeof(BotOwner), nameof(BotOwner.Create))]
-    internal static class Patch_QuietCrew
-    {
-        private const int BdWedge = 848424; // blackdiv mod's bossWedge enum value
-
-        private static void Postfix(BotOwner __result)
-        {
-            try
-            {
-                if (__result == null || Plugin.QuietBotRatio.Value <= 0f) return;
-                var world = Comfort.Common.Singleton<GameWorld>.Instance;
-                if (world == null || !string.Equals(world.LocationId, "Suburbs", StringComparison.OrdinalIgnoreCase)) return;
-                var role = __result.Profile?.Info?.Settings?.Role;
-                if (role == null || role == WildSpawnType.bossKnight || (int)role == BdWedge) return;
-                // black division talks more than the crew (user call): an assault force
-                // coordinating out loud sells the phase — 40% of the crew's quiet chance
-                float ratio = Plugin.QuietBotRatio.Value;
-                if ((int)role == 848421) ratio *= 0.4f; // blackDivAssault enum value
-                if (UnityEngine.Random.value >= ratio) return;
-                __result.Settings.FileSettings.Mind.CAN_TALK = false;
-                Plugin.Log.LogInfo($"[RaidFix] '{__result.name}' spawned quiet ({role})");
-            }
-            catch (Exception e) { Plugin.Log.LogWarning($"[RaidFix] quiet-bot flag failed: {e.Message}"); }
         }
     }
 

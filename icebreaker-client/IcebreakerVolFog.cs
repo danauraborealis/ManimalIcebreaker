@@ -66,6 +66,31 @@ namespace Manimal.Icebreaker
             System.IO.Path.Combine(System.IO.Path.GetDirectoryName(typeof(IcebreakerVolFog).Assembly.Location), "fog_areas.json");
         private static DateTime _areasJsonTime;
 
+        // the SDK markers ship in the scene bundle WITH their editor-visualization
+        // BoxColliders — strip them ALWAYS, even when the json is the data source
+        // (the old strip lived only in the marker-parsing path below, so with a
+        // json present the colliders survived = 15 invisible walls in the ship).
+        // MUST NOT depend on the fog system running: with VolFog=false the Tick
+        // early-outs before BuildAreas and a fog-off player walked into invisible
+        // walls at every doorway/hatch the voids trace (07-29 three-player test) —
+        // RaidFixPatches.StageTwoInit calls this unconditionally on every peer.
+        internal static void StripMarkerColliders()
+        {
+            int stripped = 0;
+            foreach (var t in Resources.FindObjectsOfTypeAll<Transform>())
+            {
+                if (t == null || !t.gameObject.scene.isLoaded) continue;
+                if (!t.name.StartsWith("manimal_fogvoid", StringComparison.OrdinalIgnoreCase) &&
+                    !t.name.StartsWith("manimal_fogarea", StringComparison.OrdinalIgnoreCase)) continue;
+                foreach (var col in t.GetComponents<Collider>())
+                {
+                    UnityEngine.Object.Destroy(col);
+                    stripped++;
+                }
+            }
+            if (stripped > 0) Plugin.Log.LogWarning($"[VolFog] stripped {stripped} fog-marker collider(s) (invisible-wall guard)");
+        }
+
         private static void BuildAreas()
         {
             _areasBuilt = true;
@@ -77,21 +102,7 @@ namespace Manimal.Icebreaker
             // Manimal -> Export Fog Areas, or hand-edited) — hot-reloaded on change, no
             // scene bundle rebuild in the loop
             _voidCount = 0;
-            // the SDK markers ship in the scene bundle WITH their editor-visualization
-            // BoxColliders — strip them ALWAYS, even when the json is the data source
-            // (the old strip lived only in the marker-parsing path below, so with a
-            // json present the colliders survived = 15 invisible walls in the ship)
-            foreach (var t in Resources.FindObjectsOfTypeAll<Transform>())
-            {
-                if (t == null || !t.gameObject.scene.isLoaded) continue;
-                if (!t.name.StartsWith("manimal_fogvoid", StringComparison.OrdinalIgnoreCase) &&
-                    !t.name.StartsWith("manimal_fogarea", StringComparison.OrdinalIgnoreCase)) continue;
-                foreach (var col in t.GetComponents<Collider>())
-                {
-                    UnityEngine.Object.Destroy(col);
-                    Plugin.Log.LogWarning($"[VolFog] stripped marker collider on '{t.name}'");
-                }
-            }
+            StripMarkerColliders();
             if (System.IO.File.Exists(AreasJsonPath))
             {
                 try

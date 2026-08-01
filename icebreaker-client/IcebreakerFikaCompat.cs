@@ -67,12 +67,26 @@ namespace Manimal.Icebreaker
                     applied++;
                 }
                 else Plugin.Log.LogError("[Fika] FikaPlayer.Create not found — icebreaker will NOT load in coop, report this");
+
+                // CoopGame overrides Stop, so the LocalGame.Stop torch-strip never fires
+                // in coop — re-anchor it (same param names, harmony binds them through)
+                var coopStop = Type.GetType("Fika.Core.Main.GameMode.CoopGame, Fika.Core")
+                    ?.GetMethod("Stop", BindingFlags.Public | BindingFlags.Instance);
+                if (coopStop != null)
+                {
+                    h.Patch(coopStop, prefix: new HarmonyMethod(typeof(IcebreakerFikaCompat), nameof(CoopStopPrefix)));
+                    applied++;
+                }
+                else Plugin.Log.LogWarning("[Fika] CoopGame.Stop not found — blowtorch stays in inventory after coop extracts");
             }
             catch (Exception e) { Plugin.Log.LogError($"[Fika] compat patching failed: {e}"); }
-            Plugin.Log.LogWarning($"[Fika] compat patches applied: {applied}/3");
+            Plugin.Log.LogWarning($"[Fika] compat patches applied: {applied}/4");
         }
 
         private static void PlayerCreatePrefix() => Patch_EnsureEnvironmentManager.EnsureEnvAndWeather();
+
+        private static void CoopStopPrefix(string profileId, ExitStatus exitStatus)
+            => Patch_StripTorchOnExtract.Strip(profileId, exitStatus);
 
         private static void CoopGameCreatePrefix(Profile profile, LocationSettingsClass.Location location, LocalRaidSettings localRaidSettings)
             => IcebreakerMapFare.Consume(profile, location, localRaidSettings);

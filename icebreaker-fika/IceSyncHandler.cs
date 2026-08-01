@@ -6,6 +6,8 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.LiteNetLib;
 using Fika.Core.Networking.LiteNetLib.Utils;
 using HarmonyLib;
+using EFT;
+using Manimal.Icebreaker.Blowtorch;
 
 namespace Manimal.Icebreaker.Fika
 {
@@ -13,15 +15,22 @@ namespace Manimal.Icebreaker.Fika
     // one-shot state changes, so none of the wiki's throttling/snapshotting applies
     public struct IceWorldPacket : INetSerializable
     {
-        public byte Kind;      // 0 = chain planted, 1 = chain opened, 2 = seal state
-        public string DoorId;  // seal events only
-        public bool Sealing;   // seal events only
+        public byte Kind;      // 0/1 chain plant/open, 2 seal, 3 heli, 4 progress door,
+                               // 5-7 hatch stages, 8 torch flame, 9 cutscene activation,
+                               // 10 ladder enter/exit, 11 ladder bar angle,
+                               // 12 tripwire layout seed
+        public string DoorId;  // seal doorId / profileId / ladder NetId, per kind
+        public bool Sealing;   // seal state / torch flame / ladder enter
+        public int IntA;       // player NetId (torch/ladder kinds)
+        public float Value;    // ladder bar angle
 
         public void Serialize(NetDataWriter writer)
         {
             writer.Put(Kind);
             writer.Put(DoorId ?? "");
             writer.Put(Sealing);
+            writer.Put(IntA);
+            writer.Put(Value);
         }
 
         public void Deserialize(NetDataReader reader)
@@ -29,6 +38,8 @@ namespace Manimal.Icebreaker.Fika
             Kind = reader.GetByte();
             DoorId = reader.GetString();
             Sealing = reader.GetBool();
+            IntA = reader.GetInt();
+            Value = reader.GetFloat();
         }
     }
 
@@ -44,6 +55,10 @@ namespace Manimal.Icebreaker.Fika
             IcebreakerSealedDoors.SealEvent += OnSealEvent;
             IcebreakerHeliExfil.HeliCalled += OnHeliCalled;
             IcebreakerCrew.ProgressDoorUnlocked += OnProgressDoor;
+            HatchMeltDriver.HatchStage += OnHatchStage;
+            BlowtorchController.LocalTorchFiring += OnTorchFiring;
+            IcebreakerCrew.CutsceneActivated += OnCutsceneActivated;
+            IcebreakerTripwires.SeedRolled += OnTripwireSeed;
         }
 
         private void OnManagerCreated(FikaNetworkManagerCreatedEvent ev) => Register(ev.Manager);
@@ -52,6 +67,8 @@ namespace Manimal.Icebreaker.Fika
         {
             manager.RegisterPacket<IceWorldPacket>(OnReceived);
             IceBodyDiag.Ensure(); // raid-time creation — the chainloader-time component never ticked
+            IceTorchSync.Ensure();
+            IceLadderSync.Ensure();
             FikaAddonPlugin.Log.LogInfo("[IceSync] packet registered");
         }
 
@@ -71,17 +88,48 @@ namespace Manimal.Icebreaker.Fika
         private void OnProgressDoor()
             => Send(new IceWorldPacket { Kind = 4 });
 
-        private static void Send(IceWorldPacket packet)
+        // kinds 5/6/7 = frozen-hatch stages 0/1/2 (melt done / handle turned / opened)
+        private void OnHatchStage(byte stage)
+            => Send(new IceWorldPacket { Kind = (byte)(5 + stage) });
+
+        // kind 8 = torch flame state; NetId rides the DoorId field, state in Sealing
+        private void OnTorchFiring(bool on)
+        {
+            var me = Singleton<GameWorld>.Instance?.MainPlayer as global::Fika.Core.Main.Players.FikaPlayer;
+            if (me == null) return;
+            Send(new IceWorldPacket { Kind = 8, DoorId = me.NetId.ToString(), Sealing = on });
+        }
+
+        // kind 9 = per-player cutscene activation (ProfileId in DoorId) — feeds the
+        // all-players progress-door gate on the authority
+        private void OnCutsceneActivated(string profileId)
+            => Send(new IceWorldPacket { Kind = 9, DoorId = profileId });
+
+        // kind 12 = tripwire layout seed. below TripwireChance 1.0 every marker rolls
+        // its own arm/skip, and each peer plants its own LOCAL wires — so without this
+        // every player would walk a different minefield. only the authority ever raises
+        // the event, and clients block on it before planting.
+        private void OnTripwireSeed(int seed)
+            => Send(new IceWorldPacket { Kind = 12, IntA = seed });
+
+        internal static void Send(IceWorldPacket packet, DeliveryMethod delivery = DeliveryMethod.ReliableOrdered, bool quiet = false)
         {
             var manager = Singleton<IFikaNetworkManager>.Instance;
             if (manager == null) return;
-            manager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
-            FikaAddonPlugin.Log.LogInfo($"[IceSync] sent kind={packet.Kind} door='{packet.DoorId}'");
+            manager.SendData(ref packet, delivery, true);
+            if (!quiet) FikaAddonPlugin.Log.LogInfo($"[IceSync] sent kind={packet.Kind} door='{packet.DoorId}'");
         }
 
         private void OnReceived(IceWorldPacket packet)
         {
-            FikaAddonPlugin.Log.LogInfo($"[IceSync] received kind={packet.Kind} door='{packet.DoorId}'");
+            if (packet.Kind != 11) // the 20/s bar-angle stream would drown the log
+                FikaAddonPlugin.Log.LogInfo($"[IceSync] received kind={packet.Kind} door='{packet.DoorId}'");
+            try { Dispatch(packet); }
+            catch (Exception e) { FikaAddonPlugin.Log.LogWarning($"[IceSync] handler for kind {packet.Kind} failed: {e.Message}"); }
+        }
+
+        private void Dispatch(IceWorldPacket packet)
+        {
             switch (packet.Kind)
             {
                 case 0: IcebreakerChainDoor.ApplyRemote("plant"); break;
@@ -89,6 +137,17 @@ namespace Manimal.Icebreaker.Fika
                 case 2: IcebreakerSealedDoors.ApplyRemote(packet.DoorId, packet.Sealing); break;
                 case 3: IcebreakerHeliExfil.ApplyRemoteCall(); break;
                 case 4: IcebreakerCrew.ApplyRemoteProgressDoor(); break;
+                case 5: HatchMeltDriver.ApplyRemoteStage(0); break;
+                case 6: HatchMeltDriver.ApplyRemoteStage(1); break;
+                case 7: HatchMeltDriver.ApplyRemoteStage(2); break;
+                case 8:
+                    if (int.TryParse(packet.DoorId, out var torchNetId))
+                        IceTorchSync.SetRemoteFlame(torchNetId, packet.Sealing);
+                    break;
+                case 9: IcebreakerCrew.ApplyRemoteCutsceneActivation(packet.DoorId); break;
+                case 10: IceLadderSync.ApplyRemoteLadderState(packet.IntA, packet.DoorId, packet.Sealing); break;
+                case 11: IceLadderSync.ApplyRemoteBarAngle(packet.IntA, packet.Value); break;
+                case 12: IcebreakerTripwires.ApplyRemoteSeed(packet.IntA); break;
                 default: FikaAddonPlugin.Log.LogWarning($"[IceSync] unknown event kind {packet.Kind}"); break;
             }
         }
@@ -99,6 +158,10 @@ namespace Manimal.Icebreaker.Fika
             IcebreakerSealedDoors.SealEvent -= OnSealEvent;
             IcebreakerHeliExfil.HeliCalled -= OnHeliCalled;
             IcebreakerCrew.ProgressDoorUnlocked -= OnProgressDoor;
+            HatchMeltDriver.HatchStage -= OnHatchStage;
+            BlowtorchController.LocalTorchFiring -= OnTorchFiring;
+            IcebreakerCrew.CutsceneActivated -= OnCutsceneActivated;
+            IcebreakerTripwires.SeedRolled -= OnTripwireSeed;
             FikaEventDispatcher.UnsubscribeEvent<FikaNetworkManagerCreatedEvent>(OnManagerCreated);
             try
             {

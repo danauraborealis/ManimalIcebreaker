@@ -19,7 +19,19 @@ namespace Manimal.Icebreaker
     {
         internal const string TryOpenId = "Try_open_00000";
         internal const string ExplosionSwitchId = "Explosion_switch";
-        internal const string ChargeTpl = "69a0174087a75d2cbd0842e8"; // the demo charge item
+        // BSG ships TWO distinct SZ-1 charge items (identical purpose, different tpls) —
+        // either one plants
+        internal static readonly string[] ChargeTpls =
+        {
+            "69a0174087a75d2cbd0842e8",
+            "6819f8df28294ec0730db6b4",
+        };
+        internal static bool IsCharge(Item it)
+        {
+            if (it == null) return false;
+            foreach (var t in ChargeTpls) if (it.TemplateId == t) return true;
+            return false;
+        }
         internal const float PlantSeconds = 5f;
 
         internal static bool Planted;  // one-way per raid — the charge is in the door
@@ -184,7 +196,7 @@ namespace Manimal.Icebreaker
         {
             if (player?.Profile?.Inventory == null) return null;
             foreach (var it in player.Profile.Inventory.AllRealPlayerItems)
-                if (it != null && it.TemplateId == ChargeTpl) return it;
+                if (IsCharge(it)) return it;
             return null;
         }
 

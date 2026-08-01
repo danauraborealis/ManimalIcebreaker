@@ -103,9 +103,32 @@ The pattern (see `analysis/extract_doors.py` — the canonical implementation):
 6. Record hierarchy paths with the `name~k` sibling-ordinal scheme + composed
    world position — the editor rebake matches on path first, position second.
 
+7. **The AssetRipper export tells you WHICH objects had a component; the raw level
+   still holds its VALUES.** For IL2CPP scripts AssetRipper writes a field-less
+   stub `.cs` and therefore dumps the MonoBehaviour with an empty body — the
+   hierarchy and the `m_Script` guid survive, the tuning does not. So use the
+   export to find the carriers (grep the script's `.meta` guid across the scene
+   YAML) and the raw `levelNNN` to recover the numbers. Identify the class in the
+   raw file WITHOUT a typetree by grouping every MonoBehaviour on its `m_Script`
+   PPtr and matching group size to the count the export gave you — an exact
+   count match pins the class, then the payload is a fixed-size struct you can
+   `struct.unpack` (header is GO PPtr 12B, enabled 1B→align 4, script PPtr 12B,
+   name string→align 4). Validate by range-checking every field against the
+   4.0 class's `[Range]` attributes and defaults; if the whole set lands on
+   plausible values in declaration order, the layout did NOT drift.
+   Done for `VolumetricLight` (49 lights, July 2026) — 1.0 and 4.0 matched
+   byte-for-byte, so the authored values transferred with no surgery at all.
+8. Before restoring a component at runtime, grep the assembly for who ELSE caches
+   it (`GetComponent<X>()` stored to a field, or collected into a list at init).
+   Anything that cached it before you existed needs rebinding by reflection, or
+   your restored component silently ignores the system that's supposed to drive
+   it — `VolumetricLight` is cached by both `CullingLightObject.volumetricLight_0`
+   (distance-fade intensity re-check) and `LampController.list_2` (on/off + dim).
+
 Systems recovered this way for Icebreaker (scripts all in `analysis/`): doors +
 keycard swipers, flares (+ material float sets), lootable containers, AI bake
-(covers/voxels/patrols), spatial audio, weather assets, the scene list.
+(covers/voxels/patrols), spatial audio, weather assets, volumetric lights, the
+scene list.
 
 ## Phase 4 — Editor rebake (the "Author" scripts)
 
@@ -264,3 +287,24 @@ When a BSG shader can't be bound at runtime and needs an SDK stand-in:
    stand-ins should be ambient-SH-lit (stable) instead of realtime-lit.
 5. Verify texture ALPHA survived the rip before trusting alpha-driven features
    (precedent: melt-dissolve _MainTex, then the smoothness maps).
+6. **Vertex animation must displace along a UNIFORM direction, never the vertex
+   normal.** Meshes duplicate vertices at every UV island and hard edge with
+   different normals; normal-based displacement pulls the duplicates apart and
+   the mesh visibly rips at the seams (cloth stand-in, arms in the cutscene,
+   July 2026). Position-seeded noise + one shared direction keeps coincident
+   duplicates welded by construction.
+7. **Before iterating on a stand-in shader, verify it's the shader that
+   actually renders.** The runtime name-rebind swaps materials onto the game's
+   shader whenever one with that name exists in ANY loaded location — and the
+   client's own EscapeFromTarkov_Data/sharedassets*.assets is one the
+   global-bundle check misses entirely (4.0 ships Cloth/ClothShader +
+   _backface compiled in sharedassets5, same home as retail; property lists
+   match the 1.0 materials). Four cloth stand-in fixes produced byte-identical
+   "arm rips" because none of them ever rendered in a raid; the log's
+   `[RebindShaders] Nx <name>` line is the ground truth. Once rebound, the only
+   fixes that reach the screen live in the material/texture data the rebind
+   preserves — the actual bug was DXT1 quantizing the cutout mask's whites to
+   250-254 under an authored exact threshold of 1.0 (source-PNG analysis shows
+   clean 255s; the BUNDLE texture is what the shader samples). Fix: import the
+   mask uncompressed. Identical-result fixes exclude the mechanism you touched;
+   the fourth identical result should have pointed at the render path itself.

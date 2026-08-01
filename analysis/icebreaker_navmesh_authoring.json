@@ -1,0 +1,4739 @@
+{
+ "source": {
+  "export": "C:\\Users\\peard\\Desktop\\IcebreakerLevels\\AssetRipper_export_20260704_204314\\ExportedProject\\Assets\\Content\\Locations\\Icebreaker\\Icebreaker_AI.unity",
+  "level": "C:\\Users\\peard\\Desktop\\IcebreakerLevels\\level706"
+ },
+ "expected": {
+  "NavMeshSurface": 1,
+  "NavMeshModifierVolume": 25,
+  "NavMeshModifier": 326
+ },
+ "components": {
+  "NavMeshSurface": [
+   {
+    "m_AgentTypeID": 0,
+    "m_CollectObjects": 1,
+    "m_Size": [
+     57.8,
+     121.99,
+     168.64999
+    ],
+    "m_Center": [
+     0.0,
+     2.0,
+     0.0
+    ],
+    "m_LayerMask": 1074014720,
+    "m_UseGeometry": 1,
+    "m_DefaultArea": 0,
+    "m_GenerateLinks": false,
+    "m_IgnoreNavMeshAgent": true,
+    "m_IgnoreNavMeshObstacle": true,
+    "m_OverrideTileSize": false,
+    "m_TileSize": 256,
+    "m_OverrideVoxelSize": false,
+    "m_VoxelSize": 0.1,
+    "m_MinRegionArea": 2.0,
+    "m_NavMeshData": {
+     "fileID": 5,
+     "pathID": 2
+    },
+    "m_BuildHeightMesh": false,
+    "_trailing_bytes": 0,
+    "path": "NavMesh"
+   }
+  ],
+  "NavMeshModifierVolume": [
+   {
+    "m_Size": [
+     13.96,
+     2.3,
+     1.32
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1 (5)"
+   },
+   {
+    "m_Size": [
+     13.96,
+     2.3,
+     1.32
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1 (7)"
+   },
+   {
+    "m_Size": [
+     13.96,
+     2.3,
+     4.9
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1 (9)"
+   },
+   {
+    "m_Size": [
+     3.22,
+     2.3,
+     3.34
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1 (12)"
+   },
+   {
+    "m_Size": [
+     9.13,
+     2.3,
+     9.16
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1"
+   },
+   {
+    "m_Size": [
+     13.96,
+     2.3,
+     1.32
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1 (6)"
+   },
+   {
+    "m_Size": [
+     88.4,
+     63.43,
+     3.2
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1"
+   },
+   {
+    "m_Size": [
+     13.96,
+     2.3,
+     1.32
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1 (8)"
+   },
+   {
+    "m_Size": [
+     3.22,
+     2.3,
+     3.39
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1 (1)"
+   },
+   {
+    "m_Size": [
+     3.22,
+     2.3,
+     3.34
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1 (2)"
+   },
+   {
+    "m_Size": [
+     13.96,
+     2.3,
+     1.32
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1 (11)"
+   },
+   {
+    "m_Size": [
+     13.96,
+     2.3,
+     4.0
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1 (10)"
+   },
+   {
+    "m_Size": [
+     28.1,
+     63.43,
+     0.91
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1"
+   },
+   {
+    "m_Size": [
+     9.79,
+     2.3,
+     10.97
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1"
+   },
+   {
+    "m_Size": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1 (13)"
+   },
+   {
+    "m_Size": [
+     3.2,
+     2.3,
+     2.4
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1_3fl"
+   },
+   {
+    "m_Size": [
+     1.11,
+     2.3,
+     2.4
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1 _Sten"
+   },
+   {
+    "m_Size": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1 (14)"
+   },
+   {
+    "m_Size": [
+     3.22,
+     2.3,
+     3.39
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1 (4)"
+   },
+   {
+    "m_Size": [
+     3.22,
+     2.3,
+     3.39
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1 (3)"
+   },
+   {
+    "m_Size": [
+     1.11,
+     2.3,
+     2.4
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1 _Sten"
+   },
+   {
+    "m_Size": [
+     1.11,
+     2.3,
+     2.4
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1 _Sten"
+   },
+   {
+    "m_Size": [
+     5.59,
+     1.0,
+     2.0
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1 (15)"
+   },
+   {
+    "m_Size": [
+     3.2,
+     2.3,
+     2.4
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1_3fl"
+   },
+   {
+    "m_Size": [
+     5.59,
+     1.0,
+     2.0
+    ],
+    "m_Center": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "m_Area": 1,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "NavMeshBlocks/NavMesh Block1 (16)"
+   }
+  ],
+  "NavMeshModifier": [
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Captian_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_long_coridor (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneOutside_t3/BornPositions/BP.BotZoneOutside_t3 Bot rad:42 1"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Staircase_6/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_near_engine_L-coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_coridor_right/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneRoomsFour/BornPositions/BP.BotZoneRoomsFour Bot, Boss rad:10 2"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Captian_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_coridor (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_ventilation/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Control_center/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_T_coridor (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_stern_cabin (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room19_1/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room42_1/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneEngineHide/BornPositions/BP.BotZoneEngineHide Bot rad:42 2"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneKorr_t2/BornPositions/BP.BotZoneKorr_t2 Bot rad:42 1"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Hold/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneKorrDown1/BornPositions/BP.BotZoneKitchen Bot rad:42 0"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Control_center/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_stairs_up (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneEngineHide/BornPositions/BP.BotZoneEngineHide Bot rad:42 0"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Control_center/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Archive/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Short_coridor (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_stern_cabin_low/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room15_2/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Small_stairs/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Captian_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_workshop (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Tambour_r_7f/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneRoomsThird/BornPositions/BP.BotZoneRoomsThird Bot rad:10 5"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room15_1/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_lab_lockers/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Small_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_near_engine_stairs_-1/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Engine_main_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Captian_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneRoomsThird/BornPositions/BP.BotZoneRoomsThird Bot rad:10 6"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room18_2/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_wheel_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room34_1/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_medical_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneEngineHide/BornPositions/BP.BotZoneEngineHide Bot rad:42 3"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room12_1/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Storage/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Gas_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_stern_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Icebreaker_outdoor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_wheel_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_T_coridor (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_stern_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Control_center/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_wheel_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneEngineHide/BornPositions/BP.BotZoneEngineHide Bot rad:42 8"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Captian_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneRoom_Eng/BornPositions/BP.BotZoneKitchen Bot rad:42 1"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Staircase_4/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Coridor_r_7f/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Storage (3)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Engine_control_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room36/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Exit_out (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Storage (2)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_stern_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_coridor_left/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room12_2/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_L_coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_near_engine_L-coridor (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_pectopah_vip (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Small_coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Servers/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_near_engine_stairs_-1 (3)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Freezer/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Tambour_l_6f/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_T_coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Storage (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneInside_t4/BornPositions/BP.BotZoneInside_t4 Bot rad:42 1"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_stairs_up/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneMash_t1/BornPositions/BP.BotZoneMash_t1 Bot rad:42 0"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Engine_booth/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room34_2/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Captian_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneRoomsThirdKitchen/BornPositions/BP.BotZoneRoomsThirdKitchen Bot rad:10 1"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Captian_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_medical_room (3)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room35_1/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_wheel_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_near_engine_L-coridor (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_medical_room (2)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_long_coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room19_2/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_coridor_right/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_wheel_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_coridor_down/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_L_coridor_2/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Captian_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Staircase_7/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Small_coridor (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneEngineCenter/BornPositions/BP.BotZoneEngineCenter Bot rad:42 0"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneEngineHide/BornPositions/BP.BotZoneEngineHide Bot rad:42 1"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Engine_main_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneStern/BornPositions/BP.BotZoneStern Bot rad:42 0"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneRoomsThird/BornPositions/BP.BotZoneRoomsThird Bot rad:10 1"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_stern_cabin (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Engine_main_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneRoomsThird/BornPositions/BP.BotZoneRoomsThird Bot, Boss rad:10 0"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Gas_room_2/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room02/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Tambour (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Short_coridor (2)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Coridor_l/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneRoomsThirdKitchen/BornPositions/BP.BotZoneRoomsThirdKitchen Bot rad:10 2"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Hold/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneRoom_Eng2/BornPositions/BP.BotZoneKitchen Bot rad:42 1"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Hold (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_wheel_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Coridor_l_5f/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneRoomsThird/BornPositions/BP.BotZoneRoomsThird Bot rad:10 3"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_L_coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_stern_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Coridor_r_5f/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneRoomsThirdKitchen/BornPositions/BP.BotZoneRoomsThirdKitchen Bot rad:10 0"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Control_center_enterance/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Tambour_r_5f/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneFront2/BornPositions/BP.BotZoneFront Bot rad:14 1"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_C_coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Locker_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Control_center/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Small_stairs/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneBack/BornPositions/BP.BotZoneBack Bot rad:42 1"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneFront/BornPositions/BP.BotZoneFront Bot rad:14 1"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Short_coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_medical_room (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_coridor_left/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Coridor_l_6f/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Captian_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Storage/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneInside_t4/BornPositions/BP.BotZoneInside_t4 Bot rad:42 0"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_L_coridor_2/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_medical_room (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_near_engine_L-coridor (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Tambour/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room18_2/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Engine_main_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Gas_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_pectopah/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_ventilation/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Staircase_-1/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneEngineHide/BornPositions/BP.BotZoneEngineHide Bot rad:42 6"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Captian_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneSternTop/BornPositions/BP.BotZoneSternTop Bot rad:42 0"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_gym/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Staircase_2/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneEngineHide/BornPositions/BP.BotZoneEngineHide Bot rad:42 9"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Hangar/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Captian_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_near_engine_L-coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Locker_cordor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room34_1/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_ventilation (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_near_engine_L-coridor (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_near_engine_stairs_-1/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_wheel_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Storage (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_T_coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Archive_office/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Small_stairs/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneKorr_t2/BornPositions/BP.BotZoneKorr_t2 Bot rad:42 0"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Big_kitchen/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Coridor_l_7f/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_automation_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneEngineHide/BornPositions/BP.BotZoneEngineHide Bot rad:42 4"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Engine_main_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room12_2/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneRoom_Eng/BornPositions/BP.BotZoneKitchen Bot rad:42 0"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneStern/BornPositions/BP.BotZoneStern Bot rad:42 1"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room31/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Captian_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room32/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneOutside_t3/BornPositions/BP.BotZoneOutside_t3 Bot rad:42 0"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Engine_main_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneFront/BornPositions/BP.BotZoneFront Bot rad:14 0"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Tambour_r_7f (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room35_2/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room35_2/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_L_coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Captian_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Small_kitchen/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_wheel_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_near_engine_stairs_-1 (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room15_1/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_lab_main/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Captian_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneRoomsFour/BornPositions/BP.BotZoneRoomsFour Bot, Boss rad:10 1"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_pectopah/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Control_center_enterance (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneFront2/BornPositions/BP.BotZoneFront Bot rad:14 0"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Staircase_1/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_L_coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Coridor_r_4f/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneRoomsThird/BornPositions/BP.BotZoneRoomsThird Bot rad:10 4"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room12_1/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_stern_cabin (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Gas_storage (2)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneRoom_Eng2/BornPositions/BP.BotZoneKitchen Bot rad:42 0"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneKitchen/BornPositions/BP.BotZoneKitchen Bot rad:42 1"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Engine_main_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Engine_booth/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_pectopah_vip/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_near_engine_stairs_-1 (2)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneEngineCenter/BornPositions/BP.BotZoneEngineCenter Bot rad:42 3"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Big_kitchen/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Hangar/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_stern_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room03/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room42_2/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Captain_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneRoomsFour/BornPositions/BP.BotZoneRoomsFour Bot, Boss rad:10 0"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneEngineHide/BornPositions/BP.BotZoneEngineHide Bot rad:42 7"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Engine_main_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneBack/BornPositions/BP.BotZoneBack Bot rad:42 0"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room04/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneRoomsThird/BornPositions/BP.BotZoneRoomsThird Bot rad:10 2"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Control_center/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room34_2/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_near_engine_L-coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Captian_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Small_coridor (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_conference_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneMash_t1/BornPositions/BP.BotZoneMash_t1 Bot rad:42 1"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_C_coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Engine_main_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneStern/BornPositions/BP.BotZoneStern Bot rad:42 2"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Breefing_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Captian_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_near_engine_stairs_-1 (3)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_stern_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_long_coridor (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneEngineCenter/BornPositions/BP.BotZoneEngineCenter Bot rad:42 1"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneRoomsThirdKitchen/BornPositions/BP.BotZoneRoomsThirdKitchen Bot rad:10 3"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Coridor_r/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room18_1/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room19_2/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_upperdeck_cpu/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Staircase_5/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room19_1/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room27/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_fuel_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room35_1/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room16/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_pectopah/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_near_engine_stairs_-1 (2)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room22/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneEngineCenter/BornPositions/BP.BotZoneEngineCenter Bot rad:42 2"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_T_coridor (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_long_coridor (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Exit_out/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room42_1/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_automation_room_2/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_stern_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Coridor_r_7f (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneSternTop/BornPositions/BP.BotZoneSternTop Bot rad:42 1"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Engine_booth/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_lab_coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneRooms/BornPositions/BP.BotZoneRooms Bot rad:42 0"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_wheel_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_stern_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Tambour_l_6f (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_C_coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_L_coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Hold/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_lab_main/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_T_coridor (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Hold (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_T_coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Locker_room (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Coridor_l_4f/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Coridor_r_6f/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room15_2/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_C_coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Tambour_l_4f/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneKitchen/BornPositions/BP.BotZoneKitchen Bot rad:42 0"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_pectopah_kitchen/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Control_center/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_coridor_up/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Coridor_r_7f/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Engine_main_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Engine_booth/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_near_engine_L-coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_T_coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Locker_cordor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_lab_small/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneBack/BornPositions/BP.BotZoneBack Bot rad:42 2"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_near_engine_stairs_-1 (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_stern_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneRooms/BornPositions/BP.BotZoneRooms Bot rad:42 2"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Hangar/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_workshop/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Tambour_l_5f/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneKorrDown1/BornPositions/BP.BotZoneKitchen Bot rad:42 1"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room23/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_medical_room (4)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneRooms/BornPositions/BP.BotZoneRooms Bot rad:42 1"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_wheel_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Outdoor_coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Engine_main_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Captian_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_L_coridor_2/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Small_coridor/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Gas_room_2/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Tambour_r_4f/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room42_2/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room18_1/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Coridor_l_7f/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Short_coridor (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Short_coridor (3)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_stern_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Room01/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "BotZoneEngineHide/BornPositions/BP.BotZoneEngineHide Bot rad:42 5"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Captian_cabin/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_enter (1)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_wheel_room/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Staircase_3/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Storage (2)/AudioTriggerArea"
+   },
+   {
+    "m_OverrideArea": false,
+    "m_Area": 0,
+    "m_OverrideGenerateLinks": false,
+    "m_GenerateLinks": false,
+    "m_IgnoreFromBuild": true,
+    "m_ApplyToChildren": true,
+    "m_AffectedAgents": [
+     -1
+    ],
+    "_trailing_bytes": 0,
+    "path": "ServerSpatialController/ServerRoom_Archive/AudioTriggerArea"
+   }
+  ]
+ }
+}

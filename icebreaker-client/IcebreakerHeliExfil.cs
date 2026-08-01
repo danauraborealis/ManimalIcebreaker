@@ -52,6 +52,7 @@ namespace Manimal.Icebreaker
             _live = this; // remote heli-call applies route through the live component
 
             AttachFare();
+            StartCoroutine(ClaimIEAPITrigger());
 
             var zoneSrc = GameObject.Find("NotificationZone");
             if (zoneSrc == null || zoneSrc.GetComponent<BoxCollider>() == null)
@@ -123,6 +124,58 @@ namespace Manimal.Icebreaker
         // UncompleteRequirements for SharedTimer or WorldEvent requirements, so a plain
         // transfer requirement sits in RegularMode exactly like a vanilla car extract, and
         // the flare lock keeps owning the status.
+        // INTERACTABLE EXFILS API compat. with its "auto extract" setting on, IEAPI's
+        // CustomExfilTrigger.OnTriggerEnter calls ForceSetExfilZoneEnabled(true) the moment
+        // you walk into the zone — and that method is documented, in their own source, as
+        // "does not do any exfil requirement checks". it just switches the exfil's
+        // BoxCollider on. their MANUAL path (ToggleExfilZoneEnabled) is the one that
+        // validates, so with auto on the 2400-euro fare was simply never consulted and the
+        // ride was free (user report 07-31).
+        //
+        // the fix is their own escape hatch, not a patch: RequiresManualActivation is a
+        // public settable property that OnTriggerEnter checks FIRST, and their comment at
+        // the prompt site says outright that a handler is expected to modify it. setting it
+        // forces our exfil down the manual, requirement-checking path. we only claim it
+        // when a fare actually exists — a free ride leaves auto-extract alone.
+        //
+        // reflection, no assembly reference: IEAPI is optional and must stay that way.
+        private System.Collections.IEnumerator ClaimIEAPITrigger()
+        {
+            if (Plugin.HeliExfilCost.Value <= 0) yield break;
+            var triggerType = HarmonyLib.AccessTools.TypeByName("InteractableExfilsAPI.Components.CustomExfilTrigger");
+            if (triggerType == null) yield break;   // not installed, nothing to do
+            var exfilProp = HarmonyLib.AccessTools.Property(triggerType, "Exfil");
+            var manualProp = HarmonyLib.AccessTools.Property(triggerType, "RequiresManualActivation");
+            if (exfilProp == null || manualProp == null)
+            {
+                Plugin.Log.LogWarning("[HeliExfil] InteractableExfilsAPI present but its trigger API changed shape — "
+                                      + "auto-extract may bypass the fare, report this");
+                yield break;
+            }
+
+            // IEAPI builds its triggers on GameStarted, which can land after us — retry
+            // rather than race it. ~30s is far longer than it needs and costs nothing.
+            for (int i = 0; i < 60; i++)
+            {
+                bool claimed = false;
+                foreach (var comp in Resources.FindObjectsOfTypeAll(triggerType))
+                {
+                    if (!ReferenceEquals(exfilProp.GetValue(comp, null), _exit)) continue;
+                    manualProp.SetValue(comp, true, null);
+                    claimed = true;
+                }
+                if (claimed)
+                {
+                    Plugin.Log.LogWarning("[HeliExfil] IEAPI trigger claimed — heli exfil forced to manual activation "
+                                          + "so the fare is checked (auto-extract skips requirement checks by design)");
+                    yield break;
+                }
+                yield return new WaitForSeconds(0.5f);
+            }
+            Plugin.Log.LogWarning("[HeliExfil] InteractableExfilsAPI is loaded but no trigger bound to our exfil after 30s — "
+                                  + "if auto-extract is on, the fare may be bypassed");
+        }
+
         private void AttachFare()
         {
             try
@@ -150,6 +203,33 @@ namespace Manimal.Icebreaker
                 Plugin.Log.LogWarning($"[HeliExfil] fare attached: {fare} euros to board");
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[HeliExfil] fare attach failed, ride stays free: {e.Message}"); }
+        }
+
+        // FLAT FARE. the pilot is not Fence and does not do loyalty deals: 2400 euros is
+        // 2400 euros. Profile.GetExfiltrationPrice stacks three multipliers on any
+        // TransferItem requirement — fence loyalty (ExfiltrationPriceModifier), Mark of
+        // Unknown (TradersDiscount) and charisma (CharismaExfiltrationDiscount) — and it is
+        // the same call that computes the amount ACTUALLY charged in TransferExitItem, not
+        // just the number on the prompt. so patching the function itself is the only place
+        // all three call sites (tip, action count, transfer) agree.
+        //
+        // scoped hard: icebreaker only, and only for a price exactly equal to our configured
+        // fare. our heli requirement is the map's only TransferItem requirement (the transit
+        // fare takes its money through IcebreakerTransitFare, not this path), so nothing else
+        // on this map can collide — and every paid extract on every OTHER map keeps its
+        // discounts untouched.
+        [HarmonyPatch(typeof(Profile), nameof(Profile.GetExfiltrationPrice))]
+        internal static class Patch_FlatHeliFare
+        {
+            [HarmonyPostfix]
+            private static void Postfix(int price, ref int __result)
+            {
+                if (!IceGate.On) return;
+                int fare = Plugin.HeliExfilCost.Value;
+                if (fare <= 0 || price != fare) return;
+                if (__result == price) return;      // no discount applied, nothing to undo
+                __result = price;
+            }
         }
 
         // the NATIVE pay prompt. the game already has the whole flow: Proceed sets
@@ -467,9 +547,15 @@ namespace Manimal.Icebreaker
             catch (Exception e) { Plugin.Log.LogWarning($"[HeliExfil] reference dump failed: {e.Message}"); }
         }
 
-        // heli flight audio, all scheduled up front at call time. 2D, not positional:
-        // retail ships a 'Heli_sound' carrier GO parked at the origin and the approach
-        // fade-in is baked into the wav itself — the mix IS the distance cue.
+        // heli flight audio, all scheduled up front at call time. POSITIONAL, on the rig:
+        // the old 2D reading ("retail's carrier is parked at origin, the mix is the
+        // distance cue") mistook the carrier for the emitter — level704's Heli_sound GO
+        // holds HandlerPlaySoundSequenced/Advanced + PlaybackStateSync, BSG's positional
+        // trigger-sound machinery, and the handler config carries its own sound position
+        // (_overrideSoundPosition). the rig starts ~350m out and flies in, so a source ON
+        // the rig gives the approach, the flyby pan and a pad-localised idle for free —
+        // 2D was "the helicopter is everywhere at once" (07-30). exact retail radii are
+        // locked in the drifted handler struct, so min/max here are ours, tuned by ear.
         //   helicopter_exit_start    at 0s      (46.3s — the whole approach)
         //   helicopter_exit_landing  at 37s     (8.5s — touchdown layer, ends ~45.5s)
         //   helicopter_exit_loop     at start's end, looping (idle on the pad)
@@ -488,10 +574,9 @@ namespace Manimal.Icebreaker
             if (start == null || landing == null || loop == null)
                 Plugin.Log.LogWarning($"[HeliExfil] heli foley incomplete (start={start != null} landing={landing != null} loop={loop != null}) — clips missing from bundle? rerun 1R + rebuild");
 
-            // retail's own carrier if present, else the rig — irrelevant for 2D playback
-            // but keeps the sources where a scene author would look for them
-            var carrier = GameObject.Find("Heli_sound");
-            Transform host = carrier != null ? carrier.transform : anim.transform;
+            // ON THE RIG, not the origin-parked carrier — the sound flies in with the
+            // helicopter and settles on the pad
+            Transform host = anim.transform;
 
             AudioSource Make(AudioClip c, bool looped)
             {
@@ -499,7 +584,16 @@ namespace Manimal.Icebreaker
                 src.clip = c;
                 src.loop = looped;
                 src.playOnAwake = false;
-                src.spatialBlend = 0f; // 2D — the approach fade is baked into the wav
+                src.spatialBlend = 1f;
+                // a K-32 is LOUD: generous minDistance so the whole pad area gets full
+                // level (and the wav's own baked approach ramp still shapes the far
+                // field), 500m reach so the ship never fully loses it, log falloff.
+                src.minDistance = 25f;
+                src.maxDistance = 500f;
+                src.rolloffMode = AudioRolloffMode.Logarithmic;
+                src.dopplerLevel = 0f;   // animated rig + doppler = pitch warble, retail handlers ship 0
+                src.spread = 60f;        // some stereo width up close instead of a hard point
+                src.priority = 64;       // the story sound on the map — never channel-starved
                 return src;
             }
             if (start != null) Make(start, false).Play();

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Comfort.Common;
@@ -172,11 +173,19 @@ namespace Manimal.Icebreaker.Blowtorch
                 return; // transition into Melt still pending
             }
 
-            // melt clip done — retail's Unlock_01 beat. hide the (fully dissolved)
-            // handle ice outright too, in case the shader variant ignores _Cutoff
+            CompleteMelt();
+        }
+
+        // melt clip done — retail's Unlock_01 beat. hide the (fully dissolved)
+        // handle ice outright too, in case the shader variant ignores _Cutoff.
+        // shared by the local burn path and the fika remote apply.
+        private void CompleteMelt()
+        {
+            if (MeltDone) return;
             _anim.speed = 1f;
             MeltDone = true;
             foreach (var m in _meltMats) m.SetFloat("_Cutoff", 1f);
+            foreach (var t in _meltTransforms) t.localScale = _meltBaseScale * 0.12f;
             SetActiveAll(false, "FIre", "FakeTrunk_01", "Snow_pile_19_melt_LOD0");
             // the 'Melt the ice' hint is a cached prompt — if the player is aiming at the
             // switch as the melt lands, it lingers until the aim moves. clear it now.
@@ -188,6 +197,72 @@ namespace Manimal.Icebreaker.Blowtorch
             }
             catch { }
             Plugin.Log.LogWarning("[HatchMelt] ice melted — the handle can be turned now");
+            Raise(0);
+        }
+
+        // ---- fika sync (same contract as the chain door): three one-way commits —
+        // 0 melt done, 1 handle turned, 2 hatch opened. raised on LOCAL commits only;
+        // remote applies are suppressed so nothing echoes. the melt PROGRESS visual
+        // isn't synced — a remote observer sees the ice recede fast once the commit
+        // lands, which beats desynced hatch state (07-29 coop: melted for the burner,
+        // frozen for everyone else).
+        internal static event Action<byte> HatchStage;
+        private bool _remoteApply;
+
+        private void Raise(byte stage)
+        {
+            if (_remoteApply) return;
+            try { HatchStage?.Invoke(stage); }
+            catch (Exception e) { Plugin.Log.LogWarning($"[HatchMelt] stage hook failed: {e.Message}"); }
+        }
+
+        internal static void ApplyRemoteStage(byte stage)
+        {
+            if (Instance == null) { Plugin.Log.LogWarning($"[HatchMelt] remote stage {stage} but no driver — ignored"); return; }
+            Instance.StartCoroutine(Instance.RemoteStage(stage));
+        }
+
+        private IEnumerator RemoteStage(byte stage)
+        {
+            _remoteApply = true;
+            try
+            {
+                if (stage == 0 && !MeltDone)
+                {
+                    // fast-forward the melt: play the clip quick, then land the same
+                    // completion the local path uses
+                    if (!_started) { _started = true; _anim.SetBool("IsRezak", true); SetActiveAll(true, "FIre"); }
+                    _anim.speed = 4f;
+                    float deadline = Time.time + 8f;
+                    while (Time.time < deadline)
+                    {
+                        var info = _anim.GetCurrentAnimatorStateInfo(0);
+                        if (info.IsName("Melt"))
+                        {
+                            float cut = Mathf.Clamp01(info.normalizedTime);
+                            foreach (var m in _meltMats) m.SetFloat("_Cutoff", cut);
+                            foreach (var t in _meltTransforms)
+                                t.localScale = _meltBaseScale * Mathf.Lerp(1f, 0.12f, cut * cut);
+                            if (info.normalizedTime >= 0.98f) break;
+                        }
+                        yield return null;
+                    }
+                    CompleteMelt();
+                }
+                else if (stage == 1)
+                {
+                    float deadline = Time.time + 12f;
+                    while (!MeltDone && Time.time < deadline) yield return null;
+                    TurnHandle();
+                }
+                else if (stage == 2)
+                {
+                    float deadline = Time.time + 12f;
+                    while (!RotateReady && Time.time < deadline) yield return null;
+                    OpenHatch();
+                }
+            }
+            finally { _remoteApply = false; }
         }
 
         internal void TurnHandle()
@@ -199,6 +274,7 @@ namespace Manimal.Icebreaker.Blowtorch
             PlayFoley("frozen_door_open_1");
             StartCoroutine(BreakBeats());
             Plugin.Log.LogWarning("[HatchMelt] handle turned — Break");
+            Raise(1);
         }
 
         private IEnumerator BreakBeats()
@@ -228,6 +304,7 @@ namespace Manimal.Icebreaker.Blowtorch
             PlayParticles("Open_hatch_VFX");
             PlayFoley("frozen_door_open_2");
             Plugin.Log.LogWarning("[HatchMelt] hatch opening");
+            Raise(2);
             Destroy(gameObject, 10f); // sequence complete
         }
 

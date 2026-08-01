@@ -272,7 +272,27 @@ namespace Manimal.Icebreaker.Blowtorch
                 // loop reads as input lag) — the flame follows the trigger NOW
                 TorchAnimator.CrossFade(want ? "torch_start" : "torch_end", 0.05f, Layer);
                 SetBurnerAudio(want);
+                // fika hook: this controller only exists for the LOCAL player (observed
+                // torches run the stock UsableItemController), so no echo risk
+                try { LocalTorchFiring?.Invoke(want); }
+                catch (Exception e) { Plugin.Log.LogWarning($"[Torch] fire hook failed: {e.Message}"); }
             }
+        }
+
+        // ---- fika sync hooks ----
+        // observed players' torches run the STOCK UsableItemController (fika doesn't
+        // subclass usables), so none of this class's fixes exist on remote views. the
+        // addon mirrors the essentials: the body-pose poke below on equip/unequip
+        // (our ripped clips lost the ThirdAction events the stock flow relies on),
+        // and the flame state via LocalTorchFiring -> packet -> remote animator.
+        internal static event Action<bool> LocalTorchFiring;
+
+        // the same one-liner Player.TranslateAnimatorParameter does, runnable against
+        // ANY player (observed included): FIRST_PERSON_ACTION drives the body pose
+        internal static void PokeBodyAction(Player p, int action)
+        {
+            try { p.BodyAnimatorCommon.SetInteger(PlayerAnimator.FIRST_PERSON_ACTION, action); }
+            catch (Exception e) { Plugin.Log.LogWarning($"[Torch] body poke failed: {e.Message}"); }
         }
 
         internal void ForceFiringOff()

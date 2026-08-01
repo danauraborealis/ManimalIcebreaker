@@ -153,10 +153,17 @@ namespace Manimal.Icebreaker
         private static bool _ambientLogged;
         private static readonly Dictionary<AudioSource, float> _ambientBaseVol = new Dictionary<AudioSource, float>();
 
+        private static bool _bedsSilenced;
+        private static bool _silencedWithOutdoor;
+
         public static void ResetAmbientCache()
         {
             _ambientSources = null;
             _ambientLogged = false;
+            _bedsSilenced = false;
+            _clipCache = null;          // clip instances are per raid
+            _roomTonesBound = 0;
+            _roomToneMisses.Clear();
             _ambientBaseVol.Clear();
             _windSrc = null;
             _toneSrcs.Clear();
@@ -165,8 +172,38 @@ namespace Manimal.Icebreaker
             _lastToneLogged = null;
         }
 
+        // NEVER index _ambientBaseVol directly from the blend tick. a missing key threw
+        // KeyNotFoundException out of TickAmbientBlend, and because the wind read sits
+        // ABOVE the zone-tone loop one absent entry killed the wind and all 15 tones in a
+        // single shot — while every other sound in the raid carried on, which is exactly
+        // what makes it look like a mixing problem instead of an exception (07-31, fika
+        // headless client). degrade loudly to unity-default gain instead of dying.
+        private static float BaseVol(AudioSource s)
+        {
+            if (_ambientBaseVol.TryGetValue(s, out var v)) return v;
+            _ambientBaseVol[s] = 1f;
+            Plugin.Log.LogWarning($"[Acoustics] no cached base volume for '{s.name}' — assuming 1.0; "
+                                  + "the mute cache got cleared out from under the blend");
+            return 1f;
+        }
+
+        // called by the outdoor-bed watchdog once it proves retail's bed is emitting
+        // nothing. clearing _silencedWithOutdoor lets the revive loop below Play() our
+        // Amb_OutdoorWind again, and TickAmbientBlend fades its volume back up from there.
+        internal static void ReviveOurWindBed()
+        {
+            _silencedWithOutdoor = false;
+            foreach (var s in _ambientSources ?? new AudioSource[0])
+            {
+                if (s == null || s.name != "Amb_OutdoorWind") continue;
+                if (!s.isPlaying) s.Play();
+            }
+            Plugin.Log.LogWarning("[Acoustics] our outdoor wind bed revived — retail's never made a sound");
+        }
+
         public static void KeepAmbientAlive()
         {
+            IcebreakerAmbientAudio.WatchOutdoorBed();
             if (_ambientSources == null)
             {
                 var host = GameObject.Find("Icebreaker_Ambient");
@@ -176,10 +213,45 @@ namespace Manimal.Icebreaker
                 _ambientSources = found;
                 MuteTonesForLoad(found);
             }
+            // switched OFF still means WORK: the beds carry playOnAwake in the bundle, so
+            // walking away would leave 15 zone tones blaring from origin underneath
+            // retail's authored ones. silence the TONES once.
+            //
+            // the OUTDOOR WIND bed only stands down once retail's own is proven playing —
+            // that comes from a SeasonAmbientSoundDataSO we have to REBUILD (its layout
+            // drifted between 1.0 and 4.0), so it can legitimately fail. keeping ours until
+            // the real one reports in avoids trading a doubled bed for a silent deck.
+            // re-runs once if the outdoor bed comes up AFTER the first silence pass — this
+            // ticks every frame from raid start, long before StageTwoInit rebuilds the
+            // ambient subsystem, so the first pass always sees OutdoorBedRestored false
+            if (!Plugin.AmbientBeds.Value &&
+                (!_bedsSilenced || (!_silencedWithOutdoor && IcebreakerAmbientAudio.OutdoorBedRestored)))
+            {
+                _bedsSilenced = true;
+                bool dropWind = IcebreakerAmbientAudio.OutdoorBedRestored;
+                _silencedWithOutdoor = dropWind;
+                int stopped = 0;
+                foreach (var s in _ambientSources)
+                {
+                    if (s == null) continue;
+                    if (s.name == "Amb_OutdoorWind" && !dropWind) continue;
+                    if (s.isPlaying) { s.Stop(); stopped++; }
+                    s.volume = 0f;
+                }
+                Plugin.Log.LogWarning($"[Acoustics] AmbientBeds off — silenced {stopped} bed(s); " +
+                                      (dropWind ? "retail's outdoor bed took over too"
+                                                : "our outdoor wind bed stays (retail's didn't start)"));
+            }
+            if (Plugin.AmbientBeds.Value) _bedsSilenced = false;
+
             int revived = 0;
             foreach (var s in _ambientSources)
             {
                 if (s == null || s.clip == null || !s.loop) continue;
+                // with the beds off, only the outdoor wind is worth reviving — and not even
+                // that once retail's own bed is carrying it
+                if (!Plugin.AmbientBeds.Value &&
+                    (s.name != "Amb_OutdoorWind" || _silencedWithOutdoor)) continue;
                 if (!s.isPlaying) { s.Play(); revived++; }
             }
             if (revived > 0 && !_ambientLogged)
@@ -214,7 +286,15 @@ namespace Manimal.Icebreaker
             var host = GameObject.Find("Icebreaker_Ambient");
             if (host == null) return;
             MuteTonesForLoad(host.GetComponentsInChildren<AudioSource>(true));
-            Plugin.Log.LogInfo("[Acoustics] zone tones flattened+muted at scene load (origin-stack loading noise fix)");
+
+            // REVERTED 07-31 (user call). this used to also stop the whole AmbientAudioSystem
+            // tree and zero our wind bed, to stop the "blast, cut, restart" on the loading
+            // screen. it turned that into "blast, cut, NEVER restart" instead — the restore
+            // was standing our bed down in favour of retail's inaudible one, so the cut was
+            // permanent. the tidier load screen was never worth a silent raid, and the
+            // origin-stack mute above is the part that was fixing a real problem anyway.
+            // don't reintroduce this without first confirming the deck still has wind.
+            Plugin.Log.LogInfo("[Acoustics] load-screen room tones muted (origin stack) — ambient tree left playing");
         }
 
         // ambient bed mixer (user-specified design): ALL beds are 2D/global — the zone
@@ -281,8 +361,9 @@ namespace Manimal.Icebreaker
             var player = world != null ? world.MainPlayer : null;
 
             // pick the current zone tone: nearest anchor, with 3m hysteresis so standing
-            // on a boundary doesn't flap between two tones
-            if (player != null && _toneSrcs.Count > 0)
+            // on a boundary doesn't flap between two tones. skipped when the beds are off —
+            // the wind block below still runs, it's the one thing retail can't give back.
+            if (Plugin.AmbientBeds.Value && player != null && _toneSrcs.Count > 0)
             {
                 var pos = player.Position;
                 AudioSource best = null;
@@ -312,19 +393,19 @@ namespace Manimal.Icebreaker
             float step = dt / 1.5f; // ~1.5s crossfade
             if (_windSrc != null)
             {
-                float baseVol = _ambientBaseVol[_windSrc];
+                float baseVol = BaseVol(_windSrc);
                 float target = indoor ? baseVol * Plugin.WindIndoorFraction.Value : baseVol;
                 _windSrc.volume = Mathf.MoveTowards(_windSrc.volume, target, step * Mathf.Max(baseVol, 0.2f));
             }
+            if (!Plugin.AmbientBeds.Value) return;   // tones already stopped and muted
             foreach (var t in _toneSrcs)
             {
                 if (t == null) continue;
                 // master knob x per-zone knob, both live — tames individual loud clips
                 // without touching the rest
-                float perZone = 1f;
                 var zoneName = t.name.StartsWith("Amb_") ? t.name.Substring(4) : t.name;
-                if (Plugin.ToneVolumes.TryGetValue(zoneName, out var entry)) perZone = entry.Value;
-                float baseVol = _ambientBaseVol[t] * Plugin.ZoneToneVolume.Value * perZone;
+                float perZone = Plugin.ZoneToneMultiplier(zoneName);
+                float baseVol = BaseVol(t) * perZone;   // master knob retired — clips are retail-clean now
                 float target = (indoor && t == _activeTone) ? baseVol : 0f;
                 t.volume = Mathf.MoveTowards(t.volume, target, step * Mathf.Max(baseVol, 0.2f));
             }
@@ -414,6 +495,11 @@ namespace Manimal.Icebreaker
 
                 // pass 3 — wake everything with wired state
                 foreach (var go in reactivate) go.SetActive(true);
+
+                Plugin.Log.LogWarning($"[Acoustics] bound {_roomTonesBound} authored room tones" +
+                    (_roomToneMisses.Count > 0
+                        ? $"; MISSING from the bundle: {string.Join(", ", new List<string>(_roomToneMisses).ToArray())}"
+                        : ""));
 
                 // the room tracker (GClass1122) enumerates rooms ONLY through
                 // SpatialAudioCrossSceneGroup.AllCrossGroups — NOT FindObjectsOfType.
@@ -623,6 +709,24 @@ namespace Manimal.Icebreaker
             }
         }
 
+        // clip lookup by NAME — the bundle is the only place these live, and everything in
+        // it is loaded by the time the rooms are filled. cache is per raid (cleared with
+        // the ambient cache) because a new raid means new clip instances.
+        private static Dictionary<string, AudioClip> _clipCache;
+        private static int _roomTonesBound;
+        private static readonly HashSet<string> _roomToneMisses = new HashSet<string>();
+
+        private static AudioClip FindClip(string name)
+        {
+            if (_clipCache == null)
+            {
+                _clipCache = new Dictionary<string, AudioClip>(StringComparer.OrdinalIgnoreCase);
+                foreach (var c in Resources.FindObjectsOfTypeAll<AudioClip>())
+                    if (c != null && !string.IsNullOrEmpty(c.name)) _clipCache[c.name] = c;
+            }
+            return _clipCache.TryGetValue(name, out var clip) ? clip : null;
+        }
+
         private static void FillRoom(SpatialAudioRoom r, JToken row, Dictionary<long, Component> comps)
         {
             var f = row["fields"] as JObject;
@@ -659,10 +763,29 @@ namespace Manimal.Icebreaker
                 if (conn.connectedRoom != null) r.roomConnections.Add(conn);
             }
 
-            // ambient tuning recovered; clip refs were external assets we don't ship, so
-            // room tones stay silent — occlusion/propagation doesn't need them
+            // ROOM TONES — retail hangs the indoor bed on the ROOM, not on a player:
+            // 78 rooms run living_roomtone, 49 technical, 25 near_engine, 2 engine. this
+            // used to be skipped ("clip refs were external assets we don't ship") which is
+            // exactly why we grew our own Amb_<zone> beds. the sidecar now carries the
+            // clip NAME and the scene carries the clip, so the authored per-room tone
+            // plays and our approximation can be switched off (Plugin.AmbientBeds).
             var amb = new RoomAmbientData();
-            if (f["AmbientData"] is JObject ad) FillFields(amb, ad, name => name != "RoomTone" && name != "SeasonSoundPreset");
+            if (f["AmbientData"] is JObject ad)
+            {
+                FillFields(amb, ad, name => name != "RoomTone" && name != "SeasonSoundPreset");
+                var toneName = ad.Value<string>("RoomToneName");
+                if (!string.IsNullOrEmpty(toneName))
+                {
+                    var clip = FindClip(toneName);
+                    if (clip != null) { amb.RoomTone = clip; _roomTonesBound++; }
+                    else _roomToneMisses.Add(toneName);
+                }
+                // retail's authored RoomToneVolume (1.0) plays UNSCALED. the whole
+                // "deafening at 1.0" saga was a volume-boosted living_roomtone wav in the
+                // SDK — missed by the first clip-restore pass, caught by the byte-compare
+                // re-export (07-30) — never the authored level. the ZoneToneVolume knob
+                // died with that discovery.
+            }
             r.AmbientData = amb;
         }
 

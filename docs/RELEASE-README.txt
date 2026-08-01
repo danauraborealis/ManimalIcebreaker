@@ -8,9 +8,15 @@ roubles carried in your gear, consumed at raid start).
 INSTALL
 -------
 Extract the zip into your SPT install folder (the one with EscapeFromTarkov.exe
-and the SPT folder in it). It merges into BepInEx\plugins, SPT\user\mods and
-EscapeFromTarkov_Data\StreamingAssets — the last one carries the map itself,
-which is why the zip is large.
+and the SPT folder in it). It merges into BepInEx\plugins and SPT\user\mods
+only. The map's scene bundle ships inside the plugin folder (which is why the
+zip is large) and is loaded straight from there — nothing is ever written into
+EscapeFromTarkov_Data.
+
+Updating from 1.0.x: earlier builds copied the scene bundle into
+EscapeFromTarkov_Data\StreamingAssets on first launch. This version loads from
+the plugin folder instead and deletes those leftovers itself at startup (it
+removes only files it put there) — no reinstall needed, just replace the mod.
 
 For Fika: every player extracts the zip into their own install; the SPT\ half
 only matters on the machine that runs the server.
@@ -29,9 +35,11 @@ their own machine through the replicated inventory path, and map triggers
 respond to any member of the group. Every peer must run the SAME Icebreaker
 version.
 
-The package includes ManimalIcebreakerFika.dll, a sync addon that replicates
-the chain-door plant/breach and sealed-door state between players. It only
-loads when Fika is installed (hard dependency) — without Fika it is inert.
+Fika players ALSO need the separate addon zip (Manimal-IcebreakerFika-x.y.z),
+extracted the same way. It replicates the custom world state fika can't see:
+chain-door plant/breach, sealed doors, the frozen hatch, the heli call, the
+blowtorch, ladder climbing, and the cutscene progress-door gate. It only
+loads when Fika is installed (hard dependency).
 
 KNOWN CO-OP LIMITATIONS (untested in a live multi-client session):
   - late join / reconnect behavior is unverified (world events fired before a

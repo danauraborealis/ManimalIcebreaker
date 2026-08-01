@@ -118,6 +118,71 @@ namespace Manimal.Icebreaker
                         Plugin.Log.LogInfo($"[AIBake] door link carvers rebuilt: {carved} ok, {carveFail} dropped");
                 }
 
+                // --- patrol routes (the reason bots stood still facing bulkheads) ---
+                // AssetRipper stripped every PatrolPoint/PatrolWay in the AI scene (the
+                // 668 patrol GOs survive as bare transforms) and BotZone's serialized
+                // PatrolWays refs died with them — zones had zero ways, so a spawned bot
+                // had nowhere to walk, nothing to sweep, and held its spawn heading
+                // forever ("staring at a wall until touched", 07-30; the vision chain was
+                // healthy the whole time). rebuild from the retail data: 647 points (580
+                // of them authored sub-points), 20 ways, parse-validated byte-clean
+                // against the 4.0 layouts. BotZone itself DRIFTED between versions, so
+                // each zone's way membership was recovered by raw ref-scan instead.
+                //
+                // components first, fields second — subPoints/Points/PatrolWay refs need
+                // every component to exist before any fill (same rule as the core-point
+                // net above). BotZone.Init then runs BSG's own chain at bots-controller
+                // start: Restore() binds core points by id, InitPoints() sets back-refs.
+                {
+                    int pts = 0, ways = 0, zonesWired = 0, waysWired = 0;
+                    var allPoints = new List<PatrolPoint>();
+                    var allWays = new List<PatrolWay>();
+                    foreach (var row in Rows(comps, "PatrolPoint"))
+                    {
+                        if (!index.TryGetValue(row.Value<string>("go") ?? "", out var t)) continue;
+                        var c = t.gameObject.GetComponent<PatrolPoint>() ?? t.gameObject.AddComponent<PatrolPoint>();
+                        _comps[row.Value<long>("path_id")] = c; pts++;
+                        allPoints.Add(c);
+                    }
+                    foreach (var row in Rows(comps, "PatrolWay"))
+                    {
+                        if (!index.TryGetValue(row.Value<string>("go") ?? "", out var t)) continue;
+                        var c = t.gameObject.GetComponent<PatrolWay>() ?? t.gameObject.AddComponent<PatrolWay>();
+                        _comps[row.Value<long>("path_id")] = c; ways++;
+                        allWays.Add(c);
+                    }
+                    foreach (var row in Rows(comps, "PatrolPoint"))
+                        if (Comp<PatrolPoint>(row) is PatrolPoint p) FillFields(p, row["fields"] as JObject, null);
+                    foreach (var row in Rows(comps, "PatrolWay"))
+                        if (Comp<PatrolWay>(row) is PatrolWay w) FillFields(w, row["fields"] as JObject, null);
+
+                    // --- reconcile the restored points against OUR navmesh ---
+                    // the point positions are authored against RETAIL's navmesh; ours is a
+                    // separate bake, so a point can sit just off the mesh. that fails silently
+                    // AND permanently: PatrollingData discards the NavMeshPathStatus that
+                    // GoToPoint returns and pins Status = go regardless (the else-branch at
+                    // PatrollingData.cs ~476), so a bot sent to an unreachable point reports
+                    // "go" forever while standing still. 07-31 headless log: patrol=go with
+                    // moving=False in 96% of samples, every bot, both spawn sources.
+                    // PatrolPoint.Position IS transform.position, so snapping the transform
+                    // is the whole repair for a point that merely drifted.
+                    SnapPatrolPointsToNavMesh(allPoints, allWays);
+
+                    foreach (var row in Rows(comps, "BotZone"))
+                    {
+                        if (!index.TryGetValue(row.Value<string>("go") ?? "", out var t)) continue;
+                        var zone = t.GetComponent<BotZone>();
+                        if (zone == null) continue;
+                        var list = new List<PatrolWay>();
+                        foreach (var r in (row["fields"]?["PatrolWays"] as JArray) ?? new JArray())
+                            if (Ref(r) is PatrolWay w) list.Add(w);
+                        zone.PatrolWays = list.ToArray();
+                        zonesWired++; waysWired += list.Count;
+                    }
+                    Plugin.Log.LogWarning($"[AIBake] patrol routes rebuilt: {pts} points, {ways} ways, " +
+                                          $"{zonesWired} zones wired ({waysWired} memberships)");
+                }
+
                 // --- voxels ---
                 var voxData = UnityEngine.Object.FindObjectOfType<AIVoxelesData>();
                 var vrow = Rows(comps, "AIVoxelesData").FirstOrDefault();
@@ -216,6 +281,83 @@ namespace Manimal.Icebreaker
         }
 
         // ------------------------------------------------------------------ helpers
+        // reconcile restored patrol points with OUR navmesh bake (see the call site).
+        // NOTHING is dropped unless the navmesh is demonstrably present: sampling against an
+        // unbuilt navmesh returns false for EVERY point, and acting on that would delete all
+        // 647 routes and leave the map far worse than the bug being fixed. two independent
+        // gates guard it — an explicit triangulation check, and a floor on the hit rate.
+        // either one failing makes this pass read-only.
+        private const float SnapRadius = 1.5f;    // ordinary bake drift
+        private const float RescueRadius = 6f;    // clearly displaced, still worth saving
+
+        private static void SnapPatrolPointsToNavMesh(List<PatrolPoint> points, List<PatrolWay> ways)
+        {
+            if (points == null || points.Count == 0) return;
+            try
+            {
+                bool meshReady = false;
+                try { meshReady = UnityEngine.AI.NavMesh.CalculateTriangulation().indices.Length > 0; }
+                catch { }
+                if (!meshReady)
+                {
+                    Plugin.Log.LogError("[AIBake] navmesh has no triangulation at patrol rebuild — patrol snap SKIPPED "
+                                        + "(sampling an unbuilt navmesh would drop every route)");
+                    return;
+                }
+
+                var offMesh = new List<PatrolPoint>();
+                int onMesh = 0, snapped = 0, rescued = 0;
+                float worst = 0f;
+                foreach (var p in points)
+                {
+                    if (p == null) continue;
+                    var pos = p.transform.position;
+                    UnityEngine.AI.NavMeshHit hit;
+                    float radius = SnapRadius;
+                    bool found = UnityEngine.AI.NavMesh.SamplePosition(pos, out hit, radius, UnityEngine.AI.NavMesh.AllAreas);
+                    if (!found)
+                    {
+                        radius = RescueRadius;
+                        found = UnityEngine.AI.NavMesh.SamplePosition(pos, out hit, radius, UnityEngine.AI.NavMesh.AllAreas);
+                        if (found) rescued++;
+                    }
+                    if (!found) { offMesh.Add(p); continue; }
+
+                    float d = Vector3.Distance(pos, hit.position);
+                    if (d > worst) worst = d;
+                    if (d > 0.05f) { p.transform.position = hit.position; snapped++; }
+                    else onMesh++;
+                }
+
+                // sanity floor: if almost nothing sampled, believe the navmesh, not the points
+                float hitRate = 1f - (float)offMesh.Count / points.Count;
+                if (hitRate < 0.25f)
+                {
+                    Plugin.Log.LogError($"[AIBake] patrol snap ABORTED: only {hitRate:P0} of {points.Count} points found navmesh "
+                                        + "— that reads as a navmesh problem, not a patrol-data problem. nothing dropped");
+                    return;
+                }
+
+                int pruned = 0;
+                if (offMesh.Count > 0 && ways != null)
+                {
+                    var dead = new HashSet<PatrolPoint>(offMesh);
+                    foreach (var w in ways)
+                    {
+                        if (w == null || w.Points == null) continue;
+                        pruned += w.Points.RemoveAll(p => p == null || dead.Contains(p));
+                    }
+                }
+
+                Plugin.Log.LogWarning($"[AIBake] patrol navmesh reconcile: {onMesh} already on-mesh, {snapped} snapped "
+                                      + $"({rescued} needed the {RescueRadius}m rescue, worst {worst:F2}m), "
+                                      + $"{offMesh.Count} off-mesh -> {pruned} way membership(s) pruned");
+                if (snapped == 0 && offMesh.Count == 0)
+                    Plugin.Log.LogWarning("[AIBake] every patrol point was already on the navmesh — the standing-still stall is NOT patrol placement");
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[AIBake] patrol snap failed: {e.Message} — points left as authored"); }
+        }
+
         private static void Walk(Transform t, string path, Dictionary<string, Transform> index)
         {
             index[path] = t;

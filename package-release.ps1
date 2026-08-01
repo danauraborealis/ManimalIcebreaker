@@ -1,7 +1,7 @@
 # builds both halves in Release and produces THE release zip in dist\ — single archive,
-# same format as the other manimal mods: BepInEx\ + SPT\ trees at the root (plus
-# EscapeFromTarkov_Data\ — the 1.8GB scene bundle's only legal home), extracted over
-# the SPT install root.
+# same format as the other manimal mods: BepInEx\ + SPT\ trees at the root, extracted
+# over the SPT install root. NOTHING under EscapeFromTarkov_Data (forge rule, 07-30) —
+# the scene bundle rides the plugin payload and the client materializes it at startup.
 # (the per-build zip next to the client csproj is DLL-only — an update patch, not a release)
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
@@ -31,6 +31,8 @@ New-Item -ItemType Directory -Force $pluginDst | Out-Null
 Copy-Item "$spt\BepInEx\plugins\ManimalIcebreaker\*" $pluginDst -Recurse -Force
 Remove-Item "$pluginDst\dumps" -Recurse -Force -ErrorAction SilentlyContinue
 Get-ChildItem $pluginDst -Recurse -File -Filter '*.bak*' | Remove-Item -Force
+# the fika addon ships as its OWN zip (built below) — never in the main package
+Remove-Item "$pluginDst\ManimalIcebreakerFika.dll" -Force -ErrorAction SilentlyContinue
 # fresh DLL from this build, not whatever the deploy dir held
 Copy-Item "$root\icebreaker-client\bin\Release\netstandard2.1\ManimalIcebreakerClient.dll" $pluginDst -Force
 
@@ -43,13 +45,10 @@ Copy-Item "$root\icebreaker-server\bundles.json" $serverDst -Force
 Copy-Item "$spt\SPT\user\mods\ManimalIcebreaker\bundles" "$serverDst\bundles" -Recurse -Force
 Copy-Item "$root\icebreaker-server\bin\Release\icebreaker-server.dll" $serverDst -Force
 
-# EscapeFromTarkov_Data: scene bundle + manifest, map preset, audio bake
-$sa = "$stage\EscapeFromTarkov_Data\StreamingAssets"
-New-Item -ItemType Directory -Force "$sa\Windows\assets\content\locations\icebreaker", "$sa\Windows\maps", "$sa\AudioBakeData" | Out-Null
-Copy-Item "$spt\EscapeFromTarkov_Data\StreamingAssets\Windows\assets\content\locations\icebreaker\icebreaker_scenes.bundle" "$sa\Windows\assets\content\locations\icebreaker\" -Force
-Copy-Item "$spt\EscapeFromTarkov_Data\StreamingAssets\Windows\assets\content\locations\icebreaker\icebreaker_scenes.bundle.manifest" "$sa\Windows\assets\content\locations\icebreaker\" -Force
-Copy-Item "$spt\EscapeFromTarkov_Data\StreamingAssets\Windows\maps\icebreaker.bundle" "$sa\Windows\maps\" -Force
-Copy-Item "$spt\EscapeFromTarkov_Data\StreamingAssets\AudioBakeData\icebreaker_sound.audiobakedata" "$sa\AudioBakeData\" -Force
+# FORGE COMPLIANCE: nothing ships under EscapeFromTarkov_Data. the map bundles ride
+# the plugin folder's streamingassets/ payload (harvested above with the rest of the
+# plugin dir) and the plugin materializes them into the real StreamingAssets at
+# startup; the audio bake runtime-copies from acoustics/ the same way.
 
 Copy-Item "$root\docs\RELEASE-README.txt" "$stage\README.txt" -Force
 
@@ -68,6 +67,25 @@ try {
     }
 } finally { $archive.Dispose() }
 Remove-Item -Recurse -Force $stage
+
+# the FIKA SYNC ADDON: its own installable zip, uploaded separately as an addon.
+# hard bepinex deps on fika + the main mod mean it's inert anywhere it doesn't belong.
+Write-Host "=== packaging fika addon ===" -ForegroundColor Cyan
+$fikaStage = "$root\obj-fika-stage"
+if (Test-Path $fikaStage) { Remove-Item -Recurse -Force $fikaStage }
+$fikaDst = "$fikaStage\BepInEx\plugins\ManimalIcebreaker"
+New-Item -ItemType Directory -Force $fikaDst | Out-Null
+Copy-Item "$root\icebreaker-fika\bin\Release\netstandard2.1\ManimalIcebreakerFika.dll" $fikaDst -Force
+$fikaZip = "$root\dist\Manimal-IcebreakerFika-$ver.zip"
+if (Test-Path $fikaZip) { Remove-Item $fikaZip -Force }
+$fa = [System.IO.Compression.ZipFile]::Open($fikaZip, 'Create')
+try {
+    Get-ChildItem $fikaStage -Recurse -File | ForEach-Object {
+        $rel = $_.FullName.Substring($fikaStage.Length + 1) -replace '\\', '/'
+        [void][System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($fa, $_.FullName, $rel, [System.IO.Compression.CompressionLevel]::Optimal)
+    }
+} finally { $fa.Dispose() }
+Remove-Item -Recurse -Force $fikaStage
 
 Write-Host "=== dist ===" -ForegroundColor Green
 Get-ChildItem "$root\dist" | Format-Table Name, @{n='Size';e={'{0:N1} MB' -f ($_.Length/1MB)}}

@@ -36,8 +36,24 @@
       <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="UnityEngine.AnimationModule">
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="tarkin.ladders.bep">
+      <HintPath>$(SPTPath)\BepInEx\plugins\tarkin-ladders\tarkin.ladders.bep.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="tarkin.ladders.shared">
+      <HintPath>$(SPTPath)\BepInEx\plugins\tarkin-ladders\tarkin.ladders.shared.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="tarkin.ladders.fika">
+      <HintPath>$(FikaPath)\BepInEx\plugins\tarkin-ladders\tarkin.ladders.fika.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <!-- the real runtime dll from the fika test install — compile-time only, never shipped -->
@@ -75,12 +91,10 @@
     </ItemGroup>
   </Target>
 
-  <!-- deploys to BOTH installs: the plain SPT deploy gets it too (BepInEx skips it
-       there — hard fika dependency unmet — and the release harvest picks it up from
-       that folder, ladders-style: one zip, addon dormant without fika). the fika
-       install is where coop testing actually runs. -->
+  <!-- FIKA INSTALL ONLY (user call 07-30): the solo install stays fika-free, and the
+       release ships the addon as its OWN zip (uploaded as an addon) rather than
+       riding the main package. -->
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SPTPath)\BepInEx\plugins\ManimalIcebreaker" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(FikaPath)\BepInEx\plugins\ManimalIcebreaker" Condition="Exists('$(FikaPath)')" />
   </Target>
 

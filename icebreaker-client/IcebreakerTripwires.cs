@@ -42,6 +42,24 @@ namespace Manimal.Icebreaker
         private static TripwireVisual _donorVisual;
         private static readonly HashSet<string> _patchedTpls = new HashSet<string>();
 
+        // --- coop seed handshake ---
+        // every peer plants its OWN local wires, so a per-marker roll below 1.0 only
+        // stays consistent if all peers roll the same numbers in the same order. the
+        // authority rolls a seed and the fika sync addon broadcasts it (kind 12);
+        // clients block on it rather than rolling their own, which would leave each
+        // player walking through a different set of wires.
+        public static event Action<int> SeedRolled;
+        private static int _seed;
+        private static bool _seedReady;
+        private static bool _forceAll;
+
+        public static void ApplyRemoteSeed(int seed)
+        {
+            _seed = seed;
+            _seedReady = true;
+            Plugin.Log.LogInfo($"[Tripwires] seed {seed} received from host");
+        }
+
         [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
         private static class Patch_PlantAuthoredTripwires
         {
@@ -55,6 +73,8 @@ namespace Manimal.Icebreaker
                 if (!Plugin.Tripwires.Value) return;
                 _donorVisual = null;      // per-raid: pooled assets die with the raid
                 _patchedTpls.Clear();
+                _seedReady = false;       // a second raid must re-handshake
+                _forceAll = false;
                 var host = new GameObject("Icebreaker_Tripwires");
                 host.AddComponent<TripwirePlanter>();
             }
@@ -74,6 +94,29 @@ namespace Manimal.Icebreaker
                     Plugin.Log.LogWarning("[Tripwires] world/factory/pool not ready");
                     Destroy(gameObject);
                     yield break;
+                }
+
+                // settle who decides the layout before any marker is rolled
+                if (FikaBridge.Present && !FikaBridge.BotsAuthority)
+                {
+                    float waited = 0f;
+                    while (!_seedReady && waited < 12f) { waited += Time.deltaTime; yield return null; }
+                    if (!_seedReady)
+                    {
+                        // no addon installed, or the packet never landed. arming the FULL
+                        // set is the safe miss: a wire the host lacks is a false positive
+                        // the player walks around, whereas a missing one would let them
+                        // stroll through a hazard everyone else can see them ignore
+                        _forceAll = true;
+                        Plugin.Log.LogError("[Tripwires] no host seed after 12s — arming EVERY wire locally. "
+                                            + "install the icebreaker fika sync addon on all peers to share the roll");
+                    }
+                }
+                else if (!_seedReady)
+                {
+                    _seed = unchecked(Environment.TickCount * 397);
+                    _seedReady = true;
+                    SeedRolled?.Invoke(_seed);   // addon broadcasts it; no-op in solo
                 }
 
                 var jobs = CollectJobs(factory);
@@ -159,11 +202,27 @@ namespace Manimal.Icebreaker
                 return jobs;
             }
 
+            // a shared seed is only worth anything if every peer rolls the markers in the
+            // SAME sequence, and scene traversal order is not a contract — sort by name
+            // then position so the ordering is derived from the data itself
+            markers.Sort((a, b) =>
+            {
+                int c = string.CompareOrdinal(a.name, b.name);
+                if (c != 0) return c;
+                var pa = a.position; var pb = b.position;
+                c = pa.x.CompareTo(pb.x); if (c != 0) return c;
+                c = pa.y.CompareTo(pb.y); if (c != 0) return c;
+                return pa.z.CompareTo(pb.z);
+            });
+
             int skipped = 0;
-            var rng = new System.Random(unchecked(Environment.TickCount * 397));
+            var rng = new System.Random(_seed);
             foreach (var m in markers)
             {
-                if (rng.NextDouble() > Plugin.TripwireChance.Value) { skipped++; continue; }
+                // roll ALWAYS, even when forcing them all on: keeping the sequence in
+                // lockstep matters more than the branch, so a late seed cant reorder it
+                bool armed = rng.NextDouble() <= Plugin.TripwireChance.Value || _forceAll;
+                if (!armed) { skipped++; continue; }
 
                 float len = Mathf.Clamp(Mathf.Abs(m.lossyScale.z), 0.8f, 3f); // engine limits
                 // per-marker tpl override: the SDK marker component encodes it into the

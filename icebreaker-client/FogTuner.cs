@@ -7,9 +7,9 @@ namespace Manimal.Icebreaker
 {
     // live tuning panel (F9) for OUR volumetric fog (VolumetricFog & Mist 2 embed).
     // the old MBOIT/classic tuner is gone — that pipeline was a dead end (no
-    // WindowsManager on this map, retail never ran it). sliders write straight to the
-    // VolumetricFog2 config entries, so tuned values PERSIST to the cfg and ship as
-    // the raid look; 'dump' logs a paste-friendly block for hardcoding defaults.
+    // WindowsManager on this map, retail never ran it). the fog values left the
+    // config on 07-30, so sliders now write the in-memory Val holders — changes do
+    // NOT persist; 'DUMP to log' is the way to capture values for hardcoding.
     public class FogTuner : MonoBehaviour
     {
         [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
@@ -111,7 +111,7 @@ namespace Manimal.Icebreaker
             GUI.DragWindow(new Rect(0, 0, 10000, 22));
         }
 
-        private static void Slider(BepInEx.Configuration.ConfigEntry<float> entry, string label, float min, float max, string fmt)
+        private static void Slider(Plugin.Val<float> entry, string label, float min, float max, string fmt)
         {
             float v = SliderRaw(label, entry.Value, min, max, fmt);
             if (v != entry.Value) entry.Value = v;

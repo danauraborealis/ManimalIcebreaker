@@ -15,3 +15,11 @@ obj/
 
 # Claude Code local settings (machine-specific paths/permissions)
 .claude/
+
+# Release output — package-release.ps1 harvests the LIVE SPTDev install into these,
+# so they contain the 1.77GB scene bundle. GitHub hard-rejects anything over 100MB on
+# push, so a "commit anyway" here produces a commit that can never leave the machine.
+# The small item bundles under icebreaker-server/bundles/ ARE tracked on purpose —
+# do not blanket-ignore *.bundle.
+dist/
+obj-release-stage/
