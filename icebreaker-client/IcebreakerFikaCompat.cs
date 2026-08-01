@@ -80,7 +80,7 @@ namespace Manimal.Icebreaker
                 else Plugin.Log.LogWarning("[Fika] CoopGame.Stop not found — blowtorch stays in inventory after coop extracts");
             }
             catch (Exception e) { Plugin.Log.LogError($"[Fika] compat patching failed: {e}"); }
-            Plugin.Log.LogWarning($"[Fika] compat patches applied: {applied}/4");
+            Plugin.Log.LogDebug($"[Fika] compat patches applied: {applied}/4");
         }
 
         private static void PlayerCreatePrefix() => Patch_EnsureEnvironmentManager.EnsureEnvAndWeather();

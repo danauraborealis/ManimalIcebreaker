@@ -40,7 +40,7 @@ namespace Manimal.Icebreaker
                 ApplySealed(door, myLink, true);
                 n++;
             }
-            if (n > 0) Plugin.Log.LogWarning($"[Sealed] {n} sealed door(s) registered (hold {HoldSeconds:0}s to unseal)");
+            if (n > 0) Plugin.Log.LogDebug($"[Sealed] {n} sealed door(s) registered (hold {HoldSeconds:0}s to unseal)");
         }
 
         private static void ApplySealed(Door door, NavMeshDoorLink link, bool sealedNow)

@@ -171,7 +171,7 @@ namespace Manimal.Icebreaker
                         Plugin.Log.LogWarning($"[Tripwires] plant failed at '{j.name}' ({j.from}): {e.Message}");
                     }
                 }
-                Plugin.Log.LogWarning($"[Tripwires] planted {planted}/{jobs.Count}");
+                Plugin.Log.LogDebug($"[Tripwires] planted {planted}/{jobs.Count}");
                 Destroy(gameObject);
             }
         }
@@ -265,7 +265,7 @@ namespace Manimal.Icebreaker
             if (ok) { _patchedTpls.Add(grenade.TemplateId.ToString()); return true; }
             if (gp == null)
             {
-                Plugin.Log.LogWarning($"[Tripwires] no GrenadePrefab on '{grenade.TemplateId}' — bundle still not loaded?");
+                Plugin.Log.LogDebug($"[Tripwires] no GrenadePrefab on '{grenade.TemplateId}' — bundle still not loaded?");
                 return false;
             }
 
@@ -299,7 +299,7 @@ namespace Manimal.Icebreaker
                 }
             if (patched > 0)
             {
-                Plugin.Log.LogWarning($"[Tripwires] grafted donor tripwire visual onto '{prefabName}' ({patched} asset)");
+                Plugin.Log.LogDebug($"[Tripwires] grafted donor tripwire visual onto '{prefabName}' ({patched} asset)");
                 _patchedTpls.Add(grenade.TemplateId.ToString());
                 return true;
             }

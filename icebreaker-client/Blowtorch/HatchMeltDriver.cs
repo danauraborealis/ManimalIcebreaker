@@ -107,7 +107,7 @@ namespace Manimal.Icebreaker.Blowtorch
                         if (realShader != null && m.shader != realShader)
                         {
                             m.shader = realShader;
-                            Plugin.Log.LogWarning($"[HatchMelt] melt material rebound to game shader instance");
+                            Plugin.Log.LogDebug($"[HatchMelt] melt material rebound to game shader instance");
                         }
                         m.EnableKeyword("USE_CUTOFF");
                         m.SetFloat("_Cutoff", 0f);
@@ -129,7 +129,7 @@ namespace Manimal.Icebreaker.Blowtorch
             SetActiveMeshesOnly(false, "Snow_pile_19_fragment");
             SetActiveAll(true, "Snow_pile_19_melt_LOD0", "Snow_pile_19_LOD0", "FakeTrunk_01", "FakeTrunk_02");
 
-            Plugin.Log.LogWarning("[HatchMelt] armed — melt the hatchway ice with the blowtorch");
+            Plugin.Log.LogDebug("[HatchMelt] armed — melt the hatchway ice with the blowtorch");
         }
 
         private void OnDestroy()
@@ -149,7 +149,7 @@ namespace Manimal.Icebreaker.Blowtorch
                 _started = true;
                 _anim.SetBool("IsRezak", true);          // Rezak_01: Still -> Melt
                 SetActiveAll(true, "FIre");              // the burn vfx on the ice
-                Plugin.Log.LogWarning("[HatchMelt] melting started");
+                Plugin.Log.LogDebug("[HatchMelt] melting started");
             }
 
             var info = _anim.GetCurrentAnimatorStateInfo(0);
@@ -196,7 +196,7 @@ namespace Manimal.Icebreaker.Blowtorch
                 own?.ClearInteractionState();
             }
             catch { }
-            Plugin.Log.LogWarning("[HatchMelt] ice melted — the handle can be turned now");
+            Plugin.Log.LogDebug("[HatchMelt] ice melted — the handle can be turned now");
             Raise(0);
         }
 
@@ -218,7 +218,7 @@ namespace Manimal.Icebreaker.Blowtorch
 
         internal static void ApplyRemoteStage(byte stage)
         {
-            if (Instance == null) { Plugin.Log.LogWarning($"[HatchMelt] remote stage {stage} but no driver — ignored"); return; }
+            if (Instance == null) { Plugin.Log.LogDebug($"[HatchMelt] remote stage {stage} but no driver — ignored"); return; }
             Instance.StartCoroutine(Instance.RemoteStage(stage));
         }
 
@@ -273,7 +273,7 @@ namespace Manimal.Icebreaker.Blowtorch
             SetActiveAll(false, "Snow_pile_19_melt_LOD0");
             PlayFoley("frozen_door_open_1");
             StartCoroutine(BreakBeats());
-            Plugin.Log.LogWarning("[HatchMelt] handle turned — Break");
+            Plugin.Log.LogDebug("[HatchMelt] handle turned — Break");
             Raise(1);
         }
 
@@ -291,7 +291,7 @@ namespace Manimal.Icebreaker.Blowtorch
             yield return new WaitForSeconds(4.0f - 1.62f);
             SetActiveAll(false, "FakeTrunk_02");
             RotateReady = true;
-            Plugin.Log.LogWarning("[HatchMelt] hatch can be opened now");
+            Plugin.Log.LogDebug("[HatchMelt] hatch can be opened now");
         }
 
         internal void OpenHatch()
@@ -303,7 +303,7 @@ namespace Manimal.Icebreaker.Blowtorch
             SetActiveAll(true, "Open_hatch_VFX");
             PlayParticles("Open_hatch_VFX");
             PlayFoley("frozen_door_open_2");
-            Plugin.Log.LogWarning("[HatchMelt] hatch opening");
+            Plugin.Log.LogDebug("[HatchMelt] hatch opening");
             Raise(2);
             Destroy(gameObject, 10f); // sequence complete
         }
@@ -321,7 +321,7 @@ namespace Manimal.Icebreaker.Blowtorch
                     hit++;
                 }
             if (hit == 0)
-                Plugin.Log.LogWarning($"[HatchMelt] no GOs matched [{string.Join(", ", names)}]");
+                Plugin.Log.LogDebug($"[HatchMelt] no GOs matched [{string.Join(", ", names)}]");
         }
 
         // toggle only same-named GOs that carry a renderer — leaves same-named
@@ -339,7 +339,7 @@ namespace Manimal.Icebreaker.Blowtorch
                     hit++;
                 }
             if (hit == 0)
-                Plugin.Log.LogWarning($"[HatchMelt] no mesh GOs matched '{name}'");
+                Plugin.Log.LogDebug($"[HatchMelt] no mesh GOs matched '{name}'");
         }
 
         private void PlayParticles(string name)

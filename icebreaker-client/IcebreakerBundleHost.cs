@@ -55,7 +55,7 @@ namespace Manimal.Icebreaker
                 _ours = ScanPayload();
                 if (_ours.Count == 0)
                 {
-                    Plugin.Log.LogWarning($"[Bundles] no payload under {PayloadDir}/{Platform} — map bundles unavailable");
+                    Plugin.Log.LogDebug($"[Bundles] no payload under {PayloadDir}/{Platform} — map bundles unavailable");
                     return;
                 }
 
@@ -82,7 +82,7 @@ namespace Manimal.Icebreaker
                     foreach (var p in c.GetParameters()) ps.Add(p.ParameterType.Name);
                     ctors.Add("(" + string.Join(", ", ps.ToArray()) + ")");
                 }
-                Plugin.Log.LogWarning($"[Bundles] hosting {_ours.Count} bundle(s) from the plugin folder: " +
+                Plugin.Log.LogDebug($"[Bundles] hosting {_ours.Count} bundle(s) from the plugin folder: " +
                                       $"{string.Join(", ", new List<string>(_ours.Keys).ToArray())} " +
                                       $"[entry={_entryType.FullName} ctors: {(ctors.Count > 0 ? string.Join(" ", ctors.ToArray()) : "NONE")}]");
             }
@@ -167,7 +167,7 @@ namespace Manimal.Icebreaker
                         return;
                     }
                     _loaded[key] = bundle;
-                    Plugin.Log.LogWarning($"[Bundles] loaded '{key}' from the plugin folder in {sw.ElapsedMilliseconds}ms " +
+                    Plugin.Log.LogDebug($"[Bundles] loaded '{key}' from the plugin folder in {sw.ElapsedMilliseconds}ms " +
                                           "(no copy into EscapeFromTarkov_Data)");
                 }
                 var entry = CreateEntry(bundle);
@@ -217,7 +217,7 @@ namespace Manimal.Icebreaker
                     catch (Exception e) { Plugin.Log.LogWarning($"[Bundles] could not remove stale '{key}': {e.Message}"); }
                 }
                 if (removed > 0)
-                    Plugin.Log.LogWarning($"[Bundles] removed {removed} leftover file(s) from the old StreamingAssets copy " +
+                    Plugin.Log.LogDebug($"[Bundles] removed {removed} leftover file(s) from the old StreamingAssets copy " +
                                           $"({freed / 1048576}MB reclaimed) — the game folder is clean now");
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[Bundles] legacy cleanup failed: {e.Message}"); }

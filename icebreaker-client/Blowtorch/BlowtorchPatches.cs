@@ -57,7 +57,7 @@ namespace Manimal.Icebreaker.Blowtorch
                         Singleton<PoolManagerClass>.Instance.CreateItemUsablePrefab));
                 if (controller == null)
                 {
-                    Plugin.Log.LogWarning("[Blowtorch] controller factory returned null");
+                    Plugin.Log.LogDebug("[Blowtorch] controller factory returned null");
                     return;
                 }
                 Player.UsableItemController.smethod_8<BlowtorchController>(controller, player);

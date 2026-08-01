@@ -19,6 +19,7 @@ namespace Manimal.Icebreaker
         {
             try
             {
+                if (!Plugin.DevMode.Value) return;
                 if (!string.Equals(__instance?.LocationId, "Suburbs", StringComparison.OrdinalIgnoreCase)) return;
                 var host = new GameObject("IcebreakerLootDiag");
                 UnityEngine.Object.DontDestroyOnLoad(host);

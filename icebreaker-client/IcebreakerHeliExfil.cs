@@ -57,7 +57,7 @@ namespace Manimal.Icebreaker
             var zoneSrc = GameObject.Find("NotificationZone");
             if (zoneSrc == null || zoneSrc.GetComponent<BoxCollider>() == null)
             {
-                Plugin.Log.LogWarning("[HeliExfil] no NotificationZone volume — heli exfil stays always-on");
+                Plugin.Log.LogDebug("[HeliExfil] no NotificationZone volume — heli exfil stays always-on");
                 return;
             }
 
@@ -104,7 +104,7 @@ namespace Manimal.Icebreaker
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[HeliExfil] wind pre-stop failed: {e.Message}"); }
 
-            Plugin.Log.LogWarning("[HeliExfil] armed — heli locked until a green flare is fired in the notification zone");
+            Plugin.Log.LogDebug("[HeliExfil] armed — heli locked until a green flare is fired in the notification zone");
         }
 
         // the pilot doesn't fly for free. this is the same paid extract every V-Ex uses,
@@ -166,13 +166,13 @@ namespace Manimal.Icebreaker
                 }
                 if (claimed)
                 {
-                    Plugin.Log.LogWarning("[HeliExfil] IEAPI trigger claimed — heli exfil forced to manual activation "
+                    Plugin.Log.LogDebug("[HeliExfil] IEAPI trigger claimed — heli exfil forced to manual activation "
                                           + "so the fare is checked (auto-extract skips requirement checks by design)");
                     yield break;
                 }
                 yield return new WaitForSeconds(0.5f);
             }
-            Plugin.Log.LogWarning("[HeliExfil] InteractableExfilsAPI is loaded but no trigger bound to our exfil after 30s — "
+            Plugin.Log.LogDebug("[HeliExfil] InteractableExfilsAPI is loaded but no trigger bound to our exfil after 30s — "
                                   + "if auto-extract is on, the fare may be bypassed");
         }
 
@@ -200,7 +200,7 @@ namespace Manimal.Icebreaker
                 req.Start(_exit);
 
                 _exit.Requirements = new ExfiltrationRequirement[] { req };
-                Plugin.Log.LogWarning($"[HeliExfil] fare attached: {fare} euros to board");
+                Plugin.Log.LogDebug($"[HeliExfil] fare attached: {fare} euros to board");
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[HeliExfil] fare attach failed, ride stays free: {e.Message}"); }
         }
@@ -350,7 +350,7 @@ namespace Manimal.Icebreaker
                 // attempt and the log couldn't say why the earlier shots didn't count
                 // (outside the box? wrong cartridge — acid green is AIFollow, not
                 // ExitActivate). now each enter/exit/shot shows up.
-                Plugin.Log.LogWarning($"[HeliExfil] zone event: {ev.ZoneEventType} (profile {ev.PlayerProfileID})");
+                Plugin.Log.LogDebug($"[HeliExfil] zone event: {ev.ZoneEventType} (profile {ev.PlayerProfileID})");
 
                 if (ev.ZoneEventType == GClass3552.EZoneEventType.PlayerEnteredZone
                     && ev.PlayerProfileID == Singleton<GameWorld>.Instance?.MainPlayer?.ProfileId
@@ -409,7 +409,7 @@ namespace Manimal.Icebreaker
                         int lit = 0;
                         foreach (var hl in anim.GetComponentsInChildren<Light>(true))
                             if (!hl.enabled) { hl.enabled = true; lit++; }
-                        Plugin.Log.LogWarning($"[HeliExfil] green flare accepted — {CallParam} set, heli inbound ({ArrivalSeconds:0}s flight), {freed} native lights freed + {lit} plain re-lit");
+                        Plugin.Log.LogDebug($"[HeliExfil] green flare accepted — {CallParam} set, heli inbound ({ArrivalSeconds:0}s flight), {freed} native lights freed + {lit} plain re-lit");
                     }
                     else
                         Plugin.Log.LogWarning($"[HeliExfil] '{HeliRigName}' rig/animator not found — skipping the flight, unlocking on the timer anyway");
@@ -461,7 +461,7 @@ namespace Manimal.Icebreaker
                         {
                             m.shader = reg;
                             rebound++;
-                            Plugin.Log.LogWarning($"[HeliExfil] '{m.name}': bundle copy of '{sh.name}' swapped for the game's registry instance");
+                            Plugin.Log.LogDebug($"[HeliExfil] '{m.name}': bundle copy of '{sh.name}' swapped for the game's registry instance");
                             continue;
                         }
                     }
@@ -474,7 +474,7 @@ namespace Manimal.Icebreaker
                     // default variant.
                     if (m.shaderKeywords != null && m.shaderKeywords.Length > 0)
                     {
-                        Plugin.Log.LogWarning($"[HeliExfil]   cleared {m.shaderKeywords.Length} keyword(s) on '{m.name}'");
+                        Plugin.Log.LogDebug($"[HeliExfil]   cleared {m.shaderKeywords.Length} keyword(s) on '{m.name}'");
                         m.shaderKeywords = new string[0];
                     }
                     // full property sheet: the white-out is a VALUE problem on a working
@@ -500,7 +500,7 @@ namespace Manimal.Icebreaker
                                         props.Add($"{pname}={(tex != null ? tex.name : "NULL")}"); break;
                                 }
                             }
-                            Plugin.Log.LogWarning($"[HeliExfil]   props: {string.Join(" | ", props)}");
+                            Plugin.Log.LogDebug($"[HeliExfil]   props: {string.Join(" | ", props)}");
                         }
                         catch (Exception pe) { Plugin.Log.LogWarning($"[HeliExfil]   prop dump failed: {pe.Message}"); }
                     }
@@ -527,11 +527,11 @@ namespace Manimal.Icebreaker
                     else
                     {
                         dead++;
-                        Plugin.Log.LogWarning($"[HeliExfil] material '{m.name}': shader '{(sh != null ? sh.name : "null")}' has no native match");
+                        Plugin.Log.LogDebug($"[HeliExfil] material '{m.name}': shader '{(sh != null ? sh.name : "null")}' has no native match");
                     }
                 }
             }
-            Plugin.Log.LogWarning($"[HeliExfil] heli material heal: {rebound} shader(s) rebound, {dead} unresolved, {shadowFixed} SHADOW mesh(es) set caster-only");
+            Plugin.Log.LogDebug($"[HeliExfil] heli material heal: {rebound} shader(s) rebound, {dead} unresolved, {shadowFixed} SHADOW mesh(es) set caster-only");
 
             // the control group: a door — same shader family, also dynamic (1U), renders
             // CORRECTLY. whatever state differs between this line and the heli lines above
@@ -542,7 +542,7 @@ namespace Manimal.Icebreaker
                 var dr = door != null ? door.GetComponentInChildren<Renderer>() : null;
                 var dm = dr != null ? dr.sharedMaterial : null;
                 if (dm != null)
-                    Plugin.Log.LogWarning($"[HeliExfil] REFERENCE door material '{dm.name}': shader '{dm.shader.name}' keywords=[{string.Join(",", dm.shaderKeywords)}] lmIndex={dr.lightmapIndex} probes={dr.lightProbeUsage}");
+                    Plugin.Log.LogDebug($"[HeliExfil] REFERENCE door material '{dm.name}': shader '{dm.shader.name}' keywords=[{string.Join(",", dm.shaderKeywords)}] lmIndex={dr.lightmapIndex} probes={dr.lightProbeUsage}");
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[HeliExfil] reference dump failed: {e.Message}"); }
         }
@@ -649,7 +649,7 @@ namespace Manimal.Icebreaker
             NotificationManagerClass.DisplayMessageNotification(
                 "The helicopter has landed — extraction active",
                 ENotificationDurationType.Long, ENotificationIconType.Default, Color.green);
-            Plugin.Log.LogWarning("[HeliExfil] heli arrived — exfil UNLOCKED");
+            Plugin.Log.LogDebug("[HeliExfil] heli arrived — exfil UNLOCKED");
         }
 
         private void OnDestroy()

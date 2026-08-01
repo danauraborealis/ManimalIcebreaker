@@ -255,7 +255,7 @@ namespace Manimal.Icebreaker
             }
             var go = GameObject.Find("VFX");
             if (go != null) return go.transform;
-            Plugin.Log.LogWarning("[ChainDoor] no 'VFX' object found near the door — explosion plays without particles");
+            Plugin.Log.LogDebug("[ChainDoor] no 'VFX' object found near the door — explosion plays without particles");
             return null;
         }
 
@@ -378,7 +378,7 @@ namespace Manimal.Icebreaker
                 if (p.name == "IsTryOpen") { has = true; break; }
             if (!has)
             {
-                Plugin.Log.LogWarning($"[ChainDoor] animator has no 'IsTryOpen' bool — parameters: {string.Join(", ", Array.ConvertAll(anim.parameters, p => p.name))}");
+                Plugin.Log.LogDebug($"[ChainDoor] animator has no 'IsTryOpen' bool — parameters: {string.Join(", ", Array.ConvertAll(anim.parameters, p => p.name))}");
                 return;
             }
             if (Time.time < _nextTryOpen) return;
@@ -493,7 +493,7 @@ namespace Manimal.Icebreaker
                         try { Owner?.ClearInteractionState(); } catch { }
                     }
                     else
-                        Plugin.Log.LogWarning("[Plant] hold finished but no charge to consume — cancelled");
+                        Plugin.Log.LogDebug("[Plant] hold finished but no charge to consume — cancelled");
                 }
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[Plant] completion threw: {e}"); }

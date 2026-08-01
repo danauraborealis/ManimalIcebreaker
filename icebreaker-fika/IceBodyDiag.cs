@@ -31,10 +31,10 @@ namespace Manimal.Icebreaker.Fika
             var go = new GameObject("Icebreaker_FikaBodyDiag");
             UnityEngine.Object.DontDestroyOnLoad(go);
             go.AddComponent<IceBodyDiag>();
-            FikaAddonPlugin.Log.LogWarning("[BodyDiag] probe component created (raid-time)");
+            FikaAddonPlugin.Log.LogDebug("[BodyDiag] probe component created (raid-time)");
         }
 
-        private void Start() => FikaAddonPlugin.Log.LogWarning("[BodyDiag] probe alive — Update ticking");
+        private void Start() => FikaAddonPlugin.Log.LogDebug("[BodyDiag] probe alive — Update ticking");
 
         // the probe was silent for THREE raids while its host component demonstrably
         // ran — some early-out below trips every frame. name the blocker once a minute
@@ -46,11 +46,11 @@ namespace Manimal.Icebreaker.Fika
             try
             {
                 var manager = Singleton<IFikaNetworkManager>.Instance;
-                FikaAddonPlugin.Log.LogWarning($"[BodyDiag] state: iceGate={IceGate.On} manager={(manager != null)}"
+                FikaAddonPlugin.Log.LogDebug($"[BodyDiag] state: iceGate={IceGate.On} manager={(manager != null)}"
                     + $" observed={(manager != null && manager.ObservedPlayers != null ? manager.ObservedPlayers.Count.ToString() : "n/a")}"
                     + $" cam={(GameCam() != null)}");
             }
-            catch (System.Exception e) { FikaAddonPlugin.Log.LogWarning($"[BodyDiag] state failed: {e.Message}"); }
+            catch (System.Exception e) { FikaAddonPlugin.Log.LogDebug($"[BodyDiag] state failed: {e.Message}"); }
         }
 
         private void Update()
@@ -75,7 +75,7 @@ namespace Manimal.Icebreaker.Fika
                 var near = PickObserved(byAim: false);
                 if (near != null) Dump(near, "nearest", 6);
             }
-            catch (System.Exception e) { FikaAddonPlugin.Log.LogWarning($"[BodyDiag] failed: {e.Message}"); }
+            catch (System.Exception e) { FikaAddonPlugin.Log.LogDebug($"[BodyDiag] failed: {e.Message}"); }
         }
 
         // Camera.main is null in EFT (the FPS camera isn't tagged MainCamera) — the
@@ -131,7 +131,7 @@ namespace Manimal.Icebreaker.Fika
                 if (meshShown++ >= 8) { sb.AppendLine("  ...mesh capped"); break; }
                 sb.AppendLine($"  mesh '{r.name}': en={r.enabled} act={r.gameObject.activeInHierarchy} off={r.forceRenderingOff} layer={r.gameObject.layer}");
             }
-            FikaAddonPlugin.Log.LogWarning(sb.ToString());
+            FikaAddonPlugin.Log.LogDebug(sb.ToString());
         }
 
         private static void Toast(string text)

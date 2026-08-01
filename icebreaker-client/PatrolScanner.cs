@@ -92,7 +92,7 @@ namespace Manimal.Icebreaker
                 ways += made;
             }
 
-            Plugin.Log.LogWarning($"[PatrolGen] generated {ways} way(s), {points} point(s) across {zones.Count} zone(s) "
+            Plugin.Log.LogDebug($"[PatrolGen] generated {ways} way(s), {points} point(s) across {zones.Count} zone(s) "
                                   + $"from {library.Count} candidate position(s)"
                                   + (rejected > 0 ? $"; {rejected} unreachable" : "")
                                   + (thin > 0 ? $"; {thin} zone(s) too thin for a route" : ""));

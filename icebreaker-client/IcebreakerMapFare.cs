@@ -94,10 +94,10 @@ namespace Manimal.Icebreaker
                 // never skip silently again.
                 var tr = raidSettings != null ? raidSettings.transition : null;
                 if (tr != null)
-                    Plugin.Log.LogWarning($"[MapFare] transition state: type={tr.transitionType} count={tr.transitionCount}");
+                    Plugin.Log.LogDebug($"[MapFare] transition state: type={tr.transitionType} count={tr.transitionCount}");
                 if (tr != null && tr.transitionCount > 0)
                 {
-                    Plugin.Log.LogWarning("[MapFare] transit arrival — fare was paid at boarding, not charging");
+                    Plugin.Log.LogDebug("[MapFare] transit arrival — fare was paid at boarding, not charging");
                     return;
                 }
 
@@ -114,7 +114,7 @@ namespace Manimal.Icebreaker
                 int carried = stacks.Sum(s => s.StackObjectsCount);
                 if (carried < cost)
                 {
-                    Plugin.Log.LogWarning($"[MapFare] only {carried}/{cost} carried and the ready gate didn't refuse — NOT charging (free crossing, check the gate)");
+                    Plugin.Log.LogDebug($"[MapFare] only {carried}/{cost} carried and the ready gate didn't refuse — NOT charging (free crossing, check the gate)");
                     return;
                 }
 
@@ -146,7 +146,7 @@ namespace Manimal.Icebreaker
                 if (remaining > 0)
                     Plugin.Log.LogWarning($"[MapFare] came up {remaining} short of {cost} mid-deduction — grid ops failed above");
                 else
-                    Plugin.Log.LogWarning($"[MapFare] consumed {cost} roubles for the crossing");
+                    Plugin.Log.LogDebug($"[MapFare] consumed {cost} roubles for the crossing");
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[MapFare] consume failed: {e.Message}"); }
         }

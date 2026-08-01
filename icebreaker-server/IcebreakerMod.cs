@@ -21,7 +21,14 @@ public record ModMetadata : AbstractModMetadata
     public override string Name { get; init; } = "ManimalIcebreaker";
     public override string Author { get; init; } = "Manimal";
     public override List<string>? Contributors { get; init; }
-    public override SemanticVersioning.Version Version { get; init; } = new("0.1.0");
+    // read from the assembly rather than repeated as a literal. forge requires every
+    // version a mod declares to match exactly, and the csproj already feeds ModVersion
+    // (Directory.Build.props) into <Version> — so this stays correct across a bump
+    // instead of silently drifting from the client's BuildInfo.Version.
+    public override SemanticVersioning.Version Version { get; init; } =
+        new(typeof(ModMetadata).Assembly.GetName().Version is { } v
+            ? $"{v.Major}.{v.Minor}.{v.Build}"
+            : "0.1.0");
     public override SemanticVersioning.Range SptVersion { get; init; } = new("~4.0");
     public override List<string>? Incompatibilities { get; init; }
     public override Dictionary<string, SemanticVersioning.Range>? ModDependencies { get; init; } = new()

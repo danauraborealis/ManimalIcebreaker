@@ -51,7 +51,7 @@ namespace Manimal.Icebreaker
             // player sees it when THEY cross the box (bot side effects gated inside).
             if (!FikaBridge.BotsAuthority)
             {
-                Plugin.Log.LogWarning("[Crew] fika client — crew is host-authoritative, arming local cutscene watcher only");
+                Plugin.Log.LogDebug("[Crew] fika client — crew is host-authoritative, arming local cutscene watcher only");
                 if (Plugin.CrewBlackDiv.Value)
                     StartCoroutine(EngineAdvanceWatch());
                 yield break;
@@ -71,7 +71,7 @@ namespace Manimal.Icebreaker
             }
             if (_spawner == null)
             {
-                Plugin.Log.LogWarning("[Crew] no BotSpawner after 60s — crew spawner giving up");
+                Plugin.Log.LogDebug("[Crew] no BotSpawner after 60s — crew spawner giving up");
                 yield break;
             }
 
@@ -82,7 +82,7 @@ namespace Manimal.Icebreaker
             var zones = CollectRogueZones();
             if (zones.Count == 0)
             {
-                Plugin.Log.LogWarning("[Crew] no rogue zones found — crew spawner giving up");
+                Plugin.Log.LogDebug("[Crew] no rogue zones found — crew spawner giving up");
                 yield break;
             }
 
@@ -112,7 +112,7 @@ namespace Manimal.Icebreaker
             int lo = Mathf.Min(Plugin.CrewRoguesMin.Value, Plugin.CrewRoguesMax.Value);
             int hi = Mathf.Max(Plugin.CrewRoguesMin.Value, Plugin.CrewRoguesMax.Value);
             int wantRogues = UnityEngine.Random.Range(lo, hi + 1);
-            Plugin.Log.LogWarning($"[Crew] present: {haveRogues} rogues, knight={haveKnight}; target {wantRogues} + knight={Plugin.CrewKnight.Value}");
+            Plugin.Log.LogDebug($"[Crew] present: {haveRogues} rogues, knight={haveKnight}; target {wantRogues} + knight={Plugin.CrewKnight.Value}");
 
             if (haveRogues > wantRogues)
                 TrimRogues(haveRogues - wantRogues);
@@ -152,7 +152,7 @@ namespace Manimal.Icebreaker
                 }
             }
 
-            Plugin.Log.LogWarning($"[Crew] done: {CountByRole(WildSpawnType.exUsec)} rogues, knight={CountByRole(WildSpawnType.bossKnight) > 0}");
+            Plugin.Log.LogDebug($"[Crew] done: {CountByRole(WildSpawnType.exUsec)} rogues, knight={CountByRole(WildSpawnType.bossKnight) > 0}");
 
             // NOW prepare the trigger squads — after the rogues are on deck, so the
             // build has the bot-gen queue to itself. pool mode goes one further than
@@ -185,7 +185,7 @@ namespace Manimal.Icebreaker
             // bridge and drain the buffer
             IcebreakerAIPlaces.AttachBridge(OnSpawnEvent);
             _unsubEvents = () => IcebreakerAIPlaces.Bridge = null;
-            Plugin.Log.LogWarning("[Crew] event-spawn bridge armed (buffered events drained)");
+            Plugin.Log.LogDebug("[Crew] event-spawn bridge armed (buffered events drained)");
         }
 
         private void OnDestroy()
@@ -252,7 +252,7 @@ namespace Manimal.Icebreaker
                     try { game.BotDespawn(b); trimmed++; }
                     catch (Exception e) { Plugin.Log.LogWarning($"[Crew] despawn failed on '{b.name}': {e.Message}"); }
                 }
-                Plugin.Log.LogWarning($"[Crew] trimmed {trimmed}/{count} wave rogues (stacked first, then farthest) to hit the rolled crew size");
+                Plugin.Log.LogDebug($"[Crew] trimmed {trimmed}/{count} wave rogues (stacked first, then farthest) to hit the rolled crew size");
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[Crew] trim failed: {e.Message}"); }
         }
@@ -292,9 +292,9 @@ namespace Manimal.Icebreaker
                                 moved++;
                             }
                         }
-                        if (!placed) Plugin.Log.LogWarning($"[Crew] couldnt find navmesh spot to unstack '{b.name}'");
+                        if (!placed) Plugin.Log.LogDebug($"[Crew] couldnt find navmesh spot to unstack '{b.name}'");
                     }
-                if (moved > 0) Plugin.Log.LogWarning($"[Crew] unstacked {moved} rogue(s) — group spawns piled them on one marker");
+                if (moved > 0) Plugin.Log.LogDebug($"[Crew] unstacked {moved} rogue(s) — group spawns piled them on one marker");
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[Crew] unstack failed: {e.Message}"); }
         }
@@ -311,7 +311,7 @@ namespace Manimal.Icebreaker
             var triggerGo = GameObject.Find("Icebreaker_StartCutsceneTrigger");
             if (triggerGo == null)
             {
-                Plugin.Log.LogWarning("[Crew] no Icebreaker_StartCutsceneTrigger in scene — cutscene/BD-phase watcher off");
+                Plugin.Log.LogDebug("[Crew] no Icebreaker_StartCutsceneTrigger in scene — cutscene/BD-phase watcher off");
                 yield break;
             }
             Bounds bounds;
@@ -339,7 +339,7 @@ namespace Manimal.Icebreaker
                 if (!videoPlayed && p != null && bounds.Contains(p.Position))
                 {
                     videoPlayed = true;
-                    Plugin.Log.LogWarning($"[Crew] CUTSCENE TRIGGER — cutscene, rogue spawns stopped, black division phase (player at {p.Position})");
+                    Plugin.Log.LogDebug($"[Crew] CUTSCENE TRIGGER — cutscene, rogue spawns stopped, black division phase (player at {p.Position})");
                     BdPhase = true;                // A+B: no more rogue top-ups from here on
                     IcebreakerCutscene.TryPlay();  // BD infiltration cutscene while the real ones deploy below
                     // the door does NOT unlock here anymore — it waits on the gate
@@ -349,7 +349,7 @@ namespace Manimal.Icebreaker
                 if (!beatFired && FikaBridge.BotsAuthority && FikaBridge.AnyHumanIn(bounds))
                 {
                     beatFired = true;
-                    if (!videoPlayed) Plugin.Log.LogWarning("[Crew] cutscene box tripped by a teammate — BD phase begins (your cutscene still plays when you cross)");
+                    if (!videoPlayed) Plugin.Log.LogDebug("[Crew] cutscene box tripped by a teammate — BD phase begins (your cutscene still plays when you cross)");
                     BdPhase = true;
                     OnSpawnEvent("hides0");        // no-op if the BSG box already queued them
                 }
@@ -421,7 +421,7 @@ namespace Manimal.Icebreaker
             foreach (var h in humans)
                 if (h != null && h.ProfileId != null && !_cutsceneSeen.Contains(h.ProfileId)) return;
             _doorGateOpen = true;
-            Plugin.Log.LogWarning($"[Crew] cutscene gate OPEN — all {humans.Count} living player(s) triggered the cutscene, progress door unlocking");
+            Plugin.Log.LogDebug($"[Crew] cutscene gate OPEN — all {humans.Count} living player(s) triggered the cutscene, progress door unlocking");
             UnlockDoorById(ProgressDoorId);
             try { ProgressDoorUnlocked?.Invoke(); } // kind 4 -> every peer unlocks
             catch (Exception e) { Plugin.Log.LogWarning($"[Crew] progress-door hook failed: {e.Message}"); }
@@ -446,7 +446,7 @@ namespace Manimal.Icebreaker
                     if (d.DoorState == EFT.Interactive.EDoorState.Locked)
                     {
                         d.DoorState = EFT.Interactive.EDoorState.Shut;
-                        Plugin.Log.LogWarning($"[Crew] unlocked progress door '{id}'");
+                        Plugin.Log.LogDebug($"[Crew] unlocked progress door '{id}'");
                     }
                     return;
                 }
@@ -529,10 +529,10 @@ namespace Manimal.Icebreaker
                             var vox = b.VoxelesPersonalData != null ? b.VoxelesPersonalData.CurVoxel : null;
                             int cellLinks = vox != null && vox.DoorLinks != null ? vox.DoorLinks.Count : -1;
                             bool inCell = vox != null && vox.DoorLinks != null && vox.DoorLinks.Contains(l);
-                            Plugin.Log.LogWarning($"[DoorProbe] '{b.name}' {Mathf.Sqrt(sq):0.0}m from link {l.Id} (door {(l.Door != null ? l.Door.DoorState.ToString() : "NULL")}): curVoxel={(vox != null)} cellLinks={cellLinks} thisLinkInCell={inCell} mover={b.Mover?.CurrentState} shallInteract={l.ShallInteract()} botY={b.Position.y:0.0}");
+                            Plugin.Log.LogDebug($"[DoorProbe] '{b.name}' {Mathf.Sqrt(sq):0.0}m from link {l.Id} (door {(l.Door != null ? l.Door.DoorState.ToString() : "NULL")}): curVoxel={(vox != null)} cellLinks={cellLinks} thisLinkInCell={inCell} mover={b.Mover?.CurrentState} shallInteract={l.ShallInteract()} botY={b.Position.y:0.0}");
                             _probeLogs++;
                         }
-                        catch (Exception e) { Plugin.Log.LogWarning($"[DoorProbe] {e.Message}"); _probeLogs++; }
+                        catch (Exception e) { Plugin.Log.LogDebug($"[DoorProbe] {e.Message}"); _probeLogs++; }
                     }
                 }
             }
@@ -549,7 +549,7 @@ namespace Manimal.Icebreaker
                 Plugin.Log.LogWarning($"[Crew] {label}: no zones found — skipped");
                 yield break;
             }
-            Plugin.Log.LogWarning($"[Crew] EVENT SPAWN: {label} — {(bossRole != null ? "boss + " : "")}{assaults}x assault");
+            Plugin.Log.LogDebug($"[Crew] EVENT SPAWN: {label} — {(bossRole != null ? "boss + " : "")}{assaults}x assault");
             _squadSpawnBusy = true;
             if (bossRole != null)
             {
@@ -584,7 +584,7 @@ namespace Manimal.Icebreaker
         // if T1 fires post-cutscene the knight comes alone, which fits the fiction)
         private IEnumerator SpawnKnightDetail()
         {
-            Plugin.Log.LogWarning("[Crew] T1 — the knight arrives (Mash_t1 + 2 rogue escorts)");
+            Plugin.Log.LogDebug("[Crew] T1 — the knight arrives (Mash_t1 + 2 rogue escorts)");
             var zone = UnityEngine.Object.FindObjectsOfType<BotZone>()
                 .FirstOrDefault(z => z.name == "BotZoneMash_t1" && z.SpawnPointMarkers != null && z.SpawnPointMarkers.Count > 0);
             if (zone == null) { Plugin.Log.LogWarning("[Crew] no BotZoneMash_t1 — knight detail skipped"); yield break; }
@@ -658,7 +658,7 @@ namespace Manimal.Icebreaker
                         if (b != null && b.Profile?.Info?.Settings?.Role == (WildSpawnType)BdIb
                             && (b.Position - anchor).sqrMagnitude < 30f * 30f
                             && !IsPenBot(b) && held.Add(b))
-                            Plugin.Log.LogWarning($"[Crew] engine squad member held ({held.Count}/{expected})");
+                            Plugin.Log.LogDebug($"[Crew] engine squad member held ({held.Count}/{expected})");
                     }
 
                 // RE-pause every poll: activation and goal changes silently reset patrol
@@ -678,7 +678,7 @@ namespace Manimal.Icebreaker
                             if (b.Memory != null && (b.Memory.GoalEnemy != null || b.Memory.IsUnderFire))
                             {
                                 _holdCombatLogged = true;
-                                Plugin.Log.LogWarning("[Crew] held engine squad ENGAGED early (enemy/underfire) — combat overrides the hold by design, expect repositioning");
+                                Plugin.Log.LogDebug("[Crew] held engine squad ENGAGED early (enemy/underfire) — combat overrides the hold by design, expect repositioning");
                             }
                         }
                         catch { _holdCombatLogged = true; } // Memory API drift — don't spam retries
@@ -723,7 +723,7 @@ namespace Manimal.Icebreaker
                     Plugin.Log.LogWarning($"[Crew] release failed on '{b.name}': {e.Message}");
                 }
             }
-            Plugin.Log.LogWarning($"[Crew] ENGINE SQUAD RELEASED — {released} black division moving out"
+            Plugin.Log.LogDebug($"[Crew] ENGINE SQUAD RELEASED — {released} black division moving out"
                 + (deadOrGone > 0 ? $" ({deadOrGone} of the held were dead/despawned by release time)" : ""));
 
             // reinforcement wave (user call 07-28): the other half of the squad stayed in
@@ -755,7 +755,7 @@ namespace Manimal.Icebreaker
                     var t = ForceSpawn((WildSpawnType)BdIb, hideZone, 12f);
                     while (!t.IsCompleted) yield return null;
                 }
-                Plugin.Log.LogWarning($"[Crew] ENGINE REINFORCEMENTS — {reinforcements} pushing in ({got} from the pen)");
+                Plugin.Log.LogDebug($"[Crew] ENGINE REINFORCEMENTS — {reinforcements} pushing in ({got} from the pen)");
             }
             else if (reinforcements > 0)
                 Plugin.Log.LogWarning("[Crew] reinforcements skipped — BotZoneEngineHide not found");
@@ -848,7 +848,7 @@ namespace Manimal.Icebreaker
             // fails again, skip this batch entirely (a missing bot beats a mannequin)
             if (IsNakedProfile(data))
             {
-                Plugin.Log.LogWarning($"[Crew] {role} profile arrived NAKED — re-requesting in 3s");
+                Plugin.Log.LogDebug($"[Crew] {role} profile arrived NAKED — re-requesting in 3s");
                 await Task.Delay(3000);
                 data = await BotCreationDataClass.Create(profileData, _spawner.BotCreator, count, _spawner);
                 if (data == null || IsNakedProfile(data))
@@ -1034,7 +1034,7 @@ namespace Manimal.Icebreaker
                 yield return new WaitForSeconds(3f); // gentle — the naked-profile lesson
             }
             int total = 0; foreach (var q in _preMade.Values) total += q.Count;
-            Plugin.Log.LogWarning($"[Crew] trigger squads pre-made: {total} bots cached + bundle-warm");
+            Plugin.Log.LogDebug($"[Crew] trigger squads pre-made: {total} bots cached + bundle-warm");
         }
 
         private async Task PreMakeOne(WildSpawnType role)
@@ -1119,7 +1119,7 @@ namespace Manimal.Icebreaker
                 yield return new WaitForSeconds(2f); // pace the queue — the naked-profile lesson
             }
             int total = 0; foreach (var l in _pool.Values) total += l.Count;
-            Plugin.Log.LogWarning($"[Crew] pen pool built: {total} bots spawned + parked ({_penIntake.Count} still settling)");
+            Plugin.Log.LogDebug($"[Crew] pen pool built: {total} bots spawned + parked ({_penIntake.Count} still settling)");
         }
 
         private async Task PoolMakeOne(WildSpawnType role, BotZone zone)
@@ -1223,7 +1223,7 @@ namespace Manimal.Icebreaker
                 try { b.PatrollingData.Unpause(); } catch { }
                 deliveredOut?.Add(b);
             }
-            Plugin.Log.LogWarning($"[Crew] delivered {picks.Count}/{count}x {role} from the pen into {zone.name}");
+            Plugin.Log.LogDebug($"[Crew] delivered {picks.Count}/{count}x {role} from the pen into {zone.name}");
             return picks.Count;
         }
 

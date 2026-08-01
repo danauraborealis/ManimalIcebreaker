@@ -99,7 +99,7 @@ namespace Manimal.Icebreaker
                         // engine's own "MBP::addObject" error already names it
                         $"[PhysAudit] viaTransit={viaTransit}({transitCount}) colliders={colliders} " +
                         $"rigidbodies={rigidbodies} scenes={sceneCount} mono={GC.GetTotalMemory(false) / 1048576}MB");
-                    Plugin.Log.LogWarning($"[PhysAudit] scenes: {string.Join(" | ", names.ToArray())}");
+                    Plugin.Log.LogDebug($"[PhysAudit] scenes: {string.Join(" | ", names.ToArray())}");
 
                     ProbePhysicsSetup();
 
@@ -128,14 +128,14 @@ namespace Manimal.Icebreaker
                         foreach (var rgo in s.GetRootGameObjects())
                             if (rgo.name == "PhysicsSetup") { host = rgo; break; }
                     }
-                    if (host == null) { Plugin.Log.LogWarning("[PhysAudit] probe: NO 'PhysicsSetup' root in the loaded Scripts scene"); return; }
+                    if (host == null) { Plugin.Log.LogDebug("[PhysAudit] probe: NO 'PhysicsSetup' root in the loaded Scripts scene"); return; }
 
                     var comps = host.GetComponents<Component>();
                     var names = new List<string>();
                     foreach (var c in comps)
                         names.Add(c == null ? "<MISSING SCRIPT>" : c.GetType().FullName);
                     var lps = host.GetComponent<LevelPhysicsSettings>();
-                    Plugin.Log.LogWarning($"[PhysAudit] probe: PhysicsSetup active={host.activeInHierarchy} " +
+                    Plugin.Log.LogDebug($"[PhysAudit] probe: PhysicsSetup active={host.activeInHierarchy} " +
                                           $"components=[{string.Join(", ", names)}] " +
                                           $"resolved={(lps != null)} enabled={(lps != null ? lps.enabled.ToString() : "n/a")}");
                 }
@@ -160,7 +160,7 @@ namespace Manimal.Icebreaker
                 {
                     var bounds = new Bounds(new Vector3(0f, 50f, 0f), new Vector3(720f, 100f, 800f));
                     Physics.RebuildBroadphaseRegions(bounds, 16);
-                    Plugin.Log.LogWarning("[PhysAudit] applied RETAIL broadphase regions: " +
+                    Plugin.Log.LogDebug("[PhysAudit] applied RETAIL broadphase regions: " +
                                           "centre (0,50,0) size 720x100x800, subdivisions 16");
                 }
                 catch (Exception e) { Plugin.Log.LogWarning($"[PhysAudit] region rebuild failed: {e.Message}"); }

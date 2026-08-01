@@ -18,7 +18,7 @@ namespace Manimal.Icebreaker
             [HarmonyPostfix]
             private static void Postfix()
             {
-                if (!IceGate.On) return; // diag probe is icebreaker-only
+                if (!IceGate.On || !Plugin.DevMode.Value) return; // dev-only probe
                 new GameObject("Icebreaker_SkyProbe").AddComponent<SkyProbe>();
             }
         }
@@ -34,14 +34,14 @@ namespace Manimal.Icebreaker
         {
             var sky = MonoBehaviourSingleton<TOD_Sky>.Instance;
             var sb = new StringBuilder();
-            if (sky == null) { Plugin.Log.LogWarning("[SkyProbe] no TOD_Sky.Instance"); return; }
+            if (sky == null) { Plugin.Log.LogDebug("[SkyProbe] no TOD_Sky.Instance"); return; }
             sb.AppendLine($"[SkyProbe] sky go='{sky.gameObject.name}' active={sky.isActiveAndEnabled} Initialized={sky.Initialized}");
             sb.AppendLine($"  quality: Sky={sky.SkyQuality} Cloud={sky.CloudQuality} Mesh={sky.MeshQuality} ColorSpace={sky.ColorSpace} ColorRange={sky.ColorRange}");
             try { sb.AppendLine($"  cycle: hour={sky.Cycle.Hour:0.00} SunZenith={sky.SunZenith:0.0} SunsetTime? IsDay={sky.IsDay} IsNight={sky.IsNight}"); } catch { }
             try { sb.AppendLine($"  sun dir={sky.SunDirection} moon dir={sky.MoonDirection} LerpValue={sky.LerpValue:0.00}"); } catch { }
 
             var comps = sky.Components;
-            if (comps == null) { sb.AppendLine("  Components NULL"); Plugin.Log.LogWarning(sb.ToString()); return; }
+            if (comps == null) { sb.AppendLine("  Components NULL"); Plugin.Log.LogDebug(sb.ToString()); return; }
             DumpPart(sb, "Space", comps.SpaceRenderer);
             DumpPart(sb, "Atmosphere", comps.AtmosphereRenderer);
             DumpPart(sb, "Clear", comps.ClearRenderer);
@@ -53,7 +53,7 @@ namespace Manimal.Icebreaker
                 sb.AppendLine($"  RenderSettings: fog={RenderSettings.fog} mode={RenderSettings.fogMode} density={RenderSettings.fogDensity:0.0000} color={RenderSettings.fogColor} ambientMode={RenderSettings.ambientMode} ambientIntensity={RenderSettings.ambientIntensity:0.00} skybox={(RenderSettings.skybox != null ? RenderSettings.skybox.name + "/" + (RenderSettings.skybox.shader != null ? RenderSettings.skybox.shader.name : "noshader") : "NULL")}");
             }
             catch { }
-            Plugin.Log.LogWarning(sb.ToString());
+            Plugin.Log.LogDebug(sb.ToString());
         }
 
         private static void DumpPart(StringBuilder sb, string tag, Renderer r)

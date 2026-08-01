@@ -102,7 +102,7 @@ namespace Manimal.Icebreaker
                 // the release message was unreachable in the one case it existed for
                 Watch prev;
                 if (_watch.TryGetValue(id, out prev) && prev.Announced)
-                    Plugin.Log.LogWarning($"[Stuck] '{owner.name}' RELEASED — moving again");
+                    Plugin.Log.LogDebug($"[Stuck] '{owner.name}' RELEASED — moving again");
                 _watch.Remove(id);
                 return;
             }
@@ -118,7 +118,7 @@ namespace Manimal.Icebreaker
             if ((owner.Position - w.Anchor).sqrMagnitude > StillEpsilon * StillEpsilon)
             {
                 if (w.Announced)
-                    Plugin.Log.LogWarning($"[Stuck] '{owner.name}' moved again — released");
+                    Plugin.Log.LogDebug($"[Stuck] '{owner.name}' moved again — released");
                 w.Anchor = owner.Position; w.Since = Time.time; w.Announced = false;
                 return;
             }
@@ -141,7 +141,7 @@ namespace Manimal.Icebreaker
                     if (!w.Announced)
                     {
                         w.Announced = true;
-                        Plugin.Log.LogWarning($"[Stuck] '{owner.name}' parked {PeacefulSeconds:F0}s at "
+                        Plugin.Log.LogDebug($"[Stuck] '{owner.name}' parked {PeacefulSeconds:F0}s at "
                             + $"({owner.Position.x:F1},{owner.Position.y:F1},{owner.Position.z:F1}) with no enemy — "
                             + "sent to a fresh patrol point");
                     }
@@ -176,7 +176,7 @@ namespace Manimal.Icebreaker
             {
                 w.Announced = true;
                 float d = Vector3.Distance(owner.Position, target.Position);
-                Plugin.Log.LogWarning($"[Stuck] '{owner.name}' parked {EngagedSeconds:F0}s at "
+                Plugin.Log.LogDebug($"[Stuck] '{owner.name}' parked {EngagedSeconds:F0}s at "
                     + $"({owner.Position.x:F1},{owner.Position.y:F1},{owner.Position.z:F1}) — now facing "
                     + $"'{target.Profile?.Info?.Nickname}' at {d:F1}m until it moves or loses the target");
             }

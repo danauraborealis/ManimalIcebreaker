@@ -68,7 +68,6 @@ namespace Manimal.Icebreaker.Fika
             manager.RegisterPacket<IceWorldPacket>(OnReceived);
             IceBodyDiag.Ensure(); // raid-time creation — the chainloader-time component never ticked
             IceTorchSync.Ensure();
-            IceLadderSync.Ensure();
             FikaAddonPlugin.Log.LogInfo("[IceSync] packet registered");
         }
 
@@ -145,8 +144,12 @@ namespace Manimal.Icebreaker.Fika
                         IceTorchSync.SetRemoteFlame(torchNetId, packet.Sealing);
                     break;
                 case 9: IcebreakerCrew.ApplyRemoteCutsceneActivation(packet.DoorId); break;
-                case 10: IceLadderSync.ApplyRemoteLadderState(packet.IntA, packet.DoorId, packet.Sealing); break;
-                case 11: IceLadderSync.ApplyRemoteBarAngle(packet.IntA, packet.Value); break;
+                // 10/11 were our ladder climb sync. dropped 08-01: tarkin's own fika addon
+                // throws MissingMethodException (NetDataWriter.Put(string)) out of
+                // PlayerLadderController.OnDestroy on every dismount, and remote bodies kept
+                // their IK welded to the ladder. that is his mod's bug to fix, not ours to
+                // paper over. the kinds stay RESERVED — reusing them would make an old peer
+                // decode a ladder packet as something else.
                 case 12: IcebreakerTripwires.ApplyRemoteSeed(packet.IntA); break;
                 default: FikaAddonPlugin.Log.LogWarning($"[IceSync] unknown event kind {packet.Kind}"); break;
             }

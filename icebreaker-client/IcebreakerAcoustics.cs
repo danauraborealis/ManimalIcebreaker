@@ -62,7 +62,7 @@ namespace Manimal.Icebreaker
                 var path = SysIoPath.Combine(DataDir, "icebreaker_spatial_audio.json");
                 if (!System.IO.File.Exists(path))
                 {
-                    Plugin.Log.LogWarning($"[Acoustics] no sidecar at {path} — spatial audio + env triggers stay off");
+                    Plugin.Log.LogDebug($"[Acoustics] no sidecar at {path} — spatial audio + env triggers stay off");
                     return null;
                 }
                 _sidecar = JObject.Parse(System.IO.File.ReadAllText(path));
@@ -133,7 +133,7 @@ namespace Manimal.Icebreaker
                 root.SetActive(true);
 
                 _envRoot = root;
-                Plugin.Log.LogWarning($"[Acoustics] environment switcher rebuilt: {built} indoor triggers (indoor/outdoor audio + exposure live)");
+                Plugin.Log.LogDebug($"[Acoustics] environment switcher rebuilt: {built} indoor triggers (indoor/outdoor audio + exposure live)");
                 return true;
             }
             catch (Exception e)
@@ -182,7 +182,7 @@ namespace Manimal.Icebreaker
         {
             if (_ambientBaseVol.TryGetValue(s, out var v)) return v;
             _ambientBaseVol[s] = 1f;
-            Plugin.Log.LogWarning($"[Acoustics] no cached base volume for '{s.name}' — assuming 1.0; "
+            Plugin.Log.LogDebug($"[Acoustics] no cached base volume for '{s.name}' — assuming 1.0; "
                                   + "the mute cache got cleared out from under the blend");
             return 1f;
         }
@@ -238,7 +238,7 @@ namespace Manimal.Icebreaker
                     if (s.isPlaying) { s.Stop(); stopped++; }
                     s.volume = 0f;
                 }
-                Plugin.Log.LogWarning($"[Acoustics] AmbientBeds off — silenced {stopped} bed(s); " +
+                Plugin.Log.LogDebug($"[Acoustics] AmbientBeds off — silenced {stopped} bed(s); " +
                                       (dropWind ? "retail's outdoor bed took over too"
                                                 : "our outdoor wind bed stays (retail's didn't start)"));
             }
@@ -257,7 +257,7 @@ namespace Manimal.Icebreaker
             if (revived > 0 && !_ambientLogged)
             {
                 _ambientLogged = true;
-                Plugin.Log.LogWarning($"[Acoustics] revived {revived}/{_ambientSources.Length} ambient beds (raid-start audio reset had stopped them)");
+                Plugin.Log.LogDebug($"[Acoustics] revived {revived}/{_ambientSources.Length} ambient beds (raid-start audio reset had stopped them)");
             }
         }
 
@@ -436,7 +436,7 @@ namespace Manimal.Icebreaker
                 if (em.Environment != _lastEnv)
                 {
                     _lastEnv = em.Environment;
-                    Plugin.Log.LogWarning($"[Acoustics] environment -> {_lastEnv}");
+                    Plugin.Log.LogDebug($"[Acoustics] environment -> {_lastEnv}");
                 }
             }
 
@@ -544,7 +544,7 @@ namespace Manimal.Icebreaker
                 var soundScene = SceneManager.GetSceneByName("Icebreaker_Sound");
                 if (soundScene.IsValid() && soundScene.isLoaded)
                     SceneManager.MoveGameObjectToScene(_spatialMarker, soundScene);
-                Plugin.Log.LogWarning($"[Acoustics] SPATIAL AUDIO STAGED: {comps.Count} components rehydrated — letting BSG's Initialize run for real");
+                Plugin.Log.LogDebug($"[Acoustics] SPATIAL AUDIO STAGED: {comps.Count} components rehydrated — letting BSG's Initialize run for real");
                 return true;
             }
             catch (Exception e)
@@ -570,7 +570,7 @@ namespace Manimal.Icebreaker
             }
             System.IO.Directory.CreateDirectory(SysIoPath.GetDirectoryName(dest) ?? ".");
             System.IO.File.Copy(src, dest);
-            Plugin.Log.LogWarning($"[Acoustics] installed audio bake -> {dest}");
+            Plugin.Log.LogDebug($"[Acoustics] installed audio bake -> {dest}");
             return true;
         }
 
@@ -847,14 +847,14 @@ namespace Manimal.Icebreaker
                     // door packets by Id, and unresolvable ids mean the wire ids and the
                     // world registry disagree — this shows exactly which doors changed
                     if (++renamed <= 12)
-                        Plugin.Log.LogWarning($"[Acoustics] door id RENAME '{door.Id}' -> '{doorId}' at {door.transform.position}");
+                        Plugin.Log.LogDebug($"[Acoustics] door id RENAME '{door.Id}' -> '{doorId}' at {door.transform.position}");
                     door.Id = doorId;
                 }
                 stamped++;
             }
-            if (renamed > 12) Plugin.Log.LogWarning($"[Acoustics] ...{renamed} renames total");
-            if (renamed == 0) Plugin.Log.LogWarning("[Acoustics] all stamped ids already matched the authored ids (no renames)");
-            Plugin.Log.LogWarning($"[Acoustics] stamped retail DoorIDs: {stamped} doors bound "
+            if (renamed > 12) Plugin.Log.LogDebug($"[Acoustics] ...{renamed} renames total");
+            if (renamed == 0) Plugin.Log.LogDebug("[Acoustics] all stamped ids already matched the authored ids (no renames)");
+            Plugin.Log.LogDebug($"[Acoustics] stamped retail DoorIDs: {stamped} doors bound "
                 + $"({portalByRow.Count - stamped} portal ids unmatched, {doors.Length - stamped} doors unbound)");
         }
 

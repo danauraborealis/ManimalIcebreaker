@@ -38,14 +38,14 @@ namespace Manimal.Icebreaker
 
         private static void AddVoid(string name, Vector3 center, Vector3 size)
         {
-            if (_voidCount >= 16) { Plugin.Log.LogWarning("[VolFog] void limit (16) reached — ignoring " + name); return; }
+            if (_voidCount >= 16) { Plugin.Log.LogDebug("[VolFog] void limit (16) reached — ignoring " + name); return; }
             _voidPos[_voidCount] = center;
             _voidInvHalf[_voidCount] = new Vector3(
                 1f / Mathf.Max(size.x * 0.5f, 0.01f),
                 1f / Mathf.Max(size.y * 0.5f, 0.01f),
                 1f / Mathf.Max(size.z * 0.5f, 0.01f));
             _voidCount++;
-            Plugin.Log.LogWarning($"[VolFog] fog VOID '{name}' @ {center} size {size}");
+            Plugin.Log.LogDebug($"[VolFog] fog VOID '{name}' @ {center} size {size}");
         }
 
         private static void PushVoids()
@@ -88,7 +88,7 @@ namespace Manimal.Icebreaker
                     stripped++;
                 }
             }
-            if (stripped > 0) Plugin.Log.LogWarning($"[VolFog] stripped {stripped} fog-marker collider(s) (invisible-wall guard)");
+            if (stripped > 0) Plugin.Log.LogDebug($"[VolFog] stripped {stripped} fog-marker collider(s) (invisible-wall guard)");
         }
 
         private static void BuildAreas()
@@ -126,7 +126,7 @@ namespace Manimal.Icebreaker
                             new Vector3((float)s[0], (float)s[1], (float)s[2]));
                     }
                     PushVoids();
-                    Plugin.Log.LogWarning($"[VolFog] fog_areas.json: {_areas.Count} area(s), {_voidCount} void(s)" +
+                    Plugin.Log.LogDebug($"[VolFog] fog_areas.json: {_areas.Count} area(s), {_voidCount} void(s)" +
                         (_areas.Count == 0 ? " — GLOBAL fog + exclusion voids" : " — area boxes carry the fog"));
                     return;
                 }
@@ -155,7 +155,7 @@ namespace Manimal.Icebreaker
             }
             PushVoids();
             if (_areas.Count > 0 || _voidCount > 0)
-                Plugin.Log.LogWarning($"[VolFog] scene markers: {_areas.Count} area(s), {_voidCount} void(s)");
+                Plugin.Log.LogDebug($"[VolFog] scene markers: {_areas.Count} area(s), {_voidCount} void(s)");
         }
 
         private static void MakeArea(string name, Vector3 center, Vector3 size)
@@ -178,7 +178,7 @@ namespace Manimal.Icebreaker
             f.height = size.y * 0.98f;
             f.baselineHeight = center.y - size.y * 0.5f;
             _areas.Add(f);
-            Plugin.Log.LogWarning($"[VolFog] fog area '{name}' @ {center} size {size}");
+            Plugin.Log.LogDebug($"[VolFog] fog area '{name}' @ {center} size {size}");
         }
 
         // json hot reload — re-export from the SDK (or save a hand edit) and the boxes
@@ -189,7 +189,7 @@ namespace Manimal.Icebreaker
             var t = System.IO.File.GetLastWriteTimeUtc(AreasJsonPath);
             if (t != _areasJsonTime)
             {
-                Plugin.Log.LogWarning("[VolFog] fog_areas.json changed — rebuilding areas");
+                Plugin.Log.LogDebug("[VolFog] fog_areas.json changed — rebuilding areas");
                 BuildAreas();
             }
         }
@@ -228,7 +228,7 @@ namespace Manimal.Icebreaker
                     var sky = MonoBehaviourSingleton<TOD_Sky>.Instance;
                     if (sky != null && sky.Components != null && sky.Components.Sun != null)
                         _fog.sun = sky.Components.Sun;
-                    Plugin.Log.LogWarning("[VolFog] VolumetricFog attached to render camera");
+                    Plugin.Log.LogDebug("[VolFog] VolumetricFog attached to render camera");
                 }
                 catch (Exception e)
                 {
@@ -273,7 +273,7 @@ namespace Manimal.Icebreaker
             float fade = Plugin.VolFogIndoorFade.Value;
             if (indoorNow) _fog.SetTargetAlpha(0f, 0f, fade);
             else _fog.ClearTargetAlpha(fade);
-            Plugin.Log.LogWarning($"[VolFog] {(indoorNow ? "INDOORS — fog fading out" : "outdoors — fog fading back")} ({fade:0.#}s)");
+            Plugin.Log.LogDebug($"[VolFog] {(indoorNow ? "INDOORS — fog fading out" : "outdoors — fog fading back")} ({fade:0.#}s)");
         }
 
         // live config -> fog params, cheap enough to run every tick

@@ -24,7 +24,7 @@ namespace Manimal.Icebreaker.Fika
             try
             {
                 if (!IceGate.On || door == null || !__instance.IsYourPlayer) return;
-                FikaAddonPlugin.Log.LogWarning($"[DoorDiag] SEND execute id='{door.Id}' pos={door.transform.position} forceLocal={door.ForceLocalInteraction}");
+                FikaAddonPlugin.Log.LogDebug($"[DoorDiag] SEND execute id='{door.Id}' pos={door.transform.position} forceLocal={door.ForceLocalInteraction}");
             }
             catch { }
         }
@@ -51,11 +51,11 @@ namespace Manimal.Icebreaker.Fika
                         { extra = $" COMPONENT-EXISTS at {d.transform.position} (registry stale!)"; break; }
                     if (extra == "") extra = " NO-COMPONENT (id mapping diverged!)";
                 }
-                FikaAddonPlugin.Log.LogWarning($"[DoorDiag] RECV id='{__instance.InteractiveId}' stage={__instance.InteractionStage} resolved={(door != null)}"
+                FikaAddonPlugin.Log.LogDebug($"[DoorDiag] RECV id='{__instance.InteractiveId}' stage={__instance.InteractionStage} resolved={(door != null)}"
                     + (door != null ? $" pos={door.transform.position} activeEnabled={door.isActiveAndEnabled} forceLocal={door.ForceLocalInteraction}" : extra)
                     + $" byPlayer={(player != null ? player.Profile?.Nickname : "null")}");
             }
-            catch (System.Exception e) { FikaAddonPlugin.Log.LogWarning($"[DoorDiag] recv diag failed: {e.Message}"); }
+            catch (System.Exception e) { FikaAddonPlugin.Log.LogDebug($"[DoorDiag] recv diag failed: {e.Message}"); }
         }
     }
 }

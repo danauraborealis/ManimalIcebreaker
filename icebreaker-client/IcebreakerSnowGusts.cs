@@ -45,7 +45,7 @@ namespace Manimal.Icebreaker
                     Destroy(gameObject);
                     return;
                 }
-                Plugin.Log.LogWarning("[Gusts] blown-snow gusts live");
+                Plugin.Log.LogDebug("[Gusts] blown-snow gusts live");
             }
             catch (Exception e)
             {
@@ -122,7 +122,7 @@ namespace Manimal.Icebreaker
                 if (donor != null)
                 {
                     var m = new Material(donor) { name = "manimal_snowgusts" };
-                    Plugin.Log.LogWarning($"[Gusts] grafted donor material '{donor.name}' (shader '{donor.shader?.name}')");
+                    Plugin.Log.LogDebug($"[Gusts] grafted donor material '{donor.name}' (shader '{donor.shader?.name}')");
                     return m;
                 }
             }
@@ -140,10 +140,10 @@ namespace Manimal.Icebreaker
                 var sh = Shader.Find(name);
                 if (sh == null) continue;
                 var m = new Material(sh) { name = "manimal_snowgusts", mainTexture = SoftDisc() };
-                Plugin.Log.LogWarning($"[Gusts] no donor found, fell back to shader '{name}'");
+                Plugin.Log.LogDebug($"[Gusts] no donor found, fell back to shader '{name}'");
                 return m;
             }
-            Plugin.Log.LogWarning("[Gusts] no usable particle shader found");
+            Plugin.Log.LogDebug("[Gusts] no usable particle shader found");
             return null;
         }
 

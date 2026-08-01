@@ -41,7 +41,7 @@ namespace Manimal.Icebreaker
         {
             var b = Bridge;
             if (b != null) b(id);
-            else { PendingEvents.Add(id); Plugin.Log.LogWarning($"[AIPlaces] event '{id}' buffered (bridge not armed yet)"); }
+            else { PendingEvents.Add(id); Plugin.Log.LogDebug($"[AIPlaces] event '{id}' buffered (bridge not armed yet)"); }
         }
 
         public static void AttachBridge(Action<string> bridge)
@@ -64,7 +64,7 @@ namespace Manimal.Icebreaker
                 if (System.IO.File.Exists(path))
                     _sidecar = JObject.Parse(System.IO.File.ReadAllText(path));
                 else
-                    Plugin.Log.LogWarning($"[AIPlaces] no sidecar at {path} — spawn triggers stay off");
+                    Plugin.Log.LogDebug($"[AIPlaces] no sidecar at {path} — spawn triggers stay off");
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[AIPlaces] sidecar parse failed: {e.Message}"); }
             return _sidecar;
@@ -81,7 +81,7 @@ namespace Manimal.Icebreaker
             try
             {
                 var holderGo = GameObject.Find("AIPlaceInfoHolder");
-                if (holderGo == null) { Plugin.Log.LogWarning("[AIPlaces] AIPlaceInfoHolder GO not in scene — aborting"); return; }
+                if (holderGo == null) { Plugin.Log.LogDebug("[AIPlaces] AIPlaceInfoHolder GO not in scene — aborting"); return; }
 
                 // path index under the holder root
                 var index = new Dictionary<string, Transform>();
@@ -176,12 +176,12 @@ namespace Manimal.Icebreaker
                 PendingEvents.Clear();
                 var handler = Singleton<BotEventHandler>.Instance;
                 if (handler != null) handler.OnEvent += OnAnyEvent;
-                else Plugin.Log.LogWarning("[AIPlaces] no BotEventHandler at build time — events may be lost");
+                else Plugin.Log.LogDebug("[AIPlaces] no BotEventHandler at build time — events may be lost");
 
                 _marker = new GameObject("Icebreaker_AIPlacesStaged");
                 var scn = SceneManager.GetSceneByName("Icebreaker_AI");
                 if (scn.IsValid() && scn.isLoaded) SceneManager.MoveGameObjectToScene(_marker, scn);
-                Plugin.Log.LogWarning($"[AIPlaces] SPAWN TRIGGERS REBUILT: {built} places ({evTriggers} tier-event, {gsTriggers} group-size BD) — events buffering until crew bridge attaches");
+                Plugin.Log.LogDebug($"[AIPlaces] SPAWN TRIGGERS REBUILT: {built} places ({evTriggers} tier-event, {gsTriggers} group-size BD) — events buffering until crew bridge attaches");
             }
             catch (Exception e)
             {
@@ -275,7 +275,7 @@ namespace Manimal.Icebreaker
             {
                 if (size >= min && size <= max)
                 {
-                    Plugin.Log.LogWarning($"[AIPlaces] '{gameObject.name}' entered (group={size}) -> event '{name}'");
+                    Plugin.Log.LogDebug($"[AIPlaces] '{gameObject.name}' entered (group={size}) -> event '{name}'");
                     Singleton<BotEventHandler>.Instance?.AnyEvent(name);
                     return;
                 }

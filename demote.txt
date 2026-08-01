@@ -1,0 +1,272 @@
+icebreaker-client/AiDump.cs:38  $"dump requested ({reason}) but no AICoversData in scene"
+icebreaker-client/FogTuner.cs:137  sb.ToString()
+icebreaker-client/IceGate.cs:102  $"[PhysAudit] scenes: {string.Join(" | ", names.ToArray())}"
+icebreaker-client/IceGate.cs:131  "[PhysAudit] probe: NO 'PhysicsSetup' root in the loaded Scripts scene"
+icebreaker-client/IceGate.cs:138  $"[PhysAudit] probe: PhysicsSetup active={host.activeInHierarchy} " + $"components=[{string.Join(", 
+icebreaker-client/IceGate.cs:163  "[PhysAudit] applied RETAIL broadphase regions: " + "centre (0,50,0) size 720x100x800, subdivisions 
+icebreaker-client/IcebreakerAIBake.cs:46  $"[AIBake] no sidecar at {path} — synthesized AI graph stays"
+icebreaker-client/IcebreakerAIBake.cs:68  "[AIBake] AI scene not loaded"
+icebreaker-client/IcebreakerAIBake.cs:182  $"[AIBake] patrol routes rebuilt: {pts} points, {ways} ways, " + $"{zonesWired} zones wired ({waysWi
+icebreaker-client/IcebreakerAIBake.cs:273  $"[AIBake] RETAIL AI BAKE LOADED: {covers.Points.Count} covers, {covers.Ways.Count} ways, " + $"{(vo
+icebreaker-client/IcebreakerAIBake.cs:352  $"[AIBake] patrol navmesh reconcile: {onMesh} already on-mesh, {snapped} snapped " + $"({rescued} ne
+icebreaker-client/IcebreakerAIBake.cs:356  "[AIBake] every patrol point was already on the navmesh — the standing-still stall is NOT patrol pla
+icebreaker-client/IcebreakerAIPlaces.cs:44  $"[AIPlaces] event '{id}' buffered (bridge not armed yet)"
+icebreaker-client/IcebreakerAIPlaces.cs:67  $"[AIPlaces] no sidecar at {path} — spawn triggers stay off"
+icebreaker-client/IcebreakerAIPlaces.cs:84  "[AIPlaces] AIPlaceInfoHolder GO not in scene — aborting"
+icebreaker-client/IcebreakerAIPlaces.cs:179  "[AIPlaces] no BotEventHandler at build time — events may be lost"
+icebreaker-client/IcebreakerAIPlaces.cs:184  $"[AIPlaces] SPAWN TRIGGERS REBUILT: {built} places ({evTriggers} tier-event, {gsTriggers} group-siz
+icebreaker-client/IcebreakerAIPlaces.cs:278  $"[AIPlaces] '{gameObject.name}' entered (group={size}) -> event '{name}'"
+icebreaker-client/IcebreakerAcoustics.cs:65  $"[Acoustics] no sidecar at {path} — spatial audio + env triggers stay off"
+icebreaker-client/IcebreakerAcoustics.cs:136  $"[Acoustics] environment switcher rebuilt: {built} indoor triggers (indoor/outdoor audio + exposure
+icebreaker-client/IcebreakerAcoustics.cs:185  $"[Acoustics] no cached base volume for '{s.name}' — assuming 1.0; " + "the mute cache got cleared o
+icebreaker-client/IcebreakerAcoustics.cs:241  $"[Acoustics] AmbientBeds off — silenced {stopped} bed(s); " + (dropWind ? "retail's outdoor bed too
+icebreaker-client/IcebreakerAcoustics.cs:260  $"[Acoustics] revived {revived}/{_ambientSources.Length} ambient beds (raid-start audio reset had st
+icebreaker-client/IcebreakerAcoustics.cs:439  $"[Acoustics] environment -> {_lastEnv}"
+icebreaker-client/IcebreakerAcoustics.cs:547  $"[Acoustics] SPATIAL AUDIO STAGED: {comps.Count} components rehydrated — letting BSG's Initialize r
+icebreaker-client/IcebreakerAcoustics.cs:573  $"[Acoustics] installed audio bake -> {dest}"
+icebreaker-client/IcebreakerAcoustics.cs:850  $"[Acoustics] door id RENAME '{door.Id}' -> '{doorId}' at {door.transform.position}"
+icebreaker-client/IcebreakerAcoustics.cs:855  $"[Acoustics] ...{renamed} renames total"
+icebreaker-client/IcebreakerAcoustics.cs:856  "[Acoustics] all stamped ids already matched the authored ids (no renames)"
+icebreaker-client/IcebreakerAcoustics.cs:857  $"[Acoustics] stamped retail DoorIDs: {stamped} doors bound " + $"({portalByRow.Count - stamped} por
+icebreaker-client/IcebreakerAmbientAudio.cs:231  $"[Ambient] spatialised + started {voiced} loops, {randoms} random players; " + $"{gated} 2D bed(s) 
+icebreaker-client/IcebreakerAmbientAudio.cs:350  $"[Ambient] bank bundle loaded: {added} clips"
+icebreaker-client/IcebreakerAmbientAudio.cs:399  $"[Ambient] rebuilt {builtBanks} sound bank(s) from our own clips" + (thin.Count > 0 ? $"; no clips 
+icebreaker-client/IcebreakerAmbientAudio.cs:446  $"[Ambient] rebuilt season ambient data with '{OutdoorClip}' for day+night " + $"({dict.Count} seaso
+icebreaker-client/IcebreakerAmbientAudio.cs:584  $"[Ambient] outdoor bed output verified (peak {peak:F4}) — retail's bed is genuinely carrying the de
+icebreaker-client/IcebreakerAmbientAudio.cs:624  _roomToneHandler != null ? "[Ambient] room-tone transitions armed — indoor tones now fade in/out per
+icebreaker-client/IcebreakerAmbientAudio.cs:731  "[Ambient] retail outdoor bed left MUTED (measured ~25dB down, inaudible) — our wind bed carries out
+icebreaker-client/IcebreakerAmbientAudio.cs:732  $"[Ambient] outdoor bed via DayTimeAmbientBlender: " + $"day={(day != null ? (day.clip != null ? day
+icebreaker-client/IcebreakerAmbientAudio.cs:761  "[Ambient] master/param-name data unavailable — outdoor bed stays direct (audible either way)"
+icebreaker-client/IcebreakerAmbientAudio.cs:775  "[Ambient] AmbientOutDay/Night groups not on the master — outdoor bed stays direct"
+icebreaker-client/IcebreakerAmbientAudio.cs:806  $"[Ambient] day/night faders set (day={dayDb:F0}dB night={nightDb:F0}dB) " + "but the bed stays DIRE
+icebreaker-client/IcebreakerBundleHost.cs:58  $"[Bundles] no payload under {PayloadDir}/{Platform} — map bundles unavailable"
+icebreaker-client/IcebreakerBundleHost.cs:85  $"[Bundles] hosting {_ours.Count} bundle(s) from the plugin folder: " + $"{string.Join(", ", new Lis
+icebreaker-client/IcebreakerBundleHost.cs:170  $"[Bundles] loaded '{key}' from the plugin folder in {sw.ElapsedMilliseconds}ms " + "(no copy into E
+icebreaker-client/IcebreakerBundleHost.cs:220  $"[Bundles] removed {removed} leftover file(s) from the old StreamingAssets copy " + $"({freed / 104
+icebreaker-client/IcebreakerChainDoor.cs:258  "[ChainDoor] no 'VFX' object found near the door — explosion plays without particles"
+icebreaker-client/IcebreakerChainDoor.cs:381  $"[ChainDoor] animator has no 'IsTryOpen' bool — parameters: {string.Join(", ", Array.ConvertAll(ani
+icebreaker-client/IcebreakerChainDoor.cs:496  "[Plant] hold finished but no charge to consume — cancelled"
+icebreaker-client/IcebreakerCompatPatches.cs:96  "[Vision] day-vision lift is live (200 applications this raid)"
+icebreaker-client/IcebreakerCompatPatches.cs:144  "[Vision] weather seen-debuff lifted map-wide (200 applications this raid)"
+icebreaker-client/IcebreakerCompatPatches.cs:180  $"[Torch] stripped {torches.Count} blowtorch(es) on raid end ({exitStatus}) — map kit stays on the m
+icebreaker-client/IcebreakerCrew.cs:54  "[Crew] fika client — crew is host-authoritative, arming local cutscene watcher only"
+icebreaker-client/IcebreakerCrew.cs:74  "[Crew] no BotSpawner after 60s — crew spawner giving up"
+icebreaker-client/IcebreakerCrew.cs:85  "[Crew] no rogue zones found — crew spawner giving up"
+icebreaker-client/IcebreakerCrew.cs:115  $"[Crew] present: {haveRogues} rogues, knight={haveKnight}; target {wantRogues} + knight={Plugin.Cre
+icebreaker-client/IcebreakerCrew.cs:155  $"[Crew] done: {CountByRole(WildSpawnType.exUsec)} rogues, knight={CountByRole(WildSpawnType.bossKni
+icebreaker-client/IcebreakerCrew.cs:188  "[Crew] event-spawn bridge armed (buffered events drained)"
+icebreaker-client/IcebreakerCrew.cs:255  $"[Crew] trimmed {trimmed}/{count} wave rogues (stacked first, then farthest) to hit the rolled crew
+icebreaker-client/IcebreakerCrew.cs:295  $"[Crew] couldnt find navmesh spot to unstack '{b.name}'"
+icebreaker-client/IcebreakerCrew.cs:297  $"[Crew] unstacked {moved} rogue(s) — group spawns piled them on one marker"
+icebreaker-client/IcebreakerCrew.cs:314  "[Crew] no Icebreaker_StartCutsceneTrigger in scene — cutscene/BD-phase watcher off"
+icebreaker-client/IcebreakerCrew.cs:342  $"[Crew] CUTSCENE TRIGGER — cutscene, rogue spawns stopped, black division phase (player at {p.Posit
+icebreaker-client/IcebreakerCrew.cs:352  "[Crew] cutscene box tripped by a teammate — BD phase begins (your cutscene still plays when you cro
+icebreaker-client/IcebreakerCrew.cs:424  $"[Crew] cutscene gate OPEN — all {humans.Count} living player(s) triggered the cutscene, progress d
+icebreaker-client/IcebreakerCrew.cs:449  $"[Crew] unlocked progress door '{id}'"
+icebreaker-client/IcebreakerCrew.cs:532  $"[DoorProbe] '{b.name}' {Mathf.Sqrt(sq):0.0}m from link {l.Id} (door {(l.Door != null ? l.Door.Door
+icebreaker-client/IcebreakerCrew.cs:535  $"[DoorProbe] {e.Message}"
+icebreaker-client/IcebreakerCrew.cs:552  $"[Crew] EVENT SPAWN: {label} — {(bossRole != null ? "boss + " : "")}{assaults}x assault"
+icebreaker-client/IcebreakerCrew.cs:587  "[Crew] T1 — the knight arrives (Mash_t1 + 2 rogue escorts)"
+icebreaker-client/IcebreakerCrew.cs:661  $"[Crew] engine squad member held ({held.Count}/{expected})"
+icebreaker-client/IcebreakerCrew.cs:681  "[Crew] held engine squad ENGAGED early (enemy/underfire) — combat overrides the hold by design, exp
+icebreaker-client/IcebreakerCrew.cs:726  $"[Crew] ENGINE SQUAD RELEASED — {released} black division moving out" + (deadOrGone > 0 ? $" ({dead
+icebreaker-client/IcebreakerCrew.cs:758  $"[Crew] ENGINE REINFORCEMENTS — {reinforcements} pushing in ({got} from the pen)"
+icebreaker-client/IcebreakerCrew.cs:851  $"[Crew] {role} profile arrived NAKED — re-requesting in 3s"
+icebreaker-client/IcebreakerCrew.cs:1037  $"[Crew] trigger squads pre-made: {total} bots cached + bundle-warm"
+icebreaker-client/IcebreakerCrew.cs:1122  $"[Crew] pen pool built: {total} bots spawned + parked ({_penIntake.Count} still settling)"
+icebreaker-client/IcebreakerCrew.cs:1226  $"[Crew] delivered {picks.Count}/{count}x {role} from the pen into {zone.name}"
+icebreaker-client/IcebreakerFikaCompat.cs:83  $"[Fika] compat patches applied: {applied}/4"
+icebreaker-client/IcebreakerFlares.cs:109  $"[Flares] shader '{fsh.name}' props: {string.Join(", ", props)}"
+icebreaker-client/IcebreakerFlares.cs:216  $"[Flares] lamp sample '{t.parent.name}': shader '{pm.shader.name}' renderQueue={pm.renderQueue} zwr
+icebreaker-client/IcebreakerHeliExfil.cs:60  "[HeliExfil] no NotificationZone volume — heli exfil stays always-on"
+icebreaker-client/IcebreakerHeliExfil.cs:107  "[HeliExfil] armed — heli locked until a green flare is fired in the notification zone"
+icebreaker-client/IcebreakerHeliExfil.cs:169  "[HeliExfil] IEAPI trigger claimed — heli exfil forced to manual activation " + "so the fare is chec
+icebreaker-client/IcebreakerHeliExfil.cs:175  "[HeliExfil] InteractableExfilsAPI is loaded but no trigger bound to our exfil after 30s — " + "if a
+icebreaker-client/IcebreakerHeliExfil.cs:203  $"[HeliExfil] fare attached: {fare} euros to board"
+icebreaker-client/IcebreakerHeliExfil.cs:353  $"[HeliExfil] zone event: {ev.ZoneEventType} (profile {ev.PlayerProfileID})"
+icebreaker-client/IcebreakerHeliExfil.cs:412  $"[HeliExfil] green flare accepted — {CallParam} set, heli inbound ({ArrivalSeconds:0}s flight), {fr
+icebreaker-client/IcebreakerHeliExfil.cs:464  $"[HeliExfil] '{m.name}': bundle copy of '{sh.name}' swapped for the game's registry instance"
+icebreaker-client/IcebreakerHeliExfil.cs:477  $"[HeliExfil] cleared {m.shaderKeywords.Length} keyword(s) on '{m.name}'"
+icebreaker-client/IcebreakerHeliExfil.cs:503  $"[HeliExfil] props: {string.Join(" | ", props)}"
+icebreaker-client/IcebreakerHeliExfil.cs:530  $"[HeliExfil] material '{m.name}': shader '{(sh != null ? sh.name : "null")}' has no native match"
+icebreaker-client/IcebreakerHeliExfil.cs:534  $"[HeliExfil] heli material heal: {rebound} shader(s) rebound, {dead} unresolved, {shadowFixed} SHAD
+icebreaker-client/IcebreakerHeliExfil.cs:545  $"[HeliExfil] REFERENCE door material '{dm.name}': shader '{dm.shader.name}' keywords=[{string.Join(
+icebreaker-client/IcebreakerHeliExfil.cs:652  "[HeliExfil] heli arrived — exfil UNLOCKED"
+icebreaker-client/IcebreakerHybridBake.cs:103  $"[Hybrid] none of [{string.Join(", ", wanted)}] matched a BotZone in the scene — " + "check the nam
+icebreaker-client/IcebreakerHybridBake.cs:138  "[Hybrid] scanner found no cover inside the named zones — retail bake left intact"
+icebreaker-client/IcebreakerHybridBake.cs:171  $"[Hybrid] {synth.Count} synth zone(s) of {all.Count} [{string.Join(", ", synth.Select(r => r.Zone.N
+icebreaker-client/IcebreakerHybridBake.cs:182  $"[Hybrid] {zones.Count} BotZone(s) on this map — SynthZones takes these names:"
+icebreaker-client/IcebreakerHybridBake.cs:190  $" {z.NameZone,-28} markers={n,-3} ways={z.PatrolWays?.Length ?? 0,-3} " + (n > 0 ? $"centre=({c.x:F
+icebreaker-client/IcebreakerHybridBake.cs:216  $"[Hybrid] synth region '{zone.NameZone}' centre " + $"({centre.x:F1},{centre.y:F1},{centre.z:F1}) f
+icebreaker-client/IcebreakerHybridBake.cs:290  $"[Hybrid] zone '{r.Zone.NameZone}': no route generated — keeping retail's " + $"{retail?.Length ?? 
+icebreaker-client/IcebreakerInitDiag.cs:55  sb.ToString()
+icebreaker-client/IcebreakerInitDiag.cs:57  $"[InitDiag] diagnostic itself failed: {e.Message}"
+icebreaker-client/IcebreakerMapFare.cs:97  $"[MapFare] transition state: type={tr.transitionType} count={tr.transitionCount}"
+icebreaker-client/IcebreakerMapFare.cs:100  "[MapFare] transit arrival — fare was paid at boarding, not charging"
+icebreaker-client/IcebreakerMapFare.cs:117  $"[MapFare] only {carried}/{cost} carried and the ready gate didn't refuse — NOT charging (free cros
+icebreaker-client/IcebreakerMapFare.cs:149  $"[MapFare] consumed {cost} roubles for the crossing"
+icebreaker-client/IcebreakerPhysicsRegions.cs:45  $"[PhysRegions] '{current.name}' still owned the broadphase regions, " + $"handing them to '{__insta
+icebreaker-client/IcebreakerPhysicsRegions.cs:59  $"[PhysRegions] '{__instance.name}' laid out the broadphase regions"
+icebreaker-client/IcebreakerSealedDoors.cs:43  $"[Sealed] {n} sealed door(s) registered (hold {HoldSeconds:0}s to unseal)"
+icebreaker-client/IcebreakerSky.cs:40  "[Sky] json has no TOD_Sky block"
+icebreaker-client/IcebreakerSky.cs:50  $"[Sky] RETAIL TOD_Sky applied — {set} values set, {miss} missed"
+icebreaker-client/IcebreakerSky.cs:82  $"[Sky] FACTORY FREEZE — skybox_night applied, {off} dome painters disabled (pure static skybox)"
+icebreaker-client/IcebreakerSnowGusts.cs:48  "[Gusts] blown-snow gusts live"
+icebreaker-client/IcebreakerSnowGusts.cs:125  $"[Gusts] grafted donor material '{donor.name}' (shader '{donor.shader?.name}')"
+icebreaker-client/IcebreakerSnowGusts.cs:143  $"[Gusts] no donor found, fell back to shader '{name}'"
+icebreaker-client/IcebreakerSnowGusts.cs:146  "[Gusts] no usable particle shader found"
+icebreaker-client/IcebreakerStuckBots.cs:105  $"[Stuck] '{owner.name}' RELEASED — moving again"
+icebreaker-client/IcebreakerStuckBots.cs:121  $"[Stuck] '{owner.name}' moved again — released"
+icebreaker-client/IcebreakerStuckBots.cs:144  $"[Stuck] '{owner.name}' parked {PeacefulSeconds:F0}s at " + $"({owner.Position.x:F1},{owner.Positio
+icebreaker-client/IcebreakerStuckBots.cs:179  $"[Stuck] '{owner.name}' parked {EngagedSeconds:F0}s at " + $"({owner.Position.x:F1},{owner.Position
+icebreaker-client/IcebreakerTimelineCutscene.cs:129  $"[TimelineCutscene] interior draw-off: {_indoorOff.Count} renderers"
+icebreaker-client/IcebreakerTimelineCutscene.cs:154  $"[TimelineCutscene] no '{HelipadGroup}' in the cutscene scene"
+icebreaker-client/IcebreakerTimelineCutscene.cs:200  $"[TimelineCutscene] playing '{_director.playableAsset.name}' " + $"({_director.duration:0.0}s) — SP
+icebreaker-client/IcebreakerTimelineCutscene.cs:227  $"[TimelineCutscene] {(paused ? "PAUSED (P resumes, F9 tunes)" : "resumed")}"
+icebreaker-client/IcebreakerTransit.cs:104  $"[Transit] hovercraft placed at {pos} rot {rot.eulerAngles} " + $"scene='{scene}' renderers={rends}
+icebreaker-client/IcebreakerTransit.cs:109  "[Transit] hovercraft prefab unavailable, placing the transit without it"
+icebreaker-client/IcebreakerTransit.cs:126  "[Transit] no TransitController on Shoreline"
+icebreaker-client/IcebreakerTransit.cs:133  $"[Transit] controller={controller.GetType().Name} " + $"interaction={(controller is TransitInteract
+icebreaker-client/IcebreakerTransit.cs:201  $"[Transit] transit live at {zonePos} ({box.size.x}x{box.size.y}x{box.size.z}m, " + $"yaw {Plugin.Tr
+icebreaker-client/IcebreakerTransit.cs:307  "[Transit] engine never offered the interaction, replayed OnPlayerEnter"
+icebreaker-client/IcebreakerTransit.cs:317  "[Transit] no OnPlayerEnter on this controller, offered the interaction directly"
+icebreaker-client/IcebreakerTransit.cs:371  $"[Transit] === bundle '{ab.name}' inventory ==="
+icebreaker-client/IcebreakerTransit.cs:372  $" {n}"
+icebreaker-client/IcebreakerTransitFare.cs:169  "[Fare] no inventory controller"
+icebreaker-client/IcebreakerTransitFare.cs:176  $"[Fare] short: {carried}/{cost}"
+icebreaker-client/IcebreakerTransitFare.cs:191  "[Fare] till has no room for a stack, aborting"
+icebreaker-client/IcebreakerTransitFare.cs:220  $"[Fare] collected {cost} roubles ({dispatch.Count} ops dispatched)"
+icebreaker-client/IcebreakerTripwires.cs:174  $"[Tripwires] planted {planted}/{jobs.Count}"
+icebreaker-client/IcebreakerTripwires.cs:268  $"[Tripwires] no GrenadePrefab on '{grenade.TemplateId}' — bundle still not loaded?"
+icebreaker-client/IcebreakerTripwires.cs:302  $"[Tripwires] grafted donor tripwire visual onto '{prefabName}' ({patched} asset)"
+icebreaker-client/IcebreakerVolFog.cs:41  "[VolFog] void limit (16) reached — ignoring " + name
+icebreaker-client/IcebreakerVolFog.cs:48  $"[VolFog] fog VOID '{name}' @ {center} size {size}"
+icebreaker-client/IcebreakerVolFog.cs:91  $"[VolFog] stripped {stripped} fog-marker collider(s) (invisible-wall guard)"
+icebreaker-client/IcebreakerVolFog.cs:129  $"[VolFog] fog_areas.json: {_areas.Count} area(s), {_voidCount} void(s)" + (_areas.Count == 0 ? " — 
+icebreaker-client/IcebreakerVolFog.cs:158  $"[VolFog] scene markers: {_areas.Count} area(s), {_voidCount} void(s)"
+icebreaker-client/IcebreakerVolFog.cs:181  $"[VolFog] fog area '{name}' @ {center} size {size}"
+icebreaker-client/IcebreakerVolFog.cs:192  "[VolFog] fog_areas.json changed — rebuilding areas"
+icebreaker-client/IcebreakerVolFog.cs:231  "[VolFog] VolumetricFog attached to render camera"
+icebreaker-client/IcebreakerVolFog.cs:276  $"[VolFog] {(indoorNow ? "INDOORS — fog fading out" : "outdoors — fog fading back")} ({fade:0.#}s)"
+icebreaker-client/IcebreakerVolumetricLights.cs:153  $"[Volumetric] {added} volumetric lights restored" + (already > 0 ? $" ({already} already had one)" 
+icebreaker-client/IcebreakerWeather.cs:48  $"[Weather] no sidecar at {path} — weather stays off"
+icebreaker-client/IcebreakerWeather.cs:85  $"[Weather] root '{rootName}' not in scene — aborting"
+icebreaker-client/IcebreakerWeather.cs:139  $"[Weather] WEATHER STACK REBUILT: {created} components — vanilla weather/seasons live" + (EFT.Weath
+icebreaker-client/IcebreakerWeather.cs:234  "[Weather] MBOIT_Scattering CONSTRUCTED — retail 1.0 values + _StencilShadow & CameraParameters glob
+icebreaker-client/IcebreakerWeather.cs:314  "[Weather] VOLUMETRIC fog armed — retail 1.0 remap record + MBOIT scattering"
+icebreaker-client/IcebreakerWeather.cs:338  "[Weather] MBOIT_Scattering bound to wc — volumetric params flowing"
+icebreaker-client/IcebreakerWeather.cs:341  "[Weather] MBOIT_Scattering unavailable — volumetric params cant flow (prefab-default rendering)"
+icebreaker-client/IcebreakerWeather.cs:344  $"[Weather] MBOIT_Scattering bound ok (enabled={mb.enabled})"
+icebreaker-client/IcebreakerWeather.cs:393  $"[Weather] Tonemapping instance on '{_tonemap.gameObject.name}' camEnabled={(cam != null && cam.ena
+icebreaker-client/IcebreakerWeather.cs:399  $"[Weather] Tonemapping pass {(_tonemap.enabled ? "ENABLED" : "disabled")} (washed-out colors lever)
+icebreaker-client/IcebreakerWeather.cs:431  "[Weather] BLIZZARD: WeatherDebug pinned (snow/wind/fog/hour) + StormStartedEvent raised"
+icebreaker-client/IcebreakerWeather.cs:466  $"[Weather] snow fall-vector now driving {_snowMats.Count} material(s) incl renderer copies"
+icebreaker-client/IcebreakerWeather.cs:503  "[Weather] no DryPlanes GO in scene — snow stays unmasked indoors"
+icebreaker-client/IcebreakerWeather.cs:550  $"[Weather] WEATHER OBSTACLE LIVE: '{t.name}' src={(dryCount > 0 ? dryCount + " DryPlanes" : "quad M
+icebreaker-client/IcebreakerWeather.cs:576  "[SnowDiag] NO SnowFlakes component in scene"
+icebreaker-client/IcebreakerWeather.cs:579  $"[SnowDiag] go='{sf.gameObject.name}' active={sf.gameObject.activeInHierarchy} enabled={sf.enabled}
+icebreaker-client/IcebreakerWeather.cs:582  $"[SnowDiag] Close={(close ? close.name : "NULL")} shader={(close && close.shader ? close.shader.nam
+icebreaker-client/IcebreakerWeather.cs:585  $"[SnowDiag] renderer '{mr.gameObject.name}' enabled={mr.enabled} visible={mr.isVisible} mat={(mr.sh
+icebreaker-client/IcebreakerWeather.cs:588  $"[SnowDiag] RainController={(rc != null)} wc.RainController={(wc.RainController != null)} wcRain={w
+icebreaker-client/IcebreakerWeather.cs:593  $"[SnowDiag] SunHeight={wc.SunHeight:0.000} scattering={(scat2 != null ? (scat2.enabled ? $"ON densi
+icebreaker-client/IcebreakerWeather.cs:664  $"[Weather] snow warmed at load: {_snowMats.Count} source material(s) shader+settings ready pre-Star
+icebreaker-client/IcebreakerWeather.cs:697  "[Weather] optic camera TOD_Scattering disabled (black magnified scopes)"
+icebreaker-client/IcebreakerWeather.cs:705  "[Weather] optic camera stack: " + string.Join(", ", parts)
+icebreaker-client/IcebreakerWeather.cs:725  "[Weather] GlobalFog attached — fog color now OURS, not the night sky's"
+icebreaker-client/IcebreakerWeather.cs:749  "[Weather] MBOIT_Scattering pass ENABLED, classic scattering standing down (exclusive handoff)"
+icebreaker-client/IcebreakerWeather.cs:758  $"[FogDiag] VOLUMETRIC scat.enabled={scat.enabled} MBOIT={scat.MBOIT} wdFog={Plugin.BlizzardFog.Valu
+icebreaker-client/IcebreakerWeather.cs:780  $"[FogDiag] globalFog.enabled={_globalFog.enabled} density={RenderSettings.fogDensity:0.000} color={
+icebreaker-client/IcebreakerWeather.cs:788  $"[Weather] TOD_Scattering fog pass {(scat.enabled ? "ENABLED" : "disabled")}"
+icebreaker-client/IcebreakerWeather.cs:862  $"[Weather] SCENE DEPTH MASK rendered ({dim}x{dim} over {b.size.x:0}x{b.size.z:0}m) — ship geometry 
+icebreaker-client/PatrolScanner.cs:95  $"[PatrolGen] generated {ways} way(s), {points} point(s) across {zones.Count} zone(s) " + $"from {li
+icebreaker-client/Plugin.cs:197  $"[DistCull] scale -> {CullDistanceScale.Value:F2} (live)"
+icebreaker-client/Plugin.cs:198  $"[Culling] PcDriverEnabled -> {PcDriverEnabled.Value}"
+icebreaker-client/RaidFixPatches.cs:287  $"[Weather] forcing season {season} -> Winter (icebreaker only)"
+icebreaker-client/RaidFixPatches.cs:312  $"[RaidFix] SetCameraFromSettings on icebreaker: prefab={prefab}"
+icebreaker-client/RaidFixPatches.cs:315  "[RaidFix] discarding scene camera prefab, using built-in Cam2"
+icebreaker-client/RaidFixPatches.cs:545  $"[LightAutopsy] {clo.name} d={(clo.transform.position - cam).magnitude:F0}m " + $"light={(l == null
+icebreaker-client/RaidFixPatches.cs:642  $"[Ambient] flat ambient -> {fill} (via LevelSettings, native per-frame apply)"
+icebreaker-client/RaidFixPatches.cs:648  $"[Ambient] flat ambient -> {fill} (direct — no LevelSettings in scene)"
+icebreaker-client/RaidFixPatches.cs:671  $"[RenderEnv] ambientIntensity -> {RenderSettings.ambientIntensity:F2}"
+icebreaker-client/RaidFixPatches.cs:672  $"[RenderEnv] ambientIntensity -> {RenderSettings.ambientIntensity:F2}"
+icebreaker-client/RaidFixPatches.cs:706  $"[RenderEnv] F11 mode={names[_geoMode]}: hid {hid}/{all} meshRenderers (baked set={baked.Count})"
+icebreaker-client/RaidFixPatches.cs:747  "[VolProbe] normal culling resumed"
+icebreaker-client/RaidFixPatches.cs:759  $"[VolProbe] {_volProbeIdx}/{volsArr.Length}: HIDING '{target?.name}' ({hidden} renderers set enable
+icebreaker-client/RaidFixPatches.cs:787  $"[LOD] {groups} LODGroups: {disabled} were DISABLED (now enabled), {inactiveGo} on inactive GOs. " 
+icebreaker-client/RaidFixPatches.cs:811  $"[RenderEnv] F4: ScreenSpaceReflections active -> {!cur}"
+icebreaker-client/RaidFixPatches.cs:837  $"[Census] {unbaked} UNBAKED renderers. by scene:"
+icebreaker-client/RaidFixPatches.cs:839  $"[Census] {kv.Value,7} {kv.Key}"
+icebreaker-client/RaidFixPatches.cs:840  "[Census] top roots:"
+icebreaker-client/RaidFixPatches.cs:842  $"[Census] {kv.Value,7} {kv.Key}"
+icebreaker-client/RaidFixPatches.cs:850  $"[BotAutopsy] {bots.Length} BotOwner(s) alive:"
+icebreaker-client/RaidFixPatches.cs:901  $"[BotAutopsy] covers: {coverInfo}"
+icebreaker-client/RaidFixPatches.cs:922  $"[BotAutopsy] vision: {visInfo}"
+icebreaker-client/RaidFixPatches.cs:933  $"[BotAutopsy] body: {sb}"
+icebreaker-client/RaidFixPatches.cs:934  $"[BotAutopsy] '{b.name}' role={role} state={b.BotState} pos={p} " + $"renderers={rends.Length}({on}
+icebreaker-client/RaidFixPatches.cs:978  $"[RenderEnv] F10: static-batched {candidates} renderers under {roots} roots in {sw.ElapsedMilliseco
+icebreaker-client/RaidFixPatches.cs:1095  $"[RebindShaders] alias target '{name}' not resolvable yet for '{m.name}' — will retry"
+icebreaker-client/RaidFixPatches.cs:1100  $"[RebindShaders] unique materials={seen.Count} rebound={rebound} sameOrMissing={sameOrMissing}"
+icebreaker-client/RaidFixPatches.cs:1102  $"[RebindShaders] {kv.Value}x {kv.Key}"
+icebreaker-client/RaidFixPatches.cs:1128  $"[RebindShaders] alias retry bound {bound}, {_aliasPending.Count} still pending"
+icebreaker-client/RaidFixPatches.cs:1165  $"[RebindShaders] sliced pass: {seen.Count} materials, {rebound} rebound, {_aliasPending.Count} alia
+icebreaker-client/RaidFixPatches.cs:1347  "[Culling] native BSG grid suppressed (NativeCulling=false) — our sidecar bakes drive culling"
+icebreaker-client/RaidFixPatches.cs:1381  "[Culling] NATIVE BSG culling grid alive with valid packed data — sidecar driver standing down"
+icebreaker-client/RaidFixPatches.cs:1388  "[Culling] PerfectCullingRuntime not loaded — no culling"
+icebreaker-client/RaidFixPatches.cs:1435  $"[Culling] volume '{comp?.name}': {state}"
+icebreaker-client/RaidFixPatches.cs:1437  $"[Culling] AllVolumes registered: {allVolumes?.Count ?? -1} of {vols.Length}"
+icebreaker-client/RaidFixPatches.cs:1440  "[Culling] no camera to attach to"
+icebreaker-client/RaidFixPatches.cs:1452  $"[Culling] sliced PC driver armed — {vols.Length} volume(s), 1 volume/frame, per-volume cell gating
+icebreaker-client/RaidFixPatches.cs:1483  $"[Culling] {volName}: old/bad sidecar format — re-export from the editor"
+icebreaker-client/RaidFixPatches.cs:1627  "[Culling] BakeGroup.Toggle replaced with renderer.enabled path (static-batching compatible)"
+icebreaker-client/RaidFixPatches.cs:1629  "[Culling] editor-only callbacks neutered on PerfectCullingCamera"
+icebreaker-client/RaidFixPatches.cs:1778  "[Culling] PC driver DISABLED (live) — occlusion-culled renderers restored"
+icebreaker-client/RaidFixPatches.cs:1782  "[Culling] PC driver re-enabled (live)"
+icebreaker-client/RaidFixPatches.cs:1906  $"[XCull] interior volume '{xv.Name}': {xv.Groups.Length} groups, bounds {xv.B.size}"
+icebreaker-client/RaidFixPatches.cs:1998  $"[Stutter] {dt * 1000f:F0}ms frame (avg {_ftAvg * 1000f:F1}ms): " + $"pcToggles={_pcWrites} pcRuns=
+icebreaker-client/RaidFixPatches.cs:2070  $"[DistCull] tracking {_distEntries.Count} renderers (size-classed cull distances x{Plugin.CullDista
+icebreaker-client/RaidFixPatches.cs:2083  "[Culling] CullingManager already present"
+icebreaker-client/RaidFixPatches.cs:2085  "[Culling] created CullingManager — native light culling live (if _light refs are baked)"
+icebreaker-client/RaidFixPatches.cs:2107  "[LightCull] native CullingLightObjects detected — runtime light culler standing down"
+icebreaker-client/RaidFixPatches.cs:2119  $"[LightCull] tracking {_lightEntries.Count} static map lights (80m x{Plugin.CullDistanceScale.Value
+icebreaker-client/RaidFixPatches.cs:2159  $"[CutsceneHold] forced on: {lights} tracked + {native} native lights, {rends} renderers"
+icebreaker-client/RaidFixPatches.cs:2177  $"[LightLamps] hovercraft spots freed from native culling ({freed})"
+icebreaker-client/RaidFixPatches.cs:2251  $"[CutsceneHold] released — healed {native} native lights, culling unlocked"
+icebreaker-client/RaidFixPatches.cs:2331  $"[LightLamps] drove {n} plain lamps + {natives} native culling lights to intensity {v:F2} (shadows=
+icebreaker-client/RaidFixPatches.cs:2600  $"[RaidFix] AI skeleton ready: {__instance.Points.Count} covers, " + $"{__instance.AICorePointsHolde
+icebreaker-client/RaidFixPatches.cs:2664  $"[RaidFix] synthesized voxel grid {nx}x{ny}x{nz} ({vox.VoxelsList.Count} cells) over navmesh bounds
+icebreaker-client/RaidFixPatches.cs:2699  $"[RaidFix] healed {healed} null collection(s) on {t.Name}"
+icebreaker-client/RaidFixPatches.cs:2791  $"[DoorDiag] cells: {idCells} with ids -> {linkedCells} reconnected | links: {links.Length} in scene
+icebreaker-client/RaidFixPatches.cs:2834  $"[Perf] shadow split: {proxiesFixed} proxies set cast-only, {visualsFixed} visuals set no-cast ({sw
+icebreaker-client/RaidFixPatches.cs:2885  $"[Keycard] '{swiper}' stand point was {drift:F2}m off retail — rip transform confirmed bad, correct
+icebreaker-client/RaidFixPatches.cs:2932  $"[Keycard] {doors.Length} doors: {wired} with proxies ({linked} Link(s) healed by proximity), {grip
+icebreaker-client/RaidFixPatches.cs:2996  $"[RaidFix] pruned {removed} dead spawn markers from BotZone '{__instance.name}' ({list.Count} left)
+icebreaker-client/RaidFixPatches.cs:3039  "[RaidFix] late-patched Waypoints DoorLinkPatch with finalizer"
+icebreaker-client/RaidFixPatches.cs:3258  $"[RaidFix] wave slots kept as authored ({waves.Length} waves, bot-amount slider ignored" + (Plugin.
+icebreaker-client/Blowtorch/BlowtorchController.cs:89  "[Blowtorch] no Animator found in torch prefab"
+icebreaker-client/Blowtorch/BlowtorchController.cs:102  $"[Blowtorch] FirearmsAnimator bound — LActions layer={fa.LACTIONS_LAYER_INDEX}, FullIdleStateName=i
+icebreaker-client/Blowtorch/BlowtorchController.cs:137  $"[Blowtorch] pose diag: body WeaponTypeFloat={f ?? "?"} (0=Rifle 1=Pistol 4=EmptyHands), animType={
+icebreaker-client/Blowtorch/BlowtorchPatches.cs:60  "[Blowtorch] controller factory returned null"
+icebreaker-client/Blowtorch/HatchMeltDriver.cs:110  $"[HatchMelt] melt material rebound to game shader instance"
+icebreaker-client/Blowtorch/HatchMeltDriver.cs:132  "[HatchMelt] armed — melt the hatchway ice with the blowtorch"
+icebreaker-client/Blowtorch/HatchMeltDriver.cs:152  "[HatchMelt] melting started"
+icebreaker-client/Blowtorch/HatchMeltDriver.cs:199  "[HatchMelt] ice melted — the handle can be turned now"
+icebreaker-client/Blowtorch/HatchMeltDriver.cs:221  $"[HatchMelt] remote stage {stage} but no driver — ignored"
+icebreaker-client/Blowtorch/HatchMeltDriver.cs:276  "[HatchMelt] handle turned — Break"
+icebreaker-client/Blowtorch/HatchMeltDriver.cs:294  "[HatchMelt] hatch can be opened now"
+icebreaker-client/Blowtorch/HatchMeltDriver.cs:306  "[HatchMelt] hatch opening"
+icebreaker-client/Blowtorch/HatchMeltDriver.cs:324  $"[HatchMelt] no GOs matched [{string.Join(", ", names)}]"
+icebreaker-client/Blowtorch/HatchMeltDriver.cs:342  $"[HatchMelt] no mesh GOs matched '{name}'"
+icebreaker-client/Blowtorch/SkyProbe.cs:37  "[SkyProbe] no TOD_Sky.Instance"
+icebreaker-client/Blowtorch/SkyProbe.cs:44  sb.ToString()
+icebreaker-client/Blowtorch/SkyProbe.cs:56  sb.ToString()
+icebreaker-client/Blowtorch/TorchPoseProbe.cs:49  sb.ToString()
+icebreaker-fika/IceBodyDiag.cs:34  "[BodyDiag] probe component created (raid-time)"
+icebreaker-fika/IceBodyDiag.cs:37  "[BodyDiag] probe alive — Update ticking"
+icebreaker-fika/IceBodyDiag.cs:49  $"[BodyDiag] state: iceGate={IceGate.On} manager={(manager != null)}" + $" observed={(manager != nul
+icebreaker-fika/IceBodyDiag.cs:53  $"[BodyDiag] state failed: {e.Message}"
+icebreaker-fika/IceBodyDiag.cs:78  $"[BodyDiag] failed: {e.Message}"
+icebreaker-fika/IceBodyDiag.cs:134  sb.ToString()
+icebreaker-fika/IceDoorDiag.cs:27  $"[DoorDiag] SEND execute id='{door.Id}' pos={door.transform.position} forceLocal={door.ForceLocalIn
+icebreaker-fika/IceDoorDiag.cs:54  $"[DoorDiag] RECV id='{__instance.InteractiveId}' stage={__instance.InteractionStage} resolved={(doo
+icebreaker-fika/IceDoorDiag.cs:58  $"[DoorDiag] recv diag failed: {e.Message}"
+icebreaker-fika/IceWeatherGuard.cs:35  $"[IceWeather] host GenerateWeathers — WeatherController.Instance={(WeatherController.Instance != nu

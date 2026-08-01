@@ -19,7 +19,7 @@ namespace Manimal.Icebreaker
         {
             try
             {
-                if (!IceGate.On) return;
+                if (!IceGate.On || !Plugin.DevMode.Value) return;
                 var sb = new StringBuilder("[InitDiag] ");
                 void P(string k, bool ok) => sb.Append(k).Append(ok ? "=ok " : "=NULL ");
 
@@ -52,9 +52,9 @@ namespace Manimal.Icebreaker
                 P("bones.LootRaycast", __instance.PlayerBones?.LootRaycastOrigin != null);
                 P("movementCtx", __instance.MovementContext != null);
 
-                Plugin.Log.LogWarning(sb.ToString());
+                Plugin.Log.LogDebug(sb.ToString());
             }
-            catch (Exception e) { Plugin.Log.LogWarning($"[InitDiag] diagnostic itself failed: {e.Message}"); }
+            catch (Exception e) { Plugin.Log.LogDebug($"[InitDiag] diagnostic itself failed: {e.Message}"); }
         }
     }
 }

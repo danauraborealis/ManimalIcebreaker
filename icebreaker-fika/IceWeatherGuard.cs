@@ -32,7 +32,7 @@ namespace Manimal.Icebreaker.Fika
             // serves real backend weather instead of the synthesized fallback.
             try { Patch_EnsureEnvironmentManager.EnsureEnvAndWeather(); }
             catch (Exception e) { FikaAddonPlugin.Log.LogWarning($"[IceWeather] ensure failed: {e.Message}"); }
-            FikaAddonPlugin.Log.LogWarning($"[IceWeather] host GenerateWeathers — WeatherController.Instance={(WeatherController.Instance != null ? "OK" : "NULL (WeatherClasses will stay empty!)")}");
+            FikaAddonPlugin.Log.LogDebug($"[IceWeather] host GenerateWeathers — WeatherController.Instance={(WeatherController.Instance != null ? "OK" : "NULL (WeatherClasses will stay empty!)")}");
         }
     }
 

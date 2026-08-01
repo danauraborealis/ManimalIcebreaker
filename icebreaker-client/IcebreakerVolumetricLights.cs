@@ -150,7 +150,7 @@ namespace Manimal.Icebreaker
 
             if (unmatched > 0)
                 Plugin.Log.LogWarning($"[Volumetric] {unmatched}/{Table.Length} entries matched no light — scene drift, report this");
-            Plugin.Log.LogWarning($"[Volumetric] {added} volumetric lights restored" +
+            Plugin.Log.LogDebug($"[Volumetric] {added} volumetric lights restored" +
                                   (already > 0 ? $" ({already} already had one)" : "") +
                                   (deferred > 0 ? $", {deferred} deferred to cutscene load" : ""));
         }

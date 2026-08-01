@@ -106,7 +106,7 @@ namespace Manimal.Icebreaker
                 var props = new List<string>();
                 for (int i = 0; i < fsh.GetPropertyCount(); i++)
                     props.Add($"{fsh.GetPropertyName(i)}({fsh.GetPropertyType(i)})");
-                Plugin.Log.LogWarning($"[Flares] shader '{fsh.name}' props: {string.Join(", ", props)}");
+                Plugin.Log.LogDebug($"[Flares] shader '{fsh.name}' props: {string.Join(", ", props)}");
             }
             catch { }
 
@@ -213,7 +213,7 @@ namespace Manimal.Icebreaker
                     var pr = t.parent != null ? t.parent.GetComponent<Renderer>() : null;
                     var pm = pr != null ? pr.sharedMaterial : null;
                     if (pm != null)
-                        Plugin.Log.LogWarning($"[Flares] lamp sample '{t.parent.name}': shader '{pm.shader.name}' renderQueue={pm.renderQueue} zwrite={(pm.HasProperty("_ZWrite") ? pm.GetFloat("_ZWrite").ToString() : "n/a")}");
+                        Plugin.Log.LogDebug($"[Flares] lamp sample '{t.parent.name}': shader '{pm.shader.name}' renderQueue={pm.renderQueue} zwrite={(pm.HasProperty("_ZWrite") ? pm.GetFloat("_ZWrite").ToString() : "n/a")}");
                 }
             }
             Plugin.Log.LogWarning($"[Flares] LENS FLARES LIVE: {placed} placed, {missing} paths unmatched, {drifted} position-drifted (skipped)");

@@ -45,6 +45,7 @@ namespace Manimal.Icebreaker
         internal static ConfigEntry<bool> ForceWinter;
         internal static ConfigEntry<bool> HardBots;
         internal static ConfigEntry<bool> DiagHotkeys;
+        internal static ConfigEntry<bool> DevMode;
         // fog + weather tuning left the config on 07-30 — the tuned values ARE the map
         // look now, hardcoded as defaults here. Val<T> keeps the .Value shape so the
         // F9 tuner still writes them live; changes just dont persist (DUMP + hardcode
@@ -158,92 +159,96 @@ namespace Manimal.Icebreaker
         {
             Log = Logger;
             AutoDump = Config.Bind("General", "AutoDumpOnRaidLoad", false,
-                "dump the ai data right after the game restores it at raid load (icebreaker only — dev diagnostic)");
+                new ConfigDescription("dump the ai data right after the game restores it at raid load (icebreaker only — dev diagnostic)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             DumpKey = Config.Bind("General", "DumpHotkey", new KeyboardShortcut(KeyCode.None),
-                "re-dump on demand mid-raid (icebreaker only; F9 is the fog tuner — bind something else)");
+                new ConfigDescription("re-dump on demand mid-raid (icebreaker only; F9 is the fog tuner — bind something else)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             GenerateKey = Config.Bind("General", "GenerateHotkey", new KeyboardShortcut(KeyCode.None),
-                "run the prototype cover scanner on the current map and dump the result — freezes the game for a bit (icebreaker only)");
-            IndentJson = Config.Bind("General", "IndentJson", false,
-                "pretty-print the json — files get roughly 3x bigger");
+                new ConfigDescription("run the prototype cover scanner on the current map and dump the result — freezes the game for a bit (icebreaker only)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
+            IndentJson = Config.Bind("General", "IndentJson", true,
+                new ConfigDescription("pretty-print the json — files get roughly 3x bigger", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             InjectCovers = Config.Bind("Experimental", "InjectGeneratedCovers", true,
-                "EXPERIMENT: at raid load, replace the map's baked cover points with scanner-generated ones. " +
-                "adds ~10-30s to load. bots then use OUR points — for validating the custom-map baker");
+                new ConfigDescription(
+                    "EXPERIMENT: at raid load, replace the map's baked cover points with scanner-generated ones. " +
+                    "adds ~10-30s to load. bots then use OUR points — for validating the custom-map baker",
+                    null, new ConfigurationManagerAttributes { IsAdvanced = true }));
 
             // Icebreaker's interior lamps serialize at intensity 0 (retail baked them into
             // lightmaps we don't have), so we revive them realtime. these apply live in-raid.
             LampIntensity = Config.Bind("Icebreaker", "LampIntensity", 3.0f,
                 new ConfigDescription("brightness of the revived interior lamp lights",
-                    new AcceptableValueRange<float>(0f, 12f)));
+                    new AcceptableValueRange<float>(0f, 12f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             AmbientIntensity = Config.Bind("Icebreaker", "AmbientIntensity", 0.8f,
                 new ConfigDescription("flat ambient fill light — lifts shadowed areas out of black (no real bounce without a bake)",
-                    new AcceptableValueRange<float>(0f, 3f)));
+                    new AcceptableValueRange<float>(0f, 3f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             LampShadows = Config.Bind("Icebreaker", "LampShadows", false,
-                "let the revived lamps cast realtime shadows — much prettier, much heavier (1500+ lights)");
+                new ConfigDescription("let the revived lamps cast realtime shadows — much prettier, much heavier (1500+ lights)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             CullDistanceScale = Config.Bind("Icebreaker", "CullDistanceScale", 0.5f,
                 new ConfigDescription("distance-culling aggressiveness for small props (lower = culls closer = more fps) (live)",
-                    new AcceptableValueRange<float>(0.25f, 3f)));
+                    new AcceptableValueRange<float>(0.25f, 3f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             NativeCulling = Config.Bind("Icebreaker", "NativeCulling", false,
-                "use BSG's restored retail culling bake (Culling_Data) instead of our own sidecar bakes — the retail bake cost fps, so OFF: our .pcbake volumes drive culling; restart raid to switch");
+                new ConfigDescription("use BSG's restored retail culling bake (Culling_Data) instead of our own sidecar bakes — the retail bake cost fps, so OFF: our .pcbake volumes drive culling; restart raid to switch", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             PcDriverEnabled = Config.Bind("Icebreaker", "PcDriverEnabled", true,
-                "occlusion culling driver — flip OFF (live) to un-cull everything; the pop-in isolation tool: if pops stop with this off, the bake's sightline data is the culprit");
+                new ConfigDescription("occlusion culling driver — flip OFF (live) to un-cull everything; the pop-in isolation tool: if pops stop with this off, the bake's sightline data is the culprit", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             // NOTE: the old LodBiasClamp knob is gone — forcing QualitySettings.lodBias
             // overrode the player's own Object LOD quality setting and halved loose
             // loot visibility (loot LODGroups cull on lodBias). vanilla settings stay
             // whatever the player configured.
             ShadowProxyFix = Config.Bind("Icebreaker", "ShadowProxyFix", true,
-                "enforce the retail shadow split at load: _SHADOW_ proxy meshes cast-only, their visual siblings cast nothing (double-cast shadows otherwise)");
+                new ConfigDescription("enforce the retail shadow split at load: _SHADOW_ proxy meshes cast-only, their visual siblings cast nothing (double-cast shadows otherwise)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             // proof-of-life in the log when the culling knobs move — 'slider does nothing'
             // reports need to distinguish dead knob from wrong suspect
-            CullDistanceScale.SettingChanged += (_, __) => Log.LogWarning($"[DistCull] scale -> {CullDistanceScale.Value:F2} (live)");
-            PcDriverEnabled.SettingChanged += (_, __) => Log.LogWarning($"[Culling] PcDriverEnabled -> {PcDriverEnabled.Value}");
+            CullDistanceScale.SettingChanged += (_, __) => Log.LogDebug($"[DistCull] scale -> {CullDistanceScale.Value:F2} (live)");
+            PcDriverEnabled.SettingChanged += (_, __) => Log.LogDebug($"[Culling] PcDriverEnabled -> {PcDriverEnabled.Value}");
             // default OFF (user call 07-28): the pen cant actually hold bots — the mover
             // keeps a ship-side path and drags escapees back to the nearest navmesh edge
             // (black division surfacing on the starboard walkway). the spawn hitches the
             // pool was built for turned out to be init-burst/log-storm bugs, since fixed;
             // premake+prewarm makes on-demand spawns cheap enough.
             CrewPreSpawnPool = Config.Bind("Icebreaker", "CrewPreSpawnPool", false,
-                "pre-spawn the trigger squads into an off-map pen during the early raid and TELEPORT them in when events fire. off (default) = profiles premade + bundles prewarmed, bots spawned on demand through the real pipeline");
+                new ConfigDescription("pre-spawn the trigger squads into an off-map pen during the early raid and TELEPORT them in when events fire. off (default) = profiles premade + bundles prewarmed, bots spawned on demand through the real pipeline", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             // defaults trimmed a squad below retail's 9-15 (user call 07-27) — the full
             // roster plus the trigger squads made the ship feel overcrowded
             CrewRoguesMin = Config.Bind("Icebreaker", "CrewRoguesMin", 6,
                 new ConfigDescription("min rogue crew size — each raid rolls a random target in [min,max] (retail: 9-15)",
-                    new AcceptableValueRange<int>(0, 20)));
+                    new AcceptableValueRange<int>(0, 20), new ConfigurationManagerAttributes { IsAdvanced = true }));
             CrewRoguesMax = Config.Bind("Icebreaker", "CrewRoguesMax", 11,
                 new ConfigDescription("max rogue crew size — each raid rolls a random target in [min,max] (retail: 9-15)",
-                    new AcceptableValueRange<int>(0, 20)));
+                    new AcceptableValueRange<int>(0, 20), new ConfigurationManagerAttributes { IsAdvanced = true }));
             CrewKnight = Config.Bind("Icebreaker", "CrewKnight", true,
-                "spawn solo Knight among the rogues");
+                new ConfigDescription("spawn solo Knight among the rogues", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             CrewBlackDiv = Config.Bind("Icebreaker", "CrewBlackDivision", true,
-                "spawn Black Division squads when the start-cutscene trigger is hit (needs the BlackDiv mod)");
+                new ConfigDescription("spawn Black Division squads when the start-cutscene trigger is hit (needs the BlackDiv mod)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             SpatialAudio = Config.Bind("Icebreaker", "SpatialAudio", true,
-                "resurrect BSG's spatial audio (room/portal occlusion) from the recovered retail bake — needs the acoustics sidecar next to the dll");
+                new ConfigDescription("resurrect BSG's spatial audio (room/portal occlusion) from the recovered retail bake — needs the acoustics sidecar next to the dll", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             EnvTriggers = Config.Bind("Icebreaker", "EnvironmentTriggers", true,
-                "rebuild the retail indoor/outdoor switcher volumes (indoor sound banks, exposure, rain muffling)");
+                new ConfigDescription("rebuild the retail indoor/outdoor switcher volumes (indoor sound banks, exposure, rain muffling)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             DoorSoundBoost = Config.Bind("Icebreaker", "DoorSoundBoost", 4.0f,
                 new ConfigDescription("gain multiplier for door open/close/squeak foley (ripped clips are mixed quiet; play volume clamps at 1.0)",
-                    new AcceptableValueRange<float>(0.5f, 4f)));
+                    new AcceptableValueRange<float>(0.5f, 4f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             AmbientBeds = Config.Bind("Icebreaker", "AmbientBeds", false,
-                "OUR hand-placed ambient beds (the Amb_<zone> room tones + outdoor wind bed from the Author 8 pass). " +
-                "off by default now that retail's own per-room tones are restored onto the SpatialAudioRooms — " +
-                "leaving both on stacks two room tones. turn it back ON if the authored tones fail to bind " +
-                "(watch the '[Acoustics] bound N authored room tones' line) (live)");
+                new ConfigDescription(
+                    "OUR hand-placed ambient beds (the Amb_<zone> room tones + outdoor wind bed from the Author 8 pass). " +
+                    "off by default now that retail's own per-room tones are restored onto the SpatialAudioRooms — " +
+                    "leaving both on stacks two room tones. turn it back ON if the authored tones fail to bind " +
+                    "(watch the '[Acoustics] bound N authored room tones' line) (live)",
+                    null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             // ZoneToneVolume is GONE (user call 07-30): the room tones play at retail's
             // authored 1.0. the whole "deafening at 1.0" era traced back to a volume-
             // boosted living_roomtone wav in the SDK — missed in the first clip-restore
             // pass, caught by the byte-compare re-export — not to the authored level.
-            WindIndoorFraction = Config.Bind("Icebreaker", "WindIndoorFraction", 0.04f,
+            WindIndoorFraction = Config.Bind("Icebreaker", "WindIndoorFraction", 0.054f,
                 new ConfigDescription("how much of the outdoor wind bleeds through indoors (live; 0 = silent inside, 1 = full)",
-                    new AcceptableValueRange<float>(0f, 1f)));
+                    new AcceptableValueRange<float>(0f, 1f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             WeatherSystem = Config.Bind("Icebreaker", "WeatherSystem", true,
-                "resurrect BSG's weather/sky stack (clouds, wind, rain/snow, time-of-day) from the recovered retail components (needs the Author 9 weather-asset bundle)");
+                new ConfigDescription("resurrect BSG's weather/sky stack (clouds, wind, rain/snow, time-of-day) from the recovered retail components (needs the Author 9 weather-asset bundle)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             ForceWinter = Config.Bind("Icebreaker", "ForceWinter", true,
-                "force Winter season on icebreaker only (snowfall; other maps keep the server's season; needs WeatherSystem)");
+                new ConfigDescription("force Winter season on icebreaker only (snowfall; other maps keep the server's season; needs WeatherSystem)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             HardBots = Config.Bind("Icebreaker", "HardBots", true,
-                "force ALL icebreaker AI (waves + crew + black division) to HARD difficulty");
+                new ConfigDescription("force ALL icebreaker AI (waves + crew + black division) to HARD difficulty", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             Blizzard = Config.Bind("Icebreaker", "Blizzard", true,
-                "permanent blizzard: pins WeatherDebug (snow/wind/fog) + raises the winter STORM state; also pins the TOD hour (live)");
+                new ConfigDescription("permanent blizzard: pins WeatherDebug (snow/wind/fog) + raises the winter STORM state; also pins the TOD hour (live)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             VolFog = Config.Bind("VolumetricFog2", "Enabled", true,
-                "the REAL volumetric fog (Volumetric Fog & Mist 2, raymarched) — needs volumetricfog.bundle next to the plugin dll (live)");
+                new ConfigDescription("the REAL volumetric fog (Volumetric Fog & Mist 2, raymarched) — needs volumetricfog.bundle next to the plugin dll (live)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
 
             // cutscene fog profile twins — routed to by Fog()/FogColorEntry while the
             // cutscene profile is live: thinner, lower-noise fog with a closer wall and
@@ -264,73 +269,85 @@ namespace Manimal.Icebreaker
             _fogTwin[VolFogSpeed] = new Val<float>(0.156f);
             _fogTwin[WeatherDesaturate] = new Val<float>(0.128f);
             _csVolFogColor = new Val<Color>(new Color(0.482f, 0.455f, 0.420f));
+            // DEV MODE gates CODE, not logging. verbosity is BepInEx's job — the noisy
+            // lines are LogDebug, which BepInEx already excludes from console and disk
+            // unless a user opts in via LogLevels in BepInEx.cfg. that split matters: a
+            // bug report from someone with dev mode off still carries every Warning and
+            // Error, so the first report is usually enough to work from.
+            //
+            // what this DOES gate is the machinery that costs frames on a player's box:
+            // the F9/F10/F11 tuners and probes, the per-object dumps, and the diagnostic
+            // MonoBehaviours that walk the scene every raid.
+            DevMode = Config.Bind("Icebreaker", "DevMode", false,
+                new ConfigDescription("developer tooling: on-screen tuners, scene probes, dump hotkeys and the diagnostic components. OFF for normal play — this does not affect logging, set LogLevels in BepInEx.cfg for that", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
+
             DiagHotkeys = Config.Bind("Icebreaker", "DiagHotkeys", false,
-                "enable the F1-F12 diagnostic hotkey suite (lights toggle, geo hide, batching tests, probes). OFF for normal play — F9 doubles as the fog tuner toggle and MUST not fight the lights toggle (live)");
+                new ConfigDescription("enable the F1-F12 diagnostic hotkey suite (lights toggle, geo hide, batching tests, probes). OFF for normal play — F9 doubles as the fog tuner toggle and MUST not fight the lights toggle (live)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             TimelineCutscene = Config.Bind("Icebreaker", "TimelineCutscene", true,
-                "play the in-engine helicopter cutscene at the story trigger (falls back to the video if the cutscene scene/timeline is unavailable)");
+                new ConfigDescription("play the in-engine helicopter cutscene at the story trigger (falls back to the video if the cutscene scene/timeline is unavailable)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             HovercraftTransit = Config.Bind("Icebreaker", "HovercraftTransit", true,
-                "spawn the smugglers' hovercraft transit on the Shoreline coast once the Boreas chain is finished (takes you to the icebreaker)");
+                new ConfigDescription("spawn the smugglers' hovercraft transit on the Shoreline coast once the Boreas chain is finished (takes you to the icebreaker)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             TransitX = Config.Bind("Icebreaker", "TransitX", -312.0199f,
-                new ConfigDescription("hovercraft transit position X on Shoreline (live)", new AcceptableValueRange<float>(-2000f, 2000f)));
+                new ConfigDescription("hovercraft transit position X on Shoreline (live)", new AcceptableValueRange<float>(-2000f, 2000f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             TransitY = Config.Bind("Icebreaker", "TransitY", -65.899f,
-                new ConfigDescription("hovercraft transit position Y on Shoreline (live)", new AcceptableValueRange<float>(-500f, 500f)));
+                new ConfigDescription("hovercraft transit position Y on Shoreline (live)", new AcceptableValueRange<float>(-500f, 500f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             TransitZ = Config.Bind("Icebreaker", "TransitZ", 527.0115f,
-                new ConfigDescription("hovercraft transit position Z on Shoreline (live)", new AcceptableValueRange<float>(-2000f, 2000f)));
+                new ConfigDescription("hovercraft transit position Z on Shoreline (live)", new AcceptableValueRange<float>(-2000f, 2000f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             // FULL euler, not just heading: the ripped prefab carries the OBJ axis
             // correction on X (270), so overwriting rotation with yaw alone lays it flat
             TransitRotX = Config.Bind("Icebreaker", "TransitRotX", 270f,
-                new ConfigDescription("hovercraft rotation X (270 = the OBJ axis correction) (live)", new AcceptableValueRange<float>(0f, 360f)));
+                new ConfigDescription("hovercraft rotation X (270 = the OBJ axis correction) (live)", new AcceptableValueRange<float>(0f, 360f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             TransitRotY = Config.Bind("Icebreaker", "TransitRotY", 40f,
-                new ConfigDescription("hovercraft rotation Y, its heading (live)", new AcceptableValueRange<float>(0f, 360f)));
+                new ConfigDescription("hovercraft rotation Y, its heading (live)", new AcceptableValueRange<float>(0f, 360f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             TransitRotZ = Config.Bind("Icebreaker", "TransitRotZ", 0f,
-                new ConfigDescription("hovercraft rotation Z (live)", new AcceptableValueRange<float>(0f, 360f)));
+                new ConfigDescription("hovercraft rotation Z (live)", new AcceptableValueRange<float>(0f, 360f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             // the boarding trigger has its own transform: it sits beside the craft rather
             // than inside it, and is a flattened box aligned to the hull, not a cube
             TransitZoneX = Config.Bind("Icebreaker", "TransitZoneX", -310.3848f,
-                new ConfigDescription("transit trigger position X (live)", new AcceptableValueRange<float>(-2000f, 2000f)));
+                new ConfigDescription("transit trigger position X (live)", new AcceptableValueRange<float>(-2000f, 2000f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             TransitZoneY = Config.Bind("Icebreaker", "TransitZoneY", -63.49909f,
-                new ConfigDescription("transit trigger position Y (live)", new AcceptableValueRange<float>(-500f, 500f)));
+                new ConfigDescription("transit trigger position Y (live)", new AcceptableValueRange<float>(-500f, 500f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             TransitZoneZ = Config.Bind("Icebreaker", "TransitZoneZ", 531.0692f,
-                new ConfigDescription("transit trigger position Z (live)", new AcceptableValueRange<float>(-2000f, 2000f)));
+                new ConfigDescription("transit trigger position Z (live)", new AcceptableValueRange<float>(-2000f, 2000f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             TransitZoneSizeX = Config.Bind("Icebreaker", "TransitZoneSizeX", 8f,
-                new ConfigDescription("transit trigger box size X in meters (live)", new AcceptableValueRange<float>(0.5f, 60f)));
+                new ConfigDescription("transit trigger box size X in meters (live)", new AcceptableValueRange<float>(0.5f, 60f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             TransitZoneSizeY = Config.Bind("Icebreaker", "TransitZoneSizeY", 3f,
-                new ConfigDescription("transit trigger box size Y in meters (live)", new AcceptableValueRange<float>(0.5f, 60f)));
+                new ConfigDescription("transit trigger box size Y in meters (live)", new AcceptableValueRange<float>(0.5f, 60f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             TransitZoneSizeZ = Config.Bind("Icebreaker", "TransitZoneSizeZ", 3f,
-                new ConfigDescription("transit trigger box size Z in meters (live)", new AcceptableValueRange<float>(0.5f, 60f)));
+                new ConfigDescription("transit trigger box size Z in meters (live)", new AcceptableValueRange<float>(0.5f, 60f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             TransitCost = Config.Bind("Icebreaker", "TransitCost", 400000,
-                new ConfigDescription("rouble price shown for the hovercraft crossing (live)", new AcceptableValueRange<int>(0, 5000000)));
+                new ConfigDescription("rouble price shown for the hovercraft crossing (live)", new AcceptableValueRange<int>(0, 5000000), new ConfigurationManagerAttributes { IsAdvanced = true }));
             TransitZoneRotY = Config.Bind("Icebreaker", "TransitZoneRotY", 40f,
-                new ConfigDescription("transit trigger heading, match the craft (live)", new AcceptableValueRange<float>(0f, 360f)));
+                new ConfigDescription("transit trigger heading, match the craft (live)", new AcceptableValueRange<float>(0f, 360f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             SnowGusts = Config.Bind("Icebreaker", "SnowGusts", true,
-                "wind-driven sheets of blown snow around the player, on top of the native flakes (live)");
+                new ConfigDescription("wind-driven sheets of blown snow around the player, on top of the native flakes (live)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             HeliExfilCost = Config.Bind("Icebreaker", "HeliExfilCost", 2400,
                 new ConfigDescription("euros the pilot charges to board the helicopter exfil, 0 for a free ride (read at raid start)",
-                    new AcceptableValueRange<int>(0, 1000000)));
+                    new AcceptableValueRange<int>(0, 1000000), new ConfigurationManagerAttributes { IsAdvanced = true }));
             TransitActivateAfterSec = Config.Bind("Icebreaker", "TransitActivateAfterSec", 30,
                 new ConfigDescription("seconds before the crossing opens, listed red with a countdown until then (every vanilla transit uses 60)",
-                    new AcceptableValueRange<int>(0, 600)));
+                    new AcceptableValueRange<int>(0, 600), new ConfigurationManagerAttributes { IsAdvanced = true }));
             BotFriendlyFire = Config.Bind("Icebreaker", "BotFriendlyFire", false,
-                "allow bots to damage ALLIED bots (default off: crew sprays through squadmates in tight corridors and revenge-aggro wipes whole squads — real bot-vs-bot fights are always lethal regardless)");
+                new ConfigDescription("allow bots to damage ALLIED bots (default off: crew sprays through squadmates in tight corridors and revenge-aggro wipes whole squads — real bot-vs-bot fights are always lethal regardless)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             Tripwires = Config.Bind("Icebreaker", "Tripwires", true,
-                "plant the authored grenade tripwires (manimal_tripwire* markers) at raid start");
+                new ConfigDescription("plant the authored grenade tripwires (manimal_tripwire* markers) at raid start", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             TripwireChance = Config.Bind("Icebreaker", "TripwireChance", 0.5f,
-                new ConfigDescription("per-marker chance a tripwire is armed this raid — each marker rolls independently, so the layout differs every raid (in coop the host's roll wins, broadcast by the fika sync addon)", new AcceptableValueRange<float>(0f, 1f)));
+                new ConfigDescription("per-marker chance a tripwire is armed this raid — each marker rolls independently, so the layout differs every raid (in coop the host's roll wins, broadcast by the fika sync addon)", new AcceptableValueRange<float>(0f, 1f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             TripwireTpl = Config.Bind("Icebreaker", "TripwireTpl", "6a5d6a5f4ed8c025a0a2cff0",
-                "grenade template planted on the wires (default: Manimal CS gas grenade)");
+                new ConfigDescription("grenade template planted on the wires (default: Manimal CS gas grenade)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             InteriorCrossCull = Config.Bind("Icebreaker", "InteriorCrossCull", true,
-                "cull interior volumes (Indoor_01/02/03) wholesale when the camera is outside them, beyond CrossCullDistance — the ship-center fps fix (live)");
+                new ConfigDescription("cull interior volumes (Indoor_01/02/03) wholesale when the camera is outside them, beyond CrossCullDistance — the ship-center fps fix (live)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             CrossCullDistance = Config.Bind("Icebreaker", "CrossCullDistance", 20f,
-                new ConfigDescription("how close an out-of-volume interior group must be to still render (doorway/window sightlines) (live)", new AcceptableValueRange<float>(10f, 80f)));
+                new ConfigDescription("how close an out-of-volume interior group must be to still render (doorway/window sightlines) (live)", new AcceptableValueRange<float>(10f, 80f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             PasscodeTerminals = Config.Bind("Icebreaker", "PasscodeTerminals", true,
-                "activate the authored passcode terminals + post-it code notes (needs the Author 9 passcode sidecar next to the dll)");
+                new ConfigDescription("activate the authored passcode terminals + post-it code notes (needs the Author 9 passcode sidecar next to the dll)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             RetailAIBake = Config.Bind("Icebreaker", "RetailAIBake", true,
-                "load BSG's recovered baked AI data (covers/voxels/cores/patrols) instead of runtime generation; off or fill-failure = synthesized graph");
+                new ConfigDescription("load BSG's recovered baked AI data (covers/voxels/cores/patrols) instead of runtime generation; off or fill-failure = synthesized graph", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             // HYBRID knob: retail bake everywhere, our generated cover+patrol data inside
             // these zones only. empty = pure retail, which is the behaviour that has always
             // shipped. names are BotZone object names, comma separated, case insensitive.
-            SynthZones = Config.Bind("Icebreaker", "SynthZones", "",
-                "comma-separated BotZone names to rebuild with GENERATED cover+patrol data while the rest of the map keeps the retail bake (needs RetailAIBake on); empty = all retail");
+            SynthZones = Config.Bind("Icebreaker", "SynthZones", "BotZoneKitchen,BotZoneRoomsThirdKitchen,BotZoneRoomsThird,BotZoneKorrDown1,BotZoneFront,BotZoneFront2",
+                new ConfigDescription("comma-separated BotZone names to rebuild with GENERATED cover+patrol data while the rest of the map keeps the retail bake (needs RetailAIBake on); empty = all retail", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
 
             // kill the origin-stacked zone tones the instant the sound scene loads —
             // during loading the AudioListener sits at origin inside all 13 of them
@@ -378,11 +395,35 @@ namespace Manimal.Icebreaker
             }
             IcebreakerFikaCompat.TryApply(harmony); // no-op without fika
             Log.LogInfo($"Manimal-Icebreaker {BuildInfo.Version} loaded");
+            LogConfigBanner();
+        }
+
+        // SUPPORT BANNER. every bug report starts with a log, and the first question is
+        // always "what version, and what did you change?" — so answer both up front rather
+        // than asking the reporter to go and look. only NON-DEFAULT entries are listed, so
+        // a stock install prints one tidy line and a heavily tweaked one prints its diff.
+        private void LogConfigBanner()
+        {
+            try
+            {
+                var changed = new System.Collections.Generic.List<string>();
+                foreach (var key in Config.Keys)
+                {
+                    var entry = Config[key];
+                    if (entry?.DefaultValue == null || entry.BoxedValue == null) continue;
+                    if (!entry.BoxedValue.Equals(entry.DefaultValue))
+                        changed.Add($"{key.Key}={entry.BoxedValue}");
+                }
+                Log.LogInfo(changed.Count == 0
+                    ? "[Config] all settings at defaults"
+                    : $"[Config] {changed.Count} non-default: {string.Join(", ", changed.ToArray())}");
+            }
+            catch (System.Exception e) { Log.LogInfo($"[Config] banner failed: {e.Message}"); }
         }
 
         private void Update()
         {
-            if (!IceGate.On) return; // every manimal-icebreaker diagnostic is map-gated
+            if (!IceGate.On || !DevMode.Value) return; // map-gated AND dev-gated
             if (DumpKey.Value.IsDown())
                 AiDump.TryDump(Object.FindObjectOfType<AICoversData>(), "hotkey");
             if (GenerateKey.Value.IsDown())
@@ -399,7 +440,7 @@ namespace Manimal.Icebreaker
         [HarmonyPostfix]
         private static void Postfix(AICoversData __instance)
         {
-            if (IceGate.On && Plugin.AutoDump.Value)
+            if (IceGate.On && Plugin.DevMode.Value && Plugin.AutoDump.Value)
                 AiDump.TryDump(__instance, "raid-load");
         }
     }

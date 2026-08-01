@@ -126,7 +126,7 @@ namespace Manimal.Icebreaker
                         foreach (var r in rgo.GetComponentsInChildren<Renderer>(true))
                             if (!r.forceRenderingOff) { r.forceRenderingOff = true; _indoorOff.Add(r); }
                 }
-                Plugin.Log.LogWarning($"[TimelineCutscene] interior draw-off: {_indoorOff.Count} renderers");
+                Plugin.Log.LogDebug($"[TimelineCutscene] interior draw-off: {_indoorOff.Count} renderers");
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[TimelineCutscene] interior cull failed: {e.Message}"); }
 
@@ -151,7 +151,7 @@ namespace Manimal.Icebreaker
                 _helipad.SetActive(false);
                 Plugin.Log.LogInfo($"[TimelineCutscene] '{HelipadGroup}' held back until {HelipadRevealAt:0.00}s");
             }
-            else Plugin.Log.LogWarning($"[TimelineCutscene] no '{HelipadGroup}' in the cutscene scene");
+            else Plugin.Log.LogDebug($"[TimelineCutscene] no '{HelipadGroup}' in the cutscene scene");
 
             // retail CutsceneObjects.ApplyStart
             var canvasTf = cutsceneRoot.transform.Find("Canvas");
@@ -197,7 +197,7 @@ namespace Manimal.Icebreaker
 
             _director.extrapolationMode = DirectorWrapMode.Hold; // no loop surprises
             _director.Play();
-            Plugin.Log.LogWarning($"[TimelineCutscene] playing '{_director.playableAsset.name}' " +
+            Plugin.Log.LogDebug($"[TimelineCutscene] playing '{_director.playableAsset.name}' " +
                                   $"({_director.duration:0.0}s) — SPACE skips");
             yield return Fade(1f, 0f);
 
@@ -224,7 +224,7 @@ namespace Manimal.Icebreaker
                 {
                     paused = !paused;
                     if (paused) _director.Pause(); else _director.Resume();
-                    Plugin.Log.LogWarning($"[TimelineCutscene] {(paused ? "PAUSED (P resumes, F9 tunes)" : "resumed")}");
+                    Plugin.Log.LogDebug($"[TimelineCutscene] {(paused ? "PAUSED (P resumes, F9 tunes)" : "resumed")}");
                 }
                 if (paused) hardStop += Time.unscaledDeltaTime; // clock stops with the frame
                 if (Input.GetKeyDown(KeyCode.Space))

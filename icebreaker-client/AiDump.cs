@@ -35,7 +35,7 @@ namespace Manimal.Icebreaker
         {
             if (covers == null)
             {
-                Plugin.Log.LogWarning($"dump requested ({reason}) but no AICoversData in scene");
+                Plugin.Log.LogDebug($"dump requested ({reason}) but no AICoversData in scene");
                 return;
             }
 

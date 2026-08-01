@@ -93,7 +93,7 @@ namespace Manimal.Icebreaker
         {
             if (!IceGate.On) return;
             if (++_applications == 200)
-                Plugin.Log.LogWarning("[Vision] day-vision lift is live (200 applications this raid)");
+                Plugin.Log.LogDebug("[Vision] day-vision lift is live (200 applications this raid)");
             try
             {
                 var bo = __instance.BotOwner;
@@ -141,7 +141,7 @@ namespace Manimal.Icebreaker
             if (!IceGate.On) return;
             if (__result >= 1f) return;
             if (++_applications == 200)
-                Plugin.Log.LogWarning("[Vision] weather seen-debuff lifted map-wide (200 applications this raid)");
+                Plugin.Log.LogDebug("[Vision] weather seen-debuff lifted map-wide (200 applications this raid)");
             rainK = 1f; fogK = 1f; __result = 1f;
         }
     }
@@ -177,7 +177,7 @@ namespace Manimal.Icebreaker
                     { if (!r.Succeed) Plugin.Log.LogWarning($"[Torch] extract-strip execution failed: {r.Error}"); });
                 }
                 if (torches.Count > 0)
-                    Plugin.Log.LogWarning($"[Torch] stripped {torches.Count} blowtorch(es) on raid end ({exitStatus}) — map kit stays on the map");
+                    Plugin.Log.LogDebug($"[Torch] stripped {torches.Count} blowtorch(es) on raid end ({exitStatus}) — map kit stays on the map");
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[Torch] extract strip failed: {e.Message}"); }
         }

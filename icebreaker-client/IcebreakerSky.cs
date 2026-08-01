@@ -37,7 +37,7 @@ namespace Manimal.Icebreaker
                     return;
                 }
                 var skyJson = JObject.Parse(File.ReadAllText(path))["TOD_Sky"] as JObject;
-                if (skyJson == null) { Plugin.Log.LogWarning("[Sky] json has no TOD_Sky block"); return; }
+                if (skyJson == null) { Plugin.Log.LogDebug("[Sky] json has no TOD_Sky block"); return; }
 
                 int set = 0, miss = 0;
                 foreach (var prop in skyJson.Properties())
@@ -47,7 +47,7 @@ namespace Manimal.Icebreaker
                     if (name == "Cycle") continue; // the TodHour pin owns time-of-day
                     Apply(sky, name, prop.Value, ref set, ref miss);
                 }
-                Plugin.Log.LogWarning($"[Sky] RETAIL TOD_Sky applied — {set} values set, {miss} missed");
+                Plugin.Log.LogDebug($"[Sky] RETAIL TOD_Sky applied — {set} values set, {miss} missed");
             }
             catch (Exception e)
             {
@@ -79,7 +79,7 @@ namespace Manimal.Icebreaker
             int off = 0;
             foreach (var go in new[] { c?.Atmosphere, c?.Clear, c?.Space, c?.Sun, c?.Moon, c?.CloudRenderer != null ? c.CloudRenderer.gameObject : null })
                 if (go != null && go.activeSelf) { go.SetActive(false); off++; }
-            Plugin.Log.LogWarning($"[Sky] FACTORY FREEZE — skybox_night applied, {off} dome painters disabled (pure static skybox)");
+            Plugin.Log.LogDebug($"[Sky] FACTORY FREEZE — skybox_night applied, {off} dome painters disabled (pure static skybox)");
         }
 
         private static void Apply(object target, string name, JToken tok, ref int set, ref int miss)

@@ -284,7 +284,7 @@ namespace Manimal.Icebreaker
             // pointless without the weather stack (no WeatherController -> seasons no-op)
             if (!Plugin.WeatherSystem.Value || !Plugin.ForceWinter.Value || !IcebreakerAcoustics.IcebreakerLoaded()) return;
             if (season == ESeason.Winter) return;
-            Plugin.Log.LogWarning($"[Weather] forcing season {season} -> Winter (icebreaker only)");
+            Plugin.Log.LogDebug($"[Weather] forcing season {season} -> Winter (icebreaker only)");
             season = ESeason.Winter;
         }
     }
@@ -309,10 +309,10 @@ namespace Manimal.Icebreaker
             if (!string.Equals(loc, "Suburbs", StringComparison.OrdinalIgnoreCase)) return;
 
             var prefab = settings != null && settings.CameraPrefab != null ? settings.CameraPrefab.name : "<null>";
-            Plugin.Log.LogWarning($"[RaidFix] SetCameraFromSettings on icebreaker: prefab={prefab}");
+            Plugin.Log.LogDebug($"[RaidFix] SetCameraFromSettings on icebreaker: prefab={prefab}");
             if (settings == null || settings.CameraPrefab == null)
                 return; // already headed for the Cam2 fallback
-            Plugin.Log.LogWarning("[RaidFix] discarding scene camera prefab, using built-in Cam2");
+            Plugin.Log.LogDebug("[RaidFix] discarding scene camera prefab, using built-in Cam2");
             settings = null;
         }
     }
@@ -542,7 +542,7 @@ namespace Manimal.Icebreaker
                         try { mi = (float)(_cloMaxIntensity ?? (_cloMaxIntensity =
                             HarmonyLib.AccessTools.Field(typeof(CullingLightObject), "_maxLightIntensity"))).GetValue(clo); }
                         catch { }
-                        Plugin.Log.LogWarning($"[LightAutopsy] {clo.name} d={(clo.transform.position - cam).magnitude:F0}m " +
+                        Plugin.Log.LogDebug($"[LightAutopsy] {clo.name} d={(clo.transform.position - cam).magnitude:F0}m " +
                             $"light={(l == null ? "NULL" : $"en={l.enabled} int={l.intensity:F2} range={l.range:F0}")} " +
                             $"max={mi:F2} visFlag={clo.IsLightEnabled} isVis={clo.IsVisible}");
                     }
@@ -639,13 +639,13 @@ namespace Manimal.Icebreaker
                     ls.EquatorColor = fill;
                     ls.GroundColor = fill;
                     ls.AmbientIntensity = a;
-                    Plugin.Log.LogWarning($"[Ambient] flat ambient -> {fill} (via LevelSettings, native per-frame apply)");
+                    Plugin.Log.LogDebug($"[Ambient] flat ambient -> {fill} (via LevelSettings, native per-frame apply)");
                 }
                 else
                 {
                     RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
                     RenderSettings.ambientLight = fill;
-                    Plugin.Log.LogWarning($"[Ambient] flat ambient -> {fill} (direct — no LevelSettings in scene)");
+                    Plugin.Log.LogDebug($"[Ambient] flat ambient -> {fill} (direct — no LevelSettings in scene)");
                 }
             }
 
@@ -668,8 +668,8 @@ namespace Manimal.Icebreaker
             // unless explicitly re-armed
             if (!Plugin.DiagHotkeys.Value) return;
 
-            if (Input.GetKeyDown(KeyCode.F7)) { RenderSettings.ambientIntensity *= 1.3f; Plugin.Log.LogWarning($"[RenderEnv] ambientIntensity -> {RenderSettings.ambientIntensity:F2}"); }
-            if (Input.GetKeyDown(KeyCode.F6)) { RenderSettings.ambientIntensity *= 0.77f; Plugin.Log.LogWarning($"[RenderEnv] ambientIntensity -> {RenderSettings.ambientIntensity:F2}"); }
+            if (Input.GetKeyDown(KeyCode.F7)) { RenderSettings.ambientIntensity *= 1.3f; Plugin.Log.LogDebug($"[RenderEnv] ambientIntensity -> {RenderSettings.ambientIntensity:F2}"); }
+            if (Input.GetKeyDown(KeyCode.F6)) { RenderSettings.ambientIntensity *= 0.77f; Plugin.Log.LogDebug($"[RenderEnv] ambientIntensity -> {RenderSettings.ambientIntensity:F2}"); }
 
             // F5 = THE shader-rebind test, run reliably from the plugin (console Debug.Log
             // never reached the log). our scene bundle carries a broken copy of the p0/* SMap
@@ -703,7 +703,7 @@ namespace Manimal.Icebreaker
                     if (hide) hid++;
                 }
                 string[] names = { "NORMAL", "hide ALL", "hide BAKED-only", "hide UNBAKED-only" };
-                Plugin.Log.LogWarning($"[RenderEnv] F11 mode={names[_geoMode]}: hid {hid}/{all} meshRenderers (baked set={baked.Count})");
+                Plugin.Log.LogDebug($"[RenderEnv] F11 mode={names[_geoMode]}: hid {hid}/{all} meshRenderers (baked set={baked.Count})");
             }
 
             // F2 = per-volume attribution: cycles normal -> hide ALL of volume 1 -> volume 2
@@ -744,7 +744,7 @@ namespace Manimal.Icebreaker
                     {
                         foreach (var v in volsArr) SetVolume(v, true, out _);
                         if (pcc != null) pcc.enabled = true;
-                        Plugin.Log.LogWarning("[VolProbe] normal culling resumed");
+                        Plugin.Log.LogDebug("[VolProbe] normal culling resumed");
                     }
                     else
                     {
@@ -756,7 +756,7 @@ namespace Manimal.Icebreaker
                             if (i == _volProbeIdx - 1) hidden = c;
                         }
                         var target = volsArr[_volProbeIdx - 1] as Component;
-                        Plugin.Log.LogWarning($"[VolProbe] {_volProbeIdx}/{volsArr.Length}: HIDING '{target?.name}' ({hidden} renderers set enabled=false) — note your fps");
+                        Plugin.Log.LogDebug($"[VolProbe] {_volProbeIdx}/{volsArr.Length}: HIDING '{target?.name}' ({hidden} renderers set enabled=false) — note your fps");
                     }
                 }
                 catch (Exception e) { Plugin.Log.LogWarning($"[VolProbe] failed: {e.Message}"); }
@@ -784,7 +784,7 @@ namespace Manimal.Icebreaker
                         healed++;
                     }
                 }
-                Plugin.Log.LogWarning($"[LOD] {groups} LODGroups: {disabled} were DISABLED (now enabled), {inactiveGo} on inactive GOs. " +
+                Plugin.Log.LogDebug($"[LOD] {groups} LODGroups: {disabled} were DISABLED (now enabled), {inactiveGo} on inactive GOs. " +
                                       (disabled > 0 ? "check your fps NOW." : "all were already enabled — native lod culling should be active; mystery deepens"));
             }
 
@@ -808,7 +808,7 @@ namespace Manimal.Icebreaker
                             var activeProp = s.GetType().GetProperty("active");
                             bool cur = (bool)activeProp.GetValue(s);
                             activeProp.SetValue(s, !cur);
-                            Plugin.Log.LogWarning($"[RenderEnv] F4: ScreenSpaceReflections active -> {!cur}");
+                            Plugin.Log.LogDebug($"[RenderEnv] F4: ScreenSpaceReflections active -> {!cur}");
                         }
                     }
                 }
@@ -834,12 +834,12 @@ namespace Manimal.Icebreaker
                     var key = sc + "/" + t.name;
                     byRoot.TryGetValue(key, out var c2); byRoot[key] = c2 + 1;
                 }
-                Plugin.Log.LogWarning($"[Census] {unbaked} UNBAKED renderers. by scene:");
+                Plugin.Log.LogDebug($"[Census] {unbaked} UNBAKED renderers. by scene:");
                 foreach (var kv in byScene.OrderByDescending(k => k.Value))
-                    Plugin.Log.LogWarning($"[Census]   {kv.Value,7}  {kv.Key}");
-                Plugin.Log.LogWarning("[Census] top roots:");
+                    Plugin.Log.LogDebug($"[Census]   {kv.Value,7}  {kv.Key}");
+                Plugin.Log.LogDebug("[Census] top roots:");
                 foreach (var kv in byRoot.OrderByDescending(k => k.Value).Take(15))
-                    Plugin.Log.LogWarning($"[Census]   {kv.Value,7}  {kv.Key}");
+                    Plugin.Log.LogDebug($"[Census]   {kv.Value,7}  {kv.Key}");
             }
 
             // F1 = bot autopsy: every BotOwner's state, position, and body-renderer health.
@@ -847,7 +847,7 @@ namespace Manimal.Icebreaker
             if (Input.GetKeyDown(KeyCode.F1))
             {
                 var bots = UnityEngine.Object.FindObjectsOfType<BotOwner>();
-                Plugin.Log.LogWarning($"[BotAutopsy] {bots.Length} BotOwner(s) alive:");
+                Plugin.Log.LogDebug($"[BotAutopsy] {bots.Length} BotOwner(s) alive:");
                 foreach (var b in bots)
                 {
                     try
@@ -898,7 +898,7 @@ namespace Manimal.Icebreaker
                                         $"curPt={(b.Memory?.CurCustomCoverPoint != null ? "set" : "null")}";
                         }
                         catch (Exception ce) { coverInfo = "err:" + ce.Message; }
-                        Plugin.Log.LogWarning($"[BotAutopsy]   covers: {coverInfo}");
+                        Plugin.Log.LogDebug($"[BotAutopsy]   covers: {coverInfo}");
 
                         // VISION/STEERING forensics — the wall-stare freeze: vanilla
                         // sight is a cone around LookDirection, so a bot parked staring
@@ -919,7 +919,7 @@ namespace Manimal.Icebreaker
                                       $"underFire={b.Memory?.IsUnderFire.ToString() ?? "?"}";
                         }
                         catch (Exception ve) { visInfo = "err:" + ve.Message; }
-                        Plugin.Log.LogWarning($"[BotAutopsy]   vision: {visInfo}");
+                        Plugin.Log.LogDebug($"[BotAutopsy]   vision: {visInfo}");
                         // render-state forensics for the invisible-body mystery: WHICH
                         // mechanism hides the skinned meshes?
                         var sb = new System.Text.StringBuilder();
@@ -930,8 +930,8 @@ namespace Manimal.Icebreaker
                                       $"fro={r.forceRenderingOff} shadow={r.shadowCastingMode} vis={r.isVisible} mat={(r.sharedMaterial != null ? r.sharedMaterial.shader?.name : "NULL")}] ");
                             if (sb.Length > 400) break;
                         }
-                        Plugin.Log.LogWarning($"[BotAutopsy]   body: {sb}");
-                        Plugin.Log.LogWarning($"[BotAutopsy]  '{b.name}' role={role} state={b.BotState} pos={p} " +
+                        Plugin.Log.LogDebug($"[BotAutopsy]   body: {sb}");
+                        Plugin.Log.LogDebug($"[BotAutopsy]  '{b.name}' role={role} state={b.BotState} pos={p} " +
                                               $"renderers={rends.Length}({on} on) skinned={skinned}({skinnedOn} on) brain={layer} " +
                                               $"standby={b.StandBy?.StandByType.ToString() ?? "?"} healthy={(b.GetPlayer != null ? (!b.GetPlayer.HealthController?.IsAlive == false).ToString() : "?")}");
                     }
@@ -975,7 +975,7 @@ namespace Manimal.Icebreaker
                         roots++;
                     }
                 }
-                Plugin.Log.LogWarning($"[RenderEnv] F10: static-batched {candidates} renderers under {roots} roots in {sw.ElapsedMilliseconds}ms — compare fps now");
+                Plugin.Log.LogDebug($"[RenderEnv] F10: static-batched {candidates} renderers under {roots} roots in {sw.ElapsedMilliseconds}ms — compare fps now");
             }
         }
 
@@ -1092,14 +1092,14 @@ namespace Manimal.Icebreaker
                             // materials — the old retry re-ran this entire scene sweep
                             // every 300 frames until the last alias resolved
                             if (!_aliasPending.Contains(m)) _aliasPending.Add(m);
-                            Plugin.Log.LogWarning($"[RebindShaders] alias target '{name}' not resolvable yet for '{m.name}' — will retry");
+                            Plugin.Log.LogDebug($"[RebindShaders] alias target '{name}' not resolvable yet for '{m.name}' — will retry");
                         }
                     }
                 }
             }
-            Plugin.Log.LogWarning($"[RebindShaders] unique materials={seen.Count} rebound={rebound} sameOrMissing={sameOrMissing}");
+            Plugin.Log.LogDebug($"[RebindShaders] unique materials={seen.Count} rebound={rebound} sameOrMissing={sameOrMissing}");
             foreach (var kv in byName)
-                Plugin.Log.LogWarning($"[RebindShaders]   {kv.Value}x  {kv.Key}");
+                Plugin.Log.LogDebug($"[RebindShaders]   {kv.Value}x  {kv.Key}");
         }
 
         // aliased materials whose real shader wasn't loaded yet — the retry works this
@@ -1125,7 +1125,7 @@ namespace Manimal.Icebreaker
                     bound++;
                 }
             }
-            if (bound > 0) Plugin.Log.LogWarning($"[RebindShaders] alias retry bound {bound}, {_aliasPending.Count} still pending");
+            if (bound > 0) Plugin.Log.LogDebug($"[RebindShaders] alias retry bound {bound}, {_aliasPending.Count} still pending");
             if (_aliasPending.Count == 0) _aliasRetryNeeded = false;
         }
 
@@ -1162,7 +1162,7 @@ namespace Manimal.Icebreaker
                     }
                 if (--slice <= 0) { slice = 3000; yield return null; }
             }
-            Plugin.Log.LogWarning($"[RebindShaders] sliced pass: {seen.Count} materials, {rebound} rebound, {_aliasPending.Count} alias-pending");
+            Plugin.Log.LogDebug($"[RebindShaders] sliced pass: {seen.Count} materials, {rebound} rebound, {_aliasPending.Count} alias-pending");
             _rebindRunning = false;
         }
 
@@ -1344,7 +1344,7 @@ namespace Manimal.Icebreaker
                 // this prefix was global for one day)
                 if (!IceGate.On) return true;
                 if (Plugin.NativeCulling.Value) return true;
-                Plugin.Log.LogWarning("[Culling] native BSG grid suppressed (NativeCulling=false) — our sidecar bakes drive culling");
+                Plugin.Log.LogDebug("[Culling] native BSG grid suppressed (NativeCulling=false) — our sidecar bakes drive culling");
                 return false;
             }
         }
@@ -1378,14 +1378,14 @@ namespace Manimal.Icebreaker
                     catch { packedOk = true; } // reflection drift — component alive, assume native owns culling
                     if (packedOk)
                     {
-                        Plugin.Log.LogWarning("[Culling] NATIVE BSG culling grid alive with valid packed data — sidecar driver standing down");
+                        Plugin.Log.LogDebug("[Culling] NATIVE BSG culling grid alive with valid packed data — sidecar driver standing down");
                         return;
                     }
                     Plugin.Log.LogWarning("[Culling] native grid present but packed bake NOT loaded — falling back to sidecar driver");
                 }
 
                 var camType = System.Type.GetType("Koenigz.PerfectCulling.PerfectCullingCamera, PerfectCullingRuntime");
-                if (camType == null) { Plugin.Log.LogWarning("[Culling] PerfectCullingRuntime not loaded — no culling"); return; }
+                if (camType == null) { Plugin.Log.LogDebug("[Culling] PerfectCullingRuntime not loaded — no culling"); return; }
                 var volType = System.Type.GetType("Koenigz.PerfectCulling.PerfectCullingVolume, PerfectCullingRuntime");
                 if (volType == null) { Plugin.Log.LogWarning("[Culling] volume type missing"); return; }
 
@@ -1432,12 +1432,12 @@ namespace Manimal.Icebreaker
                         state = $"asm={bt.Assembly.GetName().Name} dataField={(dataF != null ? "present" : "MISSING")} data={(dataArr == null ? "null" : dataArr.Length.ToString())} " +
                                 $"rawData={(rawArr == null ? "null" : rawArr.Length.ToString())} groups={groups} cellCount={cellCount} ver={ver} volume.bakeGroups={(volGroups == null ? "null" : volGroups.Length.ToString())}";
                     }
-                    Plugin.Log.LogWarning($"[Culling] volume '{comp?.name}': {state}");
+                    Plugin.Log.LogDebug($"[Culling] volume '{comp?.name}': {state}");
                 }
-                Plugin.Log.LogWarning($"[Culling] AllVolumes registered: {allVolumes?.Count ?? -1} of {vols.Length}");
+                Plugin.Log.LogDebug($"[Culling] AllVolumes registered: {allVolumes?.Count ?? -1} of {vols.Length}");
 
                 var cam = CameraRef != null ? CameraRef : Camera.main;
-                if (cam == null) { Plugin.Log.LogWarning("[Culling] no camera to attach to"); return; }
+                if (cam == null) { Plugin.Log.LogDebug("[Culling] no camera to attach to"); return; }
                 // NO PerfectCullingCamera: its OnPreCull re-executes ALL volumes in one
                 // frame on ANY cell crossing — with the fine indoor bake (4m cells) that
                 // meant a 90-105ms hitch every few steps. NeuterEditorOnlyCallbacks still
@@ -1449,7 +1449,7 @@ namespace Manimal.Icebreaker
                 try
                 {
                     BuildPcDriver(vols);
-                    Plugin.Log.LogWarning($"[Culling] sliced PC driver armed — {vols.Length} volume(s), 1 volume/frame, per-volume cell gating");
+                    Plugin.Log.LogDebug($"[Culling] sliced PC driver armed — {vols.Length} volume(s), 1 volume/frame, per-volume cell gating");
                 }
                 catch (Exception de) { Plugin.Log.LogWarning($"[Culling] driver build failed: {de.Message}"); }
 
@@ -1480,7 +1480,7 @@ namespace Manimal.Icebreaker
                 var groupType = asm.GetType("Koenigz.PerfectCulling.PerfectCullingBakeGroup");
 
                 using var r = new System.IO.BinaryReader(System.IO.File.OpenRead(file));
-                if (r.ReadString() != "PCBK3") { Plugin.Log.LogWarning($"[Culling] {volName}: old/bad sidecar format — re-export from the editor"); return; }
+                if (r.ReadString() != "PCBK3") { Plugin.Log.LogDebug($"[Culling] {volName}: old/bad sidecar format — re-export from the editor"); return; }
                 r.ReadString(); // volume name (== file name)
                 var volPos = new Vector3(r.ReadSingle(), r.ReadSingle(), r.ReadSingle());
                 var volRot = new Quaternion(r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadSingle());
@@ -1624,9 +1624,9 @@ namespace Manimal.Icebreaker
             {
                 _groupRenderersField = groupT.GetField("renderers");
                 h.Patch(toggle, prefix: new HarmonyMethod(typeof(RenderEnvProbe), nameof(ToggleGroupViaEnabled)));
-                Plugin.Log.LogWarning("[Culling] BakeGroup.Toggle replaced with renderer.enabled path (static-batching compatible)");
+                Plugin.Log.LogDebug("[Culling] BakeGroup.Toggle replaced with renderer.enabled path (static-batching compatible)");
             }
-            Plugin.Log.LogWarning("[Culling] editor-only callbacks neutered on PerfectCullingCamera");
+            Plugin.Log.LogDebug("[Culling] editor-only callbacks neutered on PerfectCullingCamera");
         }
 
         private static bool SkipOriginal() => false;
@@ -1775,11 +1775,11 @@ namespace Manimal.Icebreaker
                         }
                         catch { }
                     }
-                    Plugin.Log.LogWarning("[Culling] PC driver DISABLED (live) — occlusion-culled renderers restored");
+                    Plugin.Log.LogDebug("[Culling] PC driver DISABLED (live) — occlusion-culled renderers restored");
                 }
                 return;
             }
-            if (_pcDriverWasOff) { _pcDriverWasOff = false; Plugin.Log.LogWarning("[Culling] PC driver re-enabled (live)"); }
+            if (_pcDriverWasOff) { _pcDriverWasOff = false; Plugin.Log.LogDebug("[Culling] PC driver re-enabled (live)"); }
 
             if (_pcVols.Count == 0 || CameraRef == null) return;
             _pcvCursor = (_pcvCursor + 1) % _pcVols.Count;
@@ -1903,7 +1903,7 @@ namespace Manimal.Icebreaker
                 }
                 xv.B.Expand(3f); // doorway grace at the seams
                 _xvols.Add(xv);
-                Plugin.Log.LogWarning($"[XCull] interior volume '{xv.Name}': {xv.Groups.Length} groups, bounds {xv.B.size}");
+                Plugin.Log.LogDebug($"[XCull] interior volume '{xv.Name}': {xv.Groups.Length} groups, bounds {xv.B.size}");
             }
         }
 
@@ -1995,7 +1995,7 @@ namespace Manimal.Icebreaker
             if (dt > 0.025f && dt > _ftAvg * 2.2f && Time.unscaledTime - _lastSpikeLog > 1f)
             {
                 _lastSpikeLog = Time.unscaledTime;
-                Plugin.Log.LogWarning($"[Stutter] {dt * 1000f:F0}ms frame (avg {_ftAvg * 1000f:F1}ms): "
+                Plugin.Log.LogDebug($"[Stutter] {dt * 1000f:F0}ms frame (avg {_ftAvg * 1000f:F1}ms): "
                     + $"pcToggles={_pcWrites} pcRuns={_pcDriverRuns} distCull={_distWrites} lightCull={_lightWrites} "
                     + $"nav={NavCalls}x/{NavMs:F1}ms gc0={gc0 - _gc0Prev} gc1={gc1 - _gc1Prev} t={Time.timeSinceLevelLoad:F0}s");
             }
@@ -2067,7 +2067,7 @@ namespace Manimal.Icebreaker
                 // slider actually works mid-raid (baked-in scale made it a dead knob)
                 _distEntries.Add(new DistEntry { R = mr, Pos = mr.bounds.center, CullDist = cullDist });
             }
-            Plugin.Log.LogWarning($"[DistCull] tracking {_distEntries.Count} renderers (size-classed cull distances x{Plugin.CullDistanceScale.Value:F2})");
+            Plugin.Log.LogDebug($"[DistCull] tracking {_distEntries.Count} renderers (size-classed cull distances x{Plugin.CullDistanceScale.Value:F2})");
         }
 
         // retail maps ship a scene-resident CullingManager (jobified distance culler that
@@ -2080,9 +2080,9 @@ namespace Manimal.Icebreaker
         {
             try
             {
-                if (CullingManager.Instance != null) { Plugin.Log.LogWarning("[Culling] CullingManager already present"); return; }
+                if (CullingManager.Instance != null) { Plugin.Log.LogDebug("[Culling] CullingManager already present"); return; }
                 new GameObject("Icebreaker_CullingManager_Fix").AddComponent<CullingManager>();
-                Plugin.Log.LogWarning("[Culling] created CullingManager — native light culling live (if _light refs are baked)");
+                Plugin.Log.LogDebug("[Culling] created CullingManager — native light culling live (if _light refs are baked)");
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[Culling] CullingManager create failed: {e.Message}"); }
         }
@@ -2104,7 +2104,7 @@ namespace Manimal.Icebreaker
             {
                 if (clo.GetLight() != null)
                 {
-                    Plugin.Log.LogWarning("[LightCull] native CullingLightObjects detected — runtime light culler standing down");
+                    Plugin.Log.LogDebug("[LightCull] native CullingLightObjects detected — runtime light culler standing down");
                     return;
                 }
             }
@@ -2116,7 +2116,7 @@ namespace Manimal.Icebreaker
                 if (l.type == LightType.Directional) continue;
                 _lightEntries.Add(new LightEntry { L = l, Pos = l.transform.position });
             }
-            Plugin.Log.LogWarning($"[LightCull] tracking {_lightEntries.Count} static map lights (80m x{Plugin.CullDistanceScale.Value:F2})");
+            Plugin.Log.LogDebug($"[LightCull] tracking {_lightEntries.Count} static map lights (80m x{Plugin.CullDistanceScale.Value:F2})");
         }
 
         // cutscene hold: the cullers key off CAMERA position, and the cutscene flies it
@@ -2156,7 +2156,7 @@ namespace Manimal.Icebreaker
                     rends++;
                 }
             }
-            Plugin.Log.LogWarning($"[CutsceneHold] forced on: {lights} tracked + {native} native lights, {rends} renderers");
+            Plugin.Log.LogDebug($"[CutsceneHold] forced on: {lights} tracked + {native} native lights, {rends} renderers");
         }
 
         // the parked hovercraft's two spots (G_spot_1/G_spot_2 in Design_Main, the only
@@ -2174,7 +2174,7 @@ namespace Manimal.Icebreaker
                 if (go != null) freed += FreeNativeLights(go.transform);
             }
             if (freed > 0)
-                Plugin.Log.LogWarning($"[LightLamps] hovercraft spots freed from native culling ({freed})");
+                Plugin.Log.LogDebug($"[LightLamps] hovercraft spots freed from native culling ({freed})");
         }
 
         // free a rig's lights from native culling FOR GOOD: force them lit at authored
@@ -2248,7 +2248,7 @@ namespace Manimal.Icebreaker
                 if (cm != null) cm.LockState(false);
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[CutsceneHold] release failed: {e.Message}"); }
-            Plugin.Log.LogWarning($"[CutsceneHold] released — healed {native} native lights, culling unlocked");
+            Plugin.Log.LogDebug($"[CutsceneHold] released — healed {native} native lights, culling unlocked");
         }
 
         // all lights every ~15 frames — 1.8k distance checks is nothing
@@ -2328,7 +2328,7 @@ namespace Manimal.Icebreaker
                 natives++;
             }
             _lastLamp = v;
-            Plugin.Log.LogWarning($"[LightLamps] drove {n} plain lamps + {natives} native culling lights to intensity {v:F2} (shadows={Plugin.LampShadows.Value})");
+            Plugin.Log.LogDebug($"[LightLamps] drove {n} plain lamps + {natives} native culling lights to intensity {v:F2} (shadows={Plugin.LampShadows.Value})");
         }
 
         internal static void Dump(string tag)
@@ -2597,7 +2597,7 @@ namespace Manimal.Icebreaker
                             catch (Exception e) { Plugin.Log.LogWarning($"[PatrolGen] failed: {e.Message}"); }
                         }
                         AccessTools.Field(typeof(AICoversData), "_cache").SetValue(__instance, new GClass411(__instance));
-                        Plugin.Log.LogWarning($"[RaidFix] AI skeleton ready: {__instance.Points.Count} covers, " +
+                        Plugin.Log.LogDebug($"[RaidFix] AI skeleton ready: {__instance.Points.Count} covers, " +
                                               $"{__instance.AICorePointsHolder?.CorePoints?.Count ?? 0} cores, cache built");
                     }
                 }
@@ -2661,7 +2661,7 @@ namespace Manimal.Icebreaker
                         vox.VoxelesArray[x, y, z] = cell;
                         vox.VoxelsList.Add(cell);
                     }
-            Plugin.Log.LogWarning($"[RaidFix] synthesized voxel grid {nx}x{ny}x{nz} ({vox.VoxelsList.Count} cells) over navmesh bounds {min}..{max}");
+            Plugin.Log.LogDebug($"[RaidFix] synthesized voxel grid {nx}x{ny}x{nz} ({vox.VoxelsList.Count} cells) over navmesh bounds {min}..{max}");
         }
 
         // CreateOrFind only ADDs holders when the scene has none — our ripped scene HAS
@@ -2696,7 +2696,7 @@ namespace Manimal.Icebreaker
                     }
                 }
                 if (healed > 0)
-                    Plugin.Log.LogWarning($"[RaidFix] healed {healed} null collection(s) on {t.Name}");
+                    Plugin.Log.LogDebug($"[RaidFix] healed {healed} null collection(s) on {t.Name}");
             }
         }
     }
@@ -2788,7 +2788,7 @@ namespace Manimal.Icebreaker
                 }
                 var bdc = UnityEngine.Object.FindObjectOfType<BotDoorsController>();
                 var listField = AccessTools.Field(typeof(BotDoorsController), "_navMeshDoorLinks")?.GetValue(bdc) as List<NavMeshDoorLink>;
-                Plugin.Log.LogWarning($"[DoorDiag] cells: {idCells} with ids -> {linkedCells} reconnected | links: {links.Length} in scene, {ids.Count} distinct ids, {withDoor} door-matched, {carved} carved | controller list: {(listField != null ? listField.Count.ToString() : "null")}");
+                Plugin.Log.LogDebug($"[DoorDiag] cells: {idCells} with ids -> {linkedCells} reconnected | links: {links.Length} in scene, {ids.Count} distinct ids, {withDoor} door-matched, {carved} carved | controller list: {(listField != null ? listField.Count.ToString() : "null")}");
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[DoorDiag] failed: {e.Message}"); }
         }
@@ -2831,7 +2831,7 @@ namespace Manimal.Icebreaker
                     visualsFixed++;
                 }
             }
-            Plugin.Log.LogWarning($"[Perf] shadow split: {proxiesFixed} proxies set cast-only, {visualsFixed} visuals set no-cast ({sw.ElapsedMilliseconds}ms over {all.Length} renderers)");
+            Plugin.Log.LogDebug($"[Perf] shadow split: {proxiesFixed} proxies set cast-only, {visualsFixed} visuals set no-cast ({sw.ElapsedMilliseconds}ms over {all.Length} renderers)");
         }
 
         private static readonly System.Reflection.FieldInfo _gripsField =
@@ -2882,7 +2882,7 @@ namespace Manimal.Icebreaker
                     _proxyViewField?.SetValue(p, p.transform.InverseTransformPoint(world[1]));
                     standFixed++;
                     if (drift > 0.25f)
-                        Plugin.Log.LogWarning($"[Keycard] '{swiper}' stand point was {drift:F2}m off retail — rip transform confirmed bad, corrected");
+                        Plugin.Log.LogDebug($"[Keycard] '{swiper}' stand point was {drift:F2}m off retail — rip transform confirmed bad, corrected");
                 }
 
                 if (p.Link != null) continue;
@@ -2929,7 +2929,7 @@ namespace Manimal.Icebreaker
                     if (changed) { _gripsField.SetValue(d, cur.ToArray()); gripped++; }
                 }
             }
-            Plugin.Log.LogWarning($"[Keycard] {doors.Length} doors: {wired} with proxies ({linked} Link(s) healed by proximity), {gripped} given swiper grips, {standFixed} stand points set from retail, {orphans} orphan(s){(orphans > 0 ? " — swipe on those will crash" : "")}");
+            Plugin.Log.LogDebug($"[Keycard] {doors.Length} doors: {wired} with proxies ({linked} Link(s) healed by proximity), {gripped} given swiper grips, {standFixed} stand points set from retail, {orphans} orphan(s){(orphans > 0 ? " — swipe on those will crash" : "")}");
         }
 
         private static void Prefix()
@@ -2993,7 +2993,7 @@ namespace Manimal.Icebreaker
                 catch { return true; }
             });
             if (removed > 0)
-                Plugin.Log.LogWarning($"[RaidFix] pruned {removed} dead spawn markers from BotZone '{__instance.name}' ({list.Count} left)");
+                Plugin.Log.LogDebug($"[RaidFix] pruned {removed} dead spawn markers from BotZone '{__instance.name}' ({list.Count} left)");
         }
     }
 
@@ -3036,7 +3036,7 @@ namespace Manimal.Icebreaker
             }
             new Harmony("com.manimal.aidatadumper.raidfix-late").Patch(target,
                 finalizer: new HarmonyMethod(typeof(LateWaypointsPatch), nameof(SwallowFinalizer)));
-            Plugin.Log.LogWarning("[RaidFix] late-patched Waypoints DoorLinkPatch with finalizer");
+            Plugin.Log.LogDebug("[RaidFix] late-patched Waypoints DoorLinkPatch with finalizer");
         }
 
         private static bool _stackLogged;
@@ -3255,7 +3255,7 @@ namespace Manimal.Icebreaker
                     ? BotDifficulty.hard
                     : wavesSettings.BotDifficulty.ToBotDifficulty();
             }
-            Plugin.Log.LogWarning($"[RaidFix] wave slots kept as authored ({waves.Length} waves, bot-amount slider ignored"
+            Plugin.Log.LogDebug($"[RaidFix] wave slots kept as authored ({waves.Length} waves, bot-amount slider ignored"
                 + (Plugin.HardBots.Value ? ", difficulty forced HARD)" : ")"));
             __result = waves;
             return false;

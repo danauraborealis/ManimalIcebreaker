@@ -86,7 +86,7 @@ namespace Manimal.Icebreaker.Blowtorch
             }
             else
             {
-                Plugin.Log.LogWarning("[Blowtorch] no Animator found in torch prefab");
+                Plugin.Log.LogDebug("[Blowtorch] no Animator found in torch prefab");
             }
 
             // vanilla left-hand gate: SetInteractInHands (doors/loot/pickup all route
@@ -99,7 +99,7 @@ namespace Manimal.Icebreaker.Blowtorch
             if (fa != null)
             {
                 fa.FullIdleStateName = "idle";
-                Plugin.Log.LogWarning($"[Blowtorch] FirearmsAnimator bound — LActions layer={fa.LACTIONS_LAYER_INDEX}, FullIdleStateName=idle (left-hand gate open)");
+                Plugin.Log.LogDebug($"[Blowtorch] FirearmsAnimator bound — LActions layer={fa.LACTIONS_LAYER_INDEX}, FullIdleStateName=idle (left-hand gate open)");
             }
             else
                 Plugin.Log.LogWarning("[Blowtorch] FirearmsAnimator NULL — vanilla left-hand path cannot run");
@@ -134,7 +134,7 @@ namespace Manimal.Icebreaker.Blowtorch
                     foreach (var fld in mc.GetType().GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance))
                         if (fld.FieldType == typeof(PlayerAnimator)) { pa = fld.GetValue(mc); break; }
                 var f = pa?.GetType().GetMethod("GetWeaponTypeFloat")?.Invoke(pa, null);
-                Plugin.Log.LogWarning($"[Blowtorch] pose diag: body WeaponTypeFloat={f ?? "?"} (0=Rifle 1=Pistol 4=EmptyHands), animType={player.GetWeaponAnimationType(this)}");
+                Plugin.Log.LogDebug($"[Blowtorch] pose diag: body WeaponTypeFloat={f ?? "?"} (0=Rifle 1=Pistol 4=EmptyHands), animType={player.GetWeaponAnimationType(this)}");
             }
             catch (Exception e)
             {

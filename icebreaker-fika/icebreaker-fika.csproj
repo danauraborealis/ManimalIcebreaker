@@ -44,18 +44,6 @@
       <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="tarkin.ladders.bep">
-      <HintPath>$(SPTPath)\BepInEx\plugins\tarkin-ladders\tarkin.ladders.bep.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="tarkin.ladders.shared">
-      <HintPath>$(SPTPath)\BepInEx\plugins\tarkin-ladders\tarkin.ladders.shared.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="tarkin.ladders.fika">
-      <HintPath>$(FikaPath)\BepInEx\plugins\tarkin-ladders\tarkin.ladders.fika.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
     <!-- the real runtime dll from the fika test install — compile-time only, never shipped -->
     <Reference Include="Fika.Core">
       <HintPath>$(FikaPath)\BepInEx\plugins\Fika\Fika.Core.dll</HintPath>

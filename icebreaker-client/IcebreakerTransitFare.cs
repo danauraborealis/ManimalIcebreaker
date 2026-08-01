@@ -166,14 +166,14 @@ namespace Manimal.Icebreaker
         internal static bool TryTakeFare(Player player, int cost)
         {
             var inv = player.InventoryController;
-            if (inv == null) { Plugin.Log.LogWarning("[Fare] no inventory controller"); return false; }
+            if (inv == null) { Plugin.Log.LogDebug("[Fare] no inventory controller"); return false; }
 
             var stacks = RoubleStacks(player);
             int carried = stacks.Sum(i => i.StackObjectsCount);
             if (carried < cost)
             {
                 Notify($"You need {cost:N0} roubles for the crossing ({carried:N0} carried)");
-                Plugin.Log.LogWarning($"[Fare] short: {carried}/{cost}");
+                Plugin.Log.LogDebug($"[Fare] short: {carried}/{cost}");
                 return false;
             }
 
@@ -188,7 +188,7 @@ namespace Manimal.Icebreaker
                 var fakeStash = Singleton<ItemFactoryClass>.Instance.CreateFakeStash(null);
                 var till = new TraderControllerClass(fakeStash, "IcebreakerFare", "IcebreakerFare", true, EOwnerType.ExfilPoint);
                 var slot = ((StashItemClass)till.RootItem).Grid.FindLocationForItem(stack);
-                if (slot == null) { Plugin.Log.LogWarning("[Fare] till has no room for a stack, aborting"); break; }
+                if (slot == null) { Plugin.Log.LogDebug("[Fare] till has no room for a stack, aborting"); break; }
 
                 int take = Mathf.Min(remaining, stack.StackObjectsCount);
                 if (take >= stack.StackObjectsCount)
@@ -217,7 +217,7 @@ namespace Manimal.Icebreaker
 
             foreach (var d in dispatch) d();
             Notify($"Paid {cost:N0} roubles for the crossing");
-            Plugin.Log.LogWarning($"[Fare] collected {cost} roubles ({dispatch.Count} ops dispatched)");
+            Plugin.Log.LogDebug($"[Fare] collected {cost} roubles ({dispatch.Count} ops dispatched)");
             return true;
         }
 

@@ -42,7 +42,7 @@ namespace Manimal.Icebreaker
                     // just came out of. newest map wins.
                     if (current == null || ReferenceEquals(current, __instance)) return;
                     Owner.SetValue(null, null);
-                    Plugin.Log.LogWarning(
+                    Plugin.Log.LogDebug(
                         $"[PhysRegions] '{current.name}' still owned the broadphase regions, " +
                         $"handing them to '{__instance.name}' for this map");
                 }
@@ -56,7 +56,7 @@ namespace Manimal.Icebreaker
                 {
                     if (!IceGate.On) return;
                     RegionsApplied = true;
-                    Plugin.Log.LogWarning($"[PhysRegions] '{__instance.name}' laid out the broadphase regions");
+                    Plugin.Log.LogDebug($"[PhysRegions] '{__instance.name}' laid out the broadphase regions");
                 }
                 catch { }
             }

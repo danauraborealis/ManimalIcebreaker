@@ -100,7 +100,7 @@ namespace Manimal.Icebreaker
             var synth = all.Where(r => r.Synth).ToList();
             if (synth.Count == 0)
             {
-                Plugin.Log.LogWarning($"[Hybrid] none of [{string.Join(", ", wanted)}] matched a BotZone in the scene — "
+                Plugin.Log.LogDebug($"[Hybrid] none of [{string.Join(", ", wanted)}] matched a BotZone in the scene — "
                                       + "check the names against the zone list this map actually has");
                 return;
             }
@@ -135,7 +135,7 @@ namespace Manimal.Icebreaker
             }
             if (genPoints == null || genPoints.Count == 0)
             {
-                Plugin.Log.LogWarning("[Hybrid] scanner found no cover inside the named zones — retail bake left intact");
+                Plugin.Log.LogDebug("[Hybrid] scanner found no cover inside the named zones — retail bake left intact");
                 return;
             }
 
@@ -168,7 +168,7 @@ namespace Manimal.Icebreaker
 
             RegeneratePatrols(synth, covers);
 
-            Plugin.Log.LogWarning($"[Hybrid] {synth.Count} synth zone(s) of {all.Count} [{string.Join(", ", synth.Select(r => r.Zone.NameZone))}]: "
+            Plugin.Log.LogDebug($"[Hybrid] {synth.Count} synth zone(s) of {all.Count} [{string.Join(", ", synth.Select(r => r.Zone.NameZone))}]: "
                 + $"dropped {doomed.Count} retail point(s), added {genPoints.Count} generated; "
                 + $"map total {before} -> {covers.Points.Count}");
         }
@@ -179,7 +179,7 @@ namespace Manimal.Icebreaker
             {
                 var zones = UnityEngine.Object.FindObjectsOfType<BotZone>()
                     .Where(z => z != null).OrderBy(z => z.NameZone).ToList();
-                Plugin.Log.LogWarning($"[Hybrid] {zones.Count} BotZone(s) on this map — SynthZones takes these names:");
+                Plugin.Log.LogDebug($"[Hybrid] {zones.Count} BotZone(s) on this map — SynthZones takes these names:");
                 foreach (var z in zones)
                 {
                     var c = Vector3.zero; int n = 0;
@@ -187,7 +187,7 @@ namespace Manimal.Icebreaker
                         foreach (var m in z.SpawnPointMarkers)
                             if (m != null) { c += m.transform.position; n++; }
                     if (n > 0) c /= n;
-                    Plugin.Log.LogWarning($"    {z.NameZone,-28} markers={n,-3} ways={z.PatrolWays?.Length ?? 0,-3} "
+                    Plugin.Log.LogDebug($"    {z.NameZone,-28} markers={n,-3} ways={z.PatrolWays?.Length ?? 0,-3} "
                                           + (n > 0 ? $"centre=({c.x:F0},{c.y:F0},{c.z:F0})" : "centre=n/a"));
                 }
             }
@@ -213,7 +213,7 @@ namespace Manimal.Icebreaker
                 bool synth = wanted.Any(w => string.Equals(w, zone.NameZone, StringComparison.OrdinalIgnoreCase));
                 regions.Add(new ZoneRegion { Zone = zone, Centre = centre, Synth = synth });
                 if (synth)
-                    Plugin.Log.LogWarning($"[Hybrid] synth region '{zone.NameZone}' centre "
+                    Plugin.Log.LogDebug($"[Hybrid] synth region '{zone.NameZone}' centre "
                         + $"({centre.x:F1},{centre.y:F1},{centre.z:F1}) from {n} spawn marker(s)");
             }
             return regions;
@@ -287,7 +287,7 @@ namespace Manimal.Icebreaker
                     if (built == 0)
                     {
                         r.Zone.PatrolWays = retail;
-                        Plugin.Log.LogWarning($"[Hybrid] zone '{r.Zone.NameZone}': no route generated — keeping retail's "
+                        Plugin.Log.LogDebug($"[Hybrid] zone '{r.Zone.NameZone}': no route generated — keeping retail's "
                                               + $"{retail?.Length ?? 0} way(s) so the zone stays valid");
                     }
                 }

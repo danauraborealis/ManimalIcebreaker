@@ -228,7 +228,7 @@ namespace Manimal.Icebreaker
                 if (root != null)
                     foreach (var s in root.GetComponentsInChildren<AudioSource>(true))
                         if (s != null && !s.isPlaying && s.clip != null && s.playOnAwake) { s.Play(); bare++; }
-                Plugin.Log.LogWarning($"[Ambient] spatialised + started {voiced} loops, {randoms} random players; " +
+                Plugin.Log.LogDebug($"[Ambient] spatialised + started {voiced} loops, {randoms} random players; " +
                                       $"{gated} 2D bed(s) gated to indoor/outdoor; {bare} bare playOnAwake source(s) revived");
                 StartOutdoorBed(built);
                 StartRoomToneTransitions();
@@ -347,7 +347,7 @@ namespace Manimal.Icebreaker
                             int added = 0;
                             foreach (var c in _bankBundle.LoadAllAssets<AudioClip>())
                                 if (c != null) { _clips[c.name] = c; added++; }
-                            Plugin.Log.LogWarning($"[Ambient] bank bundle loaded: {added} clips");
+                            Plugin.Log.LogDebug($"[Ambient] bank bundle loaded: {added} clips");
                         }
                     }
                     else Plugin.Log.LogWarning($"[Ambient] bank bundle not shipped ({bundlePath}) — random players stay silent");
@@ -396,7 +396,7 @@ namespace Manimal.Icebreaker
                     _banks[kv.Key] = bank;
                     builtBanks++;
                 }
-                Plugin.Log.LogWarning($"[Ambient] rebuilt {builtBanks} sound bank(s) from our own clips" +
+                Plugin.Log.LogDebug($"[Ambient] rebuilt {builtBanks} sound bank(s) from our own clips" +
                                       (thin.Count > 0 ? $"; no clips found for: {string.Join(", ", thin.ToArray())}" : ""));
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[Ambient] bank rebuild failed: {e.Message}"); }
@@ -443,7 +443,7 @@ namespace Manimal.Icebreaker
                 so.name = "ManimalIcebreakerSeasonAmbientSoundData";
                 AccessTools.Field(soType, "_dayTimeAmbientSeasonClips").SetValue(so, dict);
                 _seasonData = so;
-                Plugin.Log.LogWarning($"[Ambient] rebuilt season ambient data with '{OutdoorClip}' for day+night " +
+                Plugin.Log.LogDebug($"[Ambient] rebuilt season ambient data with '{OutdoorClip}' for day+night " +
                                       $"({dict.Count} seasons) — retail's outdoor bed");
                 return wanted.IsInstanceOfType(so) ? so : null;
             }
@@ -581,7 +581,7 @@ namespace Manimal.Icebreaker
             if (peak > 0.0005f)
             {
                 _watchSettled = true;
-                Plugin.Log.LogWarning($"[Ambient] outdoor bed output verified (peak {peak:F4}) — retail's bed is genuinely carrying the deck");
+                Plugin.Log.LogDebug($"[Ambient] outdoor bed output verified (peak {peak:F4}) — retail's bed is genuinely carrying the deck");
                 return;
             }
             if (_watchTicks < 12) return;   // ~6s of nothing before calling it
@@ -621,7 +621,7 @@ namespace Manimal.Icebreaker
                 var t = ResolveType("GClass1185");
                 if (t == null) { Plugin.Log.LogWarning("[Ambient] room-tone handler type not found — indoor tones stay silent"); return; }
                 _roomToneHandler = Activator.CreateInstance(t) as IDisposable;
-                Plugin.Log.LogWarning(_roomToneHandler != null
+                Plugin.Log.LogDebug(_roomToneHandler != null
                     ? "[Ambient] room-tone transitions armed — indoor tones now fade in/out per room"
                     : "[Ambient] room-tone handler built but not IDisposable — leaving it running");
             }
@@ -728,8 +728,8 @@ namespace Manimal.Icebreaker
                 }
                 OutdoorBedRestored = false;
                 _watchSettled = true;   // nothing left to watch
-                Plugin.Log.LogWarning("[Ambient] retail outdoor bed left MUTED (measured ~25dB down, inaudible) — our wind bed carries outdoor ambience");
-                Plugin.Log.LogWarning($"[Ambient] outdoor bed via DayTimeAmbientBlender: " +
+                Plugin.Log.LogDebug("[Ambient] retail outdoor bed left MUTED (measured ~25dB down, inaudible) — our wind bed carries outdoor ambience");
+                Plugin.Log.LogDebug($"[Ambient] outdoor bed via DayTimeAmbientBlender: " +
                                       $"day={(day != null ? (day.clip != null ? day.clip.name : "no clip") : "no source")} " +
                                       $"night={(night != null ? (night.clip != null ? night.clip.name : "no clip") : "no source")} " +
                                       $"playing={playing} — our wind bed STAYS UP (retail's muted by policy)");
@@ -758,7 +758,7 @@ namespace Manimal.Icebreaker
                 GClass1174 names;
                 if (master == null || !GClass3670.TryGetData<GClass1174>(out names) || names == null)
                 {
-                    Plugin.Log.LogWarning("[Ambient] master/param-name data unavailable — outdoor bed stays direct (audible either way)");
+                    Plugin.Log.LogDebug("[Ambient] master/param-name data unavailable — outdoor bed stays direct (audible either way)");
                     return;
                 }
 
@@ -772,7 +772,7 @@ namespace Manimal.Icebreaker
                 var nightG = Find("AmbientOutNight");
                 if (dayG == null || nightG == null)
                 {
-                    Plugin.Log.LogWarning("[Ambient] AmbientOutDay/Night groups not on the master — outdoor bed stays direct");
+                    Plugin.Log.LogDebug("[Ambient] AmbientOutDay/Night groups not on the master — outdoor bed stays direct");
                     return;
                 }
 
@@ -803,7 +803,7 @@ namespace Manimal.Icebreaker
                     var src = l[0] != null ? l[0].GetComponent<AudioSource>() : null;
                     if (src != null) src.outputAudioMixerGroup = null;
                 }
-                Plugin.Log.LogWarning($"[Ambient] day/night faders set (day={dayDb:F0}dB night={nightDb:F0}dB) "
+                Plugin.Log.LogDebug($"[Ambient] day/night faders set (day={dayDb:F0}dB night={nightDb:F0}dB) "
                                       + "but the bed stays DIRECT — routing it onto the master bus silences it");
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[Ambient] mixer routing failed: {e.Message} — sources stay direct"); }

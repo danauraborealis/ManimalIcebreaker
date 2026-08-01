@@ -45,7 +45,7 @@ namespace Manimal.Icebreaker
                 var path = SysIoPath.Combine(DataDir, "icebreaker_weather.json");
                 if (!System.IO.File.Exists(path))
                 {
-                    Plugin.Log.LogWarning($"[Weather] no sidecar at {path} — weather stays off");
+                    Plugin.Log.LogDebug($"[Weather] no sidecar at {path} — weather stays off");
                     return null;
                 }
                 _sidecar = JObject.Parse(System.IO.File.ReadAllText(path));
@@ -82,7 +82,7 @@ namespace Manimal.Icebreaker
                 foreach (var rootName in new[] { "Weather", "Sky Dome" })
                 {
                     var t = FindSceneGo(rootName);
-                    if (t == null) { Plugin.Log.LogWarning($"[Weather] root '{rootName}' not in scene — aborting"); return false; }
+                    if (t == null) { Plugin.Log.LogDebug($"[Weather] root '{rootName}' not in scene — aborting"); return false; }
                     roots.Add(t);
                     IndexSubtree(t, rootName);
                 }
@@ -136,7 +136,7 @@ namespace Manimal.Icebreaker
                 WarmSnowEarly(); // shader+settings onto Close/Far NOW, during load — Start()'s
                                  // runtime copies inherit them, so flakes are valid from their
                                  // first visible frame (was: pop-in seconds into the raid)
-                Plugin.Log.LogWarning($"[Weather] WEATHER STACK REBUILT: {created} components — vanilla weather/seasons live"
+                Plugin.Log.LogDebug($"[Weather] WEATHER STACK REBUILT: {created} components — vanilla weather/seasons live"
                     + (EFT.Weather.WeatherController.Instance != null ? " (WeatherController.Instance OK)" : " (WARNING: Instance still null!)"));
                 return true;
             }
@@ -231,7 +231,7 @@ namespace Manimal.Icebreaker
             _camParamsCam = cam;
             TickCameraParams();
             Shader.SetGlobalBuffer("CameraParameters", _camParamsBuf);
-            Plugin.Log.LogWarning("[Weather] MBOIT_Scattering CONSTRUCTED — retail 1.0 values + _StencilShadow & CameraParameters globals bound (compute can dispatch)");
+            Plugin.Log.LogDebug("[Weather] MBOIT_Scattering CONSTRUCTED — retail 1.0 values + _StencilShadow & CameraParameters globals bound (compute can dispatch)");
             return mb;
         }
         private static ComputeBuffer _camParamsBuf;
@@ -311,7 +311,7 @@ namespace Manimal.Icebreaker
                     // curves instead
                     remap.Record = RetailFogRemap.Build();
                     wc.MBOITFogRemapDataV2 = remap;
-                    Plugin.Log.LogWarning("[Weather] VOLUMETRIC fog armed — retail 1.0 remap record + MBOIT scattering");
+                    Plugin.Log.LogDebug("[Weather] VOLUMETRIC fog armed — retail 1.0 remap record + MBOIT scattering");
                 }
                 if (scat != null && !scat.MBOIT) scat.MBOIT = true;
 
@@ -335,13 +335,13 @@ namespace Manimal.Icebreaker
                             AccessTools.Field(typeof(TOD_Scattering), "mboit_Scattering_0")?.SetValue(scat, mb);
                             mb.Sky = MonoBehaviourSingleton<TOD_Sky>.Instance;
                             AccessTools.Field(typeof(EFT.Weather.WeatherController), "mboit_Scattering_0")?.SetValue(wc, mb);
-                            Plugin.Log.LogWarning("[Weather] MBOIT_Scattering bound to wc — volumetric params flowing");
+                            Plugin.Log.LogDebug("[Weather] MBOIT_Scattering bound to wc — volumetric params flowing");
                         }
                         else
-                            Plugin.Log.LogWarning("[Weather] MBOIT_Scattering unavailable — volumetric params cant flow (prefab-default rendering)");
+                            Plugin.Log.LogDebug("[Weather] MBOIT_Scattering unavailable — volumetric params cant flow (prefab-default rendering)");
                     }
                     else
-                        Plugin.Log.LogWarning($"[Weather] MBOIT_Scattering bound ok (enabled={mb.enabled})");
+                        Plugin.Log.LogDebug($"[Weather] MBOIT_Scattering bound ok (enabled={mb.enabled})");
                 }
             }
             else
@@ -390,13 +390,13 @@ namespace Manimal.Icebreaker
                 if (_tonemap != null)
                 {
                     var cam = _tonemap.GetComponent<Camera>();
-                    Plugin.Log.LogWarning($"[Weather] Tonemapping instance on '{_tonemap.gameObject.name}' camEnabled={(cam != null && cam.enabled)} camDepth={(cam != null ? cam.depth.ToString("0") : "n/a")}");
+                    Plugin.Log.LogDebug($"[Weather] Tonemapping instance on '{_tonemap.gameObject.name}' camEnabled={(cam != null && cam.enabled)} camDepth={(cam != null ? cam.depth.ToString("0") : "n/a")}");
                 }
             }
             if (_tonemap != null && _tonemap.enabled != Plugin.WeatherTonemap.Value)
             {
                 _tonemap.enabled = Plugin.WeatherTonemap.Value;
-                Plugin.Log.LogWarning($"[Weather] Tonemapping pass {(_tonemap.enabled ? "ENABLED" : "disabled")} (washed-out colors lever)");
+                Plugin.Log.LogDebug($"[Weather] Tonemapping pass {(_tonemap.enabled ? "ENABLED" : "disabled")} (washed-out colors lever)");
             }
 
             if (!Plugin.Blizzard.Value)
@@ -428,7 +428,7 @@ namespace Manimal.Icebreaker
                 try
                 {
                     GlobalEventHandlerClass.CreateEvent<EFT.GlobalEvents.StormStartedEvent>().Invoke();
-                    Plugin.Log.LogWarning("[Weather] BLIZZARD: WeatherDebug pinned (snow/wind/fog/hour) + StormStartedEvent raised");
+                    Plugin.Log.LogDebug("[Weather] BLIZZARD: WeatherDebug pinned (snow/wind/fog/hour) + StormStartedEvent raised");
                 }
                 catch (Exception e) { Plugin.Log.LogWarning($"[Weather] storm event raise failed: {e.Message}"); }
             }
@@ -463,7 +463,7 @@ namespace Manimal.Icebreaker
                                 _origSizeMax = sfm.FlakesSizeMax;
                                 _origSizeCaptured = true;
                             }
-                            Plugin.Log.LogWarning($"[Weather] snow fall-vector now driving {_snowMats.Count} material(s) incl renderer copies");
+                            Plugin.Log.LogDebug($"[Weather] snow fall-vector now driving {_snowMats.Count} material(s) incl renderer copies");
                         }
                     }
                 }
@@ -500,7 +500,7 @@ namespace Manimal.Icebreaker
                 {
                     var t = FindSceneGo("Icebreaker_DryPlanes_Snow") ?? FindSceneGo("Icebreaker_DryPlanes");
                     if (t == null)
-                        Plugin.Log.LogWarning("[Weather] no DryPlanes GO in scene — snow stays unmasked indoors");
+                        Plugin.Log.LogDebug("[Weather] no DryPlanes GO in scene — snow stays unmasked indoors");
                     else
                     {
                         var dryCount = t.GetComponentsInChildren<EFT.EnvironmentEffect.DryPlane>(true).Length;
@@ -547,7 +547,7 @@ namespace Manimal.Icebreaker
                             b.Expand(new Vector3(20f, 10f, 20f));
                             AccessTools.Field(typeof(DepthPhotograper), "bounds_0")?.SetValue(dp, b);
                             dp.Render(); // one-time top-down render of JUST the obstacle mesh
-                            Plugin.Log.LogWarning($"[Weather] WEATHER OBSTACLE LIVE: '{t.name}' src={(dryCount > 0 ? dryCount + " DryPlanes" : "quad MeshFilters")} -> {wo.MeshCollider.sharedMesh.vertexCount} verts, mask over {b.size.x:0}x{b.size.z:0}m — indoor snow clipped");
+                            Plugin.Log.LogDebug($"[Weather] WEATHER OBSTACLE LIVE: '{t.name}' src={(dryCount > 0 ? dryCount + " DryPlanes" : "quad MeshFilters")} -> {wo.MeshCollider.sharedMesh.vertexCount} verts, mask over {b.size.x:0}x{b.size.z:0}m — indoor snow clipped");
                         }
                         else if (dp != null)
                         {
@@ -573,24 +573,24 @@ namespace Manimal.Icebreaker
                 try
                 {
                     var sf = UnityEngine.Object.FindObjectOfType<SnowFlakes>();
-                    if (sf == null) { Plugin.Log.LogWarning("[SnowDiag] NO SnowFlakes component in scene"); }
+                    if (sf == null) { Plugin.Log.LogDebug("[SnowDiag] NO SnowFlakes component in scene"); }
                     else
                     {
-                        Plugin.Log.LogWarning($"[SnowDiag] go='{sf.gameObject.name}' active={sf.gameObject.activeInHierarchy} enabled={sf.enabled} Intensity={sf.Intensity:0.00} StormFactor={sf.StormFactor:0.00} pos={sf.transform.position}");
+                        Plugin.Log.LogDebug($"[SnowDiag] go='{sf.gameObject.name}' active={sf.gameObject.activeInHierarchy} enabled={sf.enabled} Intensity={sf.Intensity:0.00} StormFactor={sf.StormFactor:0.00} pos={sf.transform.position}");
                         var close = AccessTools.Field(typeof(SnowFlakes), "Close")?.GetValue(sf) as Material;
                         var far = AccessTools.Field(typeof(SnowFlakes), "Far")?.GetValue(sf) as Material;
-                        Plugin.Log.LogWarning($"[SnowDiag] Close={(close ? close.name : "NULL")} shader={(close && close.shader ? close.shader.name + " sup=" + close.shader.isSupported : "NULL")} | Far={(far ? far.name : "NULL")} shader={(far && far.shader ? far.shader.name + " sup=" + far.shader.isSupported : "NULL")}");
+                        Plugin.Log.LogDebug($"[SnowDiag] Close={(close ? close.name : "NULL")} shader={(close && close.shader ? close.shader.name + " sup=" + close.shader.isSupported : "NULL")} | Far={(far ? far.name : "NULL")} shader={(far && far.shader ? far.shader.name + " sup=" + far.shader.isSupported : "NULL")}");
                         var mrs = sf.GetComponentsInChildren<MeshRenderer>(true);
                         foreach (var mr in mrs)
-                            Plugin.Log.LogWarning($"[SnowDiag] renderer '{mr.gameObject.name}' enabled={mr.enabled} visible={mr.isVisible} mat={(mr.sharedMaterial ? mr.sharedMaterial.shader.name : "NULL")}");
+                            Plugin.Log.LogDebug($"[SnowDiag] renderer '{mr.gameObject.name}' enabled={mr.enabled} visible={mr.isVisible} mat={(mr.sharedMaterial ? mr.sharedMaterial.shader.name : "NULL")}");
                         if (mrs.Length == 0) Plugin.Log.LogWarning("[SnowDiag] ZERO child renderers — Start() never built the flake meshes");
                         var rc = UnityEngine.Object.FindObjectOfType<RainController>();
-                        Plugin.Log.LogWarning($"[SnowDiag] RainController={(rc != null)} wc.RainController={(wc.RainController != null)} wcRain={wc.WeatherCurve.Rain:0.00}");
+                        Plugin.Log.LogDebug($"[SnowDiag] RainController={(rc != null)} wc.RainController={(wc.RainController != null)} wcRain={wc.WeatherCurve.Rain:0.00}");
                         // sun/darkness probe: SunHeight is written by method_4 each frame, so
                         // it doubles as proof the tick is alive AND that the hour synced (day
                         // = positive). ambient tells us what indoor pixels have to work with.
                         var scat2 = AccessTools.Field(typeof(EFT.Weather.WeatherController), "tod_Scattering_0")?.GetValue(wc) as TOD_Scattering;
-                        Plugin.Log.LogWarning($"[SnowDiag] SunHeight={wc.SunHeight:0.000} scattering={(scat2 != null ? (scat2.enabled ? $"ON density={scat2.GlobalDensity:0.0000}" : "off") : "none")} ambient={RenderSettings.ambientLight} ambientIntensity={RenderSettings.ambientIntensity:0.00} ambientMode={RenderSettings.ambientMode}");
+                        Plugin.Log.LogDebug($"[SnowDiag] SunHeight={wc.SunHeight:0.000} scattering={(scat2 != null ? (scat2.enabled ? $"ON density={scat2.GlobalDensity:0.0000}" : "off") : "none")} ambient={RenderSettings.ambientLight} ambientIntensity={RenderSettings.ambientIntensity:0.00} ambientMode={RenderSettings.ambientMode}");
                     }
                 }
                 catch (Exception e) { Plugin.Log.LogWarning($"[SnowDiag] failed: {e.Message}"); }
@@ -661,7 +661,7 @@ namespace Manimal.Icebreaker
                 sf.FlakesSizeMax = _origSizeMax * fs;
                 sf.StormFactor = Plugin.SnowStormDensity.Value ? 1f : 0f;
                 _snowShaderFixed = true;
-                Plugin.Log.LogWarning($"[Weather] snow warmed at load: {_snowMats.Count} source material(s) shader+settings ready pre-Start");
+                Plugin.Log.LogDebug($"[Weather] snow warmed at load: {_snowMats.Count} source material(s) shader+settings ready pre-Start");
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[Weather] snow warmup threw: {e.Message}"); }
         }
@@ -694,7 +694,7 @@ namespace Manimal.Icebreaker
                 if (os != null && os.enabled)
                 {
                     os.enabled = false;
-                    Plugin.Log.LogWarning("[Weather] optic camera TOD_Scattering disabled (black magnified scopes)");
+                    Plugin.Log.LogDebug("[Weather] optic camera TOD_Scattering disabled (black magnified scopes)");
                 }
                 if (!_opticLogged)
                 {
@@ -702,7 +702,7 @@ namespace Manimal.Icebreaker
                     var parts = new List<string>();
                     foreach (var beh in _opticCam.GetComponents<Behaviour>())
                         if (beh != null) parts.Add($"{beh.GetType().Name}={(beh.enabled ? "on" : "off")}");
-                    Plugin.Log.LogWarning("[Weather] optic camera stack: " + string.Join(", ", parts));
+                    Plugin.Log.LogDebug("[Weather] optic camera stack: " + string.Join(", ", parts));
                 }
             }
 
@@ -722,7 +722,7 @@ namespace Manimal.Icebreaker
                         AccessTools.Field(gfType, "useRadialDistance")?.SetValue(_globalFog, true);
                         AccessTools.Field(gfType, "heightFog")?.SetValue(_globalFog, false);
                         AccessTools.Field(gfType, "startDistance")?.SetValue(_globalFog, 5f);
-                        Plugin.Log.LogWarning("[Weather] GlobalFog attached — fog color now OURS, not the night sky's");
+                        Plugin.Log.LogDebug("[Weather] GlobalFog attached — fog color now OURS, not the night sky's");
                     }
                     else
                         Plugin.Log.LogWarning($"[Weather] GlobalFog unavailable (type={(gfType != null)} shader={(gfShader != null && gfShader.isSupported)}) — falling back to brightened TOD scattering");
@@ -746,7 +746,7 @@ namespace Manimal.Icebreaker
                 if (vmb != null && !vmb.enabled)
                 {
                     vmb.enabled = true;
-                    Plugin.Log.LogWarning("[Weather] MBOIT_Scattering pass ENABLED, classic scattering standing down (exclusive handoff)");
+                    Plugin.Log.LogDebug("[Weather] MBOIT_Scattering pass ENABLED, classic scattering standing down (exclusive handoff)");
                 }
                 // night: the volumetric media is lit by the sky — our rebuilt night sky is
                 // near-black, so lift it with the same FogBrightness lever the fallback
@@ -755,7 +755,7 @@ namespace Manimal.Icebreaker
                 if (vsky != null && vsky.Night != null && Plugin.FogBrightness.Value > 0.001f)
                     vsky.Night.ColorMultiplier = 1f + Plugin.FogBrightness.Value * 20f;
                 if ((++_fogDiagTick % 600) == 0)
-                    Plugin.Log.LogWarning($"[FogDiag] VOLUMETRIC scat.enabled={scat.enabled} MBOIT={scat.MBOIT} wdFog={Plugin.BlizzardFog.Value:0.000}");
+                    Plugin.Log.LogDebug($"[FogDiag] VOLUMETRIC scat.enabled={scat.enabled} MBOIT={scat.MBOIT} wdFog={Plugin.BlizzardFog.Value:0.000}");
                 return;
             }
 
@@ -777,7 +777,7 @@ namespace Manimal.Icebreaker
                     // GlobalFog's CheckResources can self-disable SILENTLY (info-level log
                     // only). periodic diag so a dead fog pass is visible in OUR log.
                     if ((++_fogDiagTick % 600) == 0)
-                        Plugin.Log.LogWarning($"[FogDiag] globalFog.enabled={_globalFog.enabled} density={RenderSettings.fogDensity:0.000} color={RenderSettings.fogColor}");
+                        Plugin.Log.LogDebug($"[FogDiag] globalFog.enabled={_globalFog.enabled} density={RenderSettings.fogDensity:0.000} color={RenderSettings.fogColor}");
                 }
             }
             else if (scat != null)
@@ -785,7 +785,7 @@ namespace Manimal.Icebreaker
                 if (scat.enabled != want)
                 {
                     scat.enabled = want;
-                    Plugin.Log.LogWarning($"[Weather] TOD_Scattering fog pass {(scat.enabled ? "ENABLED" : "disabled")}");
+                    Plugin.Log.LogDebug($"[Weather] TOD_Scattering fog pass {(scat.enabled ? "ENABLED" : "disabled")}");
                 }
                 if (want)
                 {
@@ -859,7 +859,7 @@ namespace Manimal.Icebreaker
                 Graphics.Blit(tmp, depthRt);
                 RenderTexture.active = prev;
                 dp.method_3(); // publish mask origin/inv-size/texture shader globals
-                Plugin.Log.LogWarning($"[Weather] SCENE DEPTH MASK rendered ({dim}x{dim} over {b.size.x:0}x{b.size.z:0}m) — ship geometry clips indoor snow");
+                Plugin.Log.LogDebug($"[Weather] SCENE DEPTH MASK rendered ({dim}x{dim} over {b.size.x:0}x{b.size.z:0}m) — ship geometry clips indoor snow");
             }
             finally
             {

@@ -101,12 +101,12 @@ namespace Manimal.Icebreaker
                     // scene, or with nothing to draw, is invisible for very different reasons
                     var scene = craft.scene.IsValid() ? craft.scene.name : "<none>";
                     int rends = craft.GetComponentsInChildren<Renderer>(true).Length;
-                    Plugin.Log.LogWarning($"[Transit] hovercraft placed at {pos} rot {rot.eulerAngles} " +
+                    Plugin.Log.LogDebug($"[Transit] hovercraft placed at {pos} rot {rot.eulerAngles} " +
                                           $"scene='{scene}' renderers={rends} active={craft.activeInHierarchy}");
                 }
                 else
                 {
-                    Plugin.Log.LogWarning("[Transit] hovercraft prefab unavailable, placing the transit without it");
+                    Plugin.Log.LogDebug("[Transit] hovercraft prefab unavailable, placing the transit without it");
                 }
 
                 BuildTransitPoint(world);
@@ -123,14 +123,14 @@ namespace Manimal.Icebreaker
                 // denied toast and no prompt, which reads far better than an inert patch
                 // of beach. see IcebreakerTransitFare for the gate.
                 var controller = world != null ? world.TransitController : null;
-                if (controller == null) { Plugin.Log.LogWarning("[Transit] no TransitController on Shoreline"); return; }
+                if (controller == null) { Plugin.Log.LogDebug("[Transit] no TransitController on Shoreline"); return; }
 
                 // which controller we got decides whether any of this works. BaseLocalGame
                 // only builds LocalGameTransitControllerClass when transitSettings.active is
                 // set, and ONLY that constructor assigns OnPlayerEnter/OnPlayerExit. get a
                 // different one and TransitPoint.OnTriggerEnter reaches a null delegate and
                 // returns without a word, which looks exactly like the trigger not firing.
-                Plugin.Log.LogWarning($"[Transit] controller={controller.GetType().Name} " +
+                Plugin.Log.LogDebug($"[Transit] controller={controller.GetType().Name} " +
                                       $"interaction={(controller is TransitInteractionControllerAbstractClass)} " +
                                       $"onEnter={(controller.OnPlayerEnter != null)} " +
                                       $"onExit={(controller.OnPlayerExit != null)} " +
@@ -198,7 +198,7 @@ namespace Manimal.Icebreaker
 
                 // log what the engine will actually act on, not a friendly name: the
                 // destination being wrong is invisible until the raid ends in the menu
-                Plugin.Log.LogWarning($"[Transit] transit live at {zonePos} ({box.size.x}x{box.size.y}x{box.size.z}m, " +
+                Plugin.Log.LogDebug($"[Transit] transit live at {zonePos} ({box.size.x}x{box.size.y}x{box.size.z}m, " +
                                       $"yaw {Plugin.TransitZoneRotY.Value}) -> location='{point.parameters.location}' " +
                                       $"target='{point.parameters.target}' opens in {point.parameters.activateAfterSec}s");
             }
@@ -304,7 +304,7 @@ namespace Manimal.Icebreaker
                     if (controller.OnPlayerEnter != null)
                     {
                         controller.OnPlayerEnter(_point, player);
-                        Plugin.Log.LogWarning("[Transit] engine never offered the interaction, replayed OnPlayerEnter");
+                        Plugin.Log.LogDebug("[Transit] engine never offered the interaction, replayed OnPlayerEnter");
                     }
                     else
                     {
@@ -314,7 +314,7 @@ namespace Manimal.Icebreaker
                         // also skips InitPlayerStash, which only the transfer-items screen
                         // needs, not the long-tap confirm this point uses.
                         interaction.method_14(_point.parameters.id, player, interaction.method_17());
-                        Plugin.Log.LogWarning("[Transit] no OnPlayerEnter on this controller, offered the interaction directly");
+                        Plugin.Log.LogDebug("[Transit] no OnPlayerEnter on this controller, offered the interaction directly");
                     }
                 }
                 catch (Exception e)
@@ -368,8 +368,8 @@ namespace Manimal.Icebreaker
                 foreach (var ab in AssetBundle.GetAllLoadedAssetBundles())
                 {
                     if (ab.name == null || ab.name.IndexOf("hovercraft", StringComparison.OrdinalIgnoreCase) < 0) continue;
-                    Plugin.Log.LogWarning($"[Transit] === bundle '{ab.name}' inventory ===");
-                    foreach (var n in ab.GetAllAssetNames()) Plugin.Log.LogWarning($"   {n}");
+                    Plugin.Log.LogDebug($"[Transit] === bundle '{ab.name}' inventory ===");
+                    foreach (var n in ab.GetAllAssetNames()) Plugin.Log.LogDebug($"   {n}");
                     var gos = ab.LoadAllAssets<GameObject>();
                     if (gos.Length > 0)
                     {

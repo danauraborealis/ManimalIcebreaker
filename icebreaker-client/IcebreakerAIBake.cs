@@ -43,7 +43,7 @@ namespace Manimal.Icebreaker
                 if (System.IO.File.Exists(path))
                     _sidecar = JObject.Parse(System.IO.File.ReadAllText(path));
                 else
-                    Plugin.Log.LogWarning($"[AIBake] no sidecar at {path} — synthesized AI graph stays");
+                    Plugin.Log.LogDebug($"[AIBake] no sidecar at {path} — synthesized AI graph stays");
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[AIBake] sidecar parse failed: {e.Message}"); }
             return _sidecar;
@@ -65,7 +65,7 @@ namespace Manimal.Icebreaker
                 // path index over the AI scene (core points, mines, door links live there)
                 var index = new Dictionary<string, Transform>();
                 var scn = SceneManager.GetSceneByName("Icebreaker_AI");
-                if (!scn.IsValid() || !scn.isLoaded) { Plugin.Log.LogWarning("[AIBake] AI scene not loaded"); return; }
+                if (!scn.IsValid() || !scn.isLoaded) { Plugin.Log.LogDebug("[AIBake] AI scene not loaded"); return; }
                 foreach (var root in scn.GetRootGameObjects())
                     Walk(root.transform, root.name, index);
 
@@ -179,7 +179,7 @@ namespace Manimal.Icebreaker
                         zone.PatrolWays = list.ToArray();
                         zonesWired++; waysWired += list.Count;
                     }
-                    Plugin.Log.LogWarning($"[AIBake] patrol routes rebuilt: {pts} points, {ways} ways, " +
+                    Plugin.Log.LogDebug($"[AIBake] patrol routes rebuilt: {pts} points, {ways} ways, " +
                                           $"{zonesWired} zones wired ({waysWired} memberships)");
                 }
 
@@ -270,7 +270,7 @@ namespace Manimal.Icebreaker
                 _marker = new GameObject("Icebreaker_AIBakeStaged");
                 SceneManager.MoveGameObjectToScene(_marker, scn);
                 Loaded = true;
-                Plugin.Log.LogWarning($"[AIBake] RETAIL AI BAKE LOADED: {covers.Points.Count} covers, {covers.Ways.Count} ways, "
+                Plugin.Log.LogDebug($"[AIBake] RETAIL AI BAKE LOADED: {covers.Points.Count} covers, {covers.Ways.Count} ways, "
                     + $"{(voxData != null ? voxData.VoxelsList.Count : 0)} voxels, {coreList.Count} cores — RestoreData gets the real thing");
             }
             catch (Exception e)
@@ -349,11 +349,11 @@ namespace Manimal.Icebreaker
                     }
                 }
 
-                Plugin.Log.LogWarning($"[AIBake] patrol navmesh reconcile: {onMesh} already on-mesh, {snapped} snapped "
+                Plugin.Log.LogDebug($"[AIBake] patrol navmesh reconcile: {onMesh} already on-mesh, {snapped} snapped "
                                       + $"({rescued} needed the {RescueRadius}m rescue, worst {worst:F2}m), "
                                       + $"{offMesh.Count} off-mesh -> {pruned} way membership(s) pruned");
                 if (snapped == 0 && offMesh.Count == 0)
-                    Plugin.Log.LogWarning("[AIBake] every patrol point was already on the navmesh — the standing-still stall is NOT patrol placement");
+                    Plugin.Log.LogDebug("[AIBake] every patrol point was already on the navmesh — the standing-still stall is NOT patrol placement");
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[AIBake] patrol snap failed: {e.Message} — points left as authored"); }
         }

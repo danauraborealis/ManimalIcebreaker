@@ -19,7 +19,7 @@ namespace Manimal.Icebreaker.Blowtorch
             [HarmonyPostfix]
             private static void Postfix()
             {
-                if (!IceGate.On) return; // diag probe is icebreaker-only
+                if (!IceGate.On || !Plugin.DevMode.Value) return; // dev-only probe
                 new GameObject("Icebreaker_TorchPoseProbe").AddComponent<TorchPoseProbe>();
             }
         }
@@ -46,7 +46,7 @@ namespace Manimal.Icebreaker.Blowtorch
 
             DumpAnimator(sb, "BODY", Unwrap(player.BodyAnimatorCommon));
             DumpAnimator(sb, "ARMS", Unwrap(player.ArmsAnimatorCommon));
-            Plugin.Log.LogWarning(sb.ToString());
+            Plugin.Log.LogDebug(sb.ToString());
         }
 
         // IAnimator wrappers hide the UnityEngine.Animator — fish it out by type

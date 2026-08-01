@@ -19,7 +19,7 @@ namespace Manimal.Icebreaker
             private static void Postfix()
             {
                 IcebreakerVolFog.ResetForRaid(); // statics reset is safe/needed everywhere
-                if (!IceGate.On) return;         // the tuner (and its F9 key) is icebreaker-only
+                if (!IceGate.On || !Plugin.DevMode.Value) return; // the tuner and its F9 key are dev-only
                 new GameObject("Icebreaker_FogTuner").AddComponent<FogTuner>();
             }
         }
@@ -134,7 +134,7 @@ namespace Manimal.Icebreaker
             sb.AppendLine($"  height={Plugin.VolFogHeight.Value:0.#} baseline={Plugin.VolFogBaseline.Value:0.#} maxLength={Plugin.VolFogMaxLength.Value:0} lenFalloff={Plugin.VolFogMaxLengthFallOff.Value:0.##} deepObsc={Plugin.VolFogDeepObscurance.Value:0.##}");
             sb.AppendLine($"  skyHaze={Plugin.VolFogSkyHaze.Value:0.#} alpha={Plugin.VolFogAlpha.Value:0.###} windSpeed={Plugin.VolFogSpeed.Value:0.###}");
             sb.AppendLine($"  color=({c.r:0.###},{c.g:0.###},{c.b:0.###}) downsampling={Plugin.VolFogDownsampling.Value} desat={Plugin.WeatherDesaturate.Value:0.##}");
-            Plugin.Log.LogWarning(sb.ToString());
+            Plugin.Log.LogDebug(sb.ToString());
         }
     }
 }

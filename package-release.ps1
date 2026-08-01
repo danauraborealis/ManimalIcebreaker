@@ -51,6 +51,8 @@ Copy-Item "$root\icebreaker-server\bin\Release\icebreaker-server.dll" $serverDst
 # startup; the audio bake runtime-copies from acoustics/ the same way.
 
 Copy-Item "$root\docs\RELEASE-README.txt" "$stage\README.txt" -Force
+# forge requires the license file INSIDE the archive, not merely in the repo
+Copy-Item "$root\LICENSE" "$stage\LICENSE" -Force
 
 Write-Host "=== zipping (the ~2GB scene bundle makes this take a few minutes) ===" -ForegroundColor Cyan
 New-Item -ItemType Directory -Force "$root\dist" | Out-Null
@@ -76,6 +78,8 @@ if (Test-Path $fikaStage) { Remove-Item -Recurse -Force $fikaStage }
 $fikaDst = "$fikaStage\BepInEx\plugins\ManimalIcebreaker"
 New-Item -ItemType Directory -Force $fikaDst | Out-Null
 Copy-Item "$root\icebreaker-fika\bin\Release\netstandard2.1\ManimalIcebreakerFika.dll" $fikaDst -Force
+# the addon is uploaded as its own forge entry, so it needs its own copy of the license
+Copy-Item "$root\LICENSE" "$fikaStage\LICENSE" -Force
 $fikaZip = "$root\dist\Manimal-IcebreakerFika-$ver.zip"
 if (Test-Path $fikaZip) { Remove-Item $fikaZip -Force }
 $fa = [System.IO.Compression.ZipFile]::Open($fikaZip, 'Create')
