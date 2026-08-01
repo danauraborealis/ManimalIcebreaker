@@ -266,7 +266,6 @@ public class BlowtorchRegistration(WTTServerCommonLib.WTTServerCommonLib wttComm
     public async Task OnLoad()
     {
         var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-        await wttCommon.CustomItemParentService.CreateCustomParents(assembly);
         await wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly);
     }
 }
@@ -342,13 +341,20 @@ public class IcebreakerQuestRegistration(
     }
 }
 
-// FLYER PICKUP TRIGGER: retail starts Boreas Part 1 when the player picks up the
-// icebreaker flyer (699f0b877c23862b4b0ee19c, a ContentBackport item) — SPT's quest
-// filter only understands Level/Quest/Standing/Loyalty start conditions, so the
-// trigger is ours: hide the quest from Mechanic until the flyer exists anywhere in
-// the profile inventory (stash or carried — i.e. it was extracted with). once the
-// quest is IN the profile (accepted/completed) it is never hidden again, so losing
-// the flyer later can't strand an active quest.
+// QUEST VISIBILITY GATES. Boreas Part 1 no longer has one: it starts on Mechanic
+// LL3, which is a TraderLoyalty condition SPT's own quest filter understands, and the
+// poster is now the first OBJECTIVE (hand it over, no found-in-raid) rather than a
+// precondition for the quest appearing.
+//
+// that replaced a custom gate which hid the quest until the flyer was in the profile.
+// it worked, but only by accident of timing: RequestQuestsTemplates is called exactly
+// twice by the client -- at login and after a raid -- so a poster bought on the flea
+// mid-session unlocked nothing until the player happened to run a raid. a native start
+// condition has the same refresh behaviour as every vanilla quest, which is what
+// players already expect.
+//
+// what remains here are the CROSSING gates below, which cannot be expressed natively:
+// "come back alive from the icebreaker" is not a condition type SPT evaluates.
 [Injectable]
 public class IcebreakerFlyerGateRouter(
     JsonUtil jsonUtil,
@@ -369,8 +375,6 @@ public class IcebreakerFlyerGateRouter(
             ),
         ])
 {
-    private const string FlyerTpl = "699f0b877c23862b4b0ee19c";   // icebreaker flyer (ContentBackport)
-    private const string BoreasP1 = "ff56532d9100ce03006493e9";   // Boreas - Part 1
     private const string StickToIt = "e857e9c34949ecbf1cf5a5b2";  // BTR follow-up, needs a survived icebreaker trip
     private const string PrivateRoman = "8b2b4eea617e2be2e54df123";
     private const string BitterVictory = "c7a1f0b93e64d5827ab1cc40";
@@ -409,13 +413,6 @@ public class IcebreakerFlyerGateRouter(
         try
         {
             var pmc = profileHelper.GetPmcProfile(sessionID);
-            bool questKnown = pmc?.Quests?.Any(q => q.QId.ToString() == BoreasP1) == true;
-            if (!questKnown)
-            {
-                bool hasFlyer = pmc?.Inventory?.Items?.Any(i => i.Template.ToString() == FlyerTpl) == true;
-                if (!hasFlyer)
-                    quests = quests.Where(q => q.Id.ToString() != BoreasP1).ToList();
-            }
 
             // stamp the crossing count for any gating quest already finished. doing it
             // here (not only at raid end) catches a hand-in made at the trader screen,
@@ -427,8 +424,8 @@ public class IcebreakerFlyerGateRouter(
                     IcebreakerRaidWatchRouter.MarkQuestFinished(sessionID.ToString(), after!);
 
             // the BTR follow-ups only exist once you've made the crossing and come back
-            // alive. same shape as the flyer gate: once the quest is in the profile it's
-            // never hidden again, so an accepted quest can't be stranded.
+            // alive. once the quest is in the profile it is never hidden again, so an
+            // accepted quest can't be stranded by losing whatever unlocked it.
             foreach (var gate in CrossingGates)
             {
                 if (pmc?.Quests?.Any(q => q.QId.ToString() == gate.QuestId) == true) continue;
@@ -439,7 +436,7 @@ public class IcebreakerFlyerGateRouter(
                     quests = quests.Where(q => q.Id.ToString() != gate.QuestId).ToList();
             }
         }
-        catch (Exception e) { logger.Warning($"[Icebreaker] flyer gate check failed (quest left visible): {e.Message}"); }
+        catch (Exception e) { logger.Warning($"[Icebreaker] quest gate check failed (quests left visible): {e.Message}"); }
         return new ValueTask<string>(httpResponseUtil.GetBody(quests));
     }
 }
