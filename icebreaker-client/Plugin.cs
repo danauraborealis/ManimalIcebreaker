@@ -16,6 +16,29 @@ namespace Manimal.Icebreaker
     // soft: loads AFTER fika when fika is installed (so the runtime compat patches can
     // resolve its types at Awake), changes nothing when it isn't
     [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)]
+    //
+    // HARD DEPENDENCIES. these were listed in the forge description but never DECLARED,
+    // which left load order down to filename luck. two ways that bites:
+    //   - WTT-ClientCommonLib is a compile-time reference, so if it is absent this
+    //     assembly throws TypeLoadException at Awake. declaring it turns an unreadable
+    //     stack trace into bepinex's own "missing dependency" line.
+    //   - BigBrain has to have registered its layer machinery before the bot mods that
+    //     build on it, and before we touch bot brains at raid load.
+    // guids are the real ones read off the loaded plugins, NOT guessed — a typo here
+    // makes bepinex silently refuse to load us at all.
+    [BepInDependency("com.wtt.commonlib", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("com.wtt.contentbackport", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("xyz.drakia.bigbrain", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("com.morebotsapi.tacticaltoaster", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("com.blackdiv.tacticaltoaster", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("com.tarkin.ladders", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("com.manimal.csgas", BepInDependency.DependencyFlags.HardDependency)]
+    //
+    // SOFT: integrated with when present, silently skipped when not. none are required.
+    //   waypoints  we late-patch its DoorLinkPatch with a finalizer (it NREs on this map)
+    //   the SAIN and InteractableExfils hooks resolve by reflection at runtime, so they
+    //   need no attribute — but waypoints must load FIRST for our patch to find it.
+    [BepInDependency("xyz.drakia.waypoints", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
         internal static ManualLogSource Log;

@@ -1,8 +1,8 @@
-# builds both halves in Release and produces THE release zip in dist\ — single archive,
+# builds both halves in Release and produces THE release zip in dist\ -- single archive,
 # same format as the other manimal mods: BepInEx\ + SPT\ trees at the root, extracted
-# over the SPT install root. NOTHING under EscapeFromTarkov_Data (forge rule, 07-30) —
+# over the SPT install root. NOTHING under EscapeFromTarkov_Data (forge rule, 07-30) --
 # the scene bundle rides the plugin payload and the client materializes it at startup.
-# (the per-build zip next to the client csproj is DLL-only — an update patch, not a release)
+# (the per-build zip next to the client csproj is DLL-only -- an update patch, not a release)
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
 
@@ -25,13 +25,13 @@ if (Test-Path $stage) { Remove-Item -Recurse -Force $stage }
 
 # BepInEx\plugins payload: the LIVE dev deploy is the canonical copy of the authored
 # data (acoustics/aibake/aiplaces/culling/cutscene/flares/weather/jsons/volumetricfog
-# + PerfectCullingRuntime) — those files exist nowhere in the repo. dev debris stays out.
+# + PerfectCullingRuntime) -- those files exist nowhere in the repo. dev debris stays out.
 $pluginDst = "$stage\BepInEx\plugins\ManimalIcebreaker"
 New-Item -ItemType Directory -Force $pluginDst | Out-Null
 Copy-Item "$spt\BepInEx\plugins\ManimalIcebreaker\*" $pluginDst -Recurse -Force
 Remove-Item "$pluginDst\dumps" -Recurse -Force -ErrorAction SilentlyContinue
 Get-ChildItem $pluginDst -Recurse -File -Filter '*.bak*' | Remove-Item -Force
-# the fika addon ships as its OWN zip (built below) — never in the main package
+# the fika addon ships as its OWN zip (built below) -- never in the main package
 Remove-Item "$pluginDst\ManimalIcebreakerFika.dll" -Force -ErrorAction SilentlyContinue
 # fresh DLL from this build, not whatever the deploy dir held
 Copy-Item "$root\icebreaker-client\bin\Release\netstandard2.1\ManimalIcebreakerClient.dll" $pluginDst -Force
@@ -90,6 +90,58 @@ try {
     }
 } finally { $fa.Dispose() }
 Remove-Item -Recurse -Force $fikaStage
+
+# THE VIRUSTOTAL ARCHIVE. forge wants a scan link per version, and the release zip is
+# ~1.6GB of unity asset bundles -- far past what virustotal accepts, and pointless to scan
+# anyway since none of it executes. every compiled binary this mod ships is under a
+# megabyte all together, so scan THOSE and link the results.
+#
+# PerfectCullingRuntime.dll is in here because we REDISTRIBUTE it -- stock, unmodified,
+# from the asset store purchase (the multi-scene bake work is a separate editor script in
+# the SDK and never touched this assembly). the rule is about what ships, not about what
+# we wrote, so a third-party binary in the zip is exactly what a scan link is for.
+# volumetricfog.bundle is deliberately NOT here: unity asset bundle, assets only, no
+# managed code to analyse.
+Write-Host "=== packaging binaries for virustotal ===" -ForegroundColor Cyan
+$vtStage = "$root\obj-vt-stage"
+if (Test-Path $vtStage) { Remove-Item -Recurse -Force $vtStage }
+New-Item -ItemType Directory -Force $vtStage | Out-Null
+@(
+    "$root\icebreaker-client\bin\Release\netstandard2.1\ManimalIcebreakerClient.dll",
+    "$root\icebreaker-fika\bin\Release\netstandard2.1\ManimalIcebreakerFika.dll",
+    "$root\icebreaker-server\bin\Release\icebreaker-server.dll",
+    "$spt\BepInEx\plugins\ManimalIcebreaker\PerfectCullingRuntime.dll"
+) | ForEach-Object {
+    if (-not (Test-Path $_)) { throw "virustotal archive: missing $_ -- build all three projects first" }
+    Copy-Item $_ $vtStage -Force
+}
+
+# BACKSTOP: if a new binary ever lands in the shipped plugin/server dirs, this catches it
+# rather than letting it go out unscanned. the scan archive silently missing a dll is the
+# failure mode worth guarding, since nothing else in the pipeline would notice.
+$shipped = @(
+    Get-ChildItem "$spt\BepInEx\plugins\ManimalIcebreaker" -Recurse -Include *.dll, *.exe -File
+    Get-ChildItem "$spt\SPT\user\mods\ManimalIcebreaker" -Recurse -Include *.dll, *.exe -File -ErrorAction SilentlyContinue
+) | Where-Object { $_.Name -ne 'ManimalIcebreakerFika.dll' } | Select-Object -ExpandProperty Name -Unique
+$staged = Get-ChildItem $vtStage -File | Select-Object -ExpandProperty Name
+$unscanned = $shipped | Where-Object { $_ -notin $staged }
+if ($unscanned) { throw "binaries shipped but NOT in the virustotal archive: $($unscanned -join ', ')" }
+$vtZip = "$root\dist\Manimal-Icebreaker-binaries-$ver.zip"
+if (Test-Path $vtZip) { Remove-Item $vtZip -Force }
+$va = [System.IO.Compression.ZipFile]::Open($vtZip, 'Create')
+try {
+    Get-ChildItem $vtStage -File | ForEach-Object {
+        [void][System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($va, $_.FullName, $_.Name, [System.IO.Compression.CompressionLevel]::Optimal)
+    }
+} finally { $va.Dispose() }
+Remove-Item -Recurse -Force $vtStage
+
+# sha256 of everything shipped: paste alongside the scan link so anyone can confirm the
+# dll they downloaded is the dll that was scanned
+Write-Host "=== sha256 (for the release notes) ===" -ForegroundColor Cyan
+Get-ChildItem "$root\dist" -Filter *.zip | ForEach-Object {
+    "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash, $_.Name
+} | Tee-Object -FilePath "$root\dist\SHA256SUMS.txt"
 
 Write-Host "=== dist ===" -ForegroundColor Green
 Get-ChildItem "$root\dist" | Format-Table Name, @{n='Size';e={'{0:N1} MB' -f ($_.Length/1MB)}}
