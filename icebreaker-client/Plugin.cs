@@ -126,7 +126,7 @@ namespace Manimal.Icebreaker
         internal static readonly Val<bool> SnowStormDensity = new Val<bool>(false);
         internal static readonly Val<float> SnowSpread = new Val<float>(14f);
         internal static ConfigEntry<bool> RetailAIBake;
-        internal static ConfigEntry<bool> RetailDoorLinks;
+        internal static ConfigEntry<string> SynthZones;
         internal static ConfigEntry<bool> PasscodeTerminals;
         internal static ConfigEntry<bool> InteriorCrossCull;
         internal static ConfigEntry<float> CrossCullDistance;
@@ -322,12 +322,15 @@ namespace Manimal.Icebreaker
                 "cull interior volumes (Indoor_01/02/03) wholesale when the camera is outside them, beyond CrossCullDistance — the ship-center fps fix (live)");
             CrossCullDistance = Config.Bind("Icebreaker", "CrossCullDistance", 20f,
                 new ConfigDescription("how close an out-of-volume interior group must be to still render (doorway/window sightlines) (live)", new AcceptableValueRange<float>(10f, 80f)));
-            RetailDoorLinks = Config.Bind("Icebreaker", "RetailDoorLinks", true,
-                "rebuild retail 1.0 NavMeshDoorLinks — the ONLY link source on this map (Waypoints' generator NREs here, so OFF means zero bot-door support)");
             PasscodeTerminals = Config.Bind("Icebreaker", "PasscodeTerminals", true,
                 "activate the authored passcode terminals + post-it code notes (needs the Author 9 passcode sidecar next to the dll)");
             RetailAIBake = Config.Bind("Icebreaker", "RetailAIBake", true,
                 "load BSG's recovered baked AI data (covers/voxels/cores/patrols) instead of runtime generation; off or fill-failure = synthesized graph");
+            // HYBRID knob: retail bake everywhere, our generated cover+patrol data inside
+            // these zones only. empty = pure retail, which is the behaviour that has always
+            // shipped. names are BotZone object names, comma separated, case insensitive.
+            SynthZones = Config.Bind("Icebreaker", "SynthZones", "",
+                "comma-separated BotZone names to rebuild with GENERATED cover+patrol data while the rest of the map keeps the retail bake (needs RetailAIBake on); empty = all retail");
 
             // kill the origin-stacked zone tones the instant the sound scene loads —
             // during loading the AudioListener sits at origin inside all 13 of them

@@ -173,6 +173,80 @@ namespace Manimal.Icebreaker
             }
         }
 
+        // REGION BUILD (hybrid bake). same scan, same GroupPoint construction as the full
+        // swap above, but it hands back a SUBSET instead of overwriting covers.Points, and
+        // anchors every point to a caller-supplied core list rather than synthesized cores.
+        //
+        // that anchor argument is the whole trick behind mixing our data with retail's:
+        // pass retail's own AICorePointsHolder.CorePoints and each generated point inherits
+        // a REAL ConnectionGroup from the surrounding baked graph, so bot group logic and
+        // GetLastConnectionId keep working across the seam. synthesizing fresh cores instead
+        // would give the region its own island ids and split the map's connectivity in two.
+        //
+        // ids are offset because retail already owns 0.._lastId and a duplicate id silently
+        // wins or loses in RestoreData's dictionary rebuild.
+        internal static (List<GroupPoint>, List<GroupPointWay>) BuildForRegion(
+            Func<Vector3, bool> inRegion, List<AICorePoint> anchorCores, int idOffset)
+        {
+            var sw = Stopwatch.StartNew();
+            var (gen, genWays) = GenerateGraph(sw);
+            if (gen == null || gen.Count == 0) return (null, null);
+
+            var keep = new Dictionary<int, GenPoint>();
+            foreach (var g in gen)
+                if (inRegion(g.Pos)) keep[g.Id] = g;
+            if (keep.Count == 0) return (new List<GroupPoint>(), new List<GroupPointWay>());
+
+            // a way only survives if BOTH ends did — a half-way pointing at a dropped point
+            // is a null Target deref during the bot's cover walk
+            var keptWays = new List<(int id, int from, int to, float dist)>();
+            var keptWayIds = new HashSet<int>();
+            foreach (var w in genWays)
+                if (keep.ContainsKey(w.from) && keep.ContainsKey(w.to))
+                {
+                    keptWays.Add(w);
+                    keptWayIds.Add(w.id);
+                }
+
+            var byId = new Dictionary<int, GroupPoint>(keep.Count);
+            var points = new List<GroupPoint>(keep.Count);
+            foreach (var g in keep.Values)
+            {
+                AICorePoint core = null;
+                float best = float.MaxValue;
+                foreach (var c in anchorCores)
+                {
+                    if (c == null) continue;
+                    float d = (c.Position - g.Pos).sqrMagnitude;
+                    if (d < best) { best = d; core = c; }
+                }
+                var firePos = g.Pos + Vector3.up * GroupPoint.CHECK_CAN_HIDE_STAY;
+                var p = new GroupPoint(g.Id + idOffset, null, g.Pos, null, core,
+                    g.CoverLevel == "Stay" ? CoverLevel.Stay : CoverLevel.Sit,
+                    false, g.WallDir, firePos, PointWithNeighborType.cover);
+                p.CoverType = CoverType.Wall;
+                p.EnvironmentType = g.Environment == "Indoor" ? EnvironmentType.Indoor : EnvironmentType.Outdoor;
+                p.NeighbourhoodsWaysIds = g.WayIds.Where(keptWayIds.Contains).Select(i => i + idOffset).ToList();
+                p.CalcDefenceLevel();
+                try { p.InitLightBorders(); } catch { }
+                try { p.method_0(); } catch { }
+                try { p.method_2(); } catch { }
+                points.Add(p);
+                byId[g.Id] = p;
+            }
+
+            var ways = new List<GroupPointWay>(keptWays.Count);
+            foreach (var w in keptWays)
+            {
+                var way = new GroupPointWay(w.id + idOffset, byId[w.to], w.dist);
+                way.IdTarget = w.to + idOffset;
+                ways.Add(way);
+            }
+            Plugin.Log.LogInfo($"[Hybrid] region build: {points.Count}/{gen.Count} scanned points kept, "
+                               + $"{ways.Count} ways ({sw.ElapsedMilliseconds}ms)");
+            return (points, ways);
+        }
+
         // cores = the coarse anchor nodes bots group around. spaced subset (~15m) of the
         // generated points; ConnectionGroupId = connected component of the ways graph
         // (union-find), matching BSG's navmesh-island semantics.
@@ -267,13 +341,41 @@ namespace Manimal.Icebreaker
                         core = c;
                     }
                 }
+                // FIRE POSITION — was Vector3.zero, which is not "unset" as far as the AI is
+                // concerned. CustomNavigationPoint guards with (FirePosition != zero), but
+                // GClass236 does NOT: it tests SqrDistHorizontal(FirePosition, Position) > 0.1
+                // and then walks to Vector3.Lerp(FirePosition, Position, 0.3f). with zero that
+                // distance is the point's whole distance from world origin, so every generated
+                // cover point told the bot its firing spot was 70% of the way to (0,0,0).
+                //
+                // retail's own value, measured across all 1885 baked points: a PURELY VERTICAL
+                // offset of 1.272m (median == min; horizontal alignment with WallDirection
+                // ~0.001). that number is BSG's own GroupPoint.CHECK_CAN_HIDE_STAY constant,
+                // and vertical-only is what makes the SqrDistHorizontal test read zero — i.e.
+                // the branch retail actually takes.
+                var firePos = g.Pos + Vector3.up * GroupPoint.CHECK_CAN_HIDE_STAY;
+
                 var p = new GroupPoint(g.Id, null, g.Pos, null, core,
                     g.CoverLevel == "Stay" ? CoverLevel.Stay : CoverLevel.Sit,
-                    false, g.WallDir, Vector3.zero, PointWithNeighborType.cover);
+                    false, g.WallDir, firePos, PointWithNeighborType.cover);
                 p.CoverType = CoverType.Wall;
                 p.EnvironmentType = g.Environment == "Indoor" ? EnvironmentType.Indoor : EnvironmentType.Outdoor;
                 p.NeighbourhoodsWaysIds = g.WayIds;
                 p.CalcDefenceLevel();
+
+                // let BSG fill the rest rather than approximating it. every one of these
+                // fields has a real calculator on GroupPoint, and method_0 in particular does
+                // actual raycasts (GClass369.TestDir) — guessing from geometry would be
+                // strictly worse than calling the thing that ships with the game.
+                //   InitLightBorders -> BordersLightHave + Left/RightBorderLight
+                //                       (WallDirection rotated +-57deg = LIGHT_WALL_ANG)
+                //   method_0         -> CanLookLeft / CanLookRight  (peeking round cover)
+                //   method_2         -> TiltType                    (leaning; Stay cover only)
+                // order matters: method_0 and method_2 both read FirePosition, so they have to
+                // run after it is set, and method_2 needs CoverLevel too.
+                try { p.InitLightBorders(); } catch { }
+                try { p.method_0(); } catch { }
+                try { p.method_2(); } catch { }
                 newPoints.Add(p);
                 byId[g.Id] = p;
             }
@@ -351,9 +453,11 @@ namespace Manimal.Icebreaker
             // baked convention: each door link id appears in the full 3x3x3 neighborhood
             // around its cell (median 27 cells/link on factory, fewer only at grid edges)
             var doorByCell = new Dictionary<(int, int, int), List<int>>();
+            var linkById = new Dictionary<int, NavMeshDoorLink>();
             if (doorLinks != null)
                 foreach (var dl in doorLinks)
                 {
+                    linkById[dl.Id] = dl;
                     var (cx, cy, cz) = CellIndex(vox, dl.MidOpen);
                     for (int dx = -1; dx <= 1; dx++)
                         for (int dy = -1; dy <= 1; dy++)
@@ -390,7 +494,24 @@ namespace Manimal.Icebreaker
                 if (allLoot != null)
                     cell.LootPointsIds = lootByCell.TryGetValue(idx, out var lootIds) ? lootIds : new List<int>();
                 if (doorLinks != null)
+                {
                     cell.DoorLinksIds = doorByCell.TryGetValue(idx, out var doorIds) ? doorIds : new List<int>();
+                    // AND the RESOLVED list. ids alone are worthless here: the id->object
+                    // resolve lives in AIVoxelesData.RestoreData, which on this path already
+                    // ran (or died) long before these links existed, and nothing runs it
+                    // again. every bot reads the OBJECT list —
+                    //   BotNearDoorData.CurrentDoorLinks() => CurVoxel.DoorLinks
+                    // so an empty DoorLinks means GetNearestDoor() returns null, BotDoorOpener
+                    // never gets a CurrentDoorLink, and no bot ever interacts with a door.
+                    // it fails SILENTLY rather than throwing because BuildVoxelGrid seeds the
+                    // list empty — which is exactly what "bots walk straight through doors"
+                    // looked like. a shut door carves nothing (BotDoorsController.method_0
+                    // only enables Carver_Opened, and only while the door is OPEN), so the
+                    // doorway stays walkable navmesh and they just stroll through it.
+                    cell.DoorLinks = cell.DoorLinksIds
+                        .Select(i => linkById.TryGetValue(i, out var l) ? l : null)
+                        .Where(l => l != null).ToList();
+                }
                 if (exfils != null)
                     cell.ExfiltrationPointsIds = exfilByCell.TryGetValue(idx, out var exfilIds) ? exfilIds : new List<int>();
             }
@@ -745,7 +866,7 @@ namespace Manimal.Icebreaker
         }
 
         // same double-int-cast floor the game uses in GetIndexes, clamped like GetVoxelSafe
-        private static (int, int, int) CellIndex(AIVoxelesData vox, Vector3 pos)
+        internal static (int, int, int) CellIndex(AIVoxelesData vox, Vector3 pos)
         {
             int ix = Mathf.Clamp((int)((float)((int)(pos.x - vox.MinVoxelesValues.x)) / 10f), 0, vox.MaxX - 1);
             int iy = Mathf.Clamp((int)((float)((int)(pos.y - vox.MinVoxelesValues.y)) / 5f), 0, vox.MaxY - 1);

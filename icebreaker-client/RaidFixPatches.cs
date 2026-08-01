@@ -2587,12 +2587,30 @@ namespace Manimal.Icebreaker
                         BuildVoxelGrid(__instance);
                         if (Plugin.InjectCovers.Value)
                             CoverScanner.TryGenerateOnEmpty(__instance);
+                        // patrols too, or RetailAIBake=false leaves bots with covers and
+                        // nowhere to walk (zero PatrolPoints, zero PatrolWays). only when the
+                        // retail bake did NOT land — it brings its own 647/20 and wires the
+                        // zones itself, and two sets of ways on one zone is not a thing.
+                        if (!IcebreakerAIBake.Loaded)
+                        {
+                            try { PatrolScanner.GenerateForZones(__instance); }
+                            catch (Exception e) { Plugin.Log.LogWarning($"[PatrolGen] failed: {e.Message}"); }
+                        }
                         AccessTools.Field(typeof(AICoversData), "_cache").SetValue(__instance, new GClass411(__instance));
                         Plugin.Log.LogWarning($"[RaidFix] AI skeleton ready: {__instance.Points.Count} covers, " +
                                               $"{__instance.AICorePointsHolder?.CorePoints?.Count ?? 0} cores, cache built");
                     }
                 }
                 catch (Exception e) { Plugin.Log.LogWarning($"[RaidFix] AI skeleton build failed: {e}"); }
+            }
+            else if (IceGate.On && IcebreakerAIBake.Loaded)
+            {
+                // SUCCESS path: the retail bake restored cleanly. if the user named zones to
+                // rebuild with our own data, carve and refill NOW rather than in the prefix —
+                // RestoreData is what resolves point ids, buckets the voxel grid and builds
+                // the cover cache, and the hybrid has to edit the finished article.
+                try { IcebreakerHybridBake.Apply(__instance); }
+                catch (Exception e) { Plugin.Log.LogError($"[Hybrid] failed — full retail bake stands: {e}"); }
             }
             return null;
         }
@@ -3207,37 +3225,6 @@ namespace Manimal.Icebreaker
             return false; // original skipped — we ran the whole sequence
         }
     }
-
-    // outcome reporter (kept for vanilla-path visibility and as a backstop)
-    [HarmonyPatch(typeof(BotOwner), "method_10")]
-    internal static class Patch_BotActivationOutcome
-    {
-        private static void Postfix(BotOwner __instance)
-        {
-            try
-            {
-                if (!IceGate.On || !Plugin.DiagHotkeys.Value) return; // ours + armed only
-                if (__instance == null || __instance.BotState != EBotState.ActiveFail) return;
-                // no witnessed step threw -> the NRE lives in a property-getter chain
-                // used as an ARGUMENT in method_10. probe every deref of those chains.
-                string diag;
-                try
-                {
-                    var bg = __instance.BotsGroup;
-                    var game = bg?.BotGame;
-                    var bc = game != null ? game.BotsController : null;
-                    var zone = bg?.BotZone;
-                    object modifier = null;
-                    try { modifier = zone != null ? (object)zone.Modifier : null; } catch (Exception mz) { modifier = "THREW:" + mz.Message; }
-                    diag = $"BotsGroup={(bg != null)} BotGame={(game != null)} BotsController={(bc != null)} CoversData={(bc?.CoversData != null)} BotZone={(zone != null ? zone.name : "NULL")} Modifier={(modifier ?? "NULL")}";
-                }
-                catch (Exception e) { diag = "probe threw: " + e.Message; }
-                Plugin.Log.LogError($"[BotWitness] '{__instance.name}' role={__instance.Profile?.Info?.Settings?.Role} ACTIVATION FAILED — chain probe: {diag}");
-            }
-            catch { }
-        }
-    }
-
     // the raid-settings "amount of bots" slider rescales every wave's slots (Medium:
     // 0.5+(max-min)/2 — our tight 2..3 waves collapse to exactly 1 bot each). icebreaker's
     // rogue count is retail-authored, not a preference — skip the rescale for our waves
