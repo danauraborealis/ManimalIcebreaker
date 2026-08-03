@@ -19,13 +19,26 @@ if ($LASTEXITCODE -ne 0) { throw "client/fika build failed" }
 dotnet build "$root\icebreaker-server\icebreaker-server.csproj" -c Release -v m
 if ($LASTEXITCODE -ne 0) { throw "server build failed" }
 
+# REPO BACKUP REFRESH: mirror the live deploy's data sidecars into
+# icebreaker-client\plugin-data so the repo copy can never be stale at release time.
+# same exclusions as the backup convention: no dlls, no bundles, no streamingassets.
+Write-Host "=== refreshing repo plugin-data backup ===" -ForegroundColor Cyan
+$pdSrc = "$spt\BepInEx\plugins\ManimalIcebreaker"
+$pdDst = "$root\icebreaker-client\plugin-data"
+robocopy $pdSrc $pdDst /MIR /XD streamingassets dumps /XF *.dll *.bundle *.manifest README.md /NJH /NJS /NDL /NFL | Out-Null
+# robocopy /MIR would delete README.md from the destination since the source lacks it;
+# the /XF above shields it from the mirror. exit codes 0-7 are all success flavors.
+if ($LASTEXITCODE -gt 7) { throw "plugin-data backup refresh failed (robocopy exit $LASTEXITCODE)" }
+$global:LASTEXITCODE = 0
+
 Write-Host "=== staging ===" -ForegroundColor Cyan
 $stage = "$root\obj-release-stage"
 if (Test-Path $stage) { Remove-Item -Recurse -Force $stage }
 
 # BepInEx\plugins payload: the LIVE dev deploy is the canonical copy of the authored
 # data (acoustics/aibake/aiplaces/culling/cutscene/flares/weather/jsons/volumetricfog
-# + PerfectCullingRuntime) -- those files exist nowhere in the repo. dev debris stays out.
+# + PerfectCullingRuntime) -- the repo's icebreaker-client\plugin-data is a MIRROR of it,
+# refreshed above, not the source. dev debris stays out.
 $pluginDst = "$stage\BepInEx\plugins\ManimalIcebreaker"
 New-Item -ItemType Directory -Force $pluginDst | Out-Null
 Copy-Item "$spt\BepInEx\plugins\ManimalIcebreaker\*" $pluginDst -Recurse -Force
