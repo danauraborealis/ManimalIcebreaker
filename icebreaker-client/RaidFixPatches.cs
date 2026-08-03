@@ -312,8 +312,45 @@ namespace Manimal.Icebreaker
             Plugin.Log.LogDebug($"[RaidFix] SetCameraFromSettings on icebreaker: prefab={prefab}");
             if (settings == null || settings.CameraPrefab == null)
                 return; // already headed for the Cam2 fallback
-            Plugin.Log.LogDebug("[RaidFix] discarding scene camera prefab, using built-in Cam2");
+
+            // ALWAYS discard the scene camera prefab — including the Author 21 retail
+            // import. shipping a camera through the bundle was tried and measured dead:
+            // the rip's serialized DATA does not survive (null shaders/materials, empty
+            // curves crashed NightVision/ThermalVision/DistortCameraFX in Awake), and the
+            // un-shippable SSAA left CameraClass.SetSSR to NRE inside
+            // PlayerCameraController.Create — error screen, no spawn. the camera story is
+            // now: Cam2 as the CHASSIS (valid core data, boots reliably) + the donor
+            // graft (IcebreakerCameraDonor) adding a real 0.16.9 map camera's components
+            // and data at runtime, where every ref resolves against live game assets.
+            Plugin.Log.LogDebug("[RaidFix] discarding scene camera prefab — Cam2 chassis + donor graft owns the camera");
             settings = null;
+        }
+    }
+
+    // GRENADE FLASH HEAL on the imported retail camera. its Awake derefs a serialized
+    // same-prefab component ref (this.PrismEffects.toneValues) that did not survive the
+    // export->SDK->bundle trip — but the PrismEffects component ITSELF ships fine and
+    // sits on the same GameObject, one GetComponent away. re-point the field before
+    // Awake reads it. OnEnable re-calls Awake, so this prefix fires more than once;
+    // the null check makes the second and later passes free. flashbang blindness is
+    // gameplay, which is why this is healed rather than dropped like the ref-dead trio.
+    [HarmonyPatch(typeof(GrenadeFlashScreenEffect), "Awake")]
+    internal static class Patch_GrenadeFlashPrismRef
+    {
+        [HarmonyPrefix]
+        private static void Prefix(GrenadeFlashScreenEffect __instance)
+        {
+            if (!IceGate.On) return; // real maps ship a real ref — never touch it
+            try
+            {
+                if (__instance.PrismEffects == null)
+                {
+                    __instance.PrismEffects = __instance.GetComponent<PrismEffects>();
+                    if (__instance.PrismEffects != null)
+                        Plugin.Log.LogDebug("[RaidFix] GrenadeFlash PrismEffects ref healed from sibling component");
+                }
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[RaidFix] grenade flash heal failed: {e.Message}"); }
         }
     }
 
@@ -3158,12 +3195,15 @@ namespace Manimal.Icebreaker
             if (!IceGate.On) return true; // vanilla maps: BSG's original behavior
             var b = __instance;
             int failed = 0;
+            bool lastStepFailed = false;
             void Step(string name, Action a)
             {
+                lastStepFailed = false;
                 try { a(); }
                 catch (Exception e)
                 {
                     failed++;
+                    lastStepFailed = true;
                     Plugin.Log.LogError($"[BotWitness] '{b.name}' step {name} FAILED: {e}");
                 }
             }

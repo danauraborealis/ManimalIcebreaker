@@ -69,6 +69,7 @@ namespace Manimal.Icebreaker
         internal static ConfigEntry<bool> HardBots;
         internal static ConfigEntry<bool> DiagHotkeys;
         internal static ConfigEntry<bool> DevMode;
+        internal static ConfigEntry<string> CamDonorSkip;
         // fog + weather tuning left the config on 07-30 — the tuned values ARE the map
         // look now, hardcoded as defaults here. Val<T> keeps the .Value shape so the
         // F9 tuner still writes them live; changes just dont persist (DUMP + hardcode
@@ -301,6 +302,10 @@ namespace Manimal.Icebreaker
             // what this DOES gate is the machinery that costs frames on a player's box:
             // the F9/F10/F11 tuners and probes, the per-object dumps, and the diagnostic
             // MonoBehaviours that walk the scene every raid.
+            // bisect knob for the camera donor graft: component type names to NOT add
+            CamDonorSkip = Config.Bind("Icebreaker", "CamDonorSkip", "",
+                new ConfigDescription("comma-separated component type names the donor graft must skip (bisecting a bad graft component)",
+                    null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             DevMode = Config.Bind("Icebreaker", "DevMode", false,
                 new ConfigDescription("developer tooling: on-screen tuners, scene probes, dump hotkeys and the diagnostic components. OFF for normal play — this does not affect logging, set LogLevels in BepInEx.cfg for that", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
 
