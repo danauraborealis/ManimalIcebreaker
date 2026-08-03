@@ -1,0 +1,22 @@
+{
+  "areas": [
+
+  ],
+  "voids": [
+    { "name": "manimal_fogvoid_1", "position": [-0.003, 28.996, 34.446], "size": [24.763, 16.37, 30.949] },
+    { "name": "manimal_fogvoid_2", "position": [0.04, 41.261, 40.908], "size": [33.154, 2.751, 7.383] },
+    { "name": "manimal_fogvoid_11", "position": [0.031, 41.261, 36.004], "size": [11.862, 2.751, 5.08] },
+    { "name": "manimal_fogvoid_12", "position": [0.854, 41.261, 28.391], "size": [6.542, 2.751, 11.046] },
+    { "name": "manimal_fogvoid_10", "position": [2.135, 38.42, 28.856], "size": [4.446, 3.328, 8.582] },
+    { "name": "manimal_fogvoid_3", "position": [-0.027, 14.094, 12.84], "size": [24.878, 13.681, 74.161] },
+    { "name": "manimal_fogvoid_8", "position": [14.467, 16.562, 12.84], "size": [4.293, 3.335, 74.161] },
+    { "name": "manimal_fogvoid_9", "position": [-14.583, 16.562, 12.84], "size": [4.326, 3.335, 74.161] },
+    { "name": "manimal_fogvoid_4", "position": [-0.003, 12.622, 55.089], "size": [24.763, 11.529, 11.198] },
+    { "name": "manimal_fogvoid_5", "position": [0.073, 11.521, -45.947], "size": [25.259, 8.535, 42.805] },
+    { "name": "manimal_fogvoid_6", "position": [2.58, 17.028, -57.935], "size": [12.56, 2.807, 18.83] },
+    { "name": "manimal_fogvoid_7", "position": [-0.26, 19.555, -61.665], "size": [14.247, 2.864, 11.368] },
+    { "name": "manimal_fogvoid_13", "position": [0.049, 24.118, -28.459], "size": [4.843, 6.187, 15.184] },
+    { "name": "manimal_fogvoid_14", "position": [-4.545, 22.352, -24.242], "size": [3.528, 2.41, 6.952] },
+    { "name": "manimal_fogvoid_15", "position": [-0.015, 29.252, -34.687], "size": [4.953, 2.41, 3.902] }
+  ]
+}

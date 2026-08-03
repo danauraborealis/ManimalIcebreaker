@@ -1,0 +1,922 @@
+{
+ "source": "retail 1.0 level706 (Icebreaker_AI) AIPlaceInfo layer",
+ "zone_names": {
+  "4101": "BotZoneBack",
+  "4113": "BotZoneRooms",
+  "4158": "BotZoneEngineCenter",
+  "4233": "BotZoneOutside_t3",
+  "4273": "BotZoneSternTop",
+  "4281": "BotZoneFront",
+  "4474": "BotZoneInside_t4",
+  "4542": "BotZoneRoomsThirdKitchen",
+  "4592": "BotZoneMash_t1",
+  "4662": "BotZoneRoomsFour",
+  "5055": "BotZoneKitchen",
+  "5139": "BotZoneKorrDown1",
+  "5152": "BotZoneKorr_t2",
+  "5161": "BotZoneFront2",
+  "5305": "BotZoneRoomsThird",
+  "5459": "BotZoneRoom_Eng",
+  "5474": "BotZoneRoom_Eng2",
+  "5541": "BotZoneStern",
+  "5681": "BotZoneEngineHide"
+ },
+ "components": {
+  "AIPlaceInfo": [
+   {
+    "path_id": 4083,
+    "go": "AIPlaceInfoHolder/AIGrenadeThrowPlace Rooms 3 (8)",
+    "world": [
+     0.22,
+     27.01,
+     39.37
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 11,
+     "Id": "111",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3525
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 5655
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": -1,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 4598,
+    "go": "AIPlaceInfoHolder/AIGrenadeThrowEngine  Back2 (2)",
+    "world": [
+     10.73,
+     16.68,
+     -65.25
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 11,
+     "Id": "111",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3611
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 4554
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": 6,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 4720,
+    "go": "AIPlaceInfoHolder/AIPlaceInfoLogic Sten Zone Spawn (2)",
+    "world": [
+     0.82,
+     16.08,
+     1.8
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 564,
+     "Id": "",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3628
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 4263
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": 11,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 4742,
+    "go": "AIPlaceInfoHolder/AIGrenadeThrowEngine  Back2",
+    "world": [
+     0.12,
+     21.92,
+     -38.6
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 11,
+     "Id": "111",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3631
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 5717
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": -1,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 4765,
+    "go": "AIPlaceInfoHolder/AIGrenadeThrowPlace (1)",
+    "world": [
+     0.82,
+     22.32,
+     -43.08
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 11,
+     "Id": "111",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3634
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 4469
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": 7,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 4837,
+    "go": "AIPlaceInfoHolder/AIGrenadeThrowEngine  Back2 (1)",
+    "world": [
+     0.12,
+     21.92,
+     -38.6
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 11,
+     "Id": "111",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3643
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 4539
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": -1,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 4878,
+    "go": "AIPlaceInfoHolder/AIGrenadeThrowPlace (4)",
+    "world": [
+     -0.18,
+     17.84,
+     -73.16
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 11,
+     "Id": "111",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3653
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 5091
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": 6,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 4910,
+    "go": "AIPlaceInfoHolder/AIPlaceInfoLogic Hide Zone Spawn (1)",
+    "world": [
+     -0.8,
+     20.3,
+     59.01
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 0,
+     "Id": "",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3659
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 5396
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": 16,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 5028,
+    "go": "AIPlaceInfoHolder/AIPlaceInfoLogicWedge Spawn",
+    "world": [
+     -0.8,
+     24.53,
+     31.9
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 0,
+     "Id": "",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3677
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 5801
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": 20,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 5069,
+    "go": "AIPlaceInfoHolder/AIGrenadeThrowEngine  Mid",
+    "world": [
+     -0.22,
+     13.63,
+     -9.84
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 11,
+     "Id": "111",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3683
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 4565
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": 11,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 5073,
+    "go": "AIPlaceInfoHolder/AIGrenadeThrowEngine",
+    "world": [
+     -0.22,
+     13.63,
+     -9.84
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 11,
+     "Id": "111",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3685
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 4668
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": 11,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 5092,
+    "go": "AIPlaceInfoHolder/AIGrenadeThrowEngine  Back1",
+    "world": [
+     0.12,
+     21.92,
+     -34.52
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 11,
+     "Id": "111",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3688
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 4915
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": -1,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 5277,
+    "go": "AIPlaceInfoHolder/T2_trigger",
+    "world": [
+     -10.13,
+     17.1,
+     16.86
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 251,
+     "Id": "2450",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3719
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 5790
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": -1,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 5358,
+    "go": "AIPlaceInfoHolder/T4_trigger",
+    "world": [
+     -6.24,
+     32.85,
+     20.4
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 251,
+     "Id": "2450",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3729
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 5805
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": -1,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 5416,
+    "go": "AIPlaceInfoHolder/T1_trigger (1)",
+    "world": [
+     -10.84,
+     19.53,
+     36.61
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 251,
+     "Id": "2450",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3734
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 4892
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": -1,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 5456,
+    "go": "AIPlaceInfoHolder/T1_trigger",
+    "world": [
+     -0.54,
+     16.62,
+     57.32
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 251,
+     "Id": "2450",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3740
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 4784
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": 17,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 5504,
+    "go": "AIPlaceInfoHolder/T1_trigger (2)",
+    "world": [
+     10.93,
+     19.53,
+     36.26
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 251,
+     "Id": "2450",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3748
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 5113
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": -1,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 5544,
+    "go": "AIPlaceInfoHolder/AIGrenadeThrowPlace (5)",
+    "world": [
+     -0.18,
+     19.73,
+     -37.77
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 11,
+     "Id": "111",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3753
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 5363
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": -1,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 5603,
+    "go": "AIPlaceInfoHolder/AIGrenadeThrowPlace Rooms 3 (4)",
+    "world": [
+     -6.56,
+     24.91,
+     29.09
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 11,
+     "Id": "111",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3764
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 4069
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": -1,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 5694,
+    "go": "AIPlaceInfoHolder/AIGrenadeThrowPlace (3)",
+    "world": [
+     9.98,
+     17.39,
+     -64.39
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 11,
+     "Id": "111",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3779
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 4242
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": -1,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 5724,
+    "go": "AIPlaceInfoHolder/AIGrenadeThrowPlace Rooms 3 (5)",
+    "world": [
+     6.46,
+     24.91,
+     29.09
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 11,
+     "Id": "111",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3787
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 4204
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": -1,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 5729,
+    "go": "AIPlaceInfoHolder/AIGrenadeThrowPlace Rooms 3 (7)",
+    "world": [
+     -6.4,
+     24.91,
+     35.98
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 11,
+     "Id": "111",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3790
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 5606
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": -1,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 5743,
+    "go": "AIPlaceInfoHolder/AIGrenadeThrowPlace Rooms 3 (6)",
+    "world": [
+     6.46,
+     24.91,
+     35.98
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 11,
+     "Id": "111",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3793
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 5693
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": -1,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 5766,
+    "go": "AIPlaceInfoHolder/T4_trigger (1)",
+    "world": [
+     6.45,
+     32.83,
+     20.27
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 251,
+     "Id": "2450",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3796
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 4578
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": -1,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 5793,
+    "go": "AIPlaceInfoHolder/T3_trigger",
+    "world": [
+     -12.0,
+     19.36,
+     -27.18
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 251,
+     "Id": "2450",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3802
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 5633
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": 6,
+     "UseAsCoverGroupId": 0
+    }
+   },
+   {
+    "path_id": 5834,
+    "go": "AIPlaceInfoHolder/AIGrenadeThrowPlace (2)",
+    "world": [
+     -10.27,
+     17.39,
+     -64.39
+    ],
+    "class": "AIPlaceInfo",
+    "fields": {
+     "AreaId": 11,
+     "Id": "111",
+     "GrenadePlaces": [],
+     "Collider": {
+      "ref": 3810
+     },
+     "IsOnTrigger": 1,
+     "BlockGrenade": 0,
+     "IsDark": 0,
+     "IsMute": 0,
+     "IsInside": 0,
+     "AtrZone": 0,
+     "InfoLogicAllEnemy": {
+      "ref": 4887
+     },
+     "CoversSpecial": 0,
+     "retailExtra_0": -1,
+     "UseAsCoverGroupId": 0
+    }
+   }
+  ],
+  "AIPlaceLogicEventRaise": [
+   {
+    "path_id": 4578,
+    "go": "AIPlaceInfoHolder/T4_trigger (1)/T4",
+    "world": [
+     6.45,
+     32.83,
+     20.27
+    ],
+    "class": "AIPlaceLogicEventRaise",
+    "fields": {
+     "EventName": "T4",
+     "EnterRaise": 1,
+     "ExitRaise": 0,
+     "retailExtra_0": 1
+    }
+   },
+   {
+    "path_id": 4784,
+    "go": "AIPlaceInfoHolder/T1_trigger/T1",
+    "world": [
+     -0.54,
+     16.62,
+     57.32
+    ],
+    "class": "AIPlaceLogicEventRaise",
+    "fields": {
+     "EventName": "T1",
+     "EnterRaise": 1,
+     "ExitRaise": 0,
+     "retailExtra_0": 1
+    }
+   },
+   {
+    "path_id": 4892,
+    "go": "AIPlaceInfoHolder/T1_trigger (1)/T1",
+    "world": [
+     -10.84,
+     19.53,
+     36.61
+    ],
+    "class": "AIPlaceLogicEventRaise",
+    "fields": {
+     "EventName": "T1",
+     "EnterRaise": 1,
+     "ExitRaise": 0,
+     "retailExtra_0": 1
+    }
+   },
+   {
+    "path_id": 5113,
+    "go": "AIPlaceInfoHolder/T1_trigger (2)/T1",
+    "world": [
+     10.93,
+     19.53,
+     36.26
+    ],
+    "class": "AIPlaceLogicEventRaise",
+    "fields": {
+     "EventName": "T1",
+     "EnterRaise": 1,
+     "ExitRaise": 0,
+     "retailExtra_0": 1
+    }
+   },
+   {
+    "path_id": 5633,
+    "go": "AIPlaceInfoHolder/T3_trigger/T3",
+    "world": [
+     -12.0,
+     19.36,
+     -27.18
+    ],
+    "class": "AIPlaceLogicEventRaise",
+    "fields": {
+     "EventName": "T3",
+     "EnterRaise": 1,
+     "ExitRaise": 0,
+     "retailExtra_0": 1
+    }
+   },
+   {
+    "path_id": 5790,
+    "go": "AIPlaceInfoHolder/T2_trigger/T2",
+    "world": [
+     -10.13,
+     17.1,
+     16.86
+    ],
+    "class": "AIPlaceLogicEventRaise",
+    "fields": {
+     "EventName": "T2",
+     "EnterRaise": 1,
+     "ExitRaise": 0,
+     "retailExtra_0": 1
+    }
+   },
+   {
+    "path_id": 5805,
+    "go": "AIPlaceInfoHolder/T4_trigger/T4",
+    "world": [
+     -6.24,
+     32.85,
+     20.4
+    ],
+    "class": "AIPlaceLogicEventRaise",
+    "fields": {
+     "EventName": "T4",
+     "EnterRaise": 1,
+     "ExitRaise": 0,
+     "retailExtra_0": 1
+    }
+   }
+  ]
+ }
+}

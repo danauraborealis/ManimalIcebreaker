@@ -1,0 +1,129 @@
+{
+ "Cpu_panel_crackles": [
+  "amb_hdd_06",
+  "amb_hdd_05",
+  "amb_hdd_04",
+  "amb_hdd_03",
+  "amb_hdd_02",
+  "amb_hdd_01"
+ ],
+ "Electric_panel_relay": [
+  "electric_panel_random_06",
+  "electric_panel_random_05",
+  "electric_panel_random_04",
+  "electric_panel_random_03",
+  "electric_panel_random_02",
+  "electric_panel_random_01"
+ ],
+ "Electric_sparks": [
+  "chain_rattles_03",
+  "elecrtic_sparks_01",
+  "elecrtic_sparks_02",
+  "elecrtic_sparks_03",
+  "elecrtic_sparks_04",
+  "elecrtic_sparks_05",
+  "elecrtic_sparks_06",
+  "elecrtic_sparks_07",
+  "elecrtic_sparks_08",
+  "garbage_rats_02"
+ ],
+ "Ice_crackles": [
+  "ice_oneshot_05",
+  "ice_oneshot_04",
+  "ice_oneshot_03",
+  "ice_oneshot_02",
+  "ice_oneshot_01"
+ ],
+ "add_wind_gusts": [
+  "amb_additional_wind_06",
+  "amb_additional_wind_05",
+  "amb_additional_wind_04",
+  "amb_additional_wind_03",
+  "amb_additional_wind_02",
+  "amb_additional_wind_01"
+ ],
+ "metal_stressed": [
+  "amb_sparrow_in_garbage_02",
+  "amb_metal_stressed_1",
+  "amb_metal_stressed_2",
+  "amb_metal_stressed_3",
+  "amb_metal_stressed_4",
+  "amb_metal_stressed_groan_2",
+  "amb_factory_sand_shovel_far_reflections_1"
+ ],
+ "ship_moans_indoor": [
+  "ship_moans_indoor_08",
+  "ship_moans_indoor_07",
+  "ship_moans_indoor_06",
+  "ship_moans_indoor_05",
+  "ship_moans_indoor_04",
+  "ship_moans_indoor_03",
+  "ship_moans_indoor_02",
+  "ship_moans_indoor_01"
+ ],
+ "ship_moans_outdoor": [
+  "ship_moans_outdoor_08",
+  "ship_moans_outdoor_07",
+  "ship_moans_outdoor_06",
+  "ship_moans_outdoor_05",
+  "ship_moans_outdoor_04",
+  "ship_moans_outdoor_03",
+  "ship_moans_outdoor_02",
+  "ship_moans_outdoor_01"
+ ],
+ "ships_creacking": [
+  "amb_terminal_metal_far_small_08",
+  "amb_terminal_ships_creaking_01",
+  "amb_terminal_ships_creaking_02",
+  "amb_terminal_ships_creaking_03",
+  "amb_terminal_ships_creaking_04",
+  "amb_terminal_ships_creaking_05",
+  "amb_terminal_ships_creaking_06",
+  "amb_terminal_ships_creaking_07",
+  "amb_terminal_ships_creaking_08",
+  "amb_terminal_ships_creaking_09",
+  "amb_terminal_ships_creaking_10",
+  "cold_metal_stress_04"
+ ],
+ "ventilation_far_reflections": [
+  "amb_sparrow_in_garbage_02",
+  "amb_factory_ventilation_far_reflections_1",
+  "amb_factory_ventilation_far_reflections_2",
+  "amb_factory_ventilation_far_reflections_3",
+  "amb_factory_ventilation_far_reflections_4",
+  "amb_factory_ventilation_far_reflections_5",
+  "amb_factory_ventilation_far_reflections_6",
+  "amb_factory_ventilation_far_reflections_7",
+  "amb_factory_ventilation_far_reflections_8",
+  "amb_factory_ventilation_far_reflections_9",
+  "amb_factory_ventilation_far_reflections_10",
+  "amb_factory_ventilation_far_reflections_11",
+  "amb_factory_ventilation_far_reflections_12",
+  "amb_factory_ventilation_far_reflections_13",
+  "amb_factory_ventilation_far_reflections_14",
+  "amb_factory_ventilation_impact_far_reflections_1",
+  "amb_factory_ventilation_impact_far_reflections_2",
+  "amb_factory_ventilation_impact_far_reflections_3",
+  "amb_factory_ventilation_impact_far_reflections_4",
+  "amb_factory_ventilation_impact_far_reflections_5",
+  "amb_factory_ventilation_impact_far_reflections_6",
+  "amb_factory_sand_shovel_far_reflections_1"
+ ],
+ "wind_gusts": [
+  "amb_wind_gusts_06",
+  "amb_wind_gusts_05",
+  "amb_wind_gusts_04",
+  "amb_wind_gusts_03",
+  "amb_wind_gusts_02",
+  "amb_wind_gusts_01"
+ ],
+ "wind_howl": [
+  "amb_sparrow_in_garbage_02",
+  "amb_factory_wind_howl_1",
+  "amb_factory_wind_howl_2",
+  "amb_factory_wind_howl_3",
+  "amb_factory_wind_howl_4",
+  "amb_factory_wind_howl_5",
+  "amb_factory_sand_shovel_far_reflections_1"
+ ]
+}

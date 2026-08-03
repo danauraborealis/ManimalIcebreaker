@@ -1,0 +1,5280 @@
+{
+ "source": "retail 1.0 level698 Weather + Sky Dome subtree, typetrees from SPT 0.16.9 Mono",
+ "components": {
+  "SceneLights": [
+   {
+    "path_id": 1799,
+    "go": "Weather/Scene_Light",
+    "trs": {
+     "pos": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rot": [
+      -0.0,
+      -0.0,
+      -0.0,
+      1.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "SceneLights",
+    "fields": {
+     "_lights": [
+      {
+       "ref": 1782
+      }
+     ]
+    }
+   }
+  ],
+  "RenderQueue": [
+   {
+    "path_id": 1800,
+    "go": "Sky Dome/Sun",
+    "trs": {
+     "pos": [
+      0.6371542811393738,
+      -0.2697102129459381,
+      0.722004771232605
+     ],
+     "rot": [
+      0.7629973888397217,
+      -0.5280506610870361,
+      -0.36502084136009216,
+      0.0758776068687439
+     ],
+     "scale": [
+      0.06984154134988785,
+      0.06984154134988785,
+      0.06984154134988785
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "RenderQueue",
+    "fields": {
+     "Queue": 1014,
+     "SetQueue": -2
+    }
+   }
+  ],
+  "RippleController": [
+   {
+    "path_id": 1801,
+    "go": "Weather/DepthPhoto/RainController",
+    "trs": {
+     "pos": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rot": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "RippleController",
+    "fields": {
+     "RippleTexture": {
+      "ref": 474,
+      "file": 6
+     },
+     "WaterCucle": {
+      "CucleSpeed": 0.800000011920929,
+      "CucleLengthRelationMinMax": {
+       "x": 0.009999999776482582,
+       "y": 1.0
+      },
+      "IntensityMinMax": {
+       "x": 0.0,
+       "y": 0.10000000149011612
+      }
+     },
+     "RippleWaveCount": 3,
+     "RippleWaveFreq": 4.0,
+     "EnvironmentCucle": {
+      "CucleSpeed": 0.4000000059604645,
+      "CucleLengthRelationMinMax": {
+       "x": 0.009999999776482582,
+       "y": 0.587670087814331
+      },
+      "IntensityMinMax": {
+       "x": 0.0,
+       "y": 0.10000000149011612
+      }
+     },
+     "WetDropsSpecular": 1.0,
+     "WetDropsGlossness": 1.0,
+     "WetDropsAlbedo": 1.0,
+     "WetDropsNormal": 1.0,
+     "RippleFakeLightIntensity": 0.4000000059604645,
+     "RainIntensityRippleScale": 2.0,
+     "_forceTriplanar": 1,
+     "_useFakeRippleLight": 1
+    }
+   }
+  ],
+  "TOD_Components": [
+   {
+    "path_id": 1802,
+    "go": "Sky Dome",
+    "trs": {
+     "pos": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rot": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "scale": [
+      1000.0,
+      1000.0,
+      1000.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "TOD_Components",
+    "fields": {
+     "Sun": {
+      "ref": 25
+     },
+     "Moon": {
+      "ref": 18
+     },
+     "Atmosphere": {
+      "ref": 28
+     },
+     "Clear": {
+      "ref": 19
+     },
+     "Space": {
+      "ref": 29
+     },
+     "Light": {
+      "ref": 26
+     }
+    }
+   }
+  ],
+  "SnowFlakes": [
+   {
+    "path_id": 1803,
+    "go": "Weather/DepthPhoto/SnowFlakes",
+    "trs": {
+     "pos": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rot": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "SnowFlakes",
+    "fields": {
+     "DefaultColor": {
+      "r": 0.10000000149011612,
+      "g": 0.10000000149011612,
+      "b": 0.10000000149011612,
+      "a": 1.0
+     },
+     "FlakesSizeMin": {
+      "x": 0.019999999552965164,
+      "y": 0.02500000037252903
+     },
+     "FlakesSizeMax": {
+      "x": 0.03999999910593033,
+      "y": 0.04500000178813934
+     },
+     "FlakesFarSizeFactor": 1.0,
+     "StormSideSpeed": 0.029999999329447746,
+     "MinMaxSideSpeed": {
+      "x": 0.029999999329447746,
+      "y": 0.05999999865889549
+     },
+     "DropsAlphaClose": 0.11599999666213989,
+     "MinAmbient": 0.20000000298023224,
+     "MinAmbientAddition": 0.4000000059604645,
+     "MinAmbientAdditionCoef": 0.0,
+     "Close": {
+      "ref": 147,
+      "file": 3
+     },
+     "Far": {
+      "ref": 148,
+      "file": 3
+     },
+     "Intensity": 0.0
+    }
+   }
+  ],
+  "RainFallDrops": [
+   {
+    "path_id": 1804,
+    "go": "Weather/DepthPhoto/RainFall",
+    "trs": {
+     "pos": [
+      0.0,
+      0.9292929172515869,
+      0.0
+     ],
+     "rot": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "RainFallDrops",
+    "fields": {
+     "_intensity": 0.0,
+     "_intensityThreshold": 0.0010000000474974513,
+     "Count": 16383,
+     "MinSize": {
+      "x": 0.009999999776482582,
+      "y": 0.009999999776482582
+     },
+     "MaxSize": {
+      "x": 0.019999999552965164,
+      "y": 0.019999999552965164
+     },
+     "MinMaxSideSpeed": {
+      "x": 0.0,
+      "y": 1.0
+     },
+     "MinMaxDensity": {
+      "x": 0.0,
+      "y": 1.0
+     },
+     "_close": {
+      "ref": 141,
+      "file": 3
+     },
+     "DropsAlphaClose": 0.10000000149011612,
+     "MinAmbient": 0.20000000298023224,
+     "MinAmbientAddition": 0.4000000059604645,
+     "MinAmbientAdditionCoef": 0.2482638955116272,
+     "SideSpeed": 0.0
+    }
+   }
+  ],
+  "TOD_Time": [
+   {
+    "path_id": 1805,
+    "go": "Sky Dome",
+    "trs": {
+     "pos": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rot": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "scale": [
+      1000.0,
+      1000.0,
+      1000.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "TOD_Time",
+    "fields": {
+     "LockCurrentTime": 0,
+     "DayLengthInMinutes": 3000.0,
+     "UseDeviceDate": 0,
+     "UseDeviceTime": 0,
+     "UseTimeCurve": 0,
+     "TimeCurve": {
+      "m_Curve": [
+       {
+        "time": 0.0,
+        "value": 0.0,
+        "inSlope": 0.0,
+        "outSlope": 1.0,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 24.0,
+        "value": 24.0,
+        "inSlope": 1.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       }
+      ],
+      "m_PreInfinity": 2,
+      "m_PostInfinity": 2,
+      "m_RotationOrder": 4
+     }
+    }
+   }
+  ],
+  "TOD_Sky": [
+   {
+    "path_id": 1806,
+    "go": "Sky Dome",
+    "trs": {
+     "pos": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rot": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "scale": [
+      1000.0,
+      1000.0,
+      1000.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "TOD_Sky",
+    "fields": {
+     "ColorSpace": 2,
+     "ColorRange": 1,
+     "SkyQuality": 1,
+     "CloudQuality": 2,
+     "MeshQuality": 2,
+     "<Cycle>k__BackingField": {
+      "Hour": 23.0,
+      "Day": 1,
+      "Month": 8,
+      "Year": 2018
+     },
+     "World": {
+      "Latitude": 46.0,
+      "Longitude": 84.0,
+      "UTC": 7.239999771118164
+     },
+     "<Atmosphere>k__BackingField": {
+      "RayleighMultiplier": 1.6120755672454834,
+      "MieMultiplier": 0.26899999380111694,
+      "Brightness": 0.2957887053489685,
+      "ScatteringBrightness": 0.7690505981445312,
+      "Contrast": 2.4786536693573,
+      "Directionality": 0.8299999833106995,
+      "Fogginess": 0.0
+     },
+     "Day": {
+      "SkyColor": {
+       "key0": {
+        "r": 1.0,
+        "g": 0.9529411792755127,
+        "b": 0.9176470637321472,
+        "a": 1.0
+       },
+       "key1": {
+        "r": 1.0,
+        "g": 0.24705882370471954,
+        "b": 0.0,
+        "a": 1.0
+       },
+       "key2": {
+        "r": 1.0,
+        "g": 0.9529411792755127,
+        "b": 0.9176470637321472,
+        "a": 0.0
+       },
+       "key3": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key4": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key5": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key6": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key7": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "ctime0": 2539,
+       "ctime1": 43236,
+       "ctime2": 65535,
+       "ctime3": 0,
+       "ctime4": 0,
+       "ctime5": 0,
+       "ctime6": 0,
+       "ctime7": 0,
+       "atime0": 0,
+       "atime1": 65535,
+       "atime2": 0,
+       "atime3": 0,
+       "atime4": 0,
+       "atime5": 0,
+       "atime6": 0,
+       "atime7": 0,
+       "m_Mode": 0,
+       "m_ColorSpace": -1,
+       "m_NumColorKeys": 2,
+       "m_NumAlphaKeys": 2
+      },
+      "LightColor": {
+       "key0": {
+        "r": 1.0,
+        "g": 0.9529411792755127,
+        "b": 0.9176470637321472,
+        "a": 1.0
+       },
+       "key1": {
+        "r": 1.0,
+        "g": 0.41960784792900085,
+        "b": 0.0,
+        "a": 1.0
+       },
+       "key2": {
+        "r": 1.0,
+        "g": 0.41960784792900085,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key3": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key4": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key5": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key6": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key7": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "ctime0": 0,
+       "ctime1": 65535,
+       "ctime2": 65535,
+       "ctime3": 0,
+       "ctime4": 0,
+       "ctime5": 0,
+       "ctime6": 0,
+       "ctime7": 0,
+       "atime0": 0,
+       "atime1": 65535,
+       "atime2": 0,
+       "atime3": 0,
+       "atime4": 0,
+       "atime5": 0,
+       "atime6": 0,
+       "atime7": 0,
+       "m_Mode": 0,
+       "m_ColorSpace": -1,
+       "m_NumColorKeys": 2,
+       "m_NumAlphaKeys": 2
+      },
+      "RayColor": {
+       "key0": {
+        "r": 1.0,
+        "g": 0.9529411792755127,
+        "b": 0.9176470637321472,
+        "a": 1.0
+       },
+       "key1": {
+        "r": 1.0,
+        "g": 0.41960784792900085,
+        "b": 0.0,
+        "a": 1.0
+       },
+       "key2": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key3": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key4": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key5": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key6": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key7": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "ctime0": 0,
+       "ctime1": 65535,
+       "ctime2": 0,
+       "ctime3": 0,
+       "ctime4": 0,
+       "ctime5": 0,
+       "ctime6": 0,
+       "ctime7": 0,
+       "atime0": 0,
+       "atime1": 65535,
+       "atime2": 0,
+       "atime3": 0,
+       "atime4": 0,
+       "atime5": 0,
+       "atime6": 0,
+       "atime7": 0,
+       "m_Mode": 0,
+       "m_ColorSpace": -1,
+       "m_NumColorKeys": 2,
+       "m_NumAlphaKeys": 2
+      },
+      "CloudColor": {
+       "key0": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+       },
+       "key1": {
+        "r": 1.0,
+        "g": 0.7843137383460999,
+        "b": 0.3921568691730499,
+        "a": 1.0
+       },
+       "key2": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key3": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key4": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key5": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key6": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key7": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "ctime0": 0,
+       "ctime1": 65535,
+       "ctime2": 0,
+       "ctime3": 0,
+       "ctime4": 0,
+       "ctime5": 0,
+       "ctime6": 0,
+       "ctime7": 0,
+       "atime0": 0,
+       "atime1": 65535,
+       "atime2": 0,
+       "atime3": 0,
+       "atime4": 0,
+       "atime5": 0,
+       "atime6": 0,
+       "atime7": 0,
+       "m_Mode": 0,
+       "m_ColorSpace": -1,
+       "m_NumColorKeys": 2,
+       "m_NumAlphaKeys": 2
+      },
+      "AmbientColor": {
+       "key0": {
+        "r": 1.0,
+        "g": 0.9450980424880981,
+        "b": 0.9254902005195618,
+        "a": 1.0
+       },
+       "key1": {
+        "r": 1.0,
+        "g": 0.6235294342041016,
+        "b": 0.4901960790157318,
+        "a": 1.0
+       },
+       "key2": {
+        "r": 0.3686274588108063,
+        "g": 0.3490196168422699,
+        "b": 0.34117648005485535,
+        "a": 0.0
+       },
+       "key3": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key4": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key5": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key6": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key7": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "ctime0": 12290,
+       "ctime1": 40587,
+       "ctime2": 65535,
+       "ctime3": 0,
+       "ctime4": 0,
+       "ctime5": 0,
+       "ctime6": 0,
+       "ctime7": 0,
+       "atime0": 0,
+       "atime1": 65535,
+       "atime2": 0,
+       "atime3": 0,
+       "atime4": 0,
+       "atime5": 0,
+       "atime6": 0,
+       "atime7": 0,
+       "m_Mode": 0,
+       "m_ColorSpace": -1,
+       "m_NumColorKeys": 2,
+       "m_NumAlphaKeys": 2
+      },
+      "LightIntensity": 0.800000011920929,
+      "ShadowStrength": 1.0,
+      "ColorMultiplier": 1.0,
+      "AmbientMultiplier": 1.0,
+      "ReflectionMultiplier": 1.0
+     },
+     "Night": {
+      "SkyColor": {
+       "key0": {
+        "r": 0.09803921729326248,
+        "g": 0.1568627506494522,
+        "b": 0.2549019753932953,
+        "a": 1.0
+       },
+       "key1": {
+        "r": 0.09803921729326248,
+        "g": 0.1568627506494522,
+        "b": 0.2549019753932953,
+        "a": 1.0
+       },
+       "key2": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key3": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key4": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key5": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key6": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key7": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "ctime0": 0,
+       "ctime1": 65535,
+       "ctime2": 0,
+       "ctime3": 0,
+       "ctime4": 0,
+       "ctime5": 0,
+       "ctime6": 0,
+       "ctime7": 0,
+       "atime0": 0,
+       "atime1": 65535,
+       "atime2": 0,
+       "atime3": 0,
+       "atime4": 0,
+       "atime5": 0,
+       "atime6": 0,
+       "atime7": 0,
+       "m_Mode": 0,
+       "m_ColorSpace": -1,
+       "m_NumColorKeys": 2,
+       "m_NumAlphaKeys": 2
+      },
+      "LightColor": {
+       "key0": {
+        "r": 0.09803921729326248,
+        "g": 0.1568627506494522,
+        "b": 0.2549019753932953,
+        "a": 1.0
+       },
+       "key1": {
+        "r": 0.09803921729326248,
+        "g": 0.1568627506494522,
+        "b": 0.2549019753932953,
+        "a": 1.0
+       },
+       "key2": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key3": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key4": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key5": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key6": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key7": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "ctime0": 0,
+       "ctime1": 65535,
+       "ctime2": 0,
+       "ctime3": 0,
+       "ctime4": 0,
+       "ctime5": 0,
+       "ctime6": 0,
+       "ctime7": 0,
+       "atime0": 0,
+       "atime1": 65535,
+       "atime2": 0,
+       "atime3": 0,
+       "atime4": 0,
+       "atime5": 0,
+       "atime6": 0,
+       "atime7": 0,
+       "m_Mode": 0,
+       "m_ColorSpace": -1,
+       "m_NumColorKeys": 2,
+       "m_NumAlphaKeys": 2
+      },
+      "RayColor": {
+       "key0": {
+        "r": 0.09803921729326248,
+        "g": 0.1568627506494522,
+        "b": 0.2549019753932953,
+        "a": 1.0
+       },
+       "key1": {
+        "r": 0.09803921729326248,
+        "g": 0.1568627506494522,
+        "b": 0.2549019753932953,
+        "a": 1.0
+       },
+       "key2": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key3": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key4": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key5": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key6": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key7": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "ctime0": 0,
+       "ctime1": 65535,
+       "ctime2": 0,
+       "ctime3": 0,
+       "ctime4": 0,
+       "ctime5": 0,
+       "ctime6": 0,
+       "ctime7": 0,
+       "atime0": 0,
+       "atime1": 65535,
+       "atime2": 0,
+       "atime3": 0,
+       "atime4": 0,
+       "atime5": 0,
+       "atime6": 0,
+       "atime7": 0,
+       "m_Mode": 0,
+       "m_ColorSpace": -1,
+       "m_NumColorKeys": 2,
+       "m_NumAlphaKeys": 2
+      },
+      "CloudColor": {
+       "key0": {
+        "r": 0.09803921729326248,
+        "g": 0.1568627506494522,
+        "b": 0.2549019753932953,
+        "a": 1.0
+       },
+       "key1": {
+        "r": 0.09803921729326248,
+        "g": 0.1568627506494522,
+        "b": 0.2549019753932953,
+        "a": 1.0
+       },
+       "key2": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key3": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key4": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key5": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key6": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key7": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "ctime0": 0,
+       "ctime1": 65535,
+       "ctime2": 0,
+       "ctime3": 0,
+       "ctime4": 0,
+       "ctime5": 0,
+       "ctime6": 0,
+       "ctime7": 0,
+       "atime0": 0,
+       "atime1": 65535,
+       "atime2": 0,
+       "atime3": 0,
+       "atime4": 0,
+       "atime5": 0,
+       "atime6": 0,
+       "atime7": 0,
+       "m_Mode": 0,
+       "m_ColorSpace": -1,
+       "m_NumColorKeys": 2,
+       "m_NumAlphaKeys": 2
+      },
+      "AmbientColor": {
+       "key0": {
+        "r": 0.8352941274642944,
+        "g": 0.4901960790157318,
+        "b": 0.29019609093666077,
+        "a": 1.0
+       },
+       "key1": {
+        "r": 0.2862745225429535,
+        "g": 0.4901960790157318,
+        "b": 0.8352941274642944,
+        "a": 1.0
+       },
+       "key2": {
+        "r": 0.2862745225429535,
+        "g": 0.4901960790157318,
+        "b": 0.8352941274642944,
+        "a": 0.0
+       },
+       "key3": {
+        "r": 0.2862745225429535,
+        "g": 0.4901960790157318,
+        "b": 0.8352941274642944,
+        "a": 0.0
+       },
+       "key4": {
+        "r": 0.2862745225429535,
+        "g": 0.4901960790157318,
+        "b": 0.8352941274642944,
+        "a": 0.0
+       },
+       "key5": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key6": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key7": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "ctime0": 18325,
+       "ctime1": 45370,
+       "ctime2": 65535,
+       "ctime3": 65535,
+       "ctime4": 65535,
+       "ctime5": 0,
+       "ctime6": 0,
+       "ctime7": 0,
+       "atime0": 0,
+       "atime1": 65535,
+       "atime2": 0,
+       "atime3": 0,
+       "atime4": 0,
+       "atime5": 0,
+       "atime6": 0,
+       "atime7": 0,
+       "m_Mode": 0,
+       "m_ColorSpace": -1,
+       "m_NumColorKeys": 3,
+       "m_NumAlphaKeys": 2
+      },
+      "LightIntensity": 0.5,
+      "ShadowStrength": 1.0,
+      "ColorMultiplier": 0.9358492493629456,
+      "AmbientMultiplier": 1.0,
+      "ReflectionMultiplier": 1.0
+     },
+     "Sun": {
+      "MeshColor": {
+       "key0": {
+        "r": 1.0,
+        "g": 0.5568627715110779,
+        "b": 0.0,
+        "a": 1.0
+       },
+       "key1": {
+        "r": 1.0,
+        "g": 0.08235294371843338,
+        "b": 0.0,
+        "a": 1.0
+       },
+       "key2": {
+        "r": 1.0,
+        "g": 0.14509804546833038,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key3": {
+        "r": 1.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key4": {
+        "r": 1.0,
+        "g": 0.6823529601097107,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key5": {
+        "r": 1.0,
+        "g": 0.6823529601097107,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key6": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key7": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "ctime0": 0,
+       "ctime1": 10727,
+       "ctime2": 25551,
+       "ctime3": 34620,
+       "ctime4": 42178,
+       "ctime5": 42178,
+       "ctime6": 0,
+       "ctime7": 0,
+       "atime0": 0,
+       "atime1": 65535,
+       "atime2": 0,
+       "atime3": 0,
+       "atime4": 0,
+       "atime5": 0,
+       "atime6": 0,
+       "atime7": 0,
+       "m_Mode": 0,
+       "m_ColorSpace": -1,
+       "m_NumColorKeys": 5,
+       "m_NumAlphaKeys": 2
+      },
+      "MeshSize": 1.0,
+      "MeshBrightness": 2.0,
+      "MeshContrast": 0.0
+     },
+     "Moon": {
+      "MeshColor": {
+       "key0": {
+        "r": 1.0,
+        "g": 0.9137254953384399,
+        "b": 0.7843137383460999,
+        "a": 1.0
+       },
+       "key1": {
+        "r": 1.0,
+        "g": 0.9137254953384399,
+        "b": 0.7843137383460999,
+        "a": 1.0
+       },
+       "key2": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key3": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key4": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key5": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key6": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key7": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "ctime0": 0,
+       "ctime1": 65535,
+       "ctime2": 0,
+       "ctime3": 0,
+       "ctime4": 0,
+       "ctime5": 0,
+       "ctime6": 0,
+       "ctime7": 0,
+       "atime0": 0,
+       "atime1": 65535,
+       "atime2": 0,
+       "atime3": 0,
+       "atime4": 0,
+       "atime5": 0,
+       "atime6": 0,
+       "atime7": 0,
+       "m_Mode": 0,
+       "m_ColorSpace": -1,
+       "m_NumColorKeys": 2,
+       "m_NumAlphaKeys": 2
+      },
+      "MeshSize": 0.699999988079071,
+      "MeshBrightness": 0.800000011920929,
+      "MeshContrast": 1.0,
+      "HaloColor": {
+       "key0": {
+        "r": 0.1764705926179886,
+        "g": 0.21568627655506134,
+        "b": 0.27843138575553894,
+        "a": 1.0
+       },
+       "key1": {
+        "r": 0.10980392247438431,
+        "g": 0.1411764770746231,
+        "b": 0.1921568661928177,
+        "a": 1.0
+       },
+       "key2": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key3": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key4": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key5": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key6": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key7": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "ctime0": 0,
+       "ctime1": 65535,
+       "ctime2": 0,
+       "ctime3": 0,
+       "ctime4": 0,
+       "ctime5": 0,
+       "ctime6": 0,
+       "ctime7": 0,
+       "atime0": 0,
+       "atime1": 65535,
+       "atime2": 0,
+       "atime3": 0,
+       "atime4": 0,
+       "atime5": 0,
+       "atime6": 0,
+       "atime7": 0,
+       "m_Mode": 0,
+       "m_ColorSpace": -1,
+       "m_NumColorKeys": 2,
+       "m_NumAlphaKeys": 2
+      },
+      "HaloSize": 0.10000000149011612,
+      "Position": 1
+     },
+     "Stars": {
+      "Tiling": 6.0,
+      "Brightness": 7.0,
+      "Position": 1
+     },
+     "Light": {
+      "UpdateInterval": 0.0,
+      "MinimumHeight": 0.0
+     },
+     "Fog": {
+      "Mode": 1,
+      "HeightBias": 0.0
+     },
+     "Ambient": {
+      "Mode": 0,
+      "UpdateInterval": 1.0
+     },
+     "Reflection": {
+      "Mode": 0,
+      "ClearFlags": 2,
+      "CullingMask": {
+       "m_Bits": 33554432
+      },
+      "TimeSlicing": 0,
+      "UpdateInterval": 1.0
+     },
+     "rotationSpeed": 2.938735877055719e-39
+    }
+   }
+  ],
+  "WetRenderer": [
+   {
+    "path_id": 1807,
+    "go": "Weather/DepthPhoto/RainController",
+    "trs": {
+     "pos": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rot": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "WetRenderer",
+    "fields": {
+     "WetShader": {
+      "ref": 183,
+      "file": 1
+     },
+     "Intensity": 0.0,
+     "DiffuseColor": {
+      "r": 0.19811320304870605,
+      "g": 0.19811320304870605,
+      "b": 0.19811320304870605,
+      "a": 0.29411765933036804
+     },
+     "SpecColor": {
+      "r": 0.0279999990016222,
+      "g": 0.0279999990016222,
+      "b": 0.0279999990016222,
+      "a": 0.8156862854957581
+     },
+     "WetBias": 0.0015999999595806003
+    }
+   }
+  ],
+  "WeatherController": [
+   {
+    "path_id": 1808,
+    "go": "Weather",
+    "trs": {
+     "pos": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rot": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "EFT.Weather.WeatherController",
+    "fields": {
+     "WindController": {
+      "ref": 1811
+     },
+     "RainController": {
+      "ref": 1809
+     },
+     "PlayerCamera": {
+      "ref": 0
+     },
+     "CloudController": {
+      "ref": 2025
+     },
+     "CloudsRemap": {
+      "ref": 1162,
+      "file": 3
+     },
+     "MinMaxAmmount": {
+      "x": 0.4000000059604645,
+      "y": 0.6725808382034302
+     },
+     "MinLyingWater": 0.800000011920929,
+     "FogMultyplyer": {
+      "m_Curve": [
+       {
+        "time": -1.0,
+        "value": 7.0,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.0,
+        "outWeight": 0.0
+       },
+       {
+        "time": -0.8760336637496948,
+        "value": 7.349331855773926,
+        "inSlope": 0.399943083524704,
+        "outSlope": 0.399943083524704,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": -0.5609985589981079,
+        "value": 7.7188873291015625,
+        "inSlope": 0.1642809510231018,
+        "outSlope": 0.1642809510231018,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": -0.21108093857765198,
+        "value": 7.886299133300781,
+        "inSlope": -0.24494171142578125,
+        "outSlope": -0.24494171142578125,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": -0.05563659965991974,
+        "value": 8.09808349609375,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.0575178787112236,
+        "value": 8.8142671585083,
+        "inSlope": 0.25464847683906555,
+        "outSlope": 0.25464847683906555,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.18445435166358948,
+        "value": 9.12066650390625,
+        "inSlope": 0.03381156548857689,
+        "outSlope": 0.03381156548857689,
+        "weightedMode": 0,
+        "inWeight": 1.0,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.29229697585105896,
+        "value": 9.442131042480469,
+        "inSlope": 0.07425805181264877,
+        "outSlope": 0.07425805181264877,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 1.0
+       },
+       {
+        "time": 0.463836669921875,
+        "value": 9.24810791015625,
+        "inSlope": 0.14614489674568176,
+        "outSlope": 0.14614489674568176,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.6760498285293579,
+        "value": 8.875812530517578,
+        "inSlope": 0.12062697857618332,
+        "outSlope": 0.12062697857618332,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.7746174335479736,
+        "value": 8.711491584777832,
+        "inSlope": -0.04646933078765869,
+        "outSlope": -0.04646933078765869,
+        "weightedMode": 0,
+        "inWeight": 1.0,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.8999999761581421,
+        "value": 8.241653442382812,
+        "inSlope": 0.023018747568130493,
+        "outSlope": 0.023018747568130493,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 1.0,
+        "value": 7.0,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       }
+      ],
+      "m_PreInfinity": 2,
+      "m_PostInfinity": 2,
+      "m_RotationOrder": 0
+     },
+     "TimeOfDayController": {
+      "RayleighMultiplierMinMax": {
+       "x": 1.0,
+       "y": 1.5
+      },
+      "RayleighMultiplier": {
+       "m_Curve": [
+        {
+         "time": -1.0,
+         "value": 1.0,
+         "inSlope": 0.0,
+         "outSlope": 0.3069345951080322,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": 0.23609788715839386,
+         "value": 1.3794012069702148,
+         "inSlope": 0.3069345951080322,
+         "outSlope": -1.7515965700149536,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": 0.9811817407608032,
+         "value": 0.0743148922920227,
+         "inSlope": -0.0703292042016983,
+         "outSlope": -0.0703292042016983,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        }
+       ],
+       "m_PreInfinity": 2,
+       "m_PostInfinity": 2,
+       "m_RotationOrder": 0
+      },
+      "MieMultiplierMinMax": {
+       "x": 0.0,
+       "y": 13.449999809265137
+      },
+      "MieMultiplier": {
+       "m_Curve": [
+        {
+         "time": 0.0,
+         "value": 0.019999999552965164,
+         "inSlope": 0.0,
+         "outSlope": 0.0,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": 1.0,
+         "value": 0.03653717041015625,
+         "inSlope": 0.0,
+         "outSlope": 0.0,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        }
+       ],
+       "m_PreInfinity": 2,
+       "m_PostInfinity": 2,
+       "m_RotationOrder": 0
+      },
+      "DirectionalityMult": 0.17000000178813934,
+      "Directionality": {
+       "m_Curve": [
+        {
+         "time": 0.0,
+         "value": 1.0,
+         "inSlope": 0.0,
+         "outSlope": 0.0,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": 1.0,
+         "value": 1.0,
+         "inSlope": 0.0,
+         "outSlope": 0.0,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        }
+       ],
+       "m_PreInfinity": 2,
+       "m_PostInfinity": 2,
+       "m_RotationOrder": 0
+      },
+      "BrightnessMinMax": {
+       "x": 0.0,
+       "y": 0.30000001192092896
+      },
+      "Brightness": {
+       "m_Curve": [
+        {
+         "time": -0.9924378395080566,
+         "value": 0.9877305030822754,
+         "inSlope": 0.025672627612948418,
+         "outSlope": 0.025672627612948418,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": -0.06467545032501221,
+         "value": 0.8950351476669312,
+         "inSlope": -0.6304277777671814,
+         "outSlope": -0.6304277777671814,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": 0.19105246663093567,
+         "value": 0.7836333513259888,
+         "inSlope": 0.0,
+         "outSlope": 0.0,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": 0.3720815181732178,
+         "value": 0.78358393907547,
+         "inSlope": 0.0009511623647995293,
+         "outSlope": 0.0009511623647995293,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": 0.9881935119628906,
+         "value": 1.1223315000534058,
+         "inSlope": 1.188368558883667,
+         "outSlope": 1.188368558883667,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        }
+       ],
+       "m_PreInfinity": 2,
+       "m_PostInfinity": 2,
+       "m_RotationOrder": 0
+      },
+      "ScatteringBrightnessMultiplier": 2.5999999046325684,
+      "ScatteringBrightness": {
+       "m_Curve": [
+        {
+         "time": 0.0,
+         "value": 1.0,
+         "inSlope": 0.0,
+         "outSlope": 0.0,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": 1.0,
+         "value": 1.0,
+         "inSlope": 0.0,
+         "outSlope": 0.0,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        }
+       ],
+       "m_PreInfinity": 2,
+       "m_PostInfinity": 2,
+       "m_RotationOrder": 4
+      },
+      "BrightnessOvercast": 0.30000001192092896,
+      "ContrastMinMax": {
+       "x": 0.0,
+       "y": 1.9500000476837158
+      },
+      "Contrast": {
+       "m_Curve": [
+        {
+         "time": 0.0028788745403289795,
+         "value": 1.2711044549942017,
+         "inSlope": 0.0,
+         "outSlope": 0.0,
+         "weightedMode": 0,
+         "inWeight": 0.0,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": 0.9961954951286316,
+         "value": 1.2711044549942017,
+         "inSlope": 0.0,
+         "outSlope": 0.0,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.0
+        }
+       ],
+       "m_PreInfinity": 2,
+       "m_PostInfinity": 2,
+       "m_RotationOrder": 0
+      },
+      "MoonLightMinMax": {
+       "x": 0.6834532618522644,
+       "y": 1.0
+      },
+      "LightColor": {
+       "key0": {
+        "r": 0.19117647409439087,
+        "g": 0.21078433096408844,
+        "b": 0.25,
+        "a": 1.0
+       },
+       "key1": {
+        "r": 0.05000000074505806,
+        "g": 0.05000000074505806,
+        "b": 0.05000000074505806,
+        "a": 1.0
+       },
+       "key2": {
+        "r": 0.27450981736183167,
+        "g": 0.12941177189350128,
+        "b": 0.08235294371843338,
+        "a": 0.0
+       },
+       "key3": {
+        "r": 0.8588235378265381,
+        "g": 0.6313725709915161,
+        "b": 0.3921568691730499,
+        "a": 0.0
+       },
+       "key4": {
+        "r": 1.0,
+        "g": 0.8980652093887329,
+        "b": 0.6462264060974121,
+        "a": 0.0
+       },
+       "key5": {
+        "r": 0.5849056243896484,
+        "g": 0.5296934247016907,
+        "b": 0.36142754554748535,
+        "a": 0.0
+       },
+       "key6": {
+        "r": 0.5849056243896484,
+        "g": 0.5296934247016907,
+        "b": 0.36142754554748535,
+        "a": 0.0
+       },
+       "key7": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "ctime0": 0,
+       "ctime1": 22249,
+       "ctime2": 34515,
+       "ctime3": 36278,
+       "ctime4": 45689,
+       "ctime5": 65486,
+       "ctime6": 65486,
+       "ctime7": 0,
+       "atime0": 0,
+       "atime1": 65535,
+       "atime2": 0,
+       "atime3": 0,
+       "atime4": 0,
+       "atime5": 0,
+       "atime6": 0,
+       "atime7": 0,
+       "m_Mode": 0,
+       "m_ColorSpace": 0,
+       "m_NumColorKeys": 6,
+       "m_NumAlphaKeys": 2
+      },
+      "AmbientLightScript": {
+       "ref": 2039
+      },
+      "AmbientHighlightScript": {
+       "ref": 2041
+      },
+      "HighlightWithoutTopHarmonics": 1,
+      "TopHarmonicIntensity": {
+       "m_Curve": [
+        {
+         "time": -1.0480213165283203,
+         "value": 1.0908184051513672,
+         "inSlope": 0.0,
+         "outSlope": 0.0,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": -0.4554421603679657,
+         "value": 1.4395267963409424,
+         "inSlope": 0.11292359232902527,
+         "outSlope": 0.11292359232902527,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.636498212814331
+        },
+        {
+         "time": 0.211605966091156,
+         "value": 1.7221646308898926,
+         "inSlope": 0.18627408146858215,
+         "outSlope": 0.18627408146858215,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": 1.9402403831481934,
+         "value": 2.44073748588562,
+         "inSlope": 0.0,
+         "outSlope": 0.0,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        }
+       ],
+       "m_PreInfinity": 2,
+       "m_PostInfinity": 2,
+       "m_RotationOrder": 0
+      },
+      "HorizontHarmonicIntensity": {
+       "m_Curve": [
+        {
+         "time": -0.9991413354873657,
+         "value": 1.003485918045044,
+         "inSlope": 0.0,
+         "outSlope": 0.0,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": -0.1653306484222412,
+         "value": 0.12128162384033203,
+         "inSlope": -0.8612871170043945,
+         "outSlope": -0.8612871170043945,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": 0.0035601244308054447,
+         "value": 0.03425460308790207,
+         "inSlope": -0.11813995242118835,
+         "outSlope": -0.11813995242118835,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": 0.9899157285690308,
+         "value": 0.14688636362552643,
+         "inSlope": 0.016287168487906456,
+         "outSlope": 0.016287168487906456,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        }
+       ],
+       "m_PreInfinity": 2,
+       "m_PostInfinity": 2,
+       "m_RotationOrder": 0
+      },
+      "BounceHarmonicIntensity": {
+       "m_Curve": [
+        {
+         "time": -1.0096064805984497,
+         "value": 0.00045797228813171387,
+         "inSlope": 0.009025019593536854,
+         "outSlope": 0.009025019593536854,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": -0.46437573432922363,
+         "value": 0.0031942809000611305,
+         "inSlope": 0.033840760588645935,
+         "outSlope": 0.033840760588645935,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": 0.024143870919942856,
+         "value": 0.020126407966017723,
+         "inSlope": 0.055439259856939316,
+         "outSlope": 0.055439259856939316,
+         "weightedMode": 0,
+         "inWeight": 0.39538800716400146,
+         "outWeight": 0.3253348767757416
+        },
+        {
+         "time": 0.9751148223876953,
+         "value": 0.17050717771053314,
+         "inSlope": 0.018601570278406143,
+         "outSlope": 0.018601570278406143,
+         "weightedMode": 0,
+         "inWeight": 1.0,
+         "outWeight": 0.3333333432674408
+        }
+       ],
+       "m_PreInfinity": 2,
+       "m_PostInfinity": 2,
+       "m_RotationOrder": 4
+      },
+      "ForwarHarmonicIntensity": {
+       "m_Curve": [
+        {
+         "time": -0.9963430166244507,
+         "value": 1.0213286876678467,
+         "inSlope": 0.0,
+         "outSlope": 0.0,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": -0.407520592212677,
+         "value": 1.4062421321868896,
+         "inSlope": 0.0,
+         "outSlope": 0.0,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": -0.037337712943553925,
+         "value": 1.9617726802825928,
+         "inSlope": 1.586965799331665,
+         "outSlope": 1.586965799331665,
+         "weightedMode": 0,
+         "inWeight": 0.04534660279750824,
+         "outWeight": 0.3016129732131958
+        },
+        {
+         "time": 0.9801511764526367,
+         "value": 2.5862789154052734,
+         "inSlope": 0.0011920928955078125,
+         "outSlope": 0.0011920928955078125,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        }
+       ],
+       "m_PreInfinity": 2,
+       "m_PostInfinity": 2,
+       "m_RotationOrder": 4
+      },
+      "ForwarHarmonicMultiplyer": {
+       "key0": {
+        "r": 1.0,
+        "g": 0.9176470637321472,
+        "b": 0.6980392336845398,
+        "a": 1.0
+       },
+       "key1": {
+        "r": 1.0,
+        "g": 0.30980393290519714,
+        "b": 0.0,
+        "a": 1.0
+       },
+       "key2": {
+        "r": 0.9725490212440491,
+        "g": 0.7098039388656616,
+        "b": 0.027450980618596077,
+        "a": 0.0
+       },
+       "key3": {
+        "r": 1.0,
+        "g": 0.9176470637321472,
+        "b": 0.6980392336845398,
+        "a": 0.0
+       },
+       "key4": {
+        "r": 1.0,
+        "g": 0.5215686559677124,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key5": {
+        "r": 1.0,
+        "g": 0.5960784554481506,
+        "b": 0.21960784494876862,
+        "a": 0.0
+       },
+       "key6": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key7": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "ctime0": 0,
+       "ctime1": 29939,
+       "ctime2": 34913,
+       "ctime3": 40472,
+       "ctime4": 48712,
+       "ctime5": 65535,
+       "ctime6": 0,
+       "ctime7": 0,
+       "atime0": 0,
+       "atime1": 65535,
+       "atime2": 0,
+       "atime3": 0,
+       "atime4": 0,
+       "atime5": 0,
+       "atime6": 0,
+       "atime7": 0,
+       "m_Mode": 0,
+       "m_ColorSpace": -1,
+       "m_NumColorKeys": 6,
+       "m_NumAlphaKeys": 2
+      },
+      "BackwardHarmonicMultiplyer": {
+       "key0": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 1.0
+       },
+       "key1": {
+        "r": 0.501960813999176,
+        "g": 0.501960813999176,
+        "b": 0.501960813999176,
+        "a": 1.0
+       },
+       "key2": {
+        "r": 0.6901960968971252,
+        "g": 0.6627451181411743,
+        "b": 0.5882353186607361,
+        "a": 0.0
+       },
+       "key3": {
+        "r": 0.2711937725543976,
+        "g": 0.580286979675293,
+        "b": 0.8382352590560913,
+        "a": 0.0
+       },
+       "key4": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key5": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key6": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key7": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "ctime0": 0,
+       "ctime1": 24332,
+       "ctime2": 31841,
+       "ctime3": 48176,
+       "ctime4": 65535,
+       "ctime5": 0,
+       "ctime6": 0,
+       "ctime7": 0,
+       "atime0": 0,
+       "atime1": 65535,
+       "atime2": 0,
+       "atime3": 0,
+       "atime4": 0,
+       "atime5": 0,
+       "atime6": 0,
+       "atime7": 0,
+       "m_Mode": 0,
+       "m_ColorSpace": -1,
+       "m_NumColorKeys": 5,
+       "m_NumAlphaKeys": 2
+      },
+      "AddTopAmbient": {
+       "key0": {
+        "r": 0.18544265627861023,
+        "g": 0.3046557605266571,
+        "b": 0.40400001406669617,
+        "a": 1.0
+       },
+       "key1": {
+        "r": 0.07450980693101883,
+        "g": 0.08235294371843338,
+        "b": 0.09019608050584793,
+        "a": 1.0
+       },
+       "key2": {
+        "r": 0.0784313753247261,
+        "g": 0.06417112052440643,
+        "b": 0.05941770598292351,
+        "a": 0.0
+       },
+       "key3": {
+        "r": 0.18400000035762787,
+        "g": 0.12311273068189621,
+        "b": 0.11224000155925751,
+        "a": 0.0
+       },
+       "key4": {
+        "r": 0.18544265627861023,
+        "g": 0.3046557605266571,
+        "b": 0.40400001406669617,
+        "a": 0.0
+       },
+       "key5": {
+        "r": 0.22758904099464417,
+        "g": 0.3718355894088745,
+        "b": 0.46799999475479126,
+        "a": 0.0
+       },
+       "key6": {
+        "r": 0.19062192738056183,
+        "g": 0.43959763646125793,
+        "b": 0.6380000114440918,
+        "a": 0.0
+       },
+       "key7": {
+        "r": 0.23415325582027435,
+        "g": 0.4545329511165619,
+        "b": 0.6290000081062317,
+        "a": 0.0
+       },
+       "ctime0": 0,
+       "ctime1": 17665,
+       "ctime2": 27843,
+       "ctime3": 32236,
+       "ctime4": 36755,
+       "ctime5": 42073,
+       "ctime6": 53704,
+       "ctime7": 65535,
+       "atime0": 0,
+       "atime1": 65535,
+       "atime2": 0,
+       "atime3": 0,
+       "atime4": 0,
+       "atime5": 0,
+       "atime6": 0,
+       "atime7": 0,
+       "m_Mode": 0,
+       "m_ColorSpace": -1,
+       "m_NumColorKeys": 8,
+       "m_NumAlphaKeys": 2
+      },
+      "AddAmbient": {
+       "key0": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 1.0
+       },
+       "key1": {
+        "r": 0.06630000472068787,
+        "g": 0.07410000264644623,
+        "b": 0.07800000160932541,
+        "a": 1.0
+       },
+       "key2": {
+        "r": 0.09699999541044235,
+        "g": 0.06466666609048843,
+        "b": 0.06466666609048843,
+        "a": 0.0
+       },
+       "key3": {
+        "r": 0.04266666993498802,
+        "g": 0.05451851710677147,
+        "b": 0.06400000303983688,
+        "a": 0.0
+       },
+       "key4": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key5": {
+        "r": 0.041999999433755875,
+        "g": 0.041999999433755875,
+        "b": 0.041999999433755875,
+        "a": 0.0
+       },
+       "key6": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+       },
+       "key7": {
+        "r": 0.06363474577665329,
+        "g": 0.1514313668012619,
+        "b": 0.24528300762176514,
+        "a": 0.0
+       },
+       "ctime0": 49,
+       "ctime1": 25063,
+       "ctime2": 30622,
+       "ctime3": 35758,
+       "ctime4": 46925,
+       "ctime5": 59154,
+       "ctime6": 65535,
+       "ctime7": 65535,
+       "atime0": 0,
+       "atime1": 65535,
+       "atime2": 0,
+       "atime3": 0,
+       "atime4": 0,
+       "atime5": 0,
+       "atime6": 0,
+       "atime7": 0,
+       "m_Mode": 0,
+       "m_ColorSpace": -1,
+       "m_NumColorKeys": 7,
+       "m_NumAlphaKeys": 2
+      },
+      "AmbientBrightness": {
+       "m_Curve": [
+        {
+         "time": -1.0160877704620361,
+         "value": 0.08548590540885925,
+         "inSlope": 0.0,
+         "outSlope": 0.0,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": 0.9726349115371704,
+         "value": 0.08586519956588745,
+         "inSlope": 0.0,
+         "outSlope": 0.0,
+         "weightedMode": 0,
+         "inWeight": 0.2669336497783661,
+         "outWeight": 0.3333333432674408
+        }
+       ],
+       "m_PreInfinity": 2,
+       "m_PostInfinity": 2,
+       "m_RotationOrder": 0
+      },
+      "AmbientSaturation": {
+       "m_Curve": [
+        {
+         "time": -0.9420830011367798,
+         "value": 0.4972004294395447,
+         "inSlope": 0.0,
+         "outSlope": 0.0,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": 0.21315982937812805,
+         "value": 0.6297249794006348,
+         "inSlope": 0.0038743019104003906,
+         "outSlope": 0.0038743019104003906,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": 1.00111985206604,
+         "value": 0.5023819208145142,
+         "inSlope": 0.0,
+         "outSlope": 0.0,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        }
+       ],
+       "m_PreInfinity": 2,
+       "m_PostInfinity": 2,
+       "m_RotationOrder": 0
+      },
+      "AmbientContrast": {
+       "m_Curve": [
+        {
+         "time": -1.0033677816390991,
+         "value": 1.1503723859786987,
+         "inSlope": 0.0,
+         "outSlope": 0.0,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": -0.12614518404006958,
+         "value": 1.1504216194152832,
+         "inSlope": 0.0,
+         "outSlope": 0.0,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        },
+        {
+         "time": 1.009344220161438,
+         "value": 1.1499512195587158,
+         "inSlope": 0.0,
+         "outSlope": 0.0,
+         "weightedMode": 0,
+         "inWeight": 0.3333333432674408,
+         "outWeight": 0.3333333432674408
+        }
+       ],
+       "m_PreInfinity": 2,
+       "m_PostInfinity": 2,
+       "m_RotationOrder": 0
+      },
+      "CloudnessLightColor": {
+       "r": 0.09043478220701218,
+       "g": 0.09495651721954346,
+       "b": 0.10399999469518661,
+       "a": 0.0
+      }
+     },
+     "isDrawDebugGui": 0,
+     "CubemapDayMult": 3.0,
+     "CubemapNightMult": -2.0,
+     "MBOITFogRemapData": {
+      "ref": 1164,
+      "file": 3
+     },
+     "MBOITFogRemapDataV2": {
+      "ref": 1163,
+      "file": 3
+     },
+     "WeatherDebug": {
+      "isEnabled": 1,
+      "IsDynamicSunWeatherDebug": 0,
+      "WindMagnitude": 0.20000000298023224,
+      "WindDirection": 2,
+      "TopWindDirection": {
+       "x": -1.0,
+       "y": 0.0
+      },
+      "CloudDensity": -0.8999999761581421,
+      "Fog": 0.0010999999940395355,
+      "Rain": 0.0,
+      "LightningThunderProbability": 0.0,
+      "Temperature": 20.0,
+      "DebugMieMultiplier": 0,
+      "MieMultiplier": 0.26899999380111694,
+      "MBOITFog": 1,
+      "DebugMBOITFog": 0,
+      "MBOITScatterColorMultiplier": {
+       "r": 1.0,
+       "g": 1.0,
+       "b": 1.0,
+       "a": 0.47049999237060547
+      },
+      "MBOITScatterDensityMultiplier": 2.1500000953674316,
+      "MBOITScatterDensityPower": 2.1500000953674316,
+      "ScatterDensityBias": 0.5600000023841858,
+      "ScatterGreyscale": 1.0,
+      "MBOITScatterSlicesFar": 0.019999999552965164,
+      "MBOITScatterSlicesDistributionExp": 1.2699999809265137,
+      "MBOITFogSoftScale": 1480.0,
+      "MBOITFogSoftPower": 1.0,
+      "Date": {
+       "Hour": 23.0,
+       "Day": 1,
+       "Month": 8,
+       "Year": 2018
+      }
+     }
+    }
+   }
+  ],
+  "RainController": [
+   {
+    "path_id": 1809,
+    "go": "Weather/DepthPhoto/RainController",
+    "trs": {
+     "pos": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rot": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "RainController",
+    "fields": {
+     "PuddleWaterLevel": {
+      "x": 0.0,
+      "y": 0.949999988079071
+     },
+     "_depthPhotograper": {
+      "ref": 1810
+     },
+     "_rainSplashController": {
+      "ref": 1813
+     },
+     "_rainFallDrops": {
+      "ref": 1804
+     },
+     "_wetRenderer": {
+      "ref": 1807
+     },
+     "_rippleController": {
+      "ref": 1801
+     },
+     "_snowFlakes": {
+      "ref": 1803
+     },
+     "_snowWetRenderer": {
+      "ref": 1902
+     },
+     "_snowRippleController": {
+      "ref": 1878
+     }
+    }
+   }
+  ],
+  "DepthPhotograper": [
+   {
+    "path_id": 1810,
+    "go": "Weather/DepthPhoto",
+    "trs": {
+     "pos": [
+      -7.3990349769592285,
+      0.0,
+      25.16543960571289
+     ],
+     "rot": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "DepthPhotograper",
+    "fields": {
+     "_depthTextureDimension": 4096,
+     "_yBias": 0.0,
+     "_depthRT": {
+      "ref": 0
+     }
+    }
+   }
+  ],
+  "WindController": [
+   {
+    "path_id": 1811,
+    "go": "Weather/WindZone",
+    "trs": {
+     "pos": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rot": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "EFT.Weather.WindController",
+    "fields": {
+     "_windShader": {
+      "ref": 708,
+      "file": 3
+     },
+     "Wires": {
+      "StrengthMultiplyer": 0.5,
+      "MaxValue": 0.4000000059604645,
+      "FreqDelta": 1.0,
+      "WindScale": 0.07999999821186066,
+      "WindFreq": 0.800000011920929,
+      "MaxWinFreq": 1.0,
+      "DetailWindAmp": 0.05000000074505806,
+      "DetailWindScale": 0.30000001192092896,
+      "DetailWindFreq": 2.0,
+      "WiresMaxWindOffsetMultiplier": 2.0999999046325684,
+      "WiresMaxWindAmplitudeMultiplier": 0.30000001192092896
+     },
+     "RainWindMultiplier": 7.0,
+     "CloudWindMultiplier": 2.0,
+     "BilboardTreesWindMultiplier": 0.10000000149011612,
+     "defaultWindVector": {
+      "x": 0.4000000059604645,
+      "y": 0.800000011920929
+     }
+    }
+   }
+  ],
+  "Tonemapping": [
+   {
+    "path_id": 1812,
+    "go": "Weather/ambientManager",
+    "trs": {
+     "pos": [
+      399.2767639160156,
+      0.7715895175933838,
+      43.78834533691406
+     ],
+     "rot": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "assembly": "Assembly-CSharp-firstpass",
+    "class": "UnityStandardAssets.ImageEffects.Tonemapping",
+    "fields": {
+     "type": 3,
+     "adaptiveTextureSize": 256,
+     "remapCurve": {
+      "m_Curve": [],
+      "m_PreInfinity": 2,
+      "m_PostInfinity": 2,
+      "m_RotationOrder": 4
+     },
+     "exposureAdjustment": 3.0,
+     "middleGrey": 0.4000000059604645,
+     "white": 2.0,
+     "adaptionSpeed": 1.5,
+     "tonemapper": {
+      "ref": 17,
+      "file": 1
+     },
+     "validRenderTextureFormat": 1
+    }
+   }
+  ],
+  "RainSplashController": [
+   {
+    "path_id": 1813,
+    "go": "Weather/DepthPhoto/RainSplashController",
+    "trs": {
+     "pos": [
+      7.3990349769592285,
+      0.0,
+      -25.16543960571289
+     ],
+     "rot": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "RainSplashController",
+    "fields": {
+     "_depthPhoto": {
+      "ref": 1810
+     },
+     "_splashes": {
+      "ref": 1786
+     },
+     "_splashLifetime": 0.05000000074505806,
+     "_particleSizeRange": {
+      "x": 0.009999999776482582,
+      "y": 0.07999999821186066
+     },
+     "_splashesOffset": 0.3499999940395355,
+     "_minDistance": 1.25,
+     "_maxDistance": 20.0,
+     "_maxGeneratedParticlesInFrame": 50.0,
+     "_falloffCurve": {
+      "m_Curve": [
+       {
+        "time": 0.0,
+        "value": 0.0,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 1.0,
+        "value": 1.0,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       }
+      ],
+      "m_PreInfinity": 2,
+      "m_PostInfinity": 2,
+      "m_RotationOrder": 4
+     },
+     "_dispersionCurve": {
+      "m_Curve": [
+       {
+        "time": 0.0,
+        "value": 0.0,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 1.0,
+        "value": 1.0,
+        "inSlope": 2.0,
+        "outSlope": 2.0,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       }
+      ],
+      "m_PreInfinity": 2,
+      "m_PostInfinity": 2,
+      "m_RotationOrder": 4
+     }
+    }
+   }
+  ],
+  "TOD_Resources": [
+   {
+    "path_id": 1814,
+    "go": "Sky Dome",
+    "trs": {
+     "pos": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rot": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "scale": [
+      1000.0,
+      1000.0,
+      1000.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "TOD_Resources",
+    "fields": {
+     "Quad": {
+      "ref": 689,
+      "file": 3
+     },
+     "SphereHigh": {
+      "ref": 692,
+      "file": 3
+     },
+     "SphereMedium": {
+      "ref": 686,
+      "file": 3
+     },
+     "SphereLow": {
+      "ref": 688,
+      "file": 3
+     },
+     "IcosphereHigh": {
+      "ref": 694,
+      "file": 3
+     },
+     "IcosphereMedium": {
+      "ref": 693,
+      "file": 3
+     },
+     "IcosphereLow": {
+      "ref": 691,
+      "file": 3
+     },
+     "HalfIcosphereHigh": {
+      "ref": 687,
+      "file": 3
+     },
+     "HalfIcosphereMedium": {
+      "ref": 690,
+      "file": 3
+     },
+     "HalfIcosphereLow": {
+      "ref": 695,
+      "file": 3
+     },
+     "SpaceMaterial": {
+      "ref": 6,
+      "file": 3
+     },
+     "AtmosphereMaterial": {
+      "ref": 2,
+      "file": 3
+     },
+     "SunMaterial": {
+      "ref": 7,
+      "file": 3
+     },
+     "MoonMaterial": {
+      "ref": 4,
+      "file": 3
+     },
+     "ClearMaterial": {
+      "ref": 3,
+      "file": 3
+     },
+     "SkyboxMaterial": {
+      "ref": 5,
+      "file": 3
+     }
+    }
+   }
+  ],
+  "WinterEventVisual": [
+   {
+    "path_id": 1843,
+    "go": "Weather",
+    "trs": {
+     "pos": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rot": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "WinterEventVisual",
+    "fields": {
+     "WinterWeatherObstacle": {
+      "ref": 1791
+     },
+     "WIND_MAX": 1.0,
+     "CLOUDS_MAX": 0.30000001192092896,
+     "FOG_MAX": 0.02500000037252903,
+     "SNOW_FLAKES_MAX": 1.0,
+     "SNOWY_MAX": 1.0,
+     "Common": {
+      "x": 0.0,
+      "y": 300.0
+     },
+     "Wind": {
+      "x": 30.0,
+      "y": 110.0
+     },
+     "Clouds": {
+      "x": 40.0,
+      "y": 90.0
+     },
+     "Fog": {
+      "x": 50.0,
+      "y": 110.0
+     },
+     "SnowFlakes": {
+      "x": 60.0,
+      "y": 80.0
+     },
+     "Snowy": {
+      "x": 20.0,
+      "y": 185.0
+     },
+     "Opaqueness": {
+      "x": 90.0,
+      "y": 120.0
+     },
+     "SnowFlakesSideSpeedIncrementSeconds": 5.0,
+     "SnowFlakesSideSpeedMaximum": 0.25
+    }
+   }
+  ],
+  "SnowRippleController": [
+   {
+    "path_id": 1878,
+    "go": "Weather/DepthPhoto/RainController",
+    "trs": {
+     "pos": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rot": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "SnowRippleController",
+    "fields": {
+     "RippleTexture": {
+      "ref": 448,
+      "file": 3
+     },
+     "WaterCucle": {
+      "CucleSpeed": 0.800000011920929,
+      "CucleLengthRelationMinMax": {
+       "x": 0.009999999776482582,
+       "y": 1.0
+      },
+      "IntensityMinMax": {
+       "x": 0.0,
+       "y": 0.10000000149011612
+      }
+     },
+     "RippleWaveCount": 3,
+     "RippleWaveFreq": 4.0,
+     "EnvironmentCucle": {
+      "CucleSpeed": 0.4000000059604645,
+      "CucleLengthRelationMinMax": {
+       "x": 9.999999747378752e-05,
+       "y": 0.587670087814331
+      },
+      "IntensityMinMax": {
+       "x": 0.0,
+       "y": 0.10000000149011612
+      }
+     },
+     "WetDropsSpecular": 1.0,
+     "WetDropsGlossness": 1.0,
+     "WetDropsAlbedo": 1.0,
+     "WetDropsNormal": 1.0,
+     "RippleFakeLightIntensity": 0.4000000059604645,
+     "RainIntensityRippleScale": 2.0,
+     "_forceTriplanar": 1,
+     "_useFakeRippleLight": 1
+    }
+   }
+  ],
+  "TodLightSetter": [
+   {
+    "path_id": 1892,
+    "go": "Sky Dome",
+    "trs": {
+     "pos": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rot": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "scale": [
+      1000.0,
+      1000.0,
+      1000.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "EFT.Weather.TodLightSetter",
+    "fields": {
+     "_forceIndoorIntensity": 1.0,
+     "_sunVisibilityCurve": {
+      "m_Curve": [
+       {
+        "time": 0.0,
+        "value": 0.0,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.0,
+        "outWeight": 0.0
+       },
+       {
+        "time": 0.25,
+        "value": 0.014999999664723873,
+        "inSlope": 0.09826646745204926,
+        "outSlope": 0.09826646745204926,
+        "weightedMode": 0,
+        "inWeight": 0.32888472080230713,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.8999999761581421,
+        "value": 0.75,
+        "inSlope": 2.1258645057678223,
+        "outSlope": 2.1258645057678223,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.23736828565597534
+       },
+       {
+        "time": 1.0,
+        "value": 1.0,
+        "inSlope": 2.880747079849243,
+        "outSlope": 2.880747079849243,
+        "weightedMode": 0,
+        "inWeight": 0.2001916915178299,
+        "outWeight": 0.0
+       }
+      ],
+      "m_PreInfinity": 2,
+      "m_PostInfinity": 2,
+      "m_RotationOrder": 4
+     }
+    }
+   }
+  ],
+  "ShadowMaskExtractor": [
+   {
+    "path_id": 1901,
+    "go": "Sky Dome/Light",
+    "trs": {
+     "pos": [
+      0.024012640118598938,
+      0.027387132868170738,
+      0.03943503275513649
+     ],
+     "rot": [
+      7.730386109017218e-09,
+      0.935358464717865,
+      2.0442907811002442e-08,
+      -0.35370126366615295
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "ShadowMaskExtractor",
+    "fields": {}
+   }
+  ],
+  "SnowWetRenderer": [
+   {
+    "path_id": 1902,
+    "go": "Weather/DepthPhoto/RainController",
+    "trs": {
+     "pos": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rot": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "SnowWetRenderer",
+    "fields": {
+     "WetShader": {
+      "ref": 56,
+      "file": 1
+     },
+     "Wetting": 1.0,
+     "SpringSnowFactor": {
+      "x": 0.30000001192092896,
+      "y": 0.30000001192092896,
+      "z": 0.10000000149011612
+     },
+     "DiffuseColor": {
+      "r": 0.20000000298023224,
+      "g": 0.20000000298023224,
+      "b": 0.20000000298023224,
+      "a": 0.29411765933036804
+     },
+     "SpecColor": {
+      "r": 0.027450980618596077,
+      "g": 0.027450980618596077,
+      "b": 0.027450980618596077,
+      "a": 0.8156862854957581
+     },
+     "WetFactor": 1000.0,
+     "WetBias": 0.004000000189989805,
+     "Opaqueness": 1.0,
+     "_wetMaterial": {
+      "ref": 0
+     },
+     "_snowCopyMaterial": {
+      "ref": 143,
+      "file": 3
+     },
+     "_wetMesh": {
+      "ref": 1
+     },
+     "_snowSparkling": {
+      "ref": 144,
+      "file": 3
+     },
+     "SparklingsCount": 1000,
+     "StormEnabled": 0,
+     "WetAngleMin": 0.47999998927116394,
+     "WetAngleMax": 0.6000000238418579,
+     "SnowTransition": 0.019999999552965164,
+     "_textureTilingFactor": {
+      "x": 4.0,
+      "y": 4.0
+     },
+     "_noiseTilingFactor": {
+      "x": 14.0,
+      "y": 14.0
+     },
+     "_DampingDistance": 100.0,
+     "AlbedoTex": {
+      "ref": 290,
+      "file": 8
+     },
+     "SpecularMap": {
+      "ref": 396,
+      "file": 3
+     },
+     "BumpMap": {
+      "ref": 112,
+      "file": 8
+     },
+     "NoiseMap": {
+      "ref": 168,
+      "file": 3
+     },
+     "ScreenNoiseTiling": {
+      "x": 1.0,
+      "y": 1.0
+     },
+     "Glossness": 0.0010000000474974513,
+     "SnowSpecularFactor": {
+      "x": 0.699999988079071,
+      "y": 1.0,
+      "z": 1.5,
+      "w": 0.0
+     },
+     "GlitterThreshold": 0.03799999877810478,
+     "GlitterIntensity": 2.619999885559082
+    }
+   }
+  ],
+  "CloudController": [
+   {
+    "path_id": 2025,
+    "go": "Weather",
+    "trs": {
+     "pos": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rot": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "EFT.Rendering.Clouds.CloudController",
+    "fields": {
+     "_ambientColor": {
+      "key0": {
+       "r": 0.0,
+       "g": 0.0,
+       "b": 0.0,
+       "a": 1.0
+      },
+      "key1": {
+       "r": 0.0,
+       "g": 0.0,
+       "b": 0.0,
+       "a": 1.0
+      },
+      "key2": {
+       "r": 0.05000000074505806,
+       "g": 0.022093024104833603,
+       "b": 0.01744185946881771,
+       "a": 0.0
+      },
+      "key3": {
+       "r": 0.03999999910593033,
+       "g": 0.029333332553505898,
+       "b": 0.03466666489839554,
+       "a": 0.0
+      },
+      "key4": {
+       "r": 0.05999999865889549,
+       "g": 0.03692307695746422,
+       "b": 0.03692307695746422,
+       "a": 0.0
+      },
+      "key5": {
+       "r": 0.3891509175300598,
+       "g": 0.468976765871048,
+       "b": 0.5188679099082947,
+       "a": 0.0
+      },
+      "key6": {
+       "r": 0.20091670751571655,
+       "g": 0.2559260427951813,
+       "b": 0.33018869161605835,
+       "a": 0.0
+      },
+      "key7": {
+       "r": 0.0,
+       "g": 0.0,
+       "b": 0.0,
+       "a": 0.0
+      },
+      "ctime0": 0,
+      "ctime1": 32768,
+      "ctime2": 35003,
+      "ctime3": 37081,
+      "ctime4": 40017,
+      "ctime5": 46882,
+      "ctime6": 65535,
+      "ctime7": 0,
+      "atime0": 0,
+      "atime1": 65535,
+      "atime2": 0,
+      "atime3": 0,
+      "atime4": 0,
+      "atime5": 0,
+      "atime6": 0,
+      "atime7": 0,
+      "m_Mode": 0,
+      "m_ColorSpace": -1,
+      "m_NumColorKeys": 7,
+      "m_NumAlphaKeys": 2
+     },
+     "_sun": {
+      "ref": 1782
+     },
+     "_settings": {
+      "ref": 1161,
+      "file": 3
+     }
+    }
+   }
+  ],
+  "AmbientLight": [
+   {
+    "path_id": 2039,
+    "go": "Weather/ambientManager",
+    "trs": {
+     "pos": [
+      399.2767639160156,
+      0.7715895175933838,
+      43.78834533691406
+     ],
+     "rot": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "AmbientLight",
+    "fields": {
+     "DepthWriteShader": {
+      "ref": 103,
+      "file": 1
+     },
+     "ClearStencilShader": {
+      "ref": 252,
+      "file": 1
+     },
+     "WriteStencilShader": {
+      "ref": 186,
+      "file": 1
+     },
+     "ScreenAmbientShader": {
+      "ref": 202,
+      "file": 1
+     },
+     "AnalyticSourceShader": {
+      "ref": 97,
+      "file": 1
+     },
+     "AmbientBlur": 1.5399999618530273,
+     "ReflectionIntensity": 0.20000000298023224,
+     "ReflectionIntensitySSR": 1.0,
+     "RenderDelay": 1.0,
+     "QubemapResolution": 128,
+     "CullingMask": {
+      "m_Bits": 268435456
+     },
+     "ReflectionBottomShade": 0.8569999933242798,
+     "_reflectionWettingFunc": {
+      "m_Curve": [
+       {
+        "time": 0.0,
+        "value": 1.0,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.9981689453125,
+        "value": 0.60589599609375,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       }
+      ],
+      "m_PreInfinity": 2,
+      "m_PostInfinity": 2,
+      "m_RotationOrder": 0
+     }
+    }
+   }
+  ],
+  "AmbientHighlight": [
+   {
+    "path_id": 2041,
+    "go": "Weather/ambientManager",
+    "trs": {
+     "pos": [
+      399.2767639160156,
+      0.7715895175933838,
+      43.78834533691406
+     ],
+     "rot": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "assembly": "Assembly-CSharp",
+    "class": "AmbientHighlight",
+    "fields": {
+     "AmbientBlur": 1.0,
+     "AmbientMaterial": {
+      "ref": 139,
+      "file": 3
+     },
+     "_highlightSettings": [
+      {
+       "HighlightMinMultiplier": 0.20000000298023224,
+       "HighlightMaxMultiplier": 2.0,
+       "HighlightIntensityCurve": {
+        "m_Curve": [
+         {
+          "time": -1.0009902715682983,
+          "value": 0.0,
+          "inSlope": -0.0,
+          "outSlope": -0.0,
+          "weightedMode": 0,
+          "inWeight": 0.3333333432674408,
+          "outWeight": 0.3333333432674408
+         },
+         {
+          "time": 0.0,
+          "value": 0.0,
+          "inSlope": -0.0,
+          "outSlope": -0.0,
+          "weightedMode": 0,
+          "inWeight": 0.3333333432674408,
+          "outWeight": 0.3333333432674408
+         },
+         {
+          "time": 0.30000001192092896,
+          "value": 1.0,
+          "inSlope": 0.0,
+          "outSlope": 0.0,
+          "weightedMode": 0,
+          "inWeight": 0.3333333432674408,
+          "outWeight": 0.3333333432674408
+         }
+        ],
+        "m_PreInfinity": 2,
+        "m_PostInfinity": 2,
+        "m_RotationOrder": 0
+       },
+       "StencilTypeToUse": 2
+      }
+     ],
+     "_additionalLights": []
+    }
+   }
+  ]
+ },
+ "scene_objects": {
+  "13": {
+   "path": "Weather/Scene_Light",
+   "type": "GameObject"
+  },
+  "430": {
+   "path": "Weather/Scene_Light",
+   "type": "Transform"
+  },
+  "15": {
+   "path": "Weather/DepthPhoto/RainSplashController/RainSplash",
+   "type": "GameObject"
+  },
+  "438": {
+   "path": "Weather/DepthPhoto/RainSplashController/RainSplash",
+   "type": "Transform"
+  },
+  "1786": {
+   "path": "Weather/DepthPhoto/RainSplashController/RainSplash",
+   "type": "ParticleSystem"
+  },
+  "1787": {
+   "path": "Weather/DepthPhoto/RainSplashController/RainSplash",
+   "type": "ParticleSystemRenderer"
+  },
+  "16": {
+   "path": "Weather/DepthPhoto",
+   "type": "GameObject"
+  },
+  "436": {
+   "path": "Weather/DepthPhoto",
+   "type": "Transform"
+  },
+  "17": {
+   "path": "Weather",
+   "type": "GameObject"
+  },
+  "439": {
+   "path": "Weather",
+   "type": "Transform"
+  },
+  "18": {
+   "path": "Sky Dome/Moon",
+   "type": "GameObject"
+  },
+  "446": {
+   "path": "Sky Dome/Moon",
+   "type": "Transform"
+  },
+  "1223": {
+   "path": "Sky Dome/Moon",
+   "type": "MeshFilter"
+  },
+  "847": {
+   "path": "Sky Dome/Moon",
+   "type": "MeshRenderer"
+  },
+  "19": {
+   "path": "Sky Dome/Clear",
+   "type": "GameObject"
+  },
+  "447": {
+   "path": "Sky Dome/Clear",
+   "type": "Transform"
+  },
+  "1225": {
+   "path": "Sky Dome/Clear",
+   "type": "MeshFilter"
+  },
+  "844": {
+   "path": "Sky Dome/Clear",
+   "type": "MeshRenderer"
+  },
+  "20": {
+   "path": "Sky Dome",
+   "type": "GameObject"
+  },
+  "445": {
+   "path": "Sky Dome",
+   "type": "Transform"
+  },
+  "21": {
+   "path": "Weather/WindZone",
+   "type": "GameObject"
+  },
+  "435": {
+   "path": "Weather/WindZone",
+   "type": "Transform"
+  },
+  "1784": {
+   "path": "Weather/WindZone",
+   "type": "WindZone"
+  },
+  "22": {
+   "path": "Weather/DepthPhoto/SnowFlakes",
+   "type": "GameObject"
+  },
+  "433": {
+   "path": "Weather/DepthPhoto/SnowFlakes",
+   "type": "Transform"
+  },
+  "23": {
+   "path": "Weather/ambientManager",
+   "type": "GameObject"
+  },
+  "443": {
+   "path": "Weather/ambientManager",
+   "type": "Transform"
+  },
+  "836": {
+   "path": "Weather/ambientManager",
+   "type": "Camera"
+  },
+  "24": {
+   "path": "Weather/DepthPhoto/RainSplashController",
+   "type": "GameObject"
+  },
+  "437": {
+   "path": "Weather/DepthPhoto/RainSplashController",
+   "type": "Transform"
+  },
+  "25": {
+   "path": "Sky Dome/Sun",
+   "type": "GameObject"
+  },
+  "444": {
+   "path": "Sky Dome/Sun",
+   "type": "Transform"
+  },
+  "1224": {
+   "path": "Sky Dome/Sun",
+   "type": "MeshFilter"
+  },
+  "845": {
+   "path": "Sky Dome/Sun",
+   "type": "MeshRenderer"
+  },
+  "26": {
+   "path": "Sky Dome/Light",
+   "type": "GameObject"
+  },
+  "441": {
+   "path": "Sky Dome/Light",
+   "type": "Transform"
+  },
+  "1782": {
+   "path": "Sky Dome/Light",
+   "type": "Light"
+  },
+  "27": {
+   "path": "Weather/DepthPhoto/RainFall",
+   "type": "GameObject"
+  },
+  "434": {
+   "path": "Weather/DepthPhoto/RainFall",
+   "type": "Transform"
+  },
+  "28": {
+   "path": "Sky Dome/Atmosphere",
+   "type": "GameObject"
+  },
+  "440": {
+   "path": "Sky Dome/Atmosphere",
+   "type": "Transform"
+  },
+  "1226": {
+   "path": "Sky Dome/Atmosphere",
+   "type": "MeshFilter"
+  },
+  "843": {
+   "path": "Sky Dome/Atmosphere",
+   "type": "MeshRenderer"
+  },
+  "29": {
+   "path": "Sky Dome/Space",
+   "type": "GameObject"
+  },
+  "442": {
+   "path": "Sky Dome/Space",
+   "type": "Transform"
+  },
+  "1227": {
+   "path": "Sky Dome/Space",
+   "type": "MeshFilter"
+  },
+  "846": {
+   "path": "Sky Dome/Space",
+   "type": "MeshRenderer"
+  },
+  "30": {
+   "path": "Weather/DepthPhoto/RainController",
+   "type": "GameObject"
+  },
+  "432": {
+   "path": "Weather/DepthPhoto/RainController",
+   "type": "Transform"
+  },
+  "69": {
+   "path": "Weather/DepthPhoto/RainFall/RainFall(16383)",
+   "type": "GameObject"
+  },
+  "667": {
+   "path": "Weather/DepthPhoto/RainFall/RainFall(16383)",
+   "type": "Transform"
+  },
+  "1581": {
+   "path": "Weather/DepthPhoto/RainFall/RainFall(16383)",
+   "type": "MeshFilter"
+  },
+  "1121": {
+   "path": "Weather/DepthPhoto/RainFall/RainFall(16383)",
+   "type": "MeshRenderer"
+  },
+  "219": {
+   "path": "Weather/DepthPhoto/RainFall/RainFall(16383)",
+   "type": "GameObject"
+  },
+  "546": {
+   "path": "Weather/DepthPhoto/RainFall/RainFall(16383)",
+   "type": "Transform"
+  },
+  "1400": {
+   "path": "Weather/DepthPhoto/RainFall/RainFall(16383)",
+   "type": "MeshFilter"
+  },
+  "864": {
+   "path": "Weather/DepthPhoto/RainFall/RainFall(16383)",
+   "type": "MeshRenderer"
+  },
+  "226": {
+   "path": "Weather/DepthPhoto/RainFall/RainFall(16383)",
+   "type": "GameObject"
+  },
+  "744": {
+   "path": "Weather/DepthPhoto/RainFall/RainFall(16383)",
+   "type": "Transform"
+  },
+  "1360": {
+   "path": "Weather/DepthPhoto/RainFall/RainFall(16383)",
+   "type": "MeshFilter"
+  },
+  "1031": {
+   "path": "Weather/DepthPhoto/RainFall/RainFall(16383)",
+   "type": "MeshRenderer"
+  },
+  "397": {
+   "path": "Weather/ambientManager/AmbientReflectionProbe",
+   "type": "GameObject"
+  },
+  "675": {
+   "path": "Weather/ambientManager/AmbientReflectionProbe",
+   "type": "Transform"
+  },
+  "1788": {
+   "path": "Weather/ambientManager/AmbientReflectionProbe",
+   "type": "ReflectionProbe"
+  }
+ },
+ "external_assets": {
+  "6:474": {
+   "type": "Texture2D",
+   "name": "circles"
+  },
+  "3:147": {
+   "type": "Material",
+   "name": "SnowFlakes Close"
+  },
+  "3:148": {
+   "type": "Material",
+   "name": "SnowFlakes Far"
+  },
+  "3:141": {
+   "type": "Material",
+   "name": "RainFallDropsClose"
+  },
+  "1:183": {
+   "type": "Shader",
+   "name": "Hidden/Wet"
+  },
+  "3:1162": {
+   "type": "MonoBehaviour",
+   "name": "CloudRemapData_main"
+  },
+  "3:1164": {
+   "type": "MonoBehaviour",
+   "name": "Fog Remap Data"
+  },
+  "3:1163": {
+   "type": "MonoBehaviour",
+   "name": "Fog Remap Data V2"
+  },
+  "3:708": {
+   "type": "ComputeShader",
+   "name": "CSSpeedTreeWind"
+  },
+  "1:17": {
+   "type": "Shader",
+   "name": "Hidden/Tonemapper"
+  },
+  "3:689": {
+   "type": "Mesh",
+   "name": "Quad"
+  },
+  "3:692": {
+   "type": "Mesh",
+   "name": "Sphere"
+  },
+  "3:686": {
+   "type": "Mesh",
+   "name": "Sphere"
+  },
+  "3:688": {
+   "type": "Mesh",
+   "name": "Sphere"
+  },
+  "3:694": {
+   "type": "Mesh",
+   "name": "Icosphere"
+  },
+  "3:693": {
+   "type": "Mesh",
+   "name": "Icosphere"
+  },
+  "3:691": {
+   "type": "Mesh",
+   "name": "Icosphere"
+  },
+  "3:687": {
+   "type": "Mesh",
+   "name": "Half_Icosphere"
+  },
+  "3:690": {
+   "type": "Mesh",
+   "name": "Half_Icosphere"
+  },
+  "3:695": {
+   "type": "Mesh",
+   "name": "Half_Icosphere"
+  },
+  "3:6": {
+   "type": "Material",
+   "name": "Space"
+  },
+  "3:2": {
+   "type": "Material",
+   "name": "Atmosphere"
+  },
+  "3:7": {
+   "type": "Material",
+   "name": "Sun"
+  },
+  "3:4": {
+   "type": "Material",
+   "name": "Moon"
+  },
+  "3:3": {
+   "type": "Material",
+   "name": "Clear Alpha"
+  },
+  "3:5": {
+   "type": "Material",
+   "name": "Skybox"
+  },
+  "3:448": {
+   "type": "Texture2D",
+   "name": "Snow"
+  },
+  "1:56": {
+   "type": "Shader",
+   "name": "Hidden/Snowy"
+  },
+  "3:143": {
+   "type": "Material",
+   "name": "SnowCopyNormalAndAlphaMask"
+  },
+  "3:144": {
+   "type": "Material",
+   "name": "SnowSparkling"
+  },
+  "8:290": {
+   "type": "Texture2D",
+   "name": "Snow_03_d"
+  },
+  "3:396": {
+   "type": "Texture2D",
+   "name": "Snow_03_g"
+  },
+  "8:112": {
+   "type": "Texture2D",
+   "name": "Snow_03_n"
+  },
+  "3:168": {
+   "type": "Texture2D",
+   "name": "Noise_01_02_03"
+  },
+  "3:1161": {
+   "type": "MonoBehaviour",
+   "name": "CloudLayerSettings_main"
+  },
+  "1:103": {
+   "type": "Shader",
+   "name": "Hidden/WriteDepth"
+  },
+  "1:252": {
+   "type": "Shader",
+   "name": "Hidden/ClearStencil"
+  },
+  "1:186": {
+   "type": "Shader",
+   "name": "Hidden/StencilShadow"
+  },
+  "1:202": {
+   "type": "Shader",
+   "name": "Hidden/WriteScreenAmbient"
+  },
+  "1:97": {
+   "type": "Shader",
+   "name": "Hidden/AnalyticSource"
+  },
+  "3:139": {
+   "type": "Material",
+   "name": "Hidden_AmbientHighlihgt"
+  }
+ },
+ "settings_assets": {
+  "CloudRemapData_main": {
+   "class": "EFT.Rendering.Clouds.CloudRemapData",
+   "parse": "byte-exact",
+   "fields": {
+    "Layer1": {
+     "R": {
+      "m_Curve": [
+       {
+        "time": 0.0,
+        "value": 0.050075892359018326,
+        "inSlope": -0.08060714602470398,
+        "outSlope": -0.08060714602470398,
+        "weightedMode": 0,
+        "inWeight": 0.0,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.125,
+        "value": 0.046872030943632126,
+        "inSlope": 0.015547476708889008,
+        "outSlope": 0.015547476708889008,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.6954307556152344
+       },
+       {
+        "time": 0.25,
+        "value": 0.44999998807907104,
+        "inSlope": 3.368000030517578,
+        "outSlope": 3.368000030517578,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.375,
+        "value": 0.8820000290870667,
+        "inSlope": 0.0759449377655983,
+        "outSlope": 0.0759449377655983,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.8477153778076172
+       },
+       {
+        "time": 0.5,
+        "value": 0.8240000009536743,
+        "inSlope": -1.4640886783599854,
+        "outSlope": -1.4640886783599854,
+        "weightedMode": 0,
+        "inWeight": 0.3045687675476074,
+        "outWeight": 0.45120859146118164
+       },
+       {
+        "time": 0.625,
+        "value": 0.46799999475479126,
+        "inSlope": -0.004567158408463001,
+        "outSlope": -0.004567158408463001,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3401013910770416
+       },
+       {
+        "time": 1.0,
+        "value": 1.0,
+        "inSlope": 1.4186667203903198,
+        "outSlope": 1.4186667203903198,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.0
+       }
+      ],
+      "m_PreInfinity": 2,
+      "m_PostInfinity": 2,
+      "m_RotationOrder": 4
+     },
+     "G": {
+      "m_Curve": [
+       {
+        "time": 0.0,
+        "value": 0.0,
+        "inSlope": 0.4000000059604645,
+        "outSlope": 0.4000000059604645,
+        "weightedMode": 0,
+        "inWeight": 0.0,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.125,
+        "value": 0.05000000074505806,
+        "inSlope": 0.6000000238418579,
+        "outSlope": 0.6000000238418579,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.25,
+        "value": 0.15000000596046448,
+        "inSlope": 0.9360000491142273,
+        "outSlope": 0.9360000491142273,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.375,
+        "value": 0.750436544418335,
+        "inSlope": 0.001144828274846077,
+        "outSlope": 0.001144828274846077,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.8863420486450195
+       },
+       {
+        "time": 0.5,
+        "value": 0.5830000042915344,
+        "inSlope": 1.5240000486373901,
+        "outSlope": 1.5240000486373901,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.625,
+        "value": 0.6650000214576721,
+        "inSlope": -0.5586666464805603,
+        "outSlope": -0.5586666464805603,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 1.0,
+        "value": 0.9995139837265015,
+        "inSlope": 1.267281413078308,
+        "outSlope": 1.267281413078308,
+        "weightedMode": 0,
+        "inWeight": 0.037523429840803146,
+        "outWeight": 0.0
+       }
+      ],
+      "m_PreInfinity": 2,
+      "m_PostInfinity": 2,
+      "m_RotationOrder": 4
+     },
+     "B": {
+      "m_Curve": [
+       {
+        "time": 0.0,
+        "value": 0.10003662109375,
+        "inSlope": 1.19970703125,
+        "outSlope": 1.19970703125,
+        "weightedMode": 0,
+        "inWeight": 0.0,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.125,
+        "value": 0.25,
+        "inSlope": -0.003439088352024555,
+        "outSlope": -0.003439088352024555,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.8375632762908936
+       },
+       {
+        "time": 0.25,
+        "value": 0.15000000596046448,
+        "inSlope": -0.0038902079686522484,
+        "outSlope": -0.0038902079686522484,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.8020303249359131
+       },
+       {
+        "time": 0.375,
+        "value": 0.5001496076583862,
+        "inSlope": -0.007560613565146923,
+        "outSlope": -0.007560613565146923,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.9929201602935791
+       },
+       {
+        "time": 0.5,
+        "value": 0.0,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.625,
+        "value": 0.0,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 1.0,
+        "value": 0.0,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.0
+       }
+      ],
+      "m_PreInfinity": 2,
+      "m_PostInfinity": 2,
+      "m_RotationOrder": 4
+     },
+     "A": {
+      "m_Curve": [
+       {
+        "time": 0.0,
+        "value": 0.0,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.0,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.125,
+        "value": 0.0,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.25,
+        "value": 0.0,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.375,
+        "value": 0.0,
+        "inSlope": 0.008099996484816074,
+        "outSlope": 0.008099996484816074,
+        "weightedMode": 0,
+        "inWeight": 0.8578684329986572,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.5,
+        "value": 0.22599999606609344,
+        "inSlope": 2.51200008392334,
+        "outSlope": 2.51200008392334,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.625,
+        "value": 0.4998422861099243,
+        "inSlope": -0.0026302344631403685,
+        "outSlope": -0.0026302344631403685,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.2893400192260742
+       },
+       {
+        "time": 1.0,
+        "value": 0.5001373291015625,
+        "inSlope": 0.006628674454987049,
+        "outSlope": 0.006628674454987049,
+        "weightedMode": 0,
+        "inWeight": 0.23350270092487335,
+        "outWeight": 0.0
+       }
+      ],
+      "m_PreInfinity": 2,
+      "m_PostInfinity": 2,
+      "m_RotationOrder": 4
+     }
+    }
+   }
+  },
+  "Fog Remap Data": {
+   "class": "EFT.Weather.FogRemapData",
+   "parse": "byte-exact",
+   "fields": {
+    "_hourCount": 6,
+    "_originalFogValueCount": 5,
+    "_fogRemapRecords": [
+     {
+      "Hour": 6.5,
+      "OriginalFogValue": 0.016100000590085983,
+      "NewFogValue": 0.0007999999797903001,
+      "ColorMultiplier": {
+       "r": 1.0,
+       "g": 0.8396000266075134,
+       "b": 0.8396000266075134,
+       "a": 0.6549000144004822
+      },
+      "DensityMultiplier": 3.490000009536743,
+      "DensityPower": 2.369999885559082,
+      "DensityBias": 0.5899999737739563,
+      "GreyscaleLerpFactor": 1.0,
+      "SlicesDistribution": 1.2699999809265137,
+      "FogSoftParticleScale": 508.0
+     },
+     {
+      "Hour": 6.5,
+      "OriginalFogValue": 0.03610000014305115,
+      "NewFogValue": 0.0020000000949949026,
+      "ColorMultiplier": {
+       "r": 0.8583999872207642,
+       "g": 0.8341000080108643,
+       "b": 0.8341000080108643,
+       "a": 0.7529000043869019
+      },
+      "DensityMultiplier": 2.4200000762939453,
+      "DensityPower": 1.6799999475479126,
+      "DensityBias": 0.5899999737739563,
+      "GreyscaleLerpFactor": 0.0,
+      "SlicesDistribution": 1.2699999809265137,
+      "FogSoftParticleScale": 508.0
+     },
+     {
+      "Hour": 6.5,
+      "OriginalFogValue": 0.0677570104598999,
+      "NewFogValue": 0.004183242097496986,
+      "ColorMultiplier": {
+       "r": 0.9256058931350708,
+       "g": 0.8341000080108643,
+       "b": 0.8341000080108643,
+       "a": 0.8500000238418579
+      },
+      "DensityMultiplier": 2.310837984085083,
+      "DensityPower": 1.542360782623291,
+      "DensityBias": 0.5899999737739563,
+      "GreyscaleLerpFactor": 0.0,
+      "SlicesDistribution": 1.331700325012207,
+      "FogSoftParticleScale": 646.5884399414062
+     },
+     {
+      "Hour": 6.5,
+      "OriginalFogValue": 0.10279999673366547,
+      "NewFogValue": 0.006599999964237213,
+      "ColorMultiplier": {
+       "r": 1.0,
+       "g": 0.8341000080108643,
+       "b": 0.8341000080108643,
+       "a": 1.0
+      },
+      "DensityMultiplier": 2.190000057220459,
+      "DensityPower": 1.3899999856948853,
+      "DensityBias": 0.5899999737739563,
+      "GreyscaleLerpFactor": 0.0,
+      "SlicesDistribution": 1.399999976158142,
+      "FogSoftParticleScale": 800.0
+     },
+     {
+      "Hour": 6.5,
+      "OriginalFogValue": 0.2549999952316284,
+      "NewFogValue": 0.06400000303983688,
+      "ColorMultiplier": {
+       "r": 1.0,
+       "g": 0.8341000080108643,
+       "b": 0.8341000080108643,
+       "a": 1.0
+      },
+      "DensityMultiplier": 2.190000057220459,
+      "DensityPower": 1.3899999856948853,
+      "DensityBias": 0.5899999737739563,
+      "GreyscaleLerpFactor": 0.0,
+      "SlicesDistribution": 1.6799999475479126,
+      "FogSoftParticleScale": 1400.0
+     },
+     {
+      "Hour": 7.5,
+      "OriginalFogValue": 0.016100000590085983,
+      "NewFogValue": 0.000699999975040555,
+      "ColorMultiplier": {
+       "r": 1.0,
+       "g": 1.0,
+       "b": 1.0,
+       "a": 0.6273999810218811
+      },
+      "DensityMultiplier": 3.490000009536743,
+      "DensityPower": 2.369999885559082,
+      "DensityBias": 0.5899999737739563,
+      "GreyscaleLerpFactor": 0.0,
+      "SlicesDistribution": 1.2699999809265137,
+      "FogSoftParticleScale": 508.0
+     },
+     {
+      "Hour": 7.5,
+      "OriginalFogValue": 0.03610000014305115,
+      "NewFogValue": 0.0020000000949949026,
+      "ColorMultiplier": {
+       "r": 1.0,
+       "g": 1.0,
+       "b": 1.0,
+       "a": 0.9294000267982483
+      },
+      "DensityMultiplier": 3.490000009536743,
+      "DensityPower": 2.369999885559082,
+      "DensityBias": 0.5899999737739563,
+      "GreyscaleLerpFactor": 0.0,
+      "SlicesDistribution": 1.1699999570846558,
+      "FogSoftParticleScale": 508.0
+     },
+     {
+      "Hour": 7.5,
+      "OriginalFogValue": 0.0677570104598999,
+      "NewFogValue": 0.004183242097496986,
+      "ColorMultiplier": {
+       "r": 1.0,
+       "g": 1.0,
+       "b": 1.0,
+       "a": 0.9629080295562744
+      },
+      "DensityMultiplier": 2.146831512451172,
+      "DensityPower": 1.0837855339050293,
+      "DensityBias": 0.5899999737739563,
+      "GreyscaleLerpFactor": 0.4746178686618805,
+      "SlicesDistribution": 1.279162049293518,
+      "FogSoftParticleScale": 646.5884399414062
+     },
+     {
+      "Hour": 7.5,
+      "OriginalFogValue": 0.10279999673366547,
+      "NewFogValue": 0.006599999964237213,
+      "ColorMultiplier": {
+       "r": 1.0,
+       "g": 1.0,
+       "b": 1.0,
+       "a": 1.0
+      },
+      "DensityMultiplier": 0.6600000262260437,
+      "DensityPower": -0.3400000035762787,
+      "DensityBias": 0.5899999737739563,
+      "GreyscaleLerpFactor": 1.0,
+      "SlicesDistribution": 1.399999976158142,
+      "FogSoftParticleScale": 800.0
+     },
+     {
+      "Hour": 7.5,
+      "OriginalFogValue": 0.2549999952316284,
+      "NewFogValue": 0.06400000303983688,
+      "ColorMultiplier": {
+       "r": 0.5942999720573425,
+       "g": 0.5942999720573425,
+       "b": 0.5942999720573425,
+       "a": 1.0
+      },
+      "DensityMultiplier": 0.6600000262260437,
+      "DensityPower": -0.3400000035762787,
+      "DensityBias": 0.0,
+      "GreyscaleLerpFactor": 0.5170000195503235,
+      "SlicesDistribution": 1.6799999475479126,
+      "FogSoftParticleScale": 1400.0
+     },
+     {
+      "Hour": 9.199999809265137,
+      "OriginalFogValue": 0.016100000590085983,
+      "NewFogValue": 0.0007999999797903001,
+      "ColorMultiplier": {
+       "r": 1.0,
+       "g": 1.0,
+       "b": 1.0,
+       "a": 0.6980000138282776
+      },
+      "DensityMultiplier": 3.490000009536743,
+      "DensityPower": 2.369999885559082,
+      "DensityBias": 0.5899999737739563,
+      "GreyscaleLerpFactor": 1.0,
+      "SlicesDistribution": 1.1699999570846558,
+      "FogSoftParticleScale": 508.0
+     },
+     {
+      "Hour": 9.199999809265137,
+      "OriginalFogValue": 0.03610000014305115,
+      "NewFogValue": 0.0020000000949949026,
+      "ColorMultiplier": {
+       "r": 1.0,
+       "g": 1.0,
+       "b": 1.0,
+       "a": 0.63919997215271
+      },
+      "DensityMultiplier": 0.5099999904632568,
+      "DensityPower": 1.899999976158142,
+      "DensityBias": 0.0,
+      "GreyscaleLerpFactor": 1.0,
+      "SlicesDistribution": 1.0,
+      "FogSoftParticleScale": 800.0
+     },
+     {
+      "Hour": 9.199999809265137,
+      "OriginalFogValue": 0.0677570104598999,
+      "NewFogValue": 0.012375540100038052,
+      "ColorMultiplier": {
+       "r": 0.7895544171333313,
+       "g": 0.7895544171333313,
+       "b": 0.7895544171333313,
+       "a": 1.0
+      },
+      "DensityMultiplier": 0.47677674889564514,
+      "DensityPower": 1.506067156791687,
+      "DensityBias": 0.0,
+      "GreyscaleLerpFactor": 1.0,
+      "SlicesDistribution": 1.1471315622329712,
+      "FogSoftParticleScale": 1084.770751953125
+     },
+     {
+      "Hour": 9.199999809265137,
+      "OriginalFogValue": 0.10279999673366547,
+      "NewFogValue": 0.06599999964237213,
+      "ColorMultiplier": {
+       "r": 0.5565999746322632,
+       "g": 0.5565999746322632,
+       "b": 0.5565999746322632,
+       "a": 1.0
+      },
+      "DensityMultiplier": 0.4399999976158142,
+      "DensityPower": 1.0700000524520874,
+      "DensityBias": 0.0,
+      "GreyscaleLerpFactor": 1.0,
+      "SlicesDistribution": 1.309999942779541,
+      "FogSoftParticleScale": 1400.0
+     },
+     {
+      "Hour": 9.199999809265137,
+      "OriginalFogValue": 0.2549999952316284,
+      "NewFogValue": 0.06400000303983688,
+      "ColorMultiplier": {
+       "r": 0.5565999746322632,
+       "g": 0.5565999746322632,
+       "b": 0.5565999746322632,
+       "a": 1.0
+      },
+      "DensityMultiplier": 1.2300000190734863,
+      "DensityPower": 1.0700000524520874,
+      "DensityBias": 0.0,
+      "GreyscaleLerpFactor": 0.7400000095367432,
+      "SlicesDistribution": 1.5399999618530273,
+      "FogSoftParticleScale": 1400.0
+     },
+     {
+      "Hour": 17.600000381469727,
+      "OriginalFogValue": 0.016100000590085983,
+      "NewFogValue": 0.0007999999797903001,
+      "ColorMultiplier": {
+       "r": 1.0,
+       "g": 1.0,
+       "b": 1.0,
+       "a": 0.47049999237060547
+      },
+      "DensityMultiplier": 3.490000009536743,
+      "DensityPower": 2.369999885559082,
+      "DensityBias": 0.5899999737739563,
+      "GreyscaleLerpFactor": 1.0,
+      "SlicesDistribution": 1.2699999809265137,
+      "FogSoftParticleScale": 508.0
+     },
+     {
+      "Hour": 17.600000381469727,
+      "OriginalFogValue": 0.03610000014305115,
+      "NewFogValue": 0.0020000000949949026,
+      "ColorMultiplier": {
+       "r": 1.0,
+       "g": 1.0,
+       "b": 1.0,
+       "a": 1.0
+      },
+      "DensityMultiplier": 1.3600000143051147,
+      "DensityPower": 1.5,
+      "DensityBias": 0.5899999737739563,
+      "GreyscaleLerpFactor": 1.0,
+      "SlicesDistribution": 1.2699999809265137,
+      "FogSoftParticleScale": 508.0
+     },
+     {
+      "Hour": 17.600000381469727,
+      "OriginalFogValue": 0.0677570104598999,
+      "NewFogValue": 0.004183242097496986,
+      "ColorMultiplier": {
+       "r": 1.0,
+       "g": 1.0,
+       "b": 1.0,
+       "a": 1.0
+      },
+      "DensityMultiplier": 0.9992904663085938,
+      "DensityPower": 0.7168805003166199,
+      "DensityBias": 0.30997544527053833,
+      "GreyscaleLerpFactor": 1.0,
+      "SlicesDistribution": 1.331700325012207,
+      "FogSoftParticleScale": 646.5884399414062
+     },
+     {
+      "Hour": 17.600000381469727,
+      "OriginalFogValue": 0.10279999673366547,
+      "NewFogValue": 0.006599999964237213,
+      "ColorMultiplier": {
+       "r": 1.0,
+       "g": 1.0,
+       "b": 1.0,
+       "a": 1.0
+      },
+      "DensityMultiplier": 0.6000000238418579,
+      "DensityPower": -0.15000000596046448,
+      "DensityBias": 0.0,
+      "GreyscaleLerpFactor": 1.0,
+      "SlicesDistribution": 1.399999976158142,
+      "FogSoftParticleScale": 800.0
+     },
+     {
+      "Hour": 17.600000381469727,
+      "OriginalFogValue": 0.2549999952316284,
+      "NewFogValue": 0.06400000303983688,
+      "ColorMultiplier": {
+       "r": 1.0,
+       "g": 1.0,
+       "b": 1.0,
+       "a": 1.0
+      },
+      "DensityMultiplier": 0.46000000834465027,
+      "DensityPower": -1.5399999618530273,
+      "DensityBias": 0.0,
+      "GreyscaleLerpFactor": 1.0,
+      "SlicesDistribution": 1.6799999475479126,
+      "FogSoftParticleScale": 1400.0
+     },
+     {
+      "Hour": 19.5,
+      "OriginalFogValue": 0.016100000590085983,
+      "NewFogValue": 0.0008999999845400453,
+      "ColorMultiplier": {
+       "r": 0.867900013923645,
+       "g": 0.8105999827384949,
+       "b": 0.7531999945640564,
+       "a": 0.6822999715805054
+      },
+      "DensityMultiplier": 3.490000009536743,
+      "DensityPower": 2.369999885559082,
+      "DensityBias": 0.5899999737739563,
+      "GreyscaleLerpFactor": 0.0,
+      "SlicesDistribution": 1.2699999809265137,
+      "FogSoftParticleScale": 508.0
+     },
+     {
+      "Hour": 19.5,
+      "OriginalFogValue": 0.03610000014305115,
+      "NewFogValue": 0.0020000000949949026,
+      "ColorMultiplier": {
+       "r": 0.867900013923645,
+       "g": 0.8105999827384949,
+       "b": 0.7531999945640564,
+       "a": 1.0
+      },
+      "DensityMultiplier": 0.25,
+      "DensityPower": 0.5899999737739563,
+      "DensityBias": 0.0,
+      "GreyscaleLerpFactor": 0.0,
+      "SlicesDistribution": 1.2699999809265137,
+      "FogSoftParticleScale": 508.0
+     },
+     {
+      "Hour": 19.5,
+      "OriginalFogValue": 0.0677570104598999,
+      "NewFogValue": 0.004183242097496986,
+      "ColorMultiplier": {
+       "r": 0.6932880878448486,
+       "g": 0.6577730178833008,
+       "b": 0.6218257546424866,
+       "a": 1.0
+      },
+      "DensityMultiplier": 0.2547461688518524,
+      "DensityPower": 0.42862990498542786,
+      "DensityBias": 0.5695414543151855,
+      "GreyscaleLerpFactor": 0.0,
+      "SlicesDistribution": 1.331700325012207,
+      "FogSoftParticleScale": 646.5884399414062
+     },
+     {
+      "Hour": 19.5,
+      "OriginalFogValue": 0.10279999673366547,
+      "NewFogValue": 0.006599999964237213,
+      "ColorMultiplier": {
+       "r": 0.5,
+       "g": 0.4885999858379364,
+       "b": 0.4763999879360199,
+       "a": 1.0
+      },
+      "DensityMultiplier": 0.25999999046325684,
+      "DensityPower": 0.25,
+      "DensityBias": 1.2000000476837158,
+      "GreyscaleLerpFactor": 0.0,
+      "SlicesDistribution": 1.399999976158142,
+      "FogSoftParticleScale": 800.0
+     },
+     {
+      "Hour": 19.5,
+      "OriginalFogValue": 0.2549999952316284,
+      "NewFogValue": 0.06400000303983688,
+      "ColorMultiplier": {
+       "r": 0.5,
+       "g": 0.4885999858379364,
+       "b": 0.4763999879360199,
+       "a": 1.0
+      },
+      "DensityMultiplier": 0.25999999046325684,
+      "DensityPower": -3.259999990463257,
+      "DensityBias": 0.0,
+      "GreyscaleLerpFactor": 0.0,
+      "SlicesDistribution": 1.6799999475479126,
+      "FogSoftParticleScale": 1400.0
+     },
+     {
+      "Hour": 21.200000762939453,
+      "OriginalFogValue": 0.016100000590085983,
+      "NewFogValue": 0.0007999999797903001,
+      "ColorMultiplier": {
+       "r": 1.0,
+       "g": 1.0,
+       "b": 1.0,
+       "a": 0.7253999710083008
+      },
+      "DensityMultiplier": 3.490000009536743,
+      "DensityPower": 2.369999885559082,
+      "DensityBias": 0.0,
+      "GreyscaleLerpFactor": 0.0,
+      "SlicesDistribution": 1.2699999809265137,
+      "FogSoftParticleScale": 508.0
+     },
+     {
+      "Hour": 21.200000762939453,
+      "OriginalFogValue": 0.03610000014305115,
+      "NewFogValue": 0.0020000000949949026,
+      "ColorMultiplier": {
+       "r": 0.8396000266075134,
+       "g": 0.8158000111579895,
+       "b": 0.8158000111579895,
+       "a": 1.0
+      },
+      "DensityMultiplier": 0.25999999046325684,
+      "DensityPower": 0.25,
+      "DensityBias": 0.0,
+      "GreyscaleLerpFactor": 0.0,
+      "SlicesDistribution": 1.2699999809265137,
+      "FogSoftParticleScale": 508.0
+     },
+     {
+      "Hour": 21.200000762939453,
+      "OriginalFogValue": 0.0677570104598999,
+      "NewFogValue": 0.004183242097496986,
+      "ColorMultiplier": {
+       "r": 0.7142059803009033,
+       "g": 0.6836664080619812,
+       "b": 0.6836664080619812,
+       "a": 1.0
+      },
+      "DensityMultiplier": 0.8105567097663879,
+      "DensityPower": 0.3259388506412506,
+      "DensityBias": 0.0,
+      "GreyscaleLerpFactor": 0.0,
+      "SlicesDistribution": 1.331700325012207,
+      "FogSoftParticleScale": 646.5884399414062
+     },
+     {
+      "Hour": 21.200000762939453,
+      "OriginalFogValue": 0.10279999673366547,
+      "NewFogValue": 0.006599999964237213,
+      "ColorMultiplier": {
+       "r": 0.5753999948501587,
+       "g": 0.5374000072479248,
+       "b": 0.5374000072479248,
+       "a": 1.0
+      },
+      "DensityMultiplier": 1.4199999570846558,
+      "DensityPower": 0.4099999964237213,
+      "DensityBias": 0.0,
+      "GreyscaleLerpFactor": 0.0,
+      "SlicesDistribution": 1.399999976158142,
+      "FogSoftParticleScale": 800.0
+     },
+     {
+      "Hour": 21.200000762939453,
+      "OriginalFogValue": 0.2549999952316284,
+      "NewFogValue": 0.06400000303983688,
+      "ColorMultiplier": {
+       "r": 0.4244999885559082,
+       "g": 0.4244999885559082,
+       "b": 0.4244999885559082,
+       "a": 1.0
+      },
+      "DensityMultiplier": 1.409999966621399,
+      "DensityPower": -2.859999895095825,
+      "DensityBias": 0.0,
+      "GreyscaleLerpFactor": 0.0,
+      "SlicesDistribution": 1.6799999475479126,
+      "FogSoftParticleScale": 1400.0
+     }
+    ]
+   }
+  },
+  "Fog Remap Data V2": {
+   "class": "EFT.Weather.FogRemapDataV2",
+   "parse": "byte-exact",
+   "fields": {
+    "_record": {
+     "Hour": 0.0,
+     "OriginalFogValue": 0.0,
+     "NewFogValue": {
+      "m_Curve": [
+       {
+        "time": 0.0,
+        "value": 0.0,
+        "inSlope": 0.033287495374679565,
+        "outSlope": 0.033287495374679565,
+        "weightedMode": 0,
+        "inWeight": 0.0,
+        "outWeight": 0.18800239264965057
+       },
+       {
+        "time": 0.003681539325043559,
+        "value": 3.705039853230119e-05,
+        "inSlope": 0.025087138637900352,
+        "outSlope": 0.025087138637900352,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.018497349694371223,
+        "value": 0.00046624476090073586,
+        "inSlope": 0.02055654488503933,
+        "outSlope": 0.02055654488503933,
+        "weightedMode": 0,
+        "inWeight": 0.09963368624448776,
+        "outWeight": 0.19528120756149292
+       },
+       {
+        "time": 0.03999999910593033,
+        "value": 0.0010019022738561034,
+        "inSlope": 0.0439738929271698,
+        "outSlope": 0.007515722420066595,
+        "weightedMode": 0,
+        "inWeight": 0.2545134723186493,
+        "outWeight": 0.09006886929273605
+       },
+       {
+        "time": 0.08051340281963348,
+        "value": 0.0043091862462460995,
+        "inSlope": 0.1003270149230957,
+        "outSlope": 0.1003270149230957,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.14987172186374664,
+        "value": 0.012025004252791405,
+        "inSlope": 0.22338032722473145,
+        "outSlope": 0.22338032722473145,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.0649457797408104
+       },
+       {
+        "time": 0.2549999952316284,
+        "value": 0.06400000303983688,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.0,
+        "outWeight": 0.0
+       }
+      ],
+      "m_PreInfinity": 2,
+      "m_PostInfinity": 2,
+      "m_RotationOrder": 4
+     },
+     "ColorMultiplier": {
+      "key0": {
+       "r": 1.0,
+       "g": 1.0,
+       "b": 1.0,
+       "a": 1.0
+      },
+      "key1": {
+       "r": 0.46226418018341064,
+       "g": 0.46226418018341064,
+       "b": 0.46226418018341064,
+       "a": 1.0
+      },
+      "key2": {
+       "r": 0.5094339847564697,
+       "g": 0.5094339847564697,
+       "b": 0.5094339847564697,
+       "a": 0.0
+      },
+      "key3": {
+       "r": 1.0,
+       "g": 1.0,
+       "b": 1.0,
+       "a": 0.0
+      },
+      "key4": {
+       "r": 0.0,
+       "g": 0.0,
+       "b": 0.0,
+       "a": 0.0
+      },
+      "key5": {
+       "r": 0.0,
+       "g": 0.0,
+       "b": 0.0,
+       "a": 0.0
+      },
+      "key6": {
+       "r": 0.0,
+       "g": 0.0,
+       "b": 0.0,
+       "a": 0.0
+      },
+      "key7": {
+       "r": 0.0,
+       "g": 0.0,
+       "b": 0.0,
+       "a": 0.0
+      },
+      "ctime0": 0,
+      "ctime1": 65535,
+      "ctime2": 65535,
+      "ctime3": 65535,
+      "ctime4": 0,
+      "ctime5": 0,
+      "ctime6": 0,
+      "ctime7": 0,
+      "atime0": 0,
+      "atime1": 65535,
+      "atime2": 0,
+      "atime3": 0,
+      "atime4": 0,
+      "atime5": 0,
+      "atime6": 0,
+      "atime7": 0,
+      "m_Mode": 0,
+      "m_ColorSpace": -1,
+      "m_NumColorKeys": 2,
+      "m_NumAlphaKeys": 2
+     },
+     "DensityMultiplier": {
+      "m_Curve": [
+       {
+        "time": 0.0,
+        "value": 0.0,
+        "inSlope": 1.5380064249038696,
+        "outSlope": 1.5380064249038696,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.09523247182369232
+       },
+       {
+        "time": 0.15037690103054047,
+        "value": 0.32769775390625,
+        "inSlope": 2.857943534851074,
+        "outSlope": 2.857943534851074,
+        "weightedMode": 0,
+        "inWeight": 0.09975095093250275,
+        "outWeight": 0.12203363329172134
+       },
+       {
+        "time": 0.2951611280441284,
+        "value": 0.49671876430511475,
+        "inSlope": 0.8380399346351624,
+        "outSlope": 0.8380399346351624,
+        "weightedMode": 0,
+        "inWeight": 0.12942491471767426,
+        "outWeight": 0.3333333432674408
+       }
+      ],
+      "m_PreInfinity": 2,
+      "m_PostInfinity": 2,
+      "m_RotationOrder": 4
+     },
+     "DensityPower": {
+      "m_Curve": [
+       {
+        "time": -0.00119861401617527,
+        "value": 2.2644569873809814,
+        "inSlope": -17.95882225036621,
+        "outSlope": -17.95882225036621,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.2536909282207489
+       },
+       {
+        "time": 0.03610000014305115,
+        "value": 1.4456787109375,
+        "inSlope": -24.586462020874023,
+        "outSlope": -24.586462020874023,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.06285250186920166,
+        "value": 0.6896666884422302,
+        "inSlope": -23.807008743286133,
+        "outSlope": -23.807008743286133,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.10279999673366547,
+        "value": -0.14224854111671448,
+        "inSlope": -11.603933334350586,
+        "outSlope": -11.603933334350586,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.2549999952316284,
+        "value": -1.5399999618530273,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       }
+      ],
+      "m_PreInfinity": 2,
+      "m_PostInfinity": 2,
+      "m_RotationOrder": 4
+     },
+     "DensityBias": {
+      "m_Curve": [
+       {
+        "time": 0.0,
+        "value": 0.0,
+        "inSlope": 99.65812683105469,
+        "outSlope": 29.840129852294922,
+        "weightedMode": 0,
+        "inWeight": 0.0,
+        "outWeight": 0.041314348578453064
+       },
+       {
+        "time": 0.01833367720246315,
+        "value": 0.54707932472229,
+        "inSlope": 29.840129852294922,
+        "outSlope": 0.002785907592624426,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.037674807012081146,
+        "value": 0.547133207321167,
+        "inSlope": 0.002785907592624426,
+        "outSlope": -8.847551345825195,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.0693248063325882,
+        "value": 0.2671082019805908,
+        "inSlope": -8.847551345825195,
+        "outSlope": -7.979288578033447,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.10279999673366547,
+        "value": 0.0,
+        "inSlope": -7.979288578033447,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.2549999952316284,
+        "value": 0.0,
+        "inSlope": -0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.0,
+        "outWeight": 0.0
+       }
+      ],
+      "m_PreInfinity": 2,
+      "m_PostInfinity": 2,
+      "m_RotationOrder": 4
+     },
+     "GreyscaleLerpFactor": {
+      "m_Curve": [
+       {
+        "time": 0.0,
+        "value": 0.0,
+        "inSlope": 0.0,
+        "outSlope": 0.06816521286964417,
+        "weightedMode": 0,
+        "inWeight": 0.0,
+        "outWeight": 0.0
+       },
+       {
+        "time": 6.0,
+        "value": 0.408991277217865,
+        "inSlope": 0.046014606952667236,
+        "outSlope": 0.046014606952667236,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.058692339807748795
+       },
+       {
+        "time": 13.574051856994629,
+        "value": 0.6986608505249023,
+        "inSlope": 0.00021920856670476496,
+        "outSlope": 0.00021920856670476496,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.6199054718017578
+       },
+       {
+        "time": 20.5,
+        "value": 0.4000000059604645,
+        "inSlope": -0.04950082302093506,
+        "outSlope": -0.04950082302093506,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.27175411581993103
+       },
+       {
+        "time": 24.0,
+        "value": 0.0,
+        "inSlope": -0.11428571492433548,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.0,
+        "outWeight": 0.0
+       }
+      ],
+      "m_PreInfinity": 2,
+      "m_PostInfinity": 2,
+      "m_RotationOrder": 4
+     },
+     "SlicesDistribution": {
+      "m_Curve": [
+       {
+        "time": 0.016100000590085983,
+        "value": 1.2699999809265137,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.03610000014305115,
+        "value": 1.281911849975586,
+        "inSlope": 0.9225068092346191,
+        "outSlope": 0.9225068092346191,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.0677499994635582,
+        "value": 1.3316999673843384,
+        "inSlope": 1.7704367637634277,
+        "outSlope": 1.7704367637634277,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.10279999673366547,
+        "value": 1.399999976158142,
+        "inSlope": 1.4590123891830444,
+        "outSlope": 1.4590123891830444,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.2549999952316284,
+        "value": 1.6799999475479126,
+        "inSlope": 1.5923027992248535,
+        "outSlope": 1.5923027992248535,
+        "weightedMode": 0,
+        "inWeight": 0.08724639564752579,
+        "outWeight": 0.3333333432674408
+       }
+      ],
+      "m_PreInfinity": 2,
+      "m_PostInfinity": 2,
+      "m_RotationOrder": 4
+     },
+     "FogSoftParticleScale": {
+      "m_Curve": [
+       {
+        "time": 0.016100000590085983,
+        "value": 508.0,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.0,
+        "outWeight": 0.0
+       },
+       {
+        "time": 0.03610000014305115,
+        "value": 508.0,
+        "inSlope": -0.0,
+        "outSlope": 4360.189453125,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.0677499994635582,
+        "value": 646.0,
+        "inSlope": 4360.189453125,
+        "outSlope": 4393.7236328125,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.10279999673366547,
+        "value": 800.0,
+        "inSlope": 4393.7236328125,
+        "outSlope": 3942.181396484375,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.2549999952316284,
+        "value": 1400.0,
+        "inSlope": 3942.181396484375,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.0,
+        "outWeight": 0.0
+       }
+      ],
+      "m_PreInfinity": 2,
+      "m_PostInfinity": 2,
+      "m_RotationOrder": 4
+     },
+     "DensityMultiplierFromTime": {
+      "m_Curve": [
+       {
+        "time": 0.0,
+        "value": 1.0,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.0,
+        "outWeight": 0.0
+       },
+       {
+        "time": 24.0,
+        "value": 1.0,
+        "inSlope": -0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.0,
+        "outWeight": 0.0
+       }
+      ],
+      "m_PreInfinity": 0,
+      "m_PostInfinity": 0,
+      "m_RotationOrder": 4
+     },
+     "DensityPowerFromTime": {
+      "m_Curve": [
+       {
+        "time": 0.0,
+        "value": 1.0,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.0,
+        "outWeight": 0.0
+       },
+       {
+        "time": 24.0,
+        "value": 1.0,
+        "inSlope": -0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.0,
+        "outWeight": 0.0
+       }
+      ],
+      "m_PreInfinity": 0,
+      "m_PostInfinity": 0,
+      "m_RotationOrder": 4
+     },
+     "DensityBiasFromTime": {
+      "m_Curve": [
+       {
+        "time": 0.0,
+        "value": 1.0,
+        "inSlope": 0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.0,
+        "outWeight": 0.0
+       },
+       {
+        "time": 24.0,
+        "value": 1.0,
+        "inSlope": -0.0,
+        "outSlope": 0.0,
+        "weightedMode": 0,
+        "inWeight": 0.0,
+        "outWeight": 0.0
+       }
+      ],
+      "m_PreInfinity": 0,
+      "m_PostInfinity": 0,
+      "m_RotationOrder": 4
+     },
+     "MBOITFogHeighFalloffFactor": {
+      "m_Curve": [
+       {
+        "time": 0.0,
+        "value": 0.10000000149011612,
+        "inSlope": -0.19607843458652496,
+        "outSlope": -0.19607843458652496,
+        "weightedMode": 0,
+        "inWeight": 0.0,
+        "outWeight": 0.3333333432674408
+       },
+       {
+        "time": 0.2549999952316284,
+        "value": 0.05000000074505806,
+        "inSlope": -0.19607843458652496,
+        "outSlope": -0.19607843458652496,
+        "weightedMode": 0,
+        "inWeight": 0.3333333432674408,
+        "outWeight": 0.3333333432674408
+       }
+      ],
+      "m_PreInfinity": 2,
+      "m_PostInfinity": 2,
+      "m_RotationOrder": 4
+     }
+    }
+   }
+  },
+  "CloudLayerSettings_main": {
+   "class": "EFT.Rendering.Clouds.CloudLayer",
+   "parse": "byte-exact (retailExtra_0 surgery)",
+   "fields": {
+    "Opacity": 1.0,
+    "ShadowMultiplier": 109.0,
+    "ShadowTint": {
+     "r": 0.22641509771347046,
+     "g": 0.22641509771347046,
+     "b": 0.22641509771347046,
+     "a": 0.0
+    },
+    "ShadowSize": 500.0,
+    "PlanetCenterRadius": {
+     "x": 0.0,
+     "y": 6704000.0,
+     "z": 0.0,
+     "w": 6704000.0
+    },
+    "retailExtra_0": 0.07999999821186066,
+    "LayerA": {
+     "CloudTexture": {
+      "extname": "CloudMapWoHorizonBorder2",
+      "exttype": "Texture2D"
+     },
+     "Altitude": 6000.0,
+     "Rotation": 191.0,
+     "Tint": {
+      "r": 1.0,
+      "g": 1.0,
+      "b": 1.0,
+      "a": 1.0
+     },
+     "Exposure": 2.0999999046325684,
+     "ScrollOrientation": 180.0,
+     "MinScrollSpeed": 20.0,
+     "MaxScrollSpeed": 100.0,
+     "Lighting": 1,
+     "Thickness": 1.0,
+     "AmbientProbeDimmer": 0.675000011920929
+    }
+   }
+  }
+ },
+ "settings_external_assets": {}
+}

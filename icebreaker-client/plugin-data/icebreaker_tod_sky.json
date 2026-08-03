@@ -1,0 +1,1116 @@
+{
+ "TOD_Components": {
+  "Sun": {
+   "m_FileID": 0,
+   "m_PathID": 25
+  },
+  "Moon": {
+   "m_FileID": 0,
+   "m_PathID": 18
+  },
+  "Atmosphere": {
+   "m_FileID": 0,
+   "m_PathID": 28
+  },
+  "Clear": {
+   "m_FileID": 0,
+   "m_PathID": 19
+  },
+  "Space": {
+   "m_FileID": 0,
+   "m_PathID": 29
+  },
+  "Light": {
+   "m_FileID": 0,
+   "m_PathID": 26
+  }
+ },
+ "TOD_Time": {
+  "LockCurrentTime": 0,
+  "DayLengthInMinutes": 3000.0,
+  "UseDeviceDate": 0,
+  "UseDeviceTime": 0,
+  "UseTimeCurve": 0,
+  "TimeCurve": {
+   "m_Curve": [
+    {
+     "time": 0.0,
+     "value": 0.0,
+     "inSlope": 0.0,
+     "outSlope": 1.0,
+     "weightedMode": 0,
+     "inWeight": 0.3333333432674408,
+     "outWeight": 0.3333333432674408
+    },
+    {
+     "time": 24.0,
+     "value": 24.0,
+     "inSlope": 1.0,
+     "outSlope": 0.0,
+     "weightedMode": 0,
+     "inWeight": 0.3333333432674408,
+     "outWeight": 0.3333333432674408
+    }
+   ],
+   "m_PreInfinity": 2,
+   "m_PostInfinity": 2,
+   "m_RotationOrder": 4
+  }
+ },
+ "TOD_Sky": {
+  "ColorSpace": 2,
+  "ColorRange": 1,
+  "SkyQuality": 1,
+  "CloudQuality": 2,
+  "MeshQuality": 2,
+  "<Cycle>k__BackingField": {
+   "Hour": 23.0,
+   "Day": 1,
+   "Month": 8,
+   "Year": 2018
+  },
+  "World": {
+   "Latitude": 46.0,
+   "Longitude": 84.0,
+   "UTC": 7.239999771118164
+  },
+  "<Atmosphere>k__BackingField": {
+   "RayleighMultiplier": 1.6120755672454834,
+   "MieMultiplier": 0.26899999380111694,
+   "Brightness": 0.2957887053489685,
+   "ScatteringBrightness": 0.7690505981445312,
+   "Contrast": 2.4786536693573,
+   "Directionality": 0.8299999833106995,
+   "Fogginess": 0.0
+  },
+  "Day": {
+   "SkyColor": {
+    "key0": {
+     "r": 1.0,
+     "g": 0.9529411792755127,
+     "b": 0.9176470637321472,
+     "a": 1.0
+    },
+    "key1": {
+     "r": 1.0,
+     "g": 0.24705882370471954,
+     "b": 0.0,
+     "a": 1.0
+    },
+    "key2": {
+     "r": 1.0,
+     "g": 0.9529411792755127,
+     "b": 0.9176470637321472,
+     "a": 0.0
+    },
+    "key3": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key4": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key5": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key6": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key7": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "ctime0": 2539,
+    "ctime1": 43236,
+    "ctime2": 65535,
+    "ctime3": 0,
+    "ctime4": 0,
+    "ctime5": 0,
+    "ctime6": 0,
+    "ctime7": 0,
+    "atime0": 0,
+    "atime1": 65535,
+    "atime2": 0,
+    "atime3": 0,
+    "atime4": 0,
+    "atime5": 0,
+    "atime6": 0,
+    "atime7": 0,
+    "m_Mode": 0,
+    "m_ColorSpace": -1,
+    "m_NumColorKeys": 2,
+    "m_NumAlphaKeys": 2
+   },
+   "LightColor": {
+    "key0": {
+     "r": 1.0,
+     "g": 0.9529411792755127,
+     "b": 0.9176470637321472,
+     "a": 1.0
+    },
+    "key1": {
+     "r": 1.0,
+     "g": 0.41960784792900085,
+     "b": 0.0,
+     "a": 1.0
+    },
+    "key2": {
+     "r": 1.0,
+     "g": 0.41960784792900085,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key3": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key4": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key5": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key6": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key7": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "ctime0": 0,
+    "ctime1": 65535,
+    "ctime2": 65535,
+    "ctime3": 0,
+    "ctime4": 0,
+    "ctime5": 0,
+    "ctime6": 0,
+    "ctime7": 0,
+    "atime0": 0,
+    "atime1": 65535,
+    "atime2": 0,
+    "atime3": 0,
+    "atime4": 0,
+    "atime5": 0,
+    "atime6": 0,
+    "atime7": 0,
+    "m_Mode": 0,
+    "m_ColorSpace": -1,
+    "m_NumColorKeys": 2,
+    "m_NumAlphaKeys": 2
+   },
+   "RayColor": {
+    "key0": {
+     "r": 1.0,
+     "g": 0.9529411792755127,
+     "b": 0.9176470637321472,
+     "a": 1.0
+    },
+    "key1": {
+     "r": 1.0,
+     "g": 0.41960784792900085,
+     "b": 0.0,
+     "a": 1.0
+    },
+    "key2": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key3": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key4": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key5": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key6": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key7": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "ctime0": 0,
+    "ctime1": 65535,
+    "ctime2": 0,
+    "ctime3": 0,
+    "ctime4": 0,
+    "ctime5": 0,
+    "ctime6": 0,
+    "ctime7": 0,
+    "atime0": 0,
+    "atime1": 65535,
+    "atime2": 0,
+    "atime3": 0,
+    "atime4": 0,
+    "atime5": 0,
+    "atime6": 0,
+    "atime7": 0,
+    "m_Mode": 0,
+    "m_ColorSpace": -1,
+    "m_NumColorKeys": 2,
+    "m_NumAlphaKeys": 2
+   },
+   "CloudColor": {
+    "key0": {
+     "r": 1.0,
+     "g": 1.0,
+     "b": 1.0,
+     "a": 1.0
+    },
+    "key1": {
+     "r": 1.0,
+     "g": 0.7843137383460999,
+     "b": 0.3921568691730499,
+     "a": 1.0
+    },
+    "key2": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key3": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key4": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key5": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key6": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key7": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "ctime0": 0,
+    "ctime1": 65535,
+    "ctime2": 0,
+    "ctime3": 0,
+    "ctime4": 0,
+    "ctime5": 0,
+    "ctime6": 0,
+    "ctime7": 0,
+    "atime0": 0,
+    "atime1": 65535,
+    "atime2": 0,
+    "atime3": 0,
+    "atime4": 0,
+    "atime5": 0,
+    "atime6": 0,
+    "atime7": 0,
+    "m_Mode": 0,
+    "m_ColorSpace": -1,
+    "m_NumColorKeys": 2,
+    "m_NumAlphaKeys": 2
+   },
+   "AmbientColor": {
+    "key0": {
+     "r": 1.0,
+     "g": 0.9450980424880981,
+     "b": 0.9254902005195618,
+     "a": 1.0
+    },
+    "key1": {
+     "r": 1.0,
+     "g": 0.6235294342041016,
+     "b": 0.4901960790157318,
+     "a": 1.0
+    },
+    "key2": {
+     "r": 0.3686274588108063,
+     "g": 0.3490196168422699,
+     "b": 0.34117648005485535,
+     "a": 0.0
+    },
+    "key3": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key4": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key5": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key6": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key7": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "ctime0": 12290,
+    "ctime1": 40587,
+    "ctime2": 65535,
+    "ctime3": 0,
+    "ctime4": 0,
+    "ctime5": 0,
+    "ctime6": 0,
+    "ctime7": 0,
+    "atime0": 0,
+    "atime1": 65535,
+    "atime2": 0,
+    "atime3": 0,
+    "atime4": 0,
+    "atime5": 0,
+    "atime6": 0,
+    "atime7": 0,
+    "m_Mode": 0,
+    "m_ColorSpace": -1,
+    "m_NumColorKeys": 2,
+    "m_NumAlphaKeys": 2
+   },
+   "LightIntensity": 0.800000011920929,
+   "ShadowStrength": 1.0,
+   "ColorMultiplier": 1.0,
+   "AmbientMultiplier": 1.0,
+   "ReflectionMultiplier": 1.0
+  },
+  "Night": {
+   "SkyColor": {
+    "key0": {
+     "r": 0.09803921729326248,
+     "g": 0.1568627506494522,
+     "b": 0.2549019753932953,
+     "a": 1.0
+    },
+    "key1": {
+     "r": 0.09803921729326248,
+     "g": 0.1568627506494522,
+     "b": 0.2549019753932953,
+     "a": 1.0
+    },
+    "key2": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key3": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key4": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key5": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key6": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key7": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "ctime0": 0,
+    "ctime1": 65535,
+    "ctime2": 0,
+    "ctime3": 0,
+    "ctime4": 0,
+    "ctime5": 0,
+    "ctime6": 0,
+    "ctime7": 0,
+    "atime0": 0,
+    "atime1": 65535,
+    "atime2": 0,
+    "atime3": 0,
+    "atime4": 0,
+    "atime5": 0,
+    "atime6": 0,
+    "atime7": 0,
+    "m_Mode": 0,
+    "m_ColorSpace": -1,
+    "m_NumColorKeys": 2,
+    "m_NumAlphaKeys": 2
+   },
+   "LightColor": {
+    "key0": {
+     "r": 0.09803921729326248,
+     "g": 0.1568627506494522,
+     "b": 0.2549019753932953,
+     "a": 1.0
+    },
+    "key1": {
+     "r": 0.09803921729326248,
+     "g": 0.1568627506494522,
+     "b": 0.2549019753932953,
+     "a": 1.0
+    },
+    "key2": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key3": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key4": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key5": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key6": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key7": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "ctime0": 0,
+    "ctime1": 65535,
+    "ctime2": 0,
+    "ctime3": 0,
+    "ctime4": 0,
+    "ctime5": 0,
+    "ctime6": 0,
+    "ctime7": 0,
+    "atime0": 0,
+    "atime1": 65535,
+    "atime2": 0,
+    "atime3": 0,
+    "atime4": 0,
+    "atime5": 0,
+    "atime6": 0,
+    "atime7": 0,
+    "m_Mode": 0,
+    "m_ColorSpace": -1,
+    "m_NumColorKeys": 2,
+    "m_NumAlphaKeys": 2
+   },
+   "RayColor": {
+    "key0": {
+     "r": 0.09803921729326248,
+     "g": 0.1568627506494522,
+     "b": 0.2549019753932953,
+     "a": 1.0
+    },
+    "key1": {
+     "r": 0.09803921729326248,
+     "g": 0.1568627506494522,
+     "b": 0.2549019753932953,
+     "a": 1.0
+    },
+    "key2": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key3": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key4": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key5": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key6": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key7": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "ctime0": 0,
+    "ctime1": 65535,
+    "ctime2": 0,
+    "ctime3": 0,
+    "ctime4": 0,
+    "ctime5": 0,
+    "ctime6": 0,
+    "ctime7": 0,
+    "atime0": 0,
+    "atime1": 65535,
+    "atime2": 0,
+    "atime3": 0,
+    "atime4": 0,
+    "atime5": 0,
+    "atime6": 0,
+    "atime7": 0,
+    "m_Mode": 0,
+    "m_ColorSpace": -1,
+    "m_NumColorKeys": 2,
+    "m_NumAlphaKeys": 2
+   },
+   "CloudColor": {
+    "key0": {
+     "r": 0.09803921729326248,
+     "g": 0.1568627506494522,
+     "b": 0.2549019753932953,
+     "a": 1.0
+    },
+    "key1": {
+     "r": 0.09803921729326248,
+     "g": 0.1568627506494522,
+     "b": 0.2549019753932953,
+     "a": 1.0
+    },
+    "key2": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key3": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key4": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key5": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key6": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key7": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "ctime0": 0,
+    "ctime1": 65535,
+    "ctime2": 0,
+    "ctime3": 0,
+    "ctime4": 0,
+    "ctime5": 0,
+    "ctime6": 0,
+    "ctime7": 0,
+    "atime0": 0,
+    "atime1": 65535,
+    "atime2": 0,
+    "atime3": 0,
+    "atime4": 0,
+    "atime5": 0,
+    "atime6": 0,
+    "atime7": 0,
+    "m_Mode": 0,
+    "m_ColorSpace": -1,
+    "m_NumColorKeys": 2,
+    "m_NumAlphaKeys": 2
+   },
+   "AmbientColor": {
+    "key0": {
+     "r": 0.8352941274642944,
+     "g": 0.4901960790157318,
+     "b": 0.29019609093666077,
+     "a": 1.0
+    },
+    "key1": {
+     "r": 0.2862745225429535,
+     "g": 0.4901960790157318,
+     "b": 0.8352941274642944,
+     "a": 1.0
+    },
+    "key2": {
+     "r": 0.2862745225429535,
+     "g": 0.4901960790157318,
+     "b": 0.8352941274642944,
+     "a": 0.0
+    },
+    "key3": {
+     "r": 0.2862745225429535,
+     "g": 0.4901960790157318,
+     "b": 0.8352941274642944,
+     "a": 0.0
+    },
+    "key4": {
+     "r": 0.2862745225429535,
+     "g": 0.4901960790157318,
+     "b": 0.8352941274642944,
+     "a": 0.0
+    },
+    "key5": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key6": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key7": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "ctime0": 18325,
+    "ctime1": 45370,
+    "ctime2": 65535,
+    "ctime3": 65535,
+    "ctime4": 65535,
+    "ctime5": 0,
+    "ctime6": 0,
+    "ctime7": 0,
+    "atime0": 0,
+    "atime1": 65535,
+    "atime2": 0,
+    "atime3": 0,
+    "atime4": 0,
+    "atime5": 0,
+    "atime6": 0,
+    "atime7": 0,
+    "m_Mode": 0,
+    "m_ColorSpace": -1,
+    "m_NumColorKeys": 3,
+    "m_NumAlphaKeys": 2
+   },
+   "LightIntensity": 0.5,
+   "ShadowStrength": 1.0,
+   "ColorMultiplier": 0.9358492493629456,
+   "AmbientMultiplier": 1.0,
+   "ReflectionMultiplier": 1.0
+  },
+  "Sun": {
+   "MeshColor": {
+    "key0": {
+     "r": 1.0,
+     "g": 0.5568627715110779,
+     "b": 0.0,
+     "a": 1.0
+    },
+    "key1": {
+     "r": 1.0,
+     "g": 0.08235294371843338,
+     "b": 0.0,
+     "a": 1.0
+    },
+    "key2": {
+     "r": 1.0,
+     "g": 0.14509804546833038,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key3": {
+     "r": 1.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key4": {
+     "r": 1.0,
+     "g": 0.6823529601097107,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key5": {
+     "r": 1.0,
+     "g": 0.6823529601097107,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key6": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key7": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "ctime0": 0,
+    "ctime1": 10727,
+    "ctime2": 25551,
+    "ctime3": 34620,
+    "ctime4": 42178,
+    "ctime5": 42178,
+    "ctime6": 0,
+    "ctime7": 0,
+    "atime0": 0,
+    "atime1": 65535,
+    "atime2": 0,
+    "atime3": 0,
+    "atime4": 0,
+    "atime5": 0,
+    "atime6": 0,
+    "atime7": 0,
+    "m_Mode": 0,
+    "m_ColorSpace": -1,
+    "m_NumColorKeys": 5,
+    "m_NumAlphaKeys": 2
+   },
+   "MeshSize": 1.0,
+   "MeshBrightness": 2.0,
+   "MeshContrast": 0.0
+  },
+  "Moon": {
+   "MeshColor": {
+    "key0": {
+     "r": 1.0,
+     "g": 0.9137254953384399,
+     "b": 0.7843137383460999,
+     "a": 1.0
+    },
+    "key1": {
+     "r": 1.0,
+     "g": 0.9137254953384399,
+     "b": 0.7843137383460999,
+     "a": 1.0
+    },
+    "key2": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key3": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key4": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key5": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key6": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key7": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "ctime0": 0,
+    "ctime1": 65535,
+    "ctime2": 0,
+    "ctime3": 0,
+    "ctime4": 0,
+    "ctime5": 0,
+    "ctime6": 0,
+    "ctime7": 0,
+    "atime0": 0,
+    "atime1": 65535,
+    "atime2": 0,
+    "atime3": 0,
+    "atime4": 0,
+    "atime5": 0,
+    "atime6": 0,
+    "atime7": 0,
+    "m_Mode": 0,
+    "m_ColorSpace": -1,
+    "m_NumColorKeys": 2,
+    "m_NumAlphaKeys": 2
+   },
+   "MeshSize": 0.699999988079071,
+   "MeshBrightness": 0.800000011920929,
+   "MeshContrast": 1.0,
+   "HaloColor": {
+    "key0": {
+     "r": 0.1764705926179886,
+     "g": 0.21568627655506134,
+     "b": 0.27843138575553894,
+     "a": 1.0
+    },
+    "key1": {
+     "r": 0.10980392247438431,
+     "g": 0.1411764770746231,
+     "b": 0.1921568661928177,
+     "a": 1.0
+    },
+    "key2": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key3": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key4": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key5": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key6": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "key7": {
+     "r": 0.0,
+     "g": 0.0,
+     "b": 0.0,
+     "a": 0.0
+    },
+    "ctime0": 0,
+    "ctime1": 65535,
+    "ctime2": 0,
+    "ctime3": 0,
+    "ctime4": 0,
+    "ctime5": 0,
+    "ctime6": 0,
+    "ctime7": 0,
+    "atime0": 0,
+    "atime1": 65535,
+    "atime2": 0,
+    "atime3": 0,
+    "atime4": 0,
+    "atime5": 0,
+    "atime6": 0,
+    "atime7": 0,
+    "m_Mode": 0,
+    "m_ColorSpace": -1,
+    "m_NumColorKeys": 2,
+    "m_NumAlphaKeys": 2
+   },
+   "HaloSize": 0.10000000149011612,
+   "Position": 1
+  },
+  "Stars": {
+   "Tiling": 6.0,
+   "Brightness": 7.0,
+   "Position": 1
+  },
+  "Light": {
+   "UpdateInterval": 0.0,
+   "MinimumHeight": 0.0
+  },
+  "Fog": {
+   "Mode": 1,
+   "HeightBias": 0.0
+  },
+  "Ambient": {
+   "Mode": 0,
+   "UpdateInterval": 1.0
+  },
+  "Reflection": {
+   "Mode": 0,
+   "ClearFlags": 2,
+   "CullingMask": {
+    "m_Bits": 33554432
+   },
+   "TimeSlicing": 0,
+   "UpdateInterval": 1.0
+  },
+  "rotationSpeed": 2.938735877055719e-39
+ },
+ "TOD_Resources": {
+  "Quad": {
+   "m_FileID": 3,
+   "m_PathID": 689
+  },
+  "SphereHigh": {
+   "m_FileID": 3,
+   "m_PathID": 692
+  },
+  "SphereMedium": {
+   "m_FileID": 3,
+   "m_PathID": 686
+  },
+  "SphereLow": {
+   "m_FileID": 3,
+   "m_PathID": 688
+  },
+  "IcosphereHigh": {
+   "m_FileID": 3,
+   "m_PathID": 694
+  },
+  "IcosphereMedium": {
+   "m_FileID": 3,
+   "m_PathID": 693
+  },
+  "IcosphereLow": {
+   "m_FileID": 3,
+   "m_PathID": 691
+  },
+  "HalfIcosphereHigh": {
+   "m_FileID": 3,
+   "m_PathID": 687
+  },
+  "HalfIcosphereMedium": {
+   "m_FileID": 3,
+   "m_PathID": 690
+  },
+  "HalfIcosphereLow": {
+   "m_FileID": 3,
+   "m_PathID": 695
+  },
+  "SpaceMaterial": {
+   "m_FileID": 3,
+   "m_PathID": 6
+  },
+  "AtmosphereMaterial": {
+   "m_FileID": 3,
+   "m_PathID": 2
+  },
+  "SunMaterial": {
+   "m_FileID": 3,
+   "m_PathID": 7
+  },
+  "MoonMaterial": {
+   "m_FileID": 3,
+   "m_PathID": 4
+  },
+  "ClearMaterial": {
+   "m_FileID": 3,
+   "m_PathID": 3
+  },
+  "SkyboxMaterial": {
+   "m_FileID": 3,
+   "m_PathID": 5
+  }
+ }
+}

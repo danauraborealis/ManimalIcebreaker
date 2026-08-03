@@ -1,0 +1,2580 @@
+{
+  "map": "factory4_day",
+  "go": "FPS Camera",
+  "components": [
+    {
+      "type": "SSAAPropagatorOpaque",
+      "enabled": true,
+      "fields": {},
+      "unencodable": 0
+    },
+    {
+      "type": "SSAAPropagator",
+      "enabled": true,
+      "fields": {
+        "CopyDLSSResources": {
+          "ref": "Material",
+          "name": "CopyDLSSSources"
+        },
+        "DLSSDebugOutput": {
+          "ref": "Material",
+          "name": "DLSSDebugDisplay"
+        },
+        "EASUShader": {
+          "ref": "ComputeShader",
+          "name": "EFTFSR_ASU"
+        },
+        "RCASShader": {
+          "ref": "ComputeShader",
+          "name": "EFTFSR_CAS"
+        },
+        "AutogenReactiveShader": {
+          "ref": "ComputeShader",
+          "name": "FSR2_AutogenReactive"
+        },
+        "TCRAutogenShader": {
+          "ref": "ComputeShader",
+          "name": "FSR2_TCRAutogen"
+        },
+        "ComputeLuminancePyramidShader": {
+          "ref": "ComputeShader",
+          "name": "FSR2_ComputeLuminancePyramid"
+        },
+        "ReconstructPreviousDepthShader": {
+          "ref": "ComputeShader",
+          "name": "FSR2_ReconstructPreviousDepth"
+        },
+        "DepthClipShader": {
+          "ref": "ComputeShader",
+          "name": "FSR2_DepthClip"
+        },
+        "LockShader": {
+          "ref": "ComputeShader",
+          "name": "FSR2_Lock"
+        },
+        "AccumulateShader": {
+          "ref": "ComputeShader",
+          "name": "FSR2_Accumulate"
+        },
+        "RCAS2Shader": {
+          "ref": "ComputeShader",
+          "name": "FSR2_RCAS"
+        },
+        "FSR3AutogenReactiveShader": {
+          "ref": "ComputeShader",
+          "name": "FSR3_AutogenReactive"
+        },
+        "FSR3TCRAutogenShader": {
+          "ref": "ComputeShader",
+          "name": "FSR2_TCRAutogen"
+        },
+        "FSR3ComputeLuminancePyramidShader": {
+          "ref": "ComputeShader",
+          "name": "FSR3_ComputeLuminancePyramid"
+        },
+        "FSR3ReconstructPreviousDepthShader": {
+          "ref": "ComputeShader",
+          "name": "FSR3_ReconstructPreviousDepth"
+        },
+        "FSR3DepthClipShader": {
+          "ref": "ComputeShader",
+          "name": "FSR3_DepthClip"
+        },
+        "FSR3LockShader": {
+          "ref": "ComputeShader",
+          "name": "FSR3_Lock"
+        },
+        "FSR3AccumulateShader": {
+          "ref": "ComputeShader",
+          "name": "FSR3_Accumulate"
+        },
+        "FSR3RCAS2Shader": {
+          "ref": "ComputeShader",
+          "name": "FSR3_RCAS"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "HBAO",
+      "enabled": true,
+      "fields": {
+        "useTriangleBlit": true,
+        "noiseTex": {
+          "ref": "Texture2D",
+          "name": ""
+        },
+        "quadMesh": {
+          "ref": "Mesh",
+          "name": ""
+        },
+        "hbaoShader": {
+          "ref": "Shader",
+          "name": "Hidden/HBAO"
+        }
+      },
+      "unencodable": 5
+    },
+    {
+      "type": "TOD_Scattering",
+      "enabled": true,
+      "fields": {
+        "Lighten": false,
+        "FromLevelSettings": true,
+        "ScatteringShader": {
+          "ref": "Shader",
+          "name": "Hidden/Time of Day/Scattering"
+        },
+        "DitheringTexture": {
+          "ref": "Texture2D",
+          "name": "bayer_matrix"
+        },
+        "GlobalDensity": 0.004076094,
+        "HeightFalloff": 0.029,
+        "SunrizeGlow": 0.9755,
+        "_mboit": false,
+        "ZeroLevel": 15.0
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "MBOIT_Scattering",
+      "enabled": false,
+      "fields": {
+        "Lighten": false,
+        "FromLevelSettings": true,
+        "ScatteringSlicesComputeShader": {
+          "ref": "ComputeShader",
+          "name": "Scattering Slices"
+        },
+        "ScatteringMBOITComputeShader": {
+          "ref": "ComputeShader",
+          "name": "Scattering MBOIT Moments"
+        },
+        "ScatteringMBOITRCPComputeShader": {
+          "ref": "ComputeShader",
+          "name": "Scattering MBOIT MomentsRcp"
+        },
+        "ScatteringMBOITFinalPassComputeShader": {
+          "ref": "ComputeShader",
+          "name": "Scattering MBOIT FinalPass"
+        },
+        "ScatterColorMultiplier": {
+          "r": 1.0,
+          "g": 1.0,
+          "b": 1.0,
+          "a": 0.4705
+        },
+        "ScatterGreyscale": 1.0,
+        "ScatterDensityMultiplier": 2.15,
+        "ScatterDensityPower": 2.15,
+        "ScatterDensityBias": 0.56,
+        "HeightFalloffFactor": 1.0,
+        "SOFT_SCALE": 1480.0,
+        "SOFT_CONTRAST_POWER": 1.0,
+        "DitheringTexture": {
+          "ref": "Texture2D",
+          "name": "bayer_matrix"
+        },
+        "GlobalDensity": 0.004076094,
+        "HeightFalloff": 0.029,
+        "SunrizeGlow": 0.9755,
+        "ThermalVisionIsEnabled": false,
+        "MBOITDitherScale": 1.0,
+        "ZeroLevel": 15.0
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "Undithering",
+      "enabled": true,
+      "fields": {
+        "shader": {
+          "ref": "Shader",
+          "name": "Hidden/Undithering"
+        },
+        "useTriangleBlit": true,
+        "_distortion": false
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "PostEffects.ContactShadows",
+      "enabled": false,
+      "fields": {
+        "_light": null,
+        "_rejectionDepth": 0.0,
+        "_sampleCount": 0,
+        "_temporalFilter": 1.0,
+        "_contrast": 0.0,
+        "_downsample": true,
+        "_noiseTextures": {
+          "ref": "NoiseTextureSet",
+          "name": "NoiseTextureSet"
+        },
+        "_shader": {
+          "ref": "Shader",
+          "name": "Hidden/PostEffects/ContactShadows"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "VolumetricLightRenderer",
+      "enabled": true,
+      "fields": {
+        "IsOn": true,
+        "IsOptic": false,
+        "Resolution": 2,
+        "DefaultSpotCookie": {
+          "ref": "Texture2D",
+          "name": "spot"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "BSG.CameraEffects.NightVision",
+      "enabled": true,
+      "fields": {
+        "Shader": {
+          "ref": "Shader",
+          "name": "Hidden/NightVision"
+        },
+        "Intensity": 2.27,
+        "Noise": {
+          "ref": "Texture2D",
+          "name": "Noise"
+        },
+        "Mask": {
+          "ref": "Texture2D",
+          "name": "thermal"
+        },
+        "MaskSize": 1.5,
+        "NoiseIntensity": 0.02,
+        "NoiseScale": 5.0,
+        "Color": {
+          "r": 0.4759948,
+          "g": 0.9117647,
+          "b": 0.4759948,
+          "a": 0.0
+        },
+        "TextureMask": {
+          "ref": "TextureMask",
+          "name": "FPS Camera"
+        },
+        "BlackFlashGoingToOn": {
+          "curve": [
+            {
+              "t": 0.0,
+              "v": 0.0,
+              "i": 2.44629574,
+              "o": 0.0
+            },
+            {
+              "t": 0.76,
+              "v": 0.0,
+              "i": 0.0241185334,
+              "o": 0.0241185334
+            },
+            {
+              "t": 0.86,
+              "v": 1.02,
+              "i": -3.33786E-06,
+              "o": -3.33786E-06
+            },
+            {
+              "t": 0.96,
+              "v": 0.0,
+              "i": 0.030142216,
+              "o": 0.030142216
+            }
+          ],
+          "pre": 8,
+          "post": 8
+        },
+        "BlackFlashGoingToOff": {
+          "curve": [
+            {
+              "t": 0.599999964,
+              "v": 0.0,
+              "i": 0.0,
+              "o": 0.0
+            },
+            {
+              "t": 0.6999999,
+              "v": 1.02,
+              "i": 0.0,
+              "o": 0.0
+            },
+            {
+              "t": 0.799999952,
+              "v": 0.0,
+              "i": 0.0,
+              "o": 0.0
+            }
+          ],
+          "pre": 8,
+          "post": 8
+        },
+        "SwitchOn": {
+          "ref": "AudioClip",
+          "name": "thermal_activate"
+        },
+        "SwitchOff": {
+          "ref": "AudioClip",
+          "name": "thermal_deactivate"
+        },
+        "ThermalMaskTexture": {
+          "ref": "Texture2D",
+          "name": "thermal"
+        },
+        "AnvisMaskTexture": {
+          "ref": "Texture2D",
+          "name": "mask_anvis"
+        },
+        "BinocularMaskTexture": {
+          "ref": "Texture2D",
+          "name": "mask_binocular"
+        },
+        "GasMaskTexture": {
+          "ref": "Texture2D",
+          "name": "mask_gasmask"
+        },
+        "OldMonocularMaskTexture": {
+          "ref": "Texture2D",
+          "name": "mask_old_monocular"
+        },
+        "ambientFactor": 1.2,
+        "_on": false
+      },
+      "unencodable": 2
+    },
+    {
+      "type": "ThermalVision",
+      "enabled": true,
+      "fields": {
+        "On": false,
+        "IsNoisy": true,
+        "IsFpsStuck": false,
+        "IsMotionBlurred": true,
+        "IsGlitch": true,
+        "IsPixelated": false,
+        "TextureMask": {
+          "ref": "TextureMask",
+          "name": "FPS Camera"
+        },
+        "ChromaticAberrationThermalShift": 0.013,
+        "BlackFlashGoingToOn": {
+          "curve": [
+            {
+              "t": 0.0,
+              "v": 0.0,
+              "i": 2.44629574,
+              "o": 0.0
+            },
+            {
+              "t": 0.76,
+              "v": 0.0,
+              "i": 0.0241185334,
+              "o": 0.0241185334
+            },
+            {
+              "t": 0.86,
+              "v": 1.02,
+              "i": -3.33786E-06,
+              "o": -3.33786E-06
+            },
+            {
+              "t": 0.96,
+              "v": 0.0,
+              "i": 0.030142216,
+              "o": 0.030142216
+            }
+          ],
+          "pre": 8,
+          "post": 8
+        },
+        "BlackFlashGoingToOff": {
+          "curve": [
+            {
+              "t": 0.599999964,
+              "v": 0.0,
+              "i": 0.0,
+              "o": 0.0
+            },
+            {
+              "t": 0.6999999,
+              "v": 1.02,
+              "i": 0.0,
+              "o": 0.0
+            },
+            {
+              "t": 0.799999952,
+              "v": 0.0,
+              "i": 0.0,
+              "o": 0.0
+            }
+          ],
+          "pre": 8,
+          "post": 8
+        },
+        "SwitchOn": {
+          "ref": "AudioClip",
+          "name": "thermal_activate"
+        },
+        "SwitchOff": {
+          "ref": "AudioClip",
+          "name": "thermal_deactivate"
+        },
+        "UnsharpRadiusBlur": 5.0,
+        "UnsharpBias": 2.0
+      },
+      "unencodable": 7
+    },
+    {
+      "type": "UnityStandardAssets.ImageEffects.Bloom",
+      "enabled": false,
+      "fields": {
+        "tweakMode": 0,
+        "screenBlendMode": 0,
+        "hdr": 0,
+        "sepBlurSpread": 2.63,
+        "quality": 0,
+        "bloomIntensity": -1.07,
+        "bloomThreshold": 0.47,
+        "bloomThresholdColor": {
+          "r": 1.0,
+          "g": 1.0,
+          "b": 1.0,
+          "a": 1.0
+        },
+        "bloomBlurIterations": 1,
+        "hollywoodFlareBlurIterations": 2,
+        "flareRotation": 0.0,
+        "lensflareMode": 1,
+        "hollyStretchWidth": 2.5,
+        "lensflareIntensity": 0.0,
+        "lensflareThreshold": 0.3,
+        "lensFlareSaturation": 0.75,
+        "flareColorA": {
+          "r": 0.4,
+          "g": 0.4,
+          "b": 0.8,
+          "a": 0.75
+        },
+        "flareColorB": {
+          "r": 0.4,
+          "g": 0.8,
+          "b": 0.8,
+          "a": 0.75
+        },
+        "flareColorC": {
+          "r": 0.8,
+          "g": 0.4,
+          "b": 0.8,
+          "a": 0.75
+        },
+        "flareColorD": {
+          "r": 0.8,
+          "g": 0.4,
+          "b": 0.0,
+          "a": 0.75
+        },
+        "lensFlareVignetteMask": {
+          "ref": "Texture2D",
+          "name": "VignetteMask"
+        },
+        "lensFlareShader": {
+          "ref": "Shader",
+          "name": "Hidden/LensFlareCreate"
+        },
+        "screenBlendShader": {
+          "ref": "Shader",
+          "name": "Hidden/BlendForBloom"
+        },
+        "blurAndFlaresShader": {
+          "ref": "Shader",
+          "name": "Hidden/BlurAndFlares"
+        },
+        "brightPassFilterShader": {
+          "ref": "Shader",
+          "name": "Hidden/BrightPassFilter2"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "UltimateBloom",
+      "enabled": true,
+      "fields": {
+        "m_SamplingMinHeight": 400.0,
+        "m_SamplingMode": 0,
+        "m_BlendMode": 0,
+        "m_ScreenMaxIntensity": 0.0,
+        "m_QualityPreset": 0,
+        "m_HDR": 1,
+        "m_ScreenBlendMode": 1,
+        "m_BloomIntensity": 0.346055418,
+        "m_BloomThreshhold": 2.1,
+        "m_BloomThreshholdColor": {
+          "r": 1.0,
+          "g": 1.0,
+          "b": 1.0,
+          "a": 1.0
+        },
+        "m_DownscaleCount": 5,
+        "m_IntensityManagement": 1,
+        "useTriangleBlit": true,
+        "m_UseLensFlare": false,
+        "m_FlareTreshold": 0.8,
+        "m_FlareIntensity": 0.25,
+        "m_FlareTint0": {
+          "r": 0.5372549,
+          "g": 0.321568638,
+          "b": 0.0,
+          "a": 1.0
+        },
+        "m_FlareTint1": {
+          "r": 0.0,
+          "g": 0.247058824,
+          "b": 0.494117647,
+          "a": 1.0
+        },
+        "m_FlareTint2": {
+          "r": 0.282352954,
+          "g": 0.5921569,
+          "b": 0.0,
+          "a": 1.0
+        },
+        "m_FlareTint3": {
+          "r": 0.447058827,
+          "g": 0.137254909,
+          "b": 0.0,
+          "a": 1.0
+        },
+        "m_FlareTint4": {
+          "r": 0.478431374,
+          "g": 0.345098048,
+          "b": 0.0,
+          "a": 1.0
+        },
+        "m_FlareTint5": {
+          "r": 0.5372549,
+          "g": 0.2784314,
+          "b": 0.0,
+          "a": 1.0
+        },
+        "m_FlareTint6": {
+          "r": 0.380392164,
+          "g": 0.545098066,
+          "b": 0.0,
+          "a": 1.0
+        },
+        "m_FlareTint7": {
+          "r": 0.156862751,
+          "g": 0.5568628,
+          "b": 0.0,
+          "a": 1.0
+        },
+        "m_FlareGlobalScale": 1.0,
+        "m_FlareScales": {
+          "x": 1.0,
+          "y": 0.6,
+          "z": 0.5,
+          "w": 0.4
+        },
+        "m_FlareScalesNear": {
+          "x": 1.0,
+          "y": 0.8,
+          "z": 0.6,
+          "w": 0.5
+        },
+        "m_FlareMask": {
+          "ref": "Texture2D",
+          "name": "FlareMask"
+        },
+        "m_FlareRendering": 1,
+        "m_FlareType": 1,
+        "m_FlareShape": {
+          "ref": "Texture2D",
+          "name": "Bokeh"
+        },
+        "m_FlareBlurQuality": 2,
+        "m_UseBokehFlare": false,
+        "m_BokehScale": 0.4,
+        "m_BokehFlareQuality": 1,
+        "m_UseAnamorphicFlare": true,
+        "m_AnamorphicFlareTreshold": 0.8,
+        "m_AnamorphicFlareIntensity": 0.8,
+        "m_AnamorphicDownscaleCount": 4,
+        "m_AnamorphicBlurPass": 2,
+        "m_AnamorphicSmallVerticalBlur": false,
+        "m_AnamorphicDirection": 0,
+        "m_AnamorphicScale": 1.5,
+        "m_UseStarFlare": false,
+        "m_StarFlareTreshol": 0.8,
+        "m_StarFlareIntensity": 2.118863,
+        "m_StarScale": 2.11627913,
+        "m_StarDownscaleCount": 6,
+        "m_StarBlurPass": 1,
+        "m_UseLensDust": false,
+        "m_DustIntensity": 2.36749125,
+        "m_DustTexture": {
+          "ref": "Texture2D",
+          "name": "CreatedWithDirtGenerator2"
+        },
+        "m_DirtLightIntensity": 4.13427544,
+        "m_DownsamplingQuality": 0,
+        "m_UpsamplingQuality": 0,
+        "m_TemporalStableDownsampling": false,
+        "m_InvertImage": false,
+        "m_DirectDownSample": false,
+        "m_DirectUpsample": true,
+        "m_UiShowBloomScales": true,
+        "m_UiShowAnamorphicBloomScales": true,
+        "m_UiShowStarBloomScales": false,
+        "m_UiShowHeightSampling": false,
+        "m_UiShowBloomSettings": true,
+        "m_UiShowSampling": true,
+        "m_UiShowIntensity": true,
+        "m_UiShowOptimizations": true,
+        "m_UiShowLensDirt": true,
+        "m_UiShowLensFlare": false,
+        "m_UiShowAnamorphic": true,
+        "m_UiShowStar": true
+      },
+      "unencodable": 11
+    },
+    {
+      "type": "UnityStandardAssets.CinematicEffects.AmbientOcclusion",
+      "enabled": false,
+      "fields": {
+        "useTriangleBlit": true,
+        "_aoShader": {
+          "ref": "Shader",
+          "name": "Hidden/Image Effects/Cinematic/AmbientOcclusion"
+        },
+        "_quadMesh": {
+          "ref": "Mesh",
+          "name": "Quad"
+        }
+      },
+      "unencodable": 1
+    },
+    {
+      "type": "PrismEffects",
+      "enabled": true,
+      "fields": {
+        "currentPrismPreset": {
+          "ref": "PrismPreset",
+          "name": "New PRISMPreset"
+        },
+        "isParentPrism": false,
+        "isChildPrism": false,
+        "m_Material": {
+          "ref": "Material",
+          "name": "Hidden/PrismEffects"
+        },
+        "m_Shader": {
+          "ref": "Shader",
+          "name": "Hidden/PrismEffects"
+        },
+        "m_Material2": {
+          "ref": "Material",
+          "name": "Hidden/PrismEffectsSecondary"
+        },
+        "m_Shader2": {
+          "ref": "Shader",
+          "name": "Hidden/PrismEffectsSecondary"
+        },
+        "m_MasterEffectExposure": null,
+        "m_AOMaterial": {
+          "ref": "Material",
+          "name": "Hidden/PrismKinoObscurance"
+        },
+        "m_AOShader": {
+          "ref": "Shader",
+          "name": "Hidden/PrismKinoObscurance"
+        },
+        "m_Material3": {
+          "ref": "Material",
+          "name": "Hidden/PrismEffectsTertiary"
+        },
+        "m_Shader3": {
+          "ref": "Shader",
+          "name": "Hidden/PrismEffectsTertiary"
+        },
+        "doBigPass": true,
+        "useSeparableBlur": true,
+        "lensDirtTexture": {
+          "ref": "Texture2D",
+          "name": "CustomDirtTexture_1"
+        },
+        "useLensDirt": true,
+        "useBloom": false,
+        "bloomUseScreenBlend": false,
+        "bloomType": 1,
+        "debugBloomTex": false,
+        "bloomDownsample": 2,
+        "bloomBlurPasses": 4,
+        "bloomIntensity": 0.05,
+        "bloomThreshold": 1.579,
+        "dirtIntensity": 0.759,
+        "useBloomStability": true,
+        "useUIBlur": false,
+        "uiBlurGrabTextureFromPassNumber": 2,
+        "useVignette": true,
+        "vignetteStart": 0.9,
+        "vignetteEnd": 0.4,
+        "vignetteStrength": 0.887,
+        "vignetteColor": {
+          "r": 0.0,
+          "g": 0.0,
+          "b": 0.0,
+          "a": 1.0
+        },
+        "useNightVision": false,
+        "m_NVColor": {
+          "r": 0.0,
+          "g": 1.0,
+          "b": 0.1724138,
+          "a": 0.0
+        },
+        "m_TargetBleachColor": {
+          "r": 1.0,
+          "g": 1.0,
+          "b": 1.0,
+          "a": 0.0
+        },
+        "m_baseLightingContribution": 0.0302,
+        "m_LightSensitivityMultiplier": 10.8,
+        "useNoise": false,
+        "noiseTexture": {
+          "ref": "Texture2D",
+          "name": "PrismGrain"
+        },
+        "noiseScale": 1.0,
+        "noiseIntensity": 0.09,
+        "noiseType": 1,
+        "useChromaticAberration": false,
+        "aberrationType": 1,
+        "chromaticDistanceOne": 0.29,
+        "chromaticDistanceTwo": 0.599,
+        "chromaticIntensity": 0.0171,
+        "chromaticBlurWidth": 1.0,
+        "useChromaticBlur": false,
+        "useTonemap": true,
+        "tonemapType": 0,
+        "toneValues": {
+          "x": 7.0,
+          "y": 0.3,
+          "z": 0.3
+        },
+        "secondaryToneValues": {
+          "x": -0.05,
+          "y": 0.25,
+          "z": 0.0
+        },
+        "useExposure": true,
+        "debugViewExposure": false,
+        "exposureMiddleGrey": 0.14000015,
+        "exposureLowerLimit": -10.0,
+        "exposureUpperLimit": 0.9,
+        "exposureSpeed": 3.99999762,
+        "histWidth": 1,
+        "histHeight": 1,
+        "useGammaCorrection": false,
+        "gammaValue": 1.0,
+        "useDof": false,
+        "dofForceEnableMedian": false,
+        "useNearDofBlur": true,
+        "useFullScreenBlur": false,
+        "dofNearFocusDistance": 8.0,
+        "dofFocusPoint": 6.75,
+        "dofFocusDistance": 55.0,
+        "dofRadius": 0.466,
+        "dofBokehFactor": 157.0,
+        "dofSampleAmount": 1,
+        "dofBlurSkybox": true,
+        "debugDofPass": true,
+        "dofFocusTransform": null,
+        "useLut": false,
+        "twoDLookupTex": {
+          "ref": "Texture2D",
+          "name": "LUT-amidgenofbluegreen2lighterblack"
+        },
+        "threeDLookupTex": null,
+        "basedOnTempTex": "",
+        "lutLerpAmount": 0.083,
+        "useSecondLut": false,
+        "secondaryTwoDLookupTex": null,
+        "secondaryThreeDLookupTex": null,
+        "secondaryBasedOnTempTex": "",
+        "secondaryLutLerpAmount": 0.0,
+        "useSharpen": false,
+        "sharpenAmount": 1.0,
+        "useFog": false,
+        "fogAffectSkybox": false,
+        "fogIntensity": 0.0,
+        "fogStartPoint": 50.0,
+        "fogDistance": 500.0,
+        "fogColor": {
+          "r": 1.0,
+          "g": 1.0,
+          "b": 1.0,
+          "a": 1.0
+        },
+        "fogEndColor": {
+          "r": 0.5,
+          "g": 0.5,
+          "b": 0.5,
+          "a": 1.0
+        },
+        "fogHeight": 2.0,
+        "useAmbientObscurance": false,
+        "aoSampleCount": 10,
+        "useAODistanceCutoff": false,
+        "aoDistanceCutoffLength": 150.0,
+        "aoDistanceCutoffStart": 4.0,
+        "aoIntensity": 1.117,
+        "aoMinIntensity": 0.0,
+        "aoRadius": 1.345,
+        "aoDownsample": true,
+        "aoBlurType": 1,
+        "aoBlurIterations": 1,
+        "aoBias": 0.448,
+        "aoBlurFilterDistance": 1.25,
+        "aoLightingContribution": 0.353,
+        "aoShowDebug": false,
+        "useRays": false,
+        "rayTransform": null,
+        "rayWeight": 0.629,
+        "rayColor": {
+          "r": 1.0,
+          "g": 1.0,
+          "b": 1.0,
+          "a": 1.0
+        },
+        "rayThreshold": {
+          "r": 0.87,
+          "g": 0.74,
+          "b": 0.65,
+          "a": 1.0
+        },
+        "raysShowDebug": false,
+        "advancedVignette": false,
+        "advancedAO": true
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "UnityStandardAssets.ImageEffects.BloomAndFlares",
+      "enabled": true,
+      "fields": {
+        "tweakMode": 1,
+        "screenBlendMode": 0,
+        "hdr": 2,
+        "sepBlurSpread": 4.3,
+        "useSrcAlphaAsMask": 0.0,
+        "bloomIntensity": 1.0,
+        "bloomThreshold": 0.46,
+        "bloomBlurIterations": 3,
+        "lensflares": false,
+        "hollywoodFlareBlurIterations": 2,
+        "lensflareMode": 1,
+        "hollyStretchWidth": 3.5,
+        "lensflareIntensity": 1.0,
+        "lensflareThreshold": 0.3,
+        "flareColorA": {
+          "r": 0.4,
+          "g": 0.4,
+          "b": 0.8,
+          "a": 0.75
+        },
+        "flareColorB": {
+          "r": 0.4,
+          "g": 0.8,
+          "b": 0.8,
+          "a": 0.75
+        },
+        "flareColorC": {
+          "r": 0.8,
+          "g": 0.4,
+          "b": 0.8,
+          "a": 0.75
+        },
+        "flareColorD": {
+          "r": 0.8,
+          "g": 0.4,
+          "b": 0.0,
+          "a": 0.75
+        },
+        "lensFlareVignetteMask": {
+          "ref": "Texture2D",
+          "name": "VignetteMask"
+        },
+        "lensFlareShader": {
+          "ref": "Shader",
+          "name": "Hidden/LensFlareCreate"
+        },
+        "vignetteShader": {
+          "ref": "Shader",
+          "name": "Hidden/VignetteShader"
+        },
+        "separableBlurShader": {
+          "ref": "Shader",
+          "name": "Hidden/SeparableBlurPlus"
+        },
+        "addBrightStuffOneOneShader": {
+          "ref": "Shader",
+          "name": "Hidden/BlendOneOne"
+        },
+        "screenBlendShader": {
+          "ref": "Shader",
+          "name": "Hidden/Blend"
+        },
+        "hollywoodFlaresShader": {
+          "ref": "Shader",
+          "name": "Hidden/MultipassHollywoodFlares"
+        },
+        "brightPassFilterShader": {
+          "ref": "Shader",
+          "name": "Hidden/BrightPassFilterForBloom"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "CC_Vintage",
+      "enabled": true,
+      "fields": {
+        "filter": 10,
+        "lookupTexture": {
+          "ref": "Texture2D",
+          "name": "Jason"
+        },
+        "amount": 0.498,
+        "shader": {
+          "ref": "Shader",
+          "name": "Hidden/CC_LookupFilter"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "DesaturateEffect",
+      "enabled": false,
+      "fields": {
+        "textureRamp": {
+          "ref": "Texture2D",
+          "name": "grayscale ramp"
+        },
+        "rampOffsetR": 0.0,
+        "rampOffsetG": 0.0,
+        "rampOffsetB": 0.0,
+        "WeatherDesaturate": 0.237969622,
+        "HealthDesaturate": 0.0,
+        "MaskDesaturate": 0.0,
+        "MinMaxRadius": {
+          "x": 0.325,
+          "y": 1.0
+        },
+        "Radius": 1.0,
+        "RadiusFalloff": 0.425,
+        "shader": {
+          "ref": "Shader",
+          "name": "Hidden/Desaturate Effect"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "UnityStandardAssets.ImageEffects.Antialiasing",
+      "enabled": false,
+      "fields": {
+        "mode": 0,
+        "showGeneratedNormals": false,
+        "offsetScale": 0.2,
+        "blurRadius": 18.0,
+        "edgeThresholdMin": 0.05,
+        "edgeThreshold": 0.2,
+        "edgeSharpness": 23.37,
+        "dlaaSharp": false,
+        "ssaaShader": {
+          "ref": "Shader",
+          "name": "Hidden/SSAA"
+        },
+        "dlaaShader": {
+          "ref": "Shader",
+          "name": "Hidden/DLAA"
+        },
+        "nfaaShader": {
+          "ref": "Shader",
+          "name": "Hidden/NFAA"
+        },
+        "shaderFXAAPreset2": {
+          "ref": "Shader",
+          "name": "Hidden/FXAA Preset 2"
+        },
+        "shaderFXAAPreset3": {
+          "ref": "Shader",
+          "name": "Hidden/FXAA Preset 3"
+        },
+        "shaderFXAAII": {
+          "ref": "Shader",
+          "name": "Hidden/FXAA II"
+        },
+        "shaderFXAAIII": {
+          "ref": "Shader",
+          "name": "Hidden/FXAA III (Console)"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "ChromaticAberration",
+      "enabled": false,
+      "fields": {
+        "Shift": 0.0015,
+        "Aniso": 1,
+        "Simple": false,
+        "shader": {
+          "ref": "Shader",
+          "name": "Hidden/ChromaticAberration"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "FastBlur",
+      "enabled": false,
+      "fields": {
+        "_value": 0.0,
+        "_material": {
+          "ref": "Material",
+          "name": "FastBlur"
+        },
+        "_upsampleTexDimension": 1024,
+        "_downsampleTexDimension": 512,
+        "_blurCount": 3,
+        "_hitTime": 0.65,
+        "_hitCurve": {
+          "curve": [
+            {
+              "t": 0.0,
+              "v": -0.00234174728,
+              "i": 0.0,
+              "o": 0.0
+            },
+            {
+              "t": 0.25,
+              "v": 0.33,
+              "i": 7.52112669E-07,
+              "o": 7.52112669E-07
+            },
+            {
+              "t": 1.0,
+              "v": -0.00234174728,
+              "i": -0.0277946666,
+              "o": -0.0277946666
+            }
+          ],
+          "pre": 8,
+          "post": 8
+        },
+        "_deathTime": 1.5,
+        "_deathCurve": {
+          "curve": [
+            {
+              "t": 0.0,
+              "v": 0.0,
+              "i": 0.0,
+              "o": 0.0
+            },
+            {
+              "t": 1.0,
+              "v": 1.0,
+              "i": 0.0,
+              "o": 0.0
+            }
+          ],
+          "pre": 8,
+          "post": 8
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "DeathFade",
+      "enabled": false,
+      "fields": {
+        "_deathFade": {
+          "ref": "Material",
+          "name": "DeathFade"
+        },
+        "_deathColorFade": {
+          "ref": "Material",
+          "name": "DeathColorFade"
+        },
+        "_color": {
+          "r": 0.0,
+          "g": 0.0,
+          "b": 0.0,
+          "a": 1.0
+        },
+        "_closeEyesTime": 0.25,
+        "_closeEyesDelay": 1.8,
+        "_disableTime": 0.001,
+        "_enableCurve": {
+          "curve": [
+            {
+              "t": 0.0,
+              "v": 0.0,
+              "i": 0.0,
+              "o": 0.0
+            },
+            {
+              "t": 1.0,
+              "v": 1.0,
+              "i": 2.0,
+              "o": 2.0
+            }
+          ],
+          "pre": 8,
+          "post": 8
+        },
+        "_disableCurve": {
+          "curve": [
+            {
+              "t": 0.0,
+              "v": 0.0,
+              "i": 2.0,
+              "o": 2.0
+            },
+            {
+              "t": 1.0,
+              "v": 1.0,
+              "i": 0.0,
+              "o": 0.0
+            }
+          ],
+          "pre": 8,
+          "post": 8
+        },
+        "_debug": false,
+        "_closeEyesValue": 0.0,
+        "_fadeValue": 0.0
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "BloodOnScreen",
+      "enabled": true,
+      "fields": {
+        "DebugMode": false,
+        "BloodColorValue": 1.0,
+        "Refraction": 0.046,
+        "DownsamplingCount": 3,
+        "MaxBloodTime": 8.0,
+        "InitialBloodDrops": 4,
+        "BloodColor": {
+          "r": 0.4,
+          "g": 0.0,
+          "b": 0.0,
+          "a": 1.0
+        },
+        "GenerateUniqueMaterials": true,
+        "BloodShader": {
+          "ref": "Shader",
+          "name": "Hidden/BloodOnScreen"
+        },
+        "BlitMaterial": {
+          "ref": "Material",
+          "name": "BlitMaterial"
+        },
+        "FadeoutMat": {
+          "ref": "Material",
+          "name": "BloodFadeout"
+        },
+        "BloodDropMaterial": {
+          "ref": "Material",
+          "name": "BloodDrop"
+        },
+        "RenderTextureDimension": 11,
+        "StartScaleDimension": {
+          "x": 0.0,
+          "y": 1.35631931
+        },
+        "EndScaleDimension": {
+          "x": 0.0,
+          "y": 1.35631931
+        },
+        "DropCountRange": {
+          "x": 3.18181825,
+          "y": 7.2918644
+        },
+        "MaxRayLength": {
+          "x": 0.4526316,
+          "y": 0.895514131
+        },
+        "StartXdistribution": {
+          "x": 0.0,
+          "y": 0.075
+        },
+        "StartYdistribution": {
+          "x": 0.0,
+          "y": 0.075
+        },
+        "EndXdistribution": {
+          "x": 0.05,
+          "y": 0.3
+        },
+        "EndYdistribution": {
+          "x": 0.05,
+          "y": 0.3
+        },
+        "DropLifetimeDistribution": {
+          "x": 0.742105246,
+          "y": 1.2
+        },
+        "OffGlassScaleMultiplier": 1.8,
+        "OffGlassLifetimeMultiplier": 2.0,
+        "Mode": 0,
+        "InputMinL": 48.0,
+        "InputMaxL": 255.0,
+        "InputGammaL": 1.0,
+        "InputMinR": 0.0,
+        "InputMaxR": 255.0,
+        "InputGammaR": 1.0,
+        "InputMinG": 0.0,
+        "InputMaxG": 255.0,
+        "InputGammaG": 1.0,
+        "InputMinB": 0.0,
+        "InputMaxB": 255.0,
+        "InputGammaB": 1.0,
+        "OutputMinL": 0.0,
+        "OutputMaxL": 254.0,
+        "OutputMinR": 0.0,
+        "OutputMaxR": 255.0,
+        "OutputMinG": 0.0,
+        "OutputMaxG": 255.0,
+        "OutputMinB": 0.0,
+        "OutputMaxB": 255.0,
+        "center": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "sharpness": 10.0,
+        "darkness": 0.0
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "PostprocessGrayscale",
+      "enabled": true,
+      "fields": {
+        "EffectShader": {
+          "ref": "Shader",
+          "name": "Hidden/Grayscale"
+        },
+        "EffectValueName": "_EffectAmount",
+        "_effectAmount": 0.0
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "DistortCameraFX",
+      "enabled": true,
+      "fields": {
+        "Shader": {
+          "ref": "Shader",
+          "name": "Hidden/DistortCameraFX"
+        },
+        "Distortion": 8.0,
+        "BlurIterations": 1
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "EffectsController",
+      "enabled": true,
+      "fields": {
+        "_effectsPrefab": {
+          "ref": "GameObject",
+          "name": "EffectsPrefab"
+        },
+        "FastVineteFlicker": {
+          "curve": [
+            {
+              "t": 0.0,
+              "v": 1.0,
+              "i": 0.0,
+              "o": 0.0
+            },
+            {
+              "t": 1.03529692,
+              "v": 0.55802685,
+              "i": -0.0473856926,
+              "o": -0.0473856926
+            },
+            {
+              "t": 3.438985,
+              "v": 0.561209559,
+              "i": -0.00566244125,
+              "o": -0.00566244125
+            },
+            {
+              "t": 5.63631439,
+              "v": 1.00212646,
+              "i": 0.0,
+              "o": 0.0
+            }
+          ],
+          "pre": 8,
+          "post": 2
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "CC_BleachBypass",
+      "enabled": false,
+      "fields": {
+        "amount": 0.0,
+        "shader": {
+          "ref": "Shader",
+          "name": "Hidden/CC_BleachBypass"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "CC_ContrastVignette",
+      "enabled": false,
+      "fields": {
+        "center": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "sharpness": 49.0,
+        "darkness": 26.9,
+        "contrast": 53.0,
+        "redCoeff": 0.5,
+        "greenCoeff": 0.5,
+        "blueCoeff": 0.5,
+        "edge": 8.0,
+        "shader": {
+          "ref": "Shader",
+          "name": "Hidden/CC_ContrastVignette"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "CC_DoubleVision",
+      "enabled": false,
+      "fields": {
+        "displace": {
+          "x": 1.88,
+          "y": 0.22
+        },
+        "amount": 0.0,
+        "shader": {
+          "ref": "Shader",
+          "name": "Hidden/CC_DoubleVision"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "CC_HueFocus",
+      "enabled": false,
+      "fields": {
+        "hue": 0.0,
+        "range": 30.0,
+        "boost": 0.5,
+        "amount": 1.0,
+        "shader": {
+          "ref": "Shader",
+          "name": "Hidden/CC_HueFocus"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "CC_RadialBlur",
+      "enabled": false,
+      "fields": {
+        "amount": 0.0,
+        "samples": 10,
+        "center": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "quality": 1,
+        "shader": {
+          "ref": "Shader",
+          "name": "Hidden/CC_RadialBlur"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "CC_Sharpen",
+      "enabled": true,
+      "fields": {
+        "strength": 1.2,
+        "clamp": 0.406,
+        "DoDesaturate": true,
+        "textureRamp": {
+          "ref": "Texture2D",
+          "name": "grayscale ramp"
+        },
+        "rampOffsetR": 0.0,
+        "rampOffsetG": 0.0,
+        "rampOffsetB": 0.0,
+        "WeatherDesaturate": 0.2379696,
+        "HealthDesaturate": 0.0,
+        "MaskDesaturate": 0.0,
+        "MinMaxRadius": {
+          "x": 0.325,
+          "y": 1.0
+        },
+        "Radius": 1.0,
+        "RadiusFalloff": 0.425,
+        "shader": {
+          "ref": "Shader",
+          "name": "Hidden/CC_Sharpen"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "CC_Technicolor",
+      "enabled": false,
+      "fields": {
+        "exposure": 6.09,
+        "balance": {
+          "x": 0.866,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "amount": 0.0,
+        "shader": {
+          "ref": "Shader",
+          "name": "Hidden/CC_Technicolor"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "CC_BrightnessContrastGamma",
+      "enabled": false,
+      "fields": {
+        "brightness": 0.0,
+        "contrast": 0.0,
+        "redCoeff": 0.5,
+        "greenCoeff": 0.5,
+        "blueCoeff": 0.5,
+        "gamma": 1.00000036,
+        "shader": {
+          "ref": "Shader",
+          "name": "Hidden/CC_BrightnessContrastGamma"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "BSG.CameraEffects.TextureMask",
+      "enabled": false,
+      "fields": {
+        "Shader": {
+          "ref": "Shader",
+          "name": "Hidden/MaskTexture"
+        },
+        "Color": {
+          "r": 0.0,
+          "g": 0.0,
+          "b": 0.0,
+          "a": 1.0
+        },
+        "Mask": {
+          "ref": "Texture2D",
+          "name": "thermal"
+        },
+        "Stretch": false,
+        "Size": 1.5
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "UnityStandardAssets.ImageEffects.BloomAndFlares",
+      "enabled": false,
+      "fields": {
+        "tweakMode": 1,
+        "screenBlendMode": 1,
+        "hdr": 0,
+        "sepBlurSpread": 10.0,
+        "useSrcAlphaAsMask": 0.54,
+        "bloomIntensity": 3.0,
+        "bloomThreshold": 0.4,
+        "bloomBlurIterations": 2,
+        "lensflares": true,
+        "hollywoodFlareBlurIterations": 2,
+        "lensflareMode": 0,
+        "hollyStretchWidth": 3.5,
+        "lensflareIntensity": 2.8,
+        "lensflareThreshold": 0.0,
+        "flareColorA": {
+          "r": 0.4,
+          "g": 0.4,
+          "b": 0.8,
+          "a": 0.75
+        },
+        "flareColorB": {
+          "r": 0.4,
+          "g": 0.8,
+          "b": 0.8,
+          "a": 0.75
+        },
+        "flareColorC": {
+          "r": 0.8,
+          "g": 0.4,
+          "b": 0.8,
+          "a": 0.75
+        },
+        "flareColorD": {
+          "r": 0.8,
+          "g": 0.4,
+          "b": 0.0,
+          "a": 0.75
+        },
+        "lensFlareVignetteMask": {
+          "ref": "Texture2D",
+          "name": "VignetteMask"
+        },
+        "lensFlareShader": {
+          "ref": "Shader",
+          "name": "Hidden/LensFlareCreate"
+        },
+        "vignetteShader": {
+          "ref": "Shader",
+          "name": "Hidden/VignetteShader"
+        },
+        "separableBlurShader": {
+          "ref": "Shader",
+          "name": "Hidden/SeparableBlurPlus"
+        },
+        "addBrightStuffOneOneShader": {
+          "ref": "Shader",
+          "name": "Hidden/BlendOneOne"
+        },
+        "screenBlendShader": {
+          "ref": "Shader",
+          "name": "Hidden/Blend"
+        },
+        "hollywoodFlaresShader": {
+          "ref": "Shader",
+          "name": "Hidden/MultipassHollywoodFlares"
+        },
+        "brightPassFilterShader": {
+          "ref": "Shader",
+          "name": "Hidden/BrightPassFilterForBloom"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "UnityStandardAssets.ImageEffects.Tonemapping",
+      "enabled": false,
+      "fields": {
+        "type": 5,
+        "adaptiveTextureSize": 256,
+        "remapCurve": {
+          "curve": [],
+          "pre": 8,
+          "post": 8
+        },
+        "exposureAdjustment": 1.5,
+        "middleGrey": 0.4,
+        "white": 5.0,
+        "adaptionSpeed": 1.0,
+        "tonemapper": {
+          "ref": "Shader",
+          "name": "Hidden/Tonemapper"
+        },
+        "validRenderTextureFormat": false
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "RainScreenDrops",
+      "enabled": true,
+      "fields": {
+        "_blitShader": {
+          "ref": "Shader",
+          "name": "Hidden/LiquidOnScreen"
+        },
+        "_intensity": 0.0,
+        "_refraction": 0.08,
+        "_refractionWithoutGlass": 0.05,
+        "_downsamplingCount": 7,
+        "_dropScaleCurve": {
+          "curve": [
+            {
+              "t": 0.0,
+              "v": 0.0,
+              "i": 38.9309349,
+              "o": 38.9309349
+            },
+            {
+              "t": 0.0014962256,
+              "v": 1.0,
+              "i": 0.39100647,
+              "o": 0.39100647
+            },
+            {
+              "t": 0.0720619261,
+              "v": 0.9016763,
+              "i": -0.0214048959,
+              "o": -0.0214048959
+            },
+            {
+              "t": 0.601628542,
+              "v": 0.3651259,
+              "i": -1.29147935,
+              "o": -1.29147935
+            },
+            {
+              "t": 1.0,
+              "v": 0.0,
+              "i": -0.393197417,
+              "o": -0.393197417
+            }
+          ],
+          "pre": 8,
+          "post": 8
+        },
+        "_dropsAmount": 32,
+        "_rainDropsDelay": 0.25,
+        "_dropScale": {
+          "x": 0.2,
+          "y": 0.4
+        },
+        "_dropLifetime": 25.0,
+        "_dropLifetimeWithoutGlass": 5.0,
+        "_isDropsShouldMove": false,
+        "_maxDropsAtOnce": 4,
+        "_dropMaterial": {
+          "ref": "Material",
+          "name": "RainDrop"
+        },
+        "_scaleMultiplierWithoutGlass": 4.0,
+        "DuDvMap": {
+          "ref": "RenderTexture",
+          "name": "DropRenderTexture"
+        },
+        "Mode": 0,
+        "InputMinL": 0.0,
+        "InputMaxL": 255.0,
+        "InputGammaL": 1.0,
+        "InputMinR": 0.0,
+        "InputMaxR": 255.0,
+        "InputGammaR": 1.0,
+        "InputMinG": 0.0,
+        "InputMaxG": 255.0,
+        "InputGammaG": 1.0,
+        "InputMinB": 0.0,
+        "InputMaxB": 255.0,
+        "InputGammaB": 1.0,
+        "OutputMinL": 0.0,
+        "OutputMaxL": 255.0,
+        "OutputMinR": 0.0,
+        "OutputMaxR": 255.0,
+        "OutputMinG": 0.0,
+        "OutputMaxG": 255.0,
+        "OutputMinB": 0.0,
+        "OutputMaxB": 255.0
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "ScreenWater",
+      "enabled": true,
+      "fields": {
+        "shaderRGB": {
+          "ref": "Shader",
+          "name": "Hidden/ScreenWater"
+        },
+        "_distortionCooldownTime": 2.0,
+        "WaterFlows": {
+          "ref": "Texture2D",
+          "name": "WaterFlowsOld"
+        },
+        "WaterMask": {
+          "ref": "Texture2D",
+          "name": "WaterMask"
+        },
+        "WetScreen": {
+          "ref": "Texture2D",
+          "name": "WetScreen"
+        },
+        "Speed": 0.01,
+        "InitialIntensity": 0.05
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "SSAOMask",
+      "enabled": true,
+      "fields": {
+        "_maskShader": {
+          "ref": "Shader",
+          "name": "Hidden/SSAOMask"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "UnityStandardAssets.ImageEffects.DepthOfField",
+      "enabled": false,
+      "fields": {
+        "visualizeFocus": false,
+        "focalLength": 3.19999981,
+        "focalSize": 2.0,
+        "aperture": 1.0,
+        "focalTransform": null,
+        "maxBlurSize": 3.91,
+        "highResolution": false,
+        "blurType": 0,
+        "blurSampleCount": 0,
+        "nearBlur": true,
+        "foregroundOverlap": 1.3,
+        "dofHdrShader": {
+          "ref": "Shader",
+          "name": "Hidden/Dof/DepthOfFieldHdr"
+        },
+        "dx11BokehShader": {
+          "ref": "Shader",
+          "name": "Hidden/Dof/DX11Dof"
+        },
+        "dx11BokehThreshold": 0.5,
+        "dx11SpawnHeuristic": 0.0875,
+        "dx11BokehTexture": {
+          "ref": "Texture2D",
+          "name": "HexShape"
+        },
+        "dx11BokehScale": 1.2,
+        "dx11BokehIntensity": 2.5
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "VisorEffect",
+      "enabled": false,
+      "fields": {
+        "Intensity": 0.0,
+        "EdgeFadeCurve": {
+          "curve": [
+            {
+              "t": 0.0,
+              "v": 0.1,
+              "i": 7.54478364E-08,
+              "o": 7.54478364E-08
+            },
+            {
+              "t": 0.785494,
+              "v": 0.09788295,
+              "i": -0.0113377441,
+              "o": -0.0113377441
+            },
+            {
+              "t": 0.9,
+              "v": 0.09261593,
+              "i": -0.09914521,
+              "o": -0.09914521
+            },
+            {
+              "t": 1.0,
+              "v": 0.0,
+              "i": -1.78054523,
+              "o": -1.78054523
+            }
+          ],
+          "pre": 8,
+          "post": 8
+        },
+        "VisorShader": {
+          "ref": "Shader",
+          "name": "Hidden/VisorEffect"
+        },
+        "Mask": {
+          "ref": "Texture2D",
+          "name": "VisorMask"
+        },
+        "Scratches": {
+          "ref": "Texture2D",
+          "name": "ScreenScratches_gud"
+        },
+        "ScratcesIntensity": 0.45,
+        "_glassDamageMaterial": {
+          "ref": "Material",
+          "name": "GlassDamageMaterial"
+        },
+        "MinLightValue": 0.4,
+        "IsAffectedByLight": false,
+        "VisorEffectPrefab": {
+          "ref": "GameObject",
+          "name": "VisorPoint"
+        },
+        "BlurMask": {
+          "ref": "Texture2D",
+          "name": "ScreenScratches_blur_psd"
+        },
+        "downsample": 1,
+        "blurSize": 1.5,
+        "blurIterations": 2,
+        "DistortMask": {
+          "ref": "Texture2D",
+          "name": "ScreenScratches_distort_psd"
+        },
+        "DistortIntensity": 0.0075,
+        "SwingValue": 1.0,
+        "DX": {
+          "curve": [
+            {
+              "t": 0.0,
+              "v": -0.000239491463,
+              "i": -0.004992347,
+              "o": -0.004992347
+            },
+            {
+              "t": 0.231148124,
+              "v": 0.000666070147,
+              "i": 0.00453094952,
+              "o": 0.0279653836
+            },
+            {
+              "t": 0.303115338,
+              "v": -0.000857496634,
+              "i": 0.0110035762,
+              "o": 0.0110035762
+            },
+            {
+              "t": 0.37910682,
+              "v": 0.000216111541,
+              "i": -0.0455675535,
+              "o": -0.0252579618
+            },
+            {
+              "t": 0.5082092,
+              "v": 0.0008286238,
+              "i": 0.000502049,
+              "o": 0.000502049
+            },
+            {
+              "t": 0.719942,
+              "v": 0.000481391326,
+              "i": 0.008931123,
+              "o": 0.03735485
+            },
+            {
+              "t": 0.8046553,
+              "v": -0.00046759157,
+              "i": -0.00475440174,
+              "o": -0.00475440174
+            },
+            {
+              "t": 0.8867267,
+              "v": 0.000273519545,
+              "i": -0.0384054072,
+              "o": -0.0174733046
+            },
+            {
+              "t": 1.0,
+              "v": -0.000239491463,
+              "i": 0.00465795072,
+              "o": 0.00465795072
+            }
+          ],
+          "pre": 8,
+          "post": 2
+        },
+        "DY": {
+          "curve": [
+            {
+              "t": 0.0,
+              "v": -0.000239491463,
+              "i": -0.00121202413,
+              "o": -0.00121202413
+            },
+            {
+              "t": 0.228418335,
+              "v": 0.004322492,
+              "i": 0.122435533,
+              "o": 0.09118267
+            },
+            {
+              "t": 0.2962794,
+              "v": 0.00738224946,
+              "i": -0.01621531,
+              "o": 0.0110035762
+            },
+            {
+              "t": 0.3972734,
+              "v": 0.00285565713,
+              "i": -0.028681485,
+              "o": -0.028681485
+            },
+            {
+              "t": 0.5102234,
+              "v": 0.00143897533,
+              "i": 0.000502049,
+              "o": 0.000502049
+            },
+            {
+              "t": 0.738750339,
+              "v": 0.00366760651,
+              "i": 0.145067126,
+              "o": 0.142689884
+            },
+            {
+              "t": 0.8022494,
+              "v": 0.007608953,
+              "i": -0.00475440174,
+              "o": -0.00475440174
+            },
+            {
+              "t": 0.908433259,
+              "v": 0.00154287089,
+              "i": -0.09490643,
+              "o": -0.09490643
+            },
+            {
+              "t": 1.0,
+              "v": -0.000239491463,
+              "i": 0.00465795072,
+              "o": 0.00465795072
+            }
+          ],
+          "pre": 8,
+          "post": 2
+        },
+        "HitSwingCurve": {
+          "curve": [
+            {
+              "t": 0.0,
+              "v": 0.0,
+              "i": 0.192826122,
+              "o": 0.192826122
+            },
+            {
+              "t": 0.182188168,
+              "v": 0.02,
+              "i": -0.130233973,
+              "o": -0.130233973
+            },
+            {
+              "t": 0.421946377,
+              "v": -0.00139001384,
+              "i": -0.0404985622,
+              "o": -0.0404985622
+            },
+            {
+              "t": 0.7460946,
+              "v": -0.0006316367,
+              "i": 0.0144541264,
+              "o": 0.0144541264
+            },
+            {
+              "t": 1.40026855,
+              "v": 0.0,
+              "i": 0.0,
+              "o": 0.0
+            }
+          ],
+          "pre": 8,
+          "post": 8
+        },
+        "WalkRotation": {
+          "curve": [
+            {
+              "t": 0.0,
+              "v": -0.000239491463,
+              "i": -0.00121202413,
+              "o": -0.00121202413
+            },
+            {
+              "t": 0.3385615,
+              "v": 0.00765308738,
+              "i": -0.01621531,
+              "o": 0.0110035762
+            },
+            {
+              "t": 0.3972734,
+              "v": 0.00285565713,
+              "i": -0.0510273874,
+              "o": -0.0510273874
+            },
+            {
+              "t": 0.6797448,
+              "v": -0.00289076613,
+              "i": -0.0445623547,
+              "o": -0.0445623547
+            },
+            {
+              "t": 0.7571444,
+              "v": -0.008214414,
+              "i": -0.00475440174,
+              "o": -0.00475440174
+            },
+            {
+              "t": 1.0,
+              "v": -0.000239491463,
+              "i": 0.00465795072,
+              "o": 0.00465795072
+            }
+          ],
+          "pre": 8,
+          "post": 2
+        },
+        "HitZoomMultiply": 6.0,
+        "StepFrequency": 0.7,
+        "Velocity": 0.0,
+        "_blurShader": null
+      },
+      "unencodable": 1
+    },
+    {
+      "type": "InfectionEffect",
+      "enabled": true,
+      "fields": {
+        "_effectMaterial": {
+          "ref": "Material",
+          "name": "Material_InfectionEffect"
+        },
+        "_refractCurve": {
+          "curve": [
+            {
+              "t": 0.0,
+              "v": 0.0,
+              "i": 0.0,
+              "o": 1.0
+            },
+            {
+              "t": 1.0,
+              "v": 1.0,
+              "i": 1.0,
+              "o": 0.0
+            }
+          ],
+          "pre": 8,
+          "post": 8
+        },
+        "_infectCurve": {
+          "curve": [
+            {
+              "t": 0.0,
+              "v": 0.0,
+              "i": 0.0,
+              "o": 1.0
+            },
+            {
+              "t": 1.0,
+              "v": 1.0,
+              "i": 1.0,
+              "o": 0.0
+            }
+          ],
+          "pre": 8,
+          "post": 8
+        },
+        "_effectValue": 0.0
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "GrenadeFlashScreenEffect",
+      "enabled": false,
+      "fields": {
+        "PrismEffects": {
+          "ref": "PrismEffects",
+          "name": "FPS Camera"
+        },
+        "WhiteBlack": {
+          "curve": [
+            {
+              "t": 0.0,
+              "v": 0.0,
+              "i": 0.0,
+              "o": 0.0
+            },
+            {
+              "t": 0.05,
+              "v": 1.0,
+              "i": 0.012540116,
+              "o": 0.012540116
+            },
+            {
+              "t": 0.1721974,
+              "v": 0.214578122,
+              "i": -3.7035296,
+              "o": -3.7035296
+            },
+            {
+              "t": 0.35,
+              "v": 0.0,
+              "i": 0.0,
+              "o": 0.0
+            }
+          ],
+          "pre": 8,
+          "post": 8
+        },
+        "FlashMaterial": {
+          "ref": "Material",
+          "name": "WhiteFlash"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "EyeBurn",
+      "enabled": false,
+      "fields": {
+        "EyeBurnScreenEffect": {
+          "ref": "Material",
+          "name": "EyeBurnScreenEffect"
+        },
+        "_scaleMinMax": {
+          "x": 0.2,
+          "y": 1.1
+        },
+        "_eyeBurnMaxTime": 100.0,
+        "TrailSpotEvery": 0.5,
+        "TrailSpotShift": 0.05,
+        "trailDecreaseCurve": {
+          "curve": [
+            {
+              "t": 0.0,
+              "v": 1.0,
+              "i": 0.170103475,
+              "o": 0.170103475
+            },
+            {
+              "t": 1.02931809,
+              "v": 1.13057089,
+              "i": 0.06605579,
+              "o": 0.06605579
+            },
+            {
+              "t": 2.0,
+              "v": 1.16793466,
+              "i": 0.00190940883,
+              "o": 0.00190940883
+            },
+            {
+              "t": 3.397546,
+              "v": 1.09872019,
+              "i": -0.165526569,
+              "o": -0.165526569
+            },
+            {
+              "t": 12.0,
+              "v": 0.5,
+              "i": -0.0379690453,
+              "o": -0.0379690453
+            }
+          ],
+          "pre": 8,
+          "post": 8
+        },
+        "MaxTrailLength": 10,
+        "_scaleCoefCurve": {
+          "curve": [
+            {
+              "t": 0.0,
+              "v": 0.400007337,
+              "i": 0.156967834,
+              "o": 0.156967834
+            },
+            {
+              "t": 0.599999964,
+              "v": 0.9000015,
+              "i": 0.7491837,
+              "o": 0.7491837
+            },
+            {
+              "t": 0.849999964,
+              "v": 0.9999993,
+              "i": 0.199079514,
+              "o": 1.021794E-05
+            },
+            {
+              "t": 0.919999957,
+              "v": 1.0,
+              "i": 1.021794E-05,
+              "o": -0.08404255
+            },
+            {
+              "t": 0.9987793,
+              "v": 0.9291796,
+              "i": -0.436105162,
+              "o": -0.436105162
+            }
+          ],
+          "pre": 8,
+          "post": 8
+        },
+        "IsPaused": false
+      },
+      "unencodable": 2
+    },
+    {
+      "type": "HysteresisFilter",
+      "enabled": false,
+      "fields": {
+        "Forward": {
+          "curve": [
+            {
+              "t": 0.0,
+              "v": 0.0,
+              "i": "Infinity",
+              "o": "Infinity"
+            },
+            {
+              "t": 0.60171777,
+              "v": 0.0,
+              "i": 0.0,
+              "o": 5.00000048
+            },
+            {
+              "t": 0.801717758,
+              "v": 1.0,
+              "i": 5.00000048,
+              "o": "Infinity"
+            }
+          ],
+          "pre": 8,
+          "post": 8
+        },
+        "Backward": {
+          "curve": [
+            {
+              "t": 0.0,
+              "v": 0.0,
+              "i": 3.862559,
+              "o": 3.862559
+            },
+            {
+              "t": 0.199999988,
+              "v": 1.0,
+              "i": 5.00000048,
+              "o": -0.0022513764
+            },
+            {
+              "t": 1.34233284,
+              "v": 0.9974282,
+              "i": "Infinity",
+              "o": "Infinity"
+            }
+          ],
+          "pre": 8,
+          "post": 8
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "FrostbiteEffect",
+      "enabled": false,
+      "fields": {
+        "_shader": {
+          "ref": "Shader",
+          "name": "Hidden/FrostbiteEffect"
+        },
+        "_baseColor": {
+          "r": 0.1607843,
+          "g": 0.282353,
+          "b": 0.4352941,
+          "a": 0.6
+        },
+        "_baseColorMap": {
+          "ref": "Texture2D",
+          "name": "T_Frostbite_Albedo"
+        },
+        "_normalMap": {
+          "ref": "Texture2D",
+          "name": "T_Frostbite_Normal"
+        },
+        "_tiling": {
+          "x": 1.0,
+          "y": 1.0
+        },
+        "_speed": 0.15,
+        "_opacity": 0.75,
+        "_distortion": 0.25,
+        "_radius": 1.0,
+        "_shapeRadius": {
+          "x": 0.8,
+          "y": 1.0
+        },
+        "_falloff": 1.5
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "UnityEngine.Rendering.PostProcessing.PostProcessLayer",
+      "enabled": true,
+      "fields": {
+        "volumeTrigger": null,
+        "volumeLayer": {
+          "mask": -1
+        },
+        "stopNaNPropagation": true,
+        "finalBlitToCameraTarget": false,
+        "antialiasingMode": 3,
+        "masterLayerExposure": null,
+        "lastExposureTexture": null,
+        "storeLastExposureTexture": false,
+        "computeAutoExposure": true,
+        "m_Resources": {
+          "ref": "PostProcessResources",
+          "name": "PostProcessResources"
+        },
+        "m_ShowToolkit": false,
+        "m_ShowCustomSorter": false,
+        "breakBeforeColorGrading": false
+      },
+      "unencodable": 8
+    },
+    {
+      "type": "UnityEngine.Rendering.PostProcessing.PostProcessVolume",
+      "enabled": true,
+      "fields": {
+        "sharedProfile": {
+          "ref": "PostProcessProfile",
+          "name": "Cam2_z4_Profile_Woods"
+        },
+        "isGlobal": true,
+        "blendDistance": 0.0,
+        "weight": 1.0,
+        "priority": 0.0
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "InventoryBlur",
+      "enabled": false,
+      "fields": {
+        "_value": 0.0,
+        "_material": {
+          "ref": "Material",
+          "name": "FastBlur"
+        },
+        "_upsampleTexDimension": 256,
+        "_downsampleTexDimension": 128,
+        "_blurCount": 8
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "GradingPostFX",
+      "enabled": false,
+      "fields": {
+        "_shader": {
+          "ref": "Shader",
+          "name": "Custom/GradingPostFX"
+        }
+      },
+      "unencodable": 1
+    },
+    {
+      "type": "AreaLightManager",
+      "enabled": true,
+      "fields": {
+        "ClearStencilShader": {
+          "ref": "Shader",
+          "name": "Hidden/ClearStencil"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "SSAA",
+      "enabled": true,
+      "fields": {
+        "DLSSOutputFlipY": true,
+        "UseJitter": true,
+        "ScopeMaskShader": {
+          "ref": "Shader",
+          "name": "Hidden/ScopeMask"
+        },
+        "CollimatorShader": {
+          "ref": "Shader",
+          "name": "CW FX/CollimatorDLSS"
+        },
+        "UnityTAAJitterSamplesRepeatCount": 1,
+        "BasePhaseSamplesCount": 8,
+        "DLSSJitterXScale": -1.0,
+        "DLSSJitterYScale": 1.0,
+        "MVScaleX": 1.0,
+        "MVScaleY": 1.0,
+        "UseProjectionMatrix": 0,
+        "FlippedV": false
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "EFT.CameraControl.CameraLodBiasController",
+      "enabled": true,
+      "fields": {
+        "LodBiasFactor": 1.0
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "Koenigz.PerfectCulling.PerfectCullingCamera",
+      "enabled": true,
+      "fields": {},
+      "unencodable": 0
+    },
+    {
+      "type": "Koenigz.PerfectCulling.EFT.PerfectCullingCrossSceneSampler",
+      "enabled": true,
+      "fields": {
+        "_cullingCamera": {
+          "ref": "PerfectCullingCamera",
+          "name": "FPS Camera"
+        },
+        "_numWorkThreads": 2
+      },
+      "unencodable": 1
+    },
+    {
+      "type": "CC_FastVignette",
+      "enabled": false,
+      "fields": {
+        "center": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "sharpness": 10.0,
+        "darkness": 74.9,
+        "desaturate": false,
+        "shader": {
+          "ref": "Shader",
+          "name": "Hidden/CC_FastVignette"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "CC_Blend",
+      "enabled": false,
+      "fields": {
+        "texture": null,
+        "amount": 1.0,
+        "mode": 0,
+        "shader": {
+          "ref": "Shader",
+          "name": "Hidden/CC_Blend"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "CC_Blend",
+      "enabled": false,
+      "fields": {
+        "texture": {
+          "ref": "Texture2D",
+          "name": "screen_neardeath_MULT"
+        },
+        "amount": 1.0,
+        "mode": 1,
+        "shader": {
+          "ref": "Shader",
+          "name": "Hidden/CC_Blend"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "CC_Wiggle",
+      "enabled": false,
+      "fields": {
+        "timer": 0.0,
+        "speed": 1.0,
+        "scale": 12.0,
+        "str": 1.0,
+        "autoTimer": true,
+        "shader": {
+          "ref": "Shader",
+          "name": "Hidden/CC_Wiggle"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "UnityStandardAssets.ImageEffects.MotionBlur",
+      "enabled": false,
+      "fields": {
+        "blurAmount": 0.8,
+        "extraBlur": false,
+        "shader": {
+          "ref": "Shader",
+          "name": "Hidden/MotionBlur"
+        }
+      },
+      "unencodable": 0
+    },
+    {
+      "type": "SSAAImpl",
+      "enabled": true,
+      "fields": {
+        "FlippedV": false,
+        "OpticLensRenderer": null,
+        "CollimatorRenderer": null,
+        "LensMaterial": {
+          "ref": "Material",
+          "name": "Hidden/ScopeMask"
+        },
+        "CollimatorMaterial": {
+          "ref": "Material",
+          "name": "CW FX/CollimatorDLSS"
+        },
+        "CopyLensDepthMotionPass": 1,
+        "DrawCollimatorPass": 0,
+        "DepthCopyMode": 0,
+        "SwapDLSSUpDown": true,
+        "EnableDLSS": true,
+        "DLSSSharpness": 0.4,
+        "DLSSDebug": false,
+        "DLSSDebugDisable": false,
+        "DLSSCopy": true,
+        "DLSSQualityNext": 2,
+        "DLSSMVScale": {
+          "x": 1.0,
+          "y": 1.0
+        },
+        "DLSSJitter": {
+          "x": -0.125,
+          "y": 0.2777778
+        },
+        "DLSSJitterXScale": -1.0,
+        "DLSSJitterYScale": 1.0,
+        "InventoryBlurIsEnabled": false,
+        "EnableFSR": false
+      },
+      "unencodable": 3
+    },
+    {
+      "type": "UnityEngine.StreamingController",
+      "enabled": true,
+      "fields": {},
+      "unencodable": 0
+    }
+  ]
+}
