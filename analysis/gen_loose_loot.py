@@ -502,8 +502,11 @@ def main():
         })
 
     mean = MEAN_OVERRIDE if MEAN_OVERRIDE is not None else round(total_prob, 2)
+    # std is live-calibrated, NOT mean*0.25: the three live raids counted 254/261/260
+    # loose items — a spread of SEVEN. the old derived std (64.5) made one raid in
+    # four roll under ~214 ("loot feels scarce today"), which retail never does.
     out = {
-        "spawnpointCount": {"mean": mean, "std": round(mean * 0.25, 2)},
+        "spawnpointCount": {"mean": mean, "std": 10.0},
         "spawnpointsForced": forced,
         "spawnpoints": spawnpoints,
     }
