@@ -122,7 +122,13 @@ namespace Manimal.Icebreaker
             Plugin.Log.LogDebug($"[Crew] present: {haveRogues} rogues, knight={haveKnight}; target {wantRogues} ({party} player(s)) + knight={Plugin.CrewKnight.Value}");
 
             if (haveRogues > wantRogues)
+            {
                 TrimRogues(haveRogues - wantRogues);
+                // waves land staggered and the safety rules can starve one pass (13
+                // arrivals vs target 6, 08-03 raid) — keep shaving as sightlines close
+                if (CountByRole(WildSpawnType.exUsec) > wantRogues)
+                    StartCoroutine(RetrimLoop(wantRogues));
+            }
             // boss-group spawns stack leader+escorts on one marker (frozen conjoined
             // rogues) — and the wave lands STAGGERED, so a one-shot pass missed everyone
             // who arrived after it. patrol for the first few minutes instead.
@@ -231,6 +237,23 @@ namespace Manimal.Icebreaker
             return false;
         }
 
+        // retry shaver: the one-shot pass at raid start rarely finds enough safe
+        // victims (see SafeToCull) — bots and players move, sightlines close, and a
+        // rogue that was exposed a minute ago becomes safely deletable. stops when the
+        // knight lands (his 2 escorts are ADDITIVE by design and must not be counted
+        // against the crew target, let alone culled) or when the BD phase begins.
+        private IEnumerator RetrimLoop(int want)
+        {
+            for (int i = 0; i < 12; i++)
+            {
+                yield return new WaitForSeconds(20f);
+                if (BdPhase || CountByRole(WildSpawnType.bossKnight) > 0) yield break;
+                int surplus = CountByRole(WildSpawnType.exUsec) - want;
+                if (surplus <= 0) yield break;
+                TrimRogues(surplus);
+            }
+        }
+
         private void TrimRogues(int count)
         {
             try
@@ -238,10 +261,36 @@ namespace Manimal.Icebreaker
                 var game = Singleton<IBotGame>.Instance;
                 var player = Singleton<GameWorld>.Instance?.MainPlayer;
                 if (game == null || player == null) return;
+                var humans = new List<Player>();
+                FikaBridge.CollectHumans(humans);
+                if (humans.Count == 0) humans.Add(player);
+
+                // eligibility: >60m from every human is always safe — but the ship is
+                // ~33m wide, so a pure radius disqualified half the crew every raid
+                // (08-03: trimmed 3/7, then 10 rogues vs target 6). indoors the real
+                // question is line of sight: 15m+ away AND a bulkhead between the bot
+                // and every human = nobody can watch the despawn.
+                bool SafeToCull(BotOwner b)
+                {
+                    float nearSq = float.MaxValue;
+                    foreach (var h in humans)
+                        nearSq = Mathf.Min(nearSq, (b.Position - h.Position).sqrMagnitude);
+                    if (nearSq > 60f * 60f) return true;
+                    if (nearSq < 15f * 15f) return false; // a pop this close can be heard
+                    var head = b.Position + Vector3.up * 1.5f;
+                    foreach (var h in humans)
+                    {
+                        var eye = h.Position + Vector3.up * 1.6f;
+                        if (!Physics.Linecast(eye, head, LayerMaskClass.HighPolyWithTerrainMask))
+                            return false; // clear line to somebody — not safe
+                    }
+                    return true;
+                }
+
                 var all = AliveRogues();
                 var candidates = new List<BotOwner>();
                 foreach (var b in all)
-                    if ((b.Position - player.Position).sqrMagnitude > 60f * 60f)
+                    if (SafeToCull(b))
                         candidates.Add(b);
                 // STACKED bots go first — the boss-group spawner piles leader+escorts on
                 // one marker and interpenetrating capsules freeze the movement solver, so
@@ -256,10 +305,22 @@ namespace Manimal.Icebreaker
                 foreach (var b in candidates)
                 {
                     if (trimmed >= count) break;
-                    try { game.BotDespawn(b); trimmed++; }
+                    try
+                    {
+                        // LeaveData.RemoveFromMap, NOT raw BotDespawn: the leave path runs
+                        // Deactivate + Dispose first, which unhooks the bot from the
+                        // hearing/event graphs. raw-despawned bots left DANGLING transforms
+                        // in BotEventHandler — every later sound the PLAYER made (footsteps,
+                        // keycard swipes) threw an NRE inside PlaySound and tore the calling
+                        // movement/interaction routine mid-frame (08-04: 415 exceptions,
+                        // controller flip-out, stuck stutterstep swipe)
+                        if (b.LeaveData != null) b.LeaveData.RemoveFromMap();
+                        else game.BotDespawn(b);
+                        trimmed++;
+                    }
                     catch (Exception e) { Plugin.Log.LogWarning($"[Crew] despawn failed on '{b.name}': {e.Message}"); }
                 }
-                Plugin.Log.LogDebug($"[Crew] trimmed {trimmed}/{count} wave rogues (stacked first, then farthest) to hit the rolled crew size");
+                Plugin.Log.LogDebug($"[Crew] trimmed {trimmed}/{count} wave rogues (stacked first, then farthest; {candidates.Count} culling-eligible of {all.Count})");
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[Crew] trim failed: {e.Message}"); }
         }

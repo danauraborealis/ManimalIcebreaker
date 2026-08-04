@@ -38,23 +38,35 @@ namespace Manimal.Icebreaker
 
         internal static void Register()
         {
-            var brains = new List<string> { "ExUsec", "PmcBear", "PmcUsec" };
-            BrainManager.AddCustomLayer(typeof(IceCrewLayer), brains, 19);
-            // the RUSH tier (user call 08-03): on the engine trigger the held squad must
-            // DEPLOY, not win a priority fight — SAIN's combat layers (solo 20/squad 22/
-            // extract 24) go active the moment it hears the player and its decision is
-            // to hold, which read as "they sat in spawn until I pushed them". 30 outranks
-            // all of those (only SAIN's grenade-dodge at 80 and debug at 99 sit higher,
-            // both fine to lose to); the layer self-limits to the RushUntil window so
-            // normal combat AI gets the bot back the moment the deployment is done.
-            BrainManager.AddCustomLayer(typeof(IceRushLayer), brains, 30);
-            Plugin.Log.LogInfo("[CrewLayer] bigbrain layers registered (ExUsec + PMC brains, crew 19 / rush 30)");
+            // "PMC" — the LITERAL brain name — is what the faction mods (BlackDiv et al)
+            // actually run: proven by the post-release diagnostic (brain='PMC',
+            // activeLayer='AvoidDanger'), which also proved SAIN does NOT cover that
+            // brain (its lists hold PmcBear/PmcUsec only) — so BD runs pure VANILLA
+            // layers even with SAIN installed, and vanilla priorities are the ones our
+            // tiers must beat: PMC brain = AvoidDanger 80, combat 70-78, idle <=61;
+            // ExUsec brain = AvoidDanger 100, combat 65-95, idle <=60 (decompiled).
+            var brains = new List<string> { "ExUsec", "PmcBear", "PmcUsec", "PMC" };
+            // idle tier: 68 owns the "nothing is happening" slot on both brains (above
+            // idle/utility <=65, below combat >=70) — and IsActive stands down on any
+            // live enemy anyway, so combat layers of ANY system keep their bots.
+            BrainManager.AddCustomLayer(typeof(IceCrewLayer), brains, 68);
+            // RUSH tier (user call 08-03: deploys must not lose a priority fight to
+            // ANYTHING): 110 clears vanilla ExUsec AvoidDanger at 100, PMC AvoidDanger
+            // at 80, and every SAIN layer (<=99). self-limits to the RushUntil window,
+            // then the bot drops back to whatever combat AI owns it.
+            BrainManager.AddCustomLayer(typeof(IceRushLayer), brains, 110);
+            Plugin.Log.LogInfo("[CrewLayer] bigbrain layers registered (ExUsec/PmcBear/PmcUsec/PMC, crew 68 / rush 110)");
         }
 
         internal static void Assign(BotOwner bot, Job job, Bounds zone = default, float rushSeconds = 0f)
         {
             var id = bot?.ProfileId;
             if (id == null) return;
+            // Hold anchors HERE, at assignment — the ambush post is where the spawner
+            // put the bot, not wherever a logic instance first ticks (a bot that
+            // wandered before the hold landed used to crouch mid-room)
+            if (job == Job.Hold && zone == default)
+                zone = new Bounds(bot.Position, Vector3.zero);
             ByProfile[id] = new Rec { Job = job, Zone = zone, RushUntil = rushSeconds > 0f ? Time.time + rushSeconds : 0f };
             try
             {
@@ -67,8 +79,14 @@ namespace Manimal.Icebreaker
 
         // black division bots that nobody assigned explicitly default to guarding the
         // area they spawned in — that's the "initial group patrols the room" behavior.
-        // lazy, on the layer's first query, so it needs no activation hook and covers
+        // lazy, on the layer's queries, so it needs no activation hook and covers
         // every spawn path (waves, pen deliveries, force spawns) automatically.
+        // 5s GRACE before the default lands: the first query fires on the bot's first
+        // brain tick, which used to beat the engine-hold sweep — freshly spawned
+        // ambushers wandered off as Guards for a second or two and then got anchored
+        // mid-room. every explicit Assign wins inside the grace window.
+        private static readonly Dictionary<string, float> FirstSeen = new Dictionary<string, float>();
+
         internal static Rec For(BotOwner bot)
         {
             var id = bot?.ProfileId;
@@ -76,6 +94,8 @@ namespace Manimal.Icebreaker
             if (ByProfile.TryGetValue(id, out var rec)) return rec;
             if (bot.Profile?.Info?.Settings?.Role == (WildSpawnType)IcebreakerCrew.BdIb)
             {
+                if (!FirstSeen.TryGetValue(id, out var seen)) { FirstSeen[id] = Time.time; return null; }
+                if (Time.time - seen < 5f) return null;
                 var zone = new Bounds(bot.Position, new Vector3(24f, 8f, 24f));
                 Assign(bot, Job.Guard, zone);
                 return ByProfile[id];
@@ -84,7 +104,7 @@ namespace Manimal.Icebreaker
             return null;
         }
 
-        internal static void Reset() => ByProfile.Clear(); // per raid
+        internal static void Reset() { ByProfile.Clear(); FirstSeen.Clear(); } // per raid
     }
 
     internal class IceCrewLayer : CustomLayer
@@ -150,7 +170,19 @@ namespace Manimal.Icebreaker
             var rec = IceCrewJobs.For(BotOwner);
             if (rec == null || rec.Job == IceCrewJobs.Job.None || Time.time >= rec.RushUntil) return false;
             var p = BotOwner.GetPlayer;
-            return p != null && p.HealthController != null && p.HealthController.IsAlive;
+            if (p == null || p.HealthController == null || !p.HealthController.IsAlive) return false;
+            // SIGHT ends the charge (user call 08-03: rushing bots ran past the player
+            // without firing) — a VISIBLE enemy hands the bot to combat right now.
+            // hearing and under-fire deliberately do NOT yield: noise-holding is the
+            // exact failure this tier exists to break. lose sight and the rush resumes
+            // for whatever remains of the window.
+            try
+            {
+                var ge = BotOwner.Memory?.GoalEnemy;
+                if (ge != null && ge.IsVisible) return false;
+            }
+            catch { }
+            return true;
         }
 
         public override Action GetNextAction()
@@ -176,23 +208,19 @@ namespace Manimal.Icebreaker
     // deactivates the layer and hands them to combat) displaced them.
     internal class IceHoldLogic : CustomLogic
     {
-        private Vector3 _post;
-        private bool _anchored;
         private float _next;
 
         public IceHoldLogic(BotOwner botOwner) : base(botOwner) { }
-
-        public override void Start()
-        {
-            base.Start();
-            // the hide marker = wherever the spawner put them; first activation anchors it
-            if (!_anchored) { _post = BotOwner.Position; _anchored = true; }
-        }
 
         public override void Update(CustomLayer.ActionData data)
         {
             if (Time.time < _next) return;
             _next = Time.time + 2f;
+            // the post is captured at ASSIGN time (Rec.Zone.center) — where the spawner
+            // put the bot, immune to whatever it did between activation and the hold
+            var rec = IceCrewJobs.For(BotOwner);
+            if (rec == null) return;
+            var _post = rec.Zone.center;
             if ((BotOwner.Position - _post).sqrMagnitude > 2f * 2f)
             {
                 // displaced (post-fight drift) — slip back to the post, low and quiet

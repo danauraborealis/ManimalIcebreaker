@@ -2224,11 +2224,16 @@ namespace Manimal.Icebreaker
         private void TickCameraAutopsy()
         {
             if (_camAutopsyDone || _iceFrames < 300) return;
-            _camAutopsyDone = true;
             try
             {
                 var cam = CameraRef != null ? CameraRef : Camera.main;
-                if (cam == null) { Plugin.Log.LogWarning("[CamAutopsy] no camera"); return; }
+                if (cam == null) { if (_iceFrames > 18000) _camAutopsyDone = true; return; }
+                // dont burn the one-shot while the camera GO is still inactive — slow
+                // loaders hit frame 300 mid-load and the dump reads activeGO=False,
+                // which is the LOADING state, not the bug (player log 08-04). wait for
+                // the live camera, give up only after ~5 minutes
+                if (!cam.gameObject.activeInHierarchy && _iceFrames < 18000) return;
+                _camAutopsyDone = true;
                 Plugin.Log.LogWarning($"[CamAutopsy] '{cam.name}' enabled={cam.enabled} activeGO={cam.gameObject.activeInHierarchy} "
                     + $"clearFlags={cam.clearFlags} bg={cam.backgroundColor} cullingMask=0x{cam.cullingMask:X} "
                     + $"depth={cam.depth} rect={cam.rect} target={(cam.targetTexture == null ? "screen" : cam.targetTexture.name)} "
@@ -3371,6 +3376,32 @@ namespace Manimal.Icebreaker
 
         private static Exception Finalizer(Exception __exception)
             => RaidFirewall.Swallow(__exception, "GameWorld.OnGameStarted");
+    }
+
+    // SOUND-PIPELINE AIRBAG — BotEventHandler.PlaySound runs SYNCHRONOUSLY inside
+    // whatever made the sound: the player's footstep code, the keycard-swipe
+    // interaction, a weapon routine. any dangling reference in the bot hearing graph
+    // (a destroyed bot someone forgot to unhook — our old raw-despawn trim did exactly
+    // that; other mods can too) makes EVERY player sound throw, and the exception
+    // tears the CALLING player system mid-frame: controller flip-outs, interactions
+    // stuck in slow stutterstep (08-04 raid, 415 exceptions). the sound is lost;
+    // the player's action must not be.
+    [HarmonyPatch(typeof(BotEventHandler), nameof(BotEventHandler.PlaySound))]
+    internal static class Patch_PlaySoundAirbag
+    {
+        private static float _lastLog;
+
+        private static Exception Finalizer(Exception __exception)
+        {
+            if (__exception == null) return null;
+            if (!IceGate.On) return __exception;
+            if (Time.unscaledTime - _lastLog > 30f)
+            {
+                _lastLog = Time.unscaledTime;
+                Plugin.Log.LogWarning($"[RaidFix] swallowed a bot-hearing exception (dangling despawned-bot ref in the sound graph) — player actions protected. inner: {__exception.Message}");
+            }
+            return null;
+        }
     }
 
     // shared machinery for the raid-start choke points above
