@@ -18,7 +18,7 @@ namespace Manimal.Icebreaker.Fika
         public byte Kind;      // 0/1 chain plant/open, 2 seal, 3 heli, 4 progress door,
                                // 5-7 hatch stages, 8 torch flame, 9 cutscene activation,
                                // 10 ladder enter/exit, 11 ladder bar angle,
-                               // 12 tripwire layout seed
+                               // 12 tripwire layout seed, 13 keypad unlock (doorId)
         public string DoorId;  // seal doorId / profileId / ladder NetId, per kind
         public bool Sealing;   // seal state / torch flame / ladder enter
         public int IntA;       // player NetId (torch/ladder kinds)
@@ -59,6 +59,7 @@ namespace Manimal.Icebreaker.Fika
             BlowtorchController.LocalTorchFiring += OnTorchFiring;
             IcebreakerCrew.CutsceneActivated += OnCutsceneActivated;
             IcebreakerTripwires.SeedRolled += OnTripwireSeed;
+            Manimal.Icebreaker.Keypad.Keypad.UnlockCommitted += OnKeypadUnlock;
         }
 
         private void OnManagerCreated(FikaNetworkManagerCreatedEvent ev) => Register(ev.Manager);
@@ -111,6 +112,12 @@ namespace Manimal.Icebreaker.Fika
         private void OnTripwireSeed(int seed)
             => Send(new IceWorldPacket { Kind = 12, IntA = seed });
 
+        // kind 13 = keypad unlock. the CODES already match on every peer (shared
+        // raid seed), but the unlock itself is a direct DoorState write fika
+        // doesnt replicate — ship the door id so peers run the same commit.
+        private void OnKeypadUnlock(string doorId)
+            => Send(new IceWorldPacket { Kind = 13, DoorId = doorId });
+
         internal static void Send(IceWorldPacket packet, DeliveryMethod delivery = DeliveryMethod.ReliableOrdered, bool quiet = false)
         {
             var manager = Singleton<IFikaNetworkManager>.Instance;
@@ -151,6 +158,7 @@ namespace Manimal.Icebreaker.Fika
                 // paper over. the kinds stay RESERVED — reusing them would make an old peer
                 // decode a ladder packet as something else.
                 case 12: IcebreakerTripwires.ApplyRemoteSeed(packet.IntA); break;
+                case 13: Manimal.Icebreaker.Keypad.Keypad.ApplyRemoteUnlock(packet.DoorId); break;
                 default: FikaAddonPlugin.Log.LogWarning($"[IceSync] unknown event kind {packet.Kind}"); break;
             }
         }
@@ -165,6 +173,7 @@ namespace Manimal.Icebreaker.Fika
             BlowtorchController.LocalTorchFiring -= OnTorchFiring;
             IcebreakerCrew.CutsceneActivated -= OnCutsceneActivated;
             IcebreakerTripwires.SeedRolled -= OnTripwireSeed;
+            Manimal.Icebreaker.Keypad.Keypad.UnlockCommitted -= OnKeypadUnlock;
             FikaEventDispatcher.UnsubscribeEvent<FikaNetworkManagerCreatedEvent>(OnManagerCreated);
             try
             {

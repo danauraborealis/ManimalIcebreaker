@@ -1,0 +1,2441 @@
+{
+ "deleteByTpl": [
+  "6217726288ed9f0845317459",
+  "69bb3e54d6c67f6265004ab9",
+  "69bb3f278af9f360ee010a7a"
+ ],
+ "markers": [
+  {
+   "name": "live_iceforced_149_noguid_live_0",
+   "pos": [
+    3.012615,
+    24.6666,
+    47.568363
+   ],
+   "euler": [
+    0,
+    150.63155,
+    180
+   ],
+   "overrideTpl": "69bb3ec9f609db77390b0e1a",
+   "prob": 1.0,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "69bb3ec9f609db77390b0e1a",
+   "pool": ""
+  },
+  {
+   "name": "live_iceforced_149_noguid_live_1",
+   "pos": [
+    -3.14882,
+    24.6593,
+    48.887432
+   ],
+   "euler": [
+    359.56326,
+    93.79309,
+    180
+   ],
+   "overrideTpl": "69bb3ec9f609db77390b0e1a",
+   "prob": 1.0,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "69bb3ec9f609db77390b0e1a",
+   "pool": ""
+  },
+  {
+   "name": "live_iceforced_172_noguid_bsg_0",
+   "pos": [
+    -3.121285,
+    24.6905,
+    41.291996
+   ],
+   "euler": [
+    0,
+    0,
+    0
+   ],
+   "overrideTpl": "67ab3d4b83869afd170fdd3f",
+   "prob": 1.0,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "67ab3d4b83869afd170fdd3f,9a449693dff5334122ed7388",
+   "pool": ""
+  },
+  {
+   "name": "live_iceforced_172_noguid_bsg_1",
+   "pos": [
+    2.611045,
+    24.6985,
+    41.29182
+   ],
+   "euler": [
+    0,
+    0,
+    0
+   ],
+   "overrideTpl": "67ab3d4b83869afd170fdd3f",
+   "prob": 1.0,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "67ab3d4b83869afd170fdd3f,9a449693dff5334122ed7388",
+   "pool": ""
+  },
+  {
+   "name": "live_rcp_1_feec138f_g0",
+   "pos": [
+    -2.388,
+    27.467,
+    -34.48937
+   ],
+   "euler": [
+    277.37677,
+    0,
+    0
+   ],
+   "overrideTpl": "6217726288ed9f0845317459",
+   "prob": 1.0,
+   "group": "live_rcp_1_feec138f",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_rcp_1_feec138f_g1",
+   "pos": [
+    1.312,
+    27.792,
+    -33.117367
+   ],
+   "euler": [
+    280.01862,
+    309.41525,
+    320.0671
+   ],
+   "overrideTpl": "6217726288ed9f0845317459",
+   "prob": 1.0,
+   "group": "live_rcp_1_feec138f",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_rcp_2_1a1fa9c2_g0",
+   "pos": [
+    2.447,
+    40.623,
+    36.580643
+   ],
+   "euler": [
+    281.6678,
+    0,
+    0
+   ],
+   "overrideTpl": "6217726288ed9f0845317459",
+   "prob": 1.0,
+   "group": "live_rcp_2_1a1fa9c2",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_rcp_2_1a1fa9c2_g1",
+   "pos": [
+    12.250002,
+    39.693,
+    42.26464
+   ],
+   "euler": [
+    280.01862,
+    309.41525,
+    320.0671
+   ],
+   "overrideTpl": "6217726288ed9f0845317459",
+   "prob": 1.0,
+   "group": "live_rcp_2_1a1fa9c2",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_rcp_3_221a6e82",
+   "pos": [
+    0.623,
+    18.84,
+    61.252007
+   ],
+   "euler": [
+    278.17474,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "6217726288ed9f0845317459",
+   "prob": 1.0,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_tem_ice_card_mech1_e4ce46b5_g0",
+   "pos": [
+    -0.293068,
+    18.410608,
+    24.520683
+   ],
+   "euler": [
+    69.84837,
+    197.25357,
+    53.6226
+   ],
+   "overrideTpl": "69bb3e54d6c67f6265004ab9",
+   "prob": 1.0,
+   "group": "live_tem_ice_card_mech1_e4ce46b5",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_tem_ice_card_mech1_e4ce46b5_g1",
+   "pos": [
+    -0.983058,
+    18.415464,
+    24.701347
+   ],
+   "euler": [
+    17.87663,
+    180,
+    180
+   ],
+   "overrideTpl": "69bb3e54d6c67f6265004ab9",
+   "prob": 1.0,
+   "group": "live_tem_ice_card_mech1_e4ce46b5",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_tem_ice_card_mech1_e4ce46b5_g2",
+   "pos": [
+    -1.268654,
+    18.370626,
+    23.397448
+   ],
+   "euler": [
+    0,
+    0,
+    0
+   ],
+   "overrideTpl": "69bb3e54d6c67f6265004ab9",
+   "prob": 1.0,
+   "group": "live_tem_ice_card_mech1_e4ce46b5",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_item_ice_card_captain1_9c20a1e8",
+   "pos": [
+    -4.230101,
+    40.0278,
+    38.817703
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "69bb3f278af9f360ee010a7a",
+   "prob": 1.0,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_constr_1_d8beb351",
+   "pos": [
+    4.762001,
+    16.349,
+    57.099007
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_constr_dbf34496",
+   "pos": [
+    8.159001,
+    16.349,
+    59.100006
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Drink_3_06541653",
+   "pos": [
+    1.631,
+    23.932,
+    26.076004
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Food"
+  },
+  {
+   "name": "live_Electrionic_16_3a75afc4",
+   "pos": [
+    15.555002,
+    40.288,
+    43.035004
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tech"
+  },
+  {
+   "name": "live_Electrionic_19_a3feef84",
+   "pos": [
+    -2.135,
+    34.703,
+    36.475002
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tech"
+  },
+  {
+   "name": "live_Electrionic_20_dfb6c9a7",
+   "pos": [
+    -2.049,
+    35.406,
+    36.099003
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tech"
+  },
+  {
+   "name": "live_Electrionic_21_3e95fe39",
+   "pos": [
+    -2.349,
+    35.019,
+    36.059002
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tech"
+  },
+  {
+   "name": "live_Electrionic_22_8ec7012c",
+   "pos": [
+    -0.636,
+    34.764,
+    37.073006
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tech"
+  },
+  {
+   "name": "live_Electrionic_23_dc86764b",
+   "pos": [
+    2.021,
+    34.715,
+    36.582004
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tech"
+  },
+  {
+   "name": "live_Food_drink_128_1a75208d",
+   "pos": [
+    5.478001,
+    16.94,
+    56.466007
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Food"
+  },
+  {
+   "name": "live_Food_drink_129_2dfc636e",
+   "pos": [
+    3.6,
+    16.353,
+    56.82501
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Food"
+  },
+  {
+   "name": "live_Food_drink_9_56d77373",
+   "pos": [
+    3.783,
+    23.941,
+    35.018005
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Food"
+  },
+  {
+   "name": "live_item_ice_Aceso_Xpress_lab_5da460dc",
+   "pos": [
+    10.253001,
+    19.225,
+    47.093002
+   ],
+   "euler": [
+    0.0,
+    267.00885,
+    0.0
+   ],
+   "overrideTpl": "69bb435ff609db77390b0e25",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_item_ice_amg10_simple_4_5ae2a453_g0",
+   "pos": [
+    11.165001,
+    16.678,
+    11.799001
+   ],
+   "euler": [
+    0,
+    184.37254,
+    0
+   ],
+   "overrideTpl": "699f09de81a6c812900a77b7",
+   "prob": 0.75,
+   "group": "live_item_ice_amg10_simple_4_5ae2a453",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_item_ice_amg10_simple_4_5ae2a453_g1",
+   "pos": [
+    11.799001,
+    15.68,
+    14.129002
+   ],
+   "euler": [
+    0,
+    7.58443,
+    0
+   ],
+   "overrideTpl": "699f09de81a6c812900a77b7",
+   "prob": 0.75,
+   "group": "live_item_ice_amg10_simple_4_5ae2a453",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_item_ice_amg10_simple_4_5ae2a453_g2",
+   "pos": [
+    11.079001,
+    16.172,
+    16.421001
+   ],
+   "euler": [
+    0,
+    357.72595,
+    0
+   ],
+   "overrideTpl": "699f09de81a6c812900a77b7",
+   "prob": 0.75,
+   "group": "live_item_ice_amg10_simple_4_5ae2a453",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_item_ice_pils_potassium_1_4fee2783",
+   "pos": [
+    10.191001,
+    19.266,
+    49.640564
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "69bb43df99f3fda8f1072483",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_item_ice_pils_potassium_60bb3f9f",
+   "pos": [
+    0.269,
+    19.2539,
+    43.506004
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "69bb43df99f3fda8f1072483",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_Jeverly_sup_10_97600afe",
+   "pos": [
+    5.548,
+    40.118,
+    36.328003
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Valuables"
+  },
+  {
+   "name": "live_Jeverly_sup_11_9e1763c7",
+   "pos": [
+    5.303,
+    40.118,
+    35.935005
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Valuables"
+  },
+  {
+   "name": "live_Jeverly_sup_12_23ceeeda",
+   "pos": [
+    5.066,
+    35.224,
+    44.335003
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Valuables"
+  },
+  {
+   "name": "live_Jeverly_sup_13_e7eb4568",
+   "pos": [
+    5.057001,
+    35.224,
+    43.975002
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Valuables"
+  },
+  {
+   "name": "live_led100_1_f9f5661d",
+   "pos": [
+    10.493601,
+    19.2268,
+    47.036503
+   ],
+   "euler": [
+    0.0,
+    200.23734,
+    0.0
+   ],
+   "overrideTpl": "5c0530ee86f774697952d952",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_led100_2_a6af784f",
+   "pos": [
+    10.51381,
+    19.2268,
+    47.24225
+   ],
+   "euler": [
+    0.0,
+    100.22669,
+    0.0
+   ],
+   "overrideTpl": "5c0530ee86f774697952d952",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_led100_3_dc5b0369",
+   "pos": [
+    10.518698,
+    19.2268,
+    47.144417
+   ],
+   "euler": [
+    0.0,
+    79.62919,
+    0.0
+   ],
+   "overrideTpl": "5c0530ee86f774697952d952",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_led100_f5899d39",
+   "pos": [
+    10.445501,
+    19.2268,
+    46.870903
+   ],
+   "euler": [
+    0.0,
+    267.00885,
+    0.0
+   ],
+   "overrideTpl": "5c0530ee86f774697952d952",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_Meds_36_7a1fcdeb",
+   "pos": [
+    -1.399,
+    18.849,
+    27.862003
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Med"
+  },
+  {
+   "name": "live_Meds_72_2276bf5e",
+   "pos": [
+    4.883,
+    19.353,
+    49.258007
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Med"
+  },
+  {
+   "name": "live_Meds_76_3af98cf9",
+   "pos": [
+    9.176001,
+    19.309,
+    46.900005
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Med"
+  },
+  {
+   "name": "live_Meds_78_9a3bd687",
+   "pos": [
+    5.484001,
+    19.382,
+    46.652004
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Med"
+  },
+  {
+   "name": "live_Meds_80_1940b653",
+   "pos": [
+    2.652,
+    19.403,
+    46.607002
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Med"
+  },
+  {
+   "name": "live_Meds_81_7b15e429",
+   "pos": [
+    3.387001,
+    19.438,
+    46.664005
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Med"
+  },
+  {
+   "name": "live_Meds_83_c472e0f3",
+   "pos": [
+    4.108,
+    18.996,
+    49.23501
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Med"
+  },
+  {
+   "name": "live_Meds_85_fa1e8982",
+   "pos": [
+    7.303001,
+    19.309,
+    44.895004
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Med"
+  },
+  {
+   "name": "live_Meds_88_f31a14a7",
+   "pos": [
+    4.063001,
+    19.31,
+    42.132004
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Med"
+  },
+  {
+   "name": "live_Meds_92_078d09a7",
+   "pos": [
+    1.058,
+    18.608,
+    41.738003
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Med"
+  },
+  {
+   "name": "live_mods_rf_45131ede",
+   "pos": [
+    -12.690002,
+    0.1175,
+    -23.833002
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "5e21ca18e4d47f0da15e77dd",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_Tools_12_1cbf5435",
+   "pos": [
+    4.299,
+    29.353,
+    37.283005
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_15_29b2e0e8",
+   "pos": [
+    -11.609001,
+    16.846,
+    -48.745007
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Tools_15_c6ecb763",
+   "pos": [
+    -3.987,
+    29.303,
+    38.275005
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_16_ef40395f",
+   "pos": [
+    1.884,
+    13.677,
+    -53.306
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_17_ecd08f94",
+   "pos": [
+    1.339,
+    13.677,
+    -52.940006
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_18_8563f427",
+   "pos": [
+    2.513,
+    16.795,
+    -58.56952
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_2_b8d0dfc4",
+   "pos": [
+    8.016001,
+    11.381,
+    0.749
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_22_a03889ef",
+   "pos": [
+    0.41,
+    16.6,
+    -62.646008
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_24_9eea6e7e",
+   "pos": [
+    1.024,
+    16.907,
+    -65.94201
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_25_b284fbf2",
+   "pos": [
+    1.616,
+    17.053,
+    -66.65001
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_26_3e9da01c",
+   "pos": [
+    0.835,
+    17.053,
+    -66.65001
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_27_91a39b29",
+   "pos": [
+    1.607,
+    19.159,
+    -61.809
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_28_bad91db1",
+   "pos": [
+    2.338,
+    19.159,
+    -62.35801
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_29_88df0e4d",
+   "pos": [
+    -12.0663,
+    16.636,
+    0.41
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Tools_30_58f42226",
+   "pos": [
+    0.15,
+    10.416,
+    -3.04
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_30_5da050a6",
+   "pos": [
+    -12.263001,
+    16.636,
+    1.333
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_31_3a80f6fb",
+   "pos": [
+    11.245001,
+    16.416,
+    12.342002
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_32_786da6b3",
+   "pos": [
+    10.871001,
+    16.416,
+    13.082002
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Tools_36_e44b71ab",
+   "pos": [
+    -5.998001,
+    13.153,
+    2.78
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Tools_38_c8a8c28b",
+   "pos": [
+    6.225001,
+    16.025,
+    3.557
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Tools_44_6136eb18",
+   "pos": [
+    1.246,
+    16.174,
+    -65.336006
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Tools_46_799cadbd",
+   "pos": [
+    1.176,
+    16.174,
+    -66.493004
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_7_61fd5585",
+   "pos": [
+    6.585,
+    16.763,
+    3.219001
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Tools_7_95dbfaae",
+   "pos": [
+    -3.164001,
+    23.86,
+    38.406002
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Tools_8_8d1b3596",
+   "pos": [
+    -3.085001,
+    23.86,
+    39.248005
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_8_df66f29b",
+   "pos": [
+    6.384001,
+    16.763,
+    3.565001
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_9_fdab08c1",
+   "pos": [
+    -3.641001,
+    22.001,
+    -22.622002
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Electrionic_24_bae66d9c",
+   "pos": [
+    1.374,
+    34.715,
+    36.763004
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tech"
+  },
+  {
+   "name": "live_Electrionic_30_6772a415",
+   "pos": [
+    -1.615,
+    35.406,
+    36.099003
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tech"
+  },
+  {
+   "name": "live_Electrionic_4_f8da3580",
+   "pos": [
+    -8.487001,
+    30.098,
+    26.873003
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tech"
+  },
+  {
+   "name": "live_Food_drink_101_35c8e21f",
+   "pos": [
+    3.281,
+    16.83,
+    41.641003
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Food"
+  },
+  {
+   "name": "live_Food_drink_102_8d380c42",
+   "pos": [
+    1.65,
+    16.944,
+    41.695003
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Food"
+  },
+  {
+   "name": "live_Food_drink_124_c4ba8ded",
+   "pos": [
+    7.550001,
+    16.018,
+    59.114006
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Food"
+  },
+  {
+   "name": "live_Food_drink_130_ff4d6025",
+   "pos": [
+    3.713001,
+    16.353,
+    57.82501
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Food"
+  },
+  {
+   "name": "live_Food_drink_131_0bf77134",
+   "pos": [
+    3.914001,
+    16.366,
+    58.972008
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Food"
+  },
+  {
+   "name": "live_Food_drink_14_02a43b4d",
+   "pos": [
+    1.02,
+    24.917,
+    29.053999
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Food"
+  },
+  {
+   "name": "live_Food_drink_8_dee390a3",
+   "pos": [
+    -1.0,
+    24.071,
+    26.169004
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Food"
+  },
+  {
+   "name": "live_Jeverly_sup_9_c5d1c8d5",
+   "pos": [
+    5.273,
+    40.158,
+    35.392002
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Valuables"
+  },
+  {
+   "name": "live_Meds_73_819fa623",
+   "pos": [
+    5.612,
+    19.001,
+    48.621006
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Med"
+  },
+  {
+   "name": "live_Meds_75_5e271937",
+   "pos": [
+    7.646001,
+    19.349,
+    49.26901
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Med"
+  },
+  {
+   "name": "live_Meds_supl_sup_c8fb3ebf",
+   "pos": [
+    11.951001,
+    19.27,
+    42.134003
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Med"
+  },
+  {
+   "name": "live_tools_10_089ecd41",
+   "pos": [
+    -5.513,
+    22.278,
+    -26.621004
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Tools_10_f2fa5ae4",
+   "pos": [
+    4.110001,
+    29.353,
+    37.546005
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Tools_13_f7cc4316",
+   "pos": [
+    3.849,
+    29.353,
+    37.276005
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_19_785cc776",
+   "pos": [
+    1.85,
+    16.6,
+    -58.56952
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_20_28fce4b5",
+   "pos": [
+    1.85,
+    16.6,
+    -60.30301
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_21_9126eff5",
+   "pos": [
+    1.512,
+    16.6,
+    -60.965008
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Tools_22_88d8f62b",
+   "pos": [
+    -7.455001,
+    18.818,
+    10.257001
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_tools_3_fa3bbe8c",
+   "pos": [
+    0.74,
+    12.161,
+    -8.379001
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Tools_35_3ed47b2e",
+   "pos": [
+    -5.691,
+    13.153,
+    3.27
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Tools_42_29129fb8",
+   "pos": [
+    11.568501,
+    16.291,
+    14.762202
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Tools_45_91196ec1",
+   "pos": [
+    2.051,
+    16.174,
+    -65.229004
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Tools_47_4364815b",
+   "pos": [
+    11.490001,
+    15.897,
+    10.896001
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Tools_9_c345da8b",
+   "pos": [
+    -2.694,
+    23.86,
+    38.999004
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.5,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Drink_10_01816e1f",
+   "pos": [
+    -0.009,
+    23.935,
+    44.660004
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Food"
+  },
+  {
+   "name": "live_Electrionic_31_f522c675",
+   "pos": [
+    -1.275,
+    35.406,
+    36.703003
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tech"
+  },
+  {
+   "name": "live_Food_drink_125_ca7291ca",
+   "pos": [
+    6.503001,
+    16.604,
+    58.59601
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Food"
+  },
+  {
+   "name": "live_Food_drink_126_f1098d03",
+   "pos": [
+    5.659,
+    16.018,
+    58.397007
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Food"
+  },
+  {
+   "name": "live_item_ice_amg10_simple_2_86febfbd_g0",
+   "pos": [
+    7.149002,
+    12.9678,
+    -54.327007
+   ],
+   "euler": [
+    0,
+    0,
+    0
+   ],
+   "overrideTpl": "699f09de81a6c812900a77b7",
+   "prob": 0.25,
+   "group": "live_item_ice_amg10_simple_2_86febfbd",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_item_ice_amg10_simple_2_86febfbd_g1",
+   "pos": [
+    -2.869,
+    12.9729,
+    -53.278008
+   ],
+   "euler": [
+    0,
+    0,
+    0
+   ],
+   "overrideTpl": "699f09de81a6c812900a77b7",
+   "prob": 0.25,
+   "group": "live_item_ice_amg10_simple_2_86febfbd",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_item_ice_amg10_simple_2_86febfbd_g2",
+   "pos": [
+    -2.876,
+    16.1698,
+    -64.44201
+   ],
+   "euler": [
+    0,
+    95.67857,
+    0
+   ],
+   "overrideTpl": "699f09de81a6c812900a77b7",
+   "prob": 0.25,
+   "group": "live_item_ice_amg10_simple_2_86febfbd",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_item_ice_amg10_simple_3_e3bd005b_g0",
+   "pos": [
+    1.514,
+    27.775,
+    -33.170002
+   ],
+   "euler": [
+    0,
+    357.69162,
+    0
+   ],
+   "overrideTpl": "699f09de81a6c812900a77b7",
+   "prob": 0.25,
+   "group": "live_item_ice_amg10_simple_3_e3bd005b",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_item_ice_amg10_simple_3_e3bd005b_g1",
+   "pos": [
+    2.537,
+    27.75875,
+    -35.044002
+   ],
+   "euler": [
+    0,
+    271.90588,
+    0
+   ],
+   "overrideTpl": "699f09de81a6c812900a77b7",
+   "prob": 0.25,
+   "group": "live_item_ice_amg10_simple_3_e3bd005b",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_item_ice_amg10_simple_3_e3bd005b_g2",
+   "pos": [
+    -2.456,
+    27.77,
+    -33.115006
+   ],
+   "euler": [
+    0,
+    271.90588,
+    0
+   ],
+   "overrideTpl": "699f09de81a6c812900a77b7",
+   "prob": 0.25,
+   "group": "live_item_ice_amg10_simple_3_e3bd005b",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_Meds_71_bbd0710f",
+   "pos": [
+    2.772,
+    19.404,
+    49.552006
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Med"
+  },
+  {
+   "name": "live_Meds_87_5675d3de",
+   "pos": [
+    2.74,
+    19.364,
+    44.823006
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Med"
+  },
+  {
+   "name": "live_Meds_87fffc2e",
+   "pos": [
+    -9.48,
+    23.938,
+    30.124004
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Med"
+  },
+  {
+   "name": "live_tetriz_kay_4e83cfa3",
+   "pos": [
+    11.109701,
+    29.959,
+    39.514202
+   ],
+   "euler": [
+    0.0,
+    72.58791,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tech"
+  },
+  {
+   "name": "live_Tools_14_5577d43d",
+   "pos": [
+    -4.902,
+    29.303,
+    38.418003
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Tools_34_50349663",
+   "pos": [
+    -5.766,
+    13.153,
+    2.277
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Tools_39_825ca242",
+   "pos": [
+    6.760001,
+    16.025,
+    2.682
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_Tools_6_6bd17f5c",
+   "pos": [
+    -3.985,
+    23.86,
+    38.652004
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "",
+   "prob": 0.25,
+   "group": "",
+   "poolPoint": false,
+   "joinGroupOfTpl": "",
+   "pool": "Tools"
+  },
+  {
+   "name": "live_item_ice_disk_quest_decripted1_f6b2e545",
+   "pos": [
+    -1.1245,
+    35.0498,
+    29.427105
+   ],
+   "euler": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "overrideTpl": "69bb3ffcc1379d828003271b",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_item_ice_disk_quest_decripted2_5f5502c5",
+   "pos": [
+    -4.012201,
+    34.8468,
+    30.685803
+   ],
+   "euler": [
+    0.0,
+    323.88837,
+    0.0
+   ],
+   "overrideTpl": "69bbf277f34471232a0ea89a",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_item_ice_disk_quest_decripted3_71fbaf21",
+   "pos": [
+    -3.011201,
+    35.4981,
+    31.055103
+   ],
+   "euler": [
+    0.0,
+    347.47815,
+    0.0
+   ],
+   "overrideTpl": "69bb4075c1379d828003271e",
+   "prob": 0.75,
+   "group": "",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_item_ice_journal_control_b2e0b6c5_g0",
+   "pos": [
+    8.011011,
+    11.286272,
+    -17.998869
+   ],
+   "euler": [
+    0,
+    0,
+    -0.0
+   ],
+   "overrideTpl": "69bb42b9ce2b96840302b92b",
+   "prob": 0.75,
+   "group": "live_item_ice_journal_control_b2e0b6c5",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_item_ice_journal_control_b2e0b6c5_g1",
+   "pos": [
+    4.821866,
+    8.63516,
+    -17.56198
+   ],
+   "euler": [
+    -0.0,
+    270.66443,
+    0.0
+   ],
+   "overrideTpl": "69bb42b9ce2b96840302b92b",
+   "prob": 0.75,
+   "group": "live_item_ice_journal_control_b2e0b6c5",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  },
+  {
+   "name": "live_item_ice_journal_control_b2e0b6c5_g2",
+   "pos": [
+    3.636709,
+    16.410278,
+    26.824934
+   ],
+   "euler": [
+    0.0,
+    268.94122,
+    0.0
+   ],
+   "overrideTpl": "69bb42b9ce2b96840302b92b",
+   "prob": 0.75,
+   "group": "live_item_ice_journal_control_b2e0b6c5",
+   "poolPoint": true,
+   "joinGroupOfTpl": "",
+   "pool": ""
+  }
+ ]
+}

@@ -54,7 +54,16 @@ namespace Manimal.Icebreaker
             {
                 try
                 {
-                    if (!IceGate.On) return;
+                    // scene-based gate: transit PRELOADS the destination scenes before the
+                    // new raid exists, so IceGate still answers the OLD map when this Awake
+                    // fires (transit-gate-blindness, proven 2026-08-02). the component's own
+                    // scene is truthful on every entry path — and this fix exists FOR the
+                    // transit path, so a blind gate here defeated its whole purpose.
+                    bool ours;
+                    try { ours = __instance.gameObject.scene.name != null
+                                  && __instance.gameObject.scene.name.StartsWith("Icebreaker", StringComparison.OrdinalIgnoreCase); }
+                    catch { ours = IceGate.On; }
+                    if (!ours && !IceGate.On) return;
                     RegionsApplied = true;
                     Plugin.Log.LogDebug($"[PhysRegions] '{__instance.name}' laid out the broadphase regions");
                 }

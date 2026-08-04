@@ -23,6 +23,11 @@ PRICE_TILT_POOLS = {"Tech", "Valuables", "Tools", "Food"}
 TILT_ALPHA = 0.4
 TILT_MIN, TILT_MAX = 0.6, 3.0
 
+# live 1.0 calibration (user call 08-02): live raids averaged ~258 loose items;
+# sum-of-authored-probs would give ~280 after the live-position imports, so the
+# mean is pinned to lives measurement instead. None = old sum-of-probs behavior.
+MEAN_OVERRIDE = 258.0
+
 # tpl remaps applied to authored overrideTpls AND pool entries — survives Author 12
 # re-exports (the Unity markers keep the vanilla tpl; the swap happens here).
 TPL_REPLACE = {
@@ -162,6 +167,73 @@ EXTRA_ITEMS = {
 }
 
 
+# LIVE 1.0 INJECTIONS (user call 08-02): items live's dumps spawn on the icebreaker
+# that our borrowed pools lacked, injected per family into every matching pool.
+# weights are FINAL (already live-count-calibrated against the tilted pool medians),
+# so these append AFTER apply_price_tilt — do not fold them into EXTRA_ITEMS.
+LIVE_INJECT = {
+    "Food": [
+        ("544fb6cc4bdc2d34748b456e", 156),   # Slickers chocolate bar
+        ("575062b524597720a31c09a1", 156),   # Can of Ice Green tea
+        ("57513f9324597720a7128161", 156),   # Pack of Grand juice
+        ("57513fcc24597720a31c09a6", 156),   # Pack of Vita juice
+        ("5751435d24597720a27126d1", 470),   # Can of Max Energy energy drink
+        ("57514643245977207f2c2d09", 313),   # Can of TarCola soda
+        ("590c5f0d86f77413997acfab", 1568),  # MRE ration pack
+        ("59e3556c86f7741776641ac2", 156),   # Ox bleach
+        ("5e8f3423fd7471236e6e3b64", 1568),  # Norvinsky Yadreniy premium kvass
+        ("60b0f93284c20f0feb453da7", 1568),  # Can of RatCola soda
+        ("656df4fec921ad01000481a2", 313),   # Pack of instant noodles
+        ("65815f0e647e3d7246384e14", 1568),  # Pack of Tarker dried meat
+    ],
+    "Med": [
+        ("59e3556c86f7741776641ac2", 228),   # Ox bleach (household chems family)
+    ],
+    # the phone/electronics junk family lands in all three tech-ish pools, scaled
+    # to each pool's weight range
+    "Tech": [
+        ("56742c324bdc2d150f8b456d", 9680),   # Broken GPhone smartphone
+        ("5909e99886f7740c983b9984", 4840),   # USB Adapter
+        ("5bc9b720d4351e450201234b", 29041),  # Golden 1GPhone smartphone
+        ("5c12620d86f7743f8b198b72", 29041),  # Tetriz portable game console
+        ("5c1265fc86f7743f896a21c2", 33882),  # Broken GPhone X smartphone
+        ("5d0377ce86f774186372f689", 19361),  # Iridium military thermal vision module
+        ("5d03784a86f774203e7e0c4d", 24201),  # Military gyrotachometer
+        ("5d1b2fa286f77425227d1674", 14520),  # Electric motor
+        ("5d1b309586f77425227d1676", 9680),   # Broken LCD
+    ],
+    "Intel": [
+        ("56742c324bdc2d150f8b456d", 80),     # Broken GPhone smartphone
+        ("5909e99886f7740c983b9984", 40),     # USB Adapter
+        ("5bc9b720d4351e450201234b", 240),    # Golden 1GPhone smartphone
+        ("5c12620d86f7743f8b198b72", 240),    # Tetriz portable game console
+        ("5c1265fc86f7743f896a21c2", 280),    # Broken GPhone X smartphone
+        ("5d0377ce86f774186372f689", 160),    # Iridium military thermal vision module
+        ("5d03784a86f774203e7e0c4d", 200),    # Military gyrotachometer
+        ("5d1b2fa286f77425227d1674", 120),    # Electric motor
+        ("5d1b309586f77425227d1676", 80),     # Broken LCD
+    ],
+    "Tools": [
+        ("56742c284bdc2d98058b456d", 507),    # Crickent lighter
+        ("56742c324bdc2d150f8b456d", 1014),   # Broken GPhone smartphone
+        ("57347b8b24597737dd42e192", 507),    # Classic matches
+        ("5909e99886f7740c983b9984", 507),    # USB Adapter
+        ("590a373286f774287540368b", 1014),   # Dry fuel
+        ("59fafb5d86f774067a6f2084", 1014),   # Propane tank (5L)
+        ("5b43575a86f77424f443fe62", 2029),   # Fuel conditioner
+        ("5bc9b720d4351e450201234b", 3044),   # Golden 1GPhone smartphone
+        ("5c12620d86f7743f8b198b72", 3044),   # Tetriz portable game console
+        ("5c1265fc86f7743f896a21c2", 3551),   # Broken GPhone X smartphone
+        ("5d0377ce86f774186372f689", 2029),   # Iridium military thermal vision module
+        ("5d03784a86f774203e7e0c4d", 2537),   # Military gyrotachometer
+        ("5d1b2fa286f77425227d1674", 1522),   # Electric motor
+        ("5d1b309586f77425227d1676", 1014),   # Broken LCD
+        ("5e2af37686f774755a234b65", 1522),   # SurvL Survivor Lighter
+        ("63a0b208f444d32d6f03ea1e", 1014),   # Fierce Blow sledgehammer
+    ],
+}
+
+
 # Intel pool: no container base — authored outright. paperwork/media commons up
 # top, the money items (folders + textbooks) at really-rare weights.
 INTEL_POOL = [
@@ -270,6 +342,20 @@ def main():
 
     pool_dists["Intel"] = [{"tpl": t, "relativeProbability": w} for t, w in INTEL_POOL]
 
+    # live-injected items go in post-tilt with their final calibrated weights
+    for name, extras in LIVE_INJECT.items():
+        dist = pool_dists.get(name)
+        if dist is None:
+            print(f"WARNING: LIVE_INJECT pool '{name}' does not exist — skipped")
+            continue
+        present = {e["tpl"] for e in dist}
+        for tpl, weight in extras:
+            if tpl in present:
+                print(f"WARNING: LIVE_INJECT {tpl} already in {name} pool — skipped")
+                continue
+            dist.append({"tpl": tpl, "relativeProbability": weight})
+        print(f"{name} pool: +{len(extras)} live-injected item(s)")
+
     # group collapse: spots sharing a non-empty group name become ONE spawnpoint
     # whose GroupPositions lists every member pose — the game picks one per raid
     # (retail's randomized-keycard mechanic). pool/override/prob come from the
@@ -325,6 +411,35 @@ def main():
         # probability 1 there means guaranteed every raid
         override = (s.get("overrideTpl") or "").strip()
         override = TPL_REPLACE.get(override, override)
+        if override and s.get("poolPoint"):
+            # live-1.0 import spots: a specific item that rolls against the loot
+            # budget like any pool point (forced would spawn it every raid)
+            iid = mongo_from(f"icelive_{i}_{override}")
+            key = str(hash((i, override)) & 0x7FFFFFFF)
+            total_prob += prob
+            spawnpoints.append({
+                "locationId": f"({x}, {y}, {z})",
+                "probability": prob,
+                "template": {
+                    "Id": f"icelive_{i:03d}",
+                    "IsContainer": False,
+                    "useGravity": False,
+                    "randomRotation": False,
+                    "Position": {"x": x, "y": y, "z": z},
+                    "Rotation": {"x": rx, "y": ry, "z": rz},
+                    "IsGroupPosition": is_group,
+                    "GroupPositions": group_positions,
+                    "IsAlwaysSpawn": False,
+                    "Root": iid,
+                    "Items": [
+                        {"composedKey": key, "_id": iid, "_tpl": override, "upd": {"StackObjectsCount": 1}}
+                    ],
+                },
+                "itemDistribution": [
+                    {"composedKey": {"key": key}, "relativeProbability": 1}
+                ],
+            })
+            continue
         if override:
             iid = mongo_from(f"iceforced_{i}_{override}")
             forced.append({
@@ -386,8 +501,9 @@ def main():
             "itemDistribution": item_dist,
         })
 
+    mean = MEAN_OVERRIDE if MEAN_OVERRIDE is not None else round(total_prob, 2)
     out = {
-        "spawnpointCount": {"mean": round(total_prob, 2), "std": round(total_prob * 0.25, 2)},
+        "spawnpointCount": {"mean": mean, "std": round(mean * 0.25, 2)},
         "spawnpointsForced": forced,
         "spawnpoints": spawnpoints,
     }

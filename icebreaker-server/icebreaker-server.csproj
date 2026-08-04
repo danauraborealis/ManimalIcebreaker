@@ -14,6 +14,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>$(SPTPath)\SPT\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <PackageReference Include="SPTarkov.Common" Version="4.0.13" />
     <PackageReference Include="SPTarkov.DI" Version="4.0.13" />
     <PackageReference Include="SPTarkov.Server.Core" Version="4.0.13" />

@@ -15,7 +15,8 @@ namespace Manimal.Icebreaker
     // per-zone type blocks, spawn-point saturation) — instead of fighting each gate, count
     // what actually spawned and FORCE the remainder via BotSpawner.TryToSpawnInZoneInner
     // with a pre-picked point (bypasses the whole scenario/limit machinery). retail comp:
-    // 10-15 rogues (config) + solo knight, distributed over the confirmed rogue zones.
+    // party-scaled rogues (config min=solo, +1/extra player to max) + solo knight,
+    // distributed over the confirmed rogue zones.
     public class IcebreakerCrew : MonoBehaviour
     {
         private static readonly string[] RogueZones =
@@ -109,10 +110,16 @@ namespace Manimal.Icebreaker
             int haveRogues = CountByRole(WildSpawnType.exUsec);
             bool haveKnight = CountByRole(WildSpawnType.bossKnight) > 0;
             // retail rolls a random crew size each raid — pick a target in [min,max]
-            int lo = Mathf.Min(Plugin.CrewRoguesMin.Value, Plugin.CrewRoguesMax.Value);
-            int hi = Mathf.Max(Plugin.CrewRoguesMin.Value, Plugin.CrewRoguesMax.Value);
-            int wantRogues = UnityEngine.Random.Range(lo, hi + 1);
-            Plugin.Log.LogDebug($"[Crew] present: {haveRogues} rogues, knight={haveKnight}; target {wantRogues} + knight={Plugin.CrewKnight.Value}");
+            // party-size scaling (user call 08-03, replaces the random roll AND the
+            // min/max config pair — scaling made the knobs redundant): solo gets the
+            // base crew, every extra coop player adds one rogue up to the cap — same
+            // roster source as the BD trigger brackets, counted at raid start.
+            // 6/10 not 8/12 (user call, same day): the knight detail adds 2 rogue
+            // escorts at T1, so TOTALS land at the intended 8 solo .. 12 full squad
+            const int baseRogues = 6, capRogues = 10;
+            int party = GroupSizeEventLogic.GroupSize();
+            int wantRogues = Mathf.Clamp(baseRogues + (party - 1), baseRogues, capRogues);
+            Plugin.Log.LogDebug($"[Crew] present: {haveRogues} rogues, knight={haveKnight}; target {wantRogues} ({party} player(s)) + knight={Plugin.CrewKnight.Value}");
 
             if (haveRogues > wantRogues)
                 TrimRogues(haveRogues - wantRogues);
@@ -461,12 +468,14 @@ namespace Manimal.Icebreaker
                 ? eventId[eventId.Length - 1] - '0' : 0;
             if (eventId.StartsWith("hides"))
             {
-                // vanilla brains, but with the hold/release STAGING back (user call 07-17),
-                // now split (user call 07-28): 2 are already IN the room when the doors
-                // open, the rest push in as reinforcements when the player descends past
-                // the release trigger. spawn staging only, no temperament/mind pokes.
-                StartCoroutine(SpawnSquad("engine room", new[] { "BotZoneEngineHide" }, 2, null));
-                StartCoroutine(HoldEngineSquad(2, 2 + extras));
+                // hold/release STAGING (07-17), split (07-28), re-split (08-03 user call):
+                // the whole squad spawns at the hide markers — 2 start WITHOUT the hold
+                // and patrol out into the engine room immediately (visible presence before
+                // the trigger, the thing SAIN killed), the other 2 hold the ambush at the
+                // hide spots, and the extras push in from the pen when the trigger blows.
+                StartCoroutine(SpawnSquad("engine room", new[] { "BotZoneEngineHide" }, 4, null));
+                StartCoroutine(HoldEngineSquad(2, 2, extras));
+                StartCoroutine(PlaceChargeSweep("BotZoneEngineHide"));
             }
             else if (eventId.StartsWith("stern"))
                 StartCoroutine(SpawnSternDeployment(extras));
@@ -483,7 +492,10 @@ namespace Manimal.Icebreaker
             else if (eventId == "T1")
                 StartCoroutine(SpawnKnightDetail());
             else if (eventId == "T3")
+            {
                 StartCoroutine(SpawnSquad("outside t3", new[] { "BotZoneOutside_t3" }, 3, null));
+                StartCoroutine(PlaceChargeSweep("BotZoneOutside_t3"));
+            }
             else if (eventId == "T4")
                 StartCoroutine(SpawnSquad("inside t4", new[] { "BotZoneInside_t4" }, 5, null));
             else
@@ -577,6 +589,7 @@ namespace Manimal.Icebreaker
             yield return SpawnSquad("stern helipad", new[] { "BotZoneSternTop" }, 3 + extras, null);
             yield return SpawnSquad("stern", new[] { "BotZoneStern" }, 3, null);
             yield return SpawnSquad("stern second team", new[] { "BotZoneStern" }, 3, null);
+            StartCoroutine(PlaceChargeSweep("BotZoneSternTop", "BotZoneStern"));
         }
 
         // retail T1: the knight arrives mid-raid at Mash_t1 with two rogue escorts —
@@ -606,14 +619,141 @@ namespace Manimal.Icebreaker
         private const string EngineLandmark = "Glowstick_01_red (9)"; // fallback anchor if the trigger's missing
         private static readonly Vector3 EngineLandmarkFallback = new Vector3(0f, 10.3f, -1.8f);
 
+        // active-layer diagnostic: names which brain layer owns each crew bot a few
+        // seconds after a job assignment — the difference between "SAIN outranked us",
+        // "our layer isn't attached to this brain at all" and "working as intended"
+        // is unguessable from behavior alone
+        private IEnumerator LogCrewBrains(List<BotOwner> bots, string label)
+        {
+            yield return new WaitForSeconds(8f);
+            foreach (var b in bots)
+            {
+                if (b == null || b.GetPlayer == null || b.GetPlayer.HealthController == null
+                    || !b.GetPlayer.HealthController.IsAlive) continue;
+                string layer = "?";
+                try { layer = DrakiaXYZ.BigBrain.Brains.BrainManager.GetActiveLayerName(b) ?? "(none)"; }
+                catch (Exception e) { layer = $"(query failed: {e.Message})"; }
+                string brain = "?";
+                try { brain = b.Brain?.BaseBrain?.ShortName() ?? "?"; } catch { }
+                Plugin.Log.LogDebug($"[CrewLayer] {label}: '{b.name}' brain='{brain}' activeLayer='{layer}'");
+            }
+        }
+
+        // SZ-1 GUARANTEE (user call 08-03; replaced the knight-pocket server inject that
+        // died on pocket size): exactly ONE chain-door charge per raid, carried by the
+        // black division. the first qualifying deployment to spawn gets it — stern,
+        // stern top, engine hide, or the outside T3 squad — preferring a guard who
+        // rolled a BACKPACK (rare here) with pockets as the fallback. client-side and
+        // host-only by construction (the crew spawner runs with bots authority; fika
+        // corpse searches read the host's inventory live, so the loot replicates).
+        private bool _chargePlaced;
+
+        private IEnumerator PlaceChargeSweep(params string[] zoneNames)
+        {
+            if (_chargePlaced) yield break;
+            // batches create asynchronously (server round trips) — poll until the squad
+            // is actually standing there rather than sweeping a fixed delay too early.
+            // timeout leaves _chargePlaced false so a LATER qualifying squad still takes it.
+            var anchors = new List<Vector3>();
+            foreach (var z in UnityEngine.Object.FindObjectsOfType<BotZone>())
+                if (zoneNames.Contains(z.name) && z.SpawnPointMarkers != null)
+                    foreach (var m in z.SpawnPointMarkers)
+                        if (m != null) anchors.Add(m.transform.position);
+            if (anchors.Count == 0) yield break;
+
+            float giveUp = Time.time + 60f;
+            var cands = new List<BotOwner>();
+            while (Time.time < giveUp && !_chargePlaced)
+            {
+                cands.Clear();
+                foreach (var b in UnityEngine.Object.FindObjectsOfType<BotOwner>())
+                {
+                    if (b == null || b.Profile?.Info?.Settings?.Role != (WildSpawnType)BdIb || IsPenBot(b)) continue;
+                    var p = b.GetPlayer;
+                    if (p == null || p.HealthController == null || !p.HealthController.IsAlive) continue;
+                    foreach (var a in anchors)
+                        if ((b.Position - a).sqrMagnitude < 35f * 35f) { cands.Add(b); break; }
+                }
+                if (cands.Count > 0) break;
+                yield return new WaitForSeconds(1f);
+            }
+            if (_chargePlaced) yield break;
+            if (cands.Count == 0)
+            {
+                Plugin.Log.LogDebug($"[Crew] SZ-1 placement: nobody near {string.Join("/", zoneNames)} in time — leaving it for the next squad");
+                yield break;
+            }
+
+            // shuffle, then stable-sort backpack carriers to the front — random pick
+            // within each tier, bag carriers always tried first
+            foreach (var b in cands.OrderBy(_ => UnityEngine.Random.value).OrderByDescending(b => BackpackOf(b) != null).ToList())
+            {
+                if (StuffCharge(b))
+                {
+                    _chargePlaced = true;
+                    yield break;
+                }
+            }
+            Plugin.Log.LogWarning($"[Crew] SZ-1 placement: no room on anyone near {string.Join("/", zoneNames)} — leaving it for the next squad");
+        }
+
+        private static EFT.InventoryLogic.CompoundItem BackpackOf(BotOwner b)
+        {
+            try
+            {
+                return b.Profile?.Inventory?.Equipment?.GetSlot(EFT.InventoryLogic.EquipmentSlot.Backpack)?.ContainedItem
+                    as EFT.InventoryLogic.CompoundItem;
+            }
+            catch { return null; }
+        }
+
+        private static bool StuffCharge(BotOwner b)
+        {
+            try
+            {
+                var factory = Singleton<ItemFactoryClass>.Instance;
+                if (factory == null) return false;
+                var item = factory.CreateItem(factory.MongoID_0, IcebreakerChainDoor.ChargeTpls[0], null);
+                if (item == null) return false;
+
+                var grids = new List<StashGridClass>();
+                var bag = BackpackOf(b);
+                int bagGrids = 0;
+                if (bag != null && bag.Grids != null) { grids.AddRange(bag.Grids); bagGrids = bag.Grids.Length; }
+                var pockets = b.Profile?.Inventory?.Equipment?.GetSlot(EFT.InventoryLogic.EquipmentSlot.Pockets)?.ContainedItem
+                    as EFT.InventoryLogic.CompoundItem;
+                if (pockets != null && pockets.Grids != null) grids.AddRange(pockets.Grids);
+
+                for (int i = 0; i < grids.Count; i++)
+                {
+                    var loc = grids[i].FindFreeSpace(item);
+                    if (loc == null) continue;
+                    // WithoutRestrictions: skip container FILTERS (geometry still applies) —
+                    // a pocket excluded-filter must not veto the guaranteed charge
+                    if (!grids[i].AddItemWithoutRestrictions(item, loc).Succeeded) continue;
+                    Plugin.Log.LogDebug($"[Crew] SZ-1 charge placed in '{b.name}' {(i < bagGrids ? "BACKPACK" : "pockets")} — one per raid, go find him");
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogWarning($"[Crew] SZ-1 stuff failed on '{b?.name}': {e.Message}");
+                return false;
+            }
+        }
+
         // ENGINE SQUAD HOLD — the hides squad spawns at the cutscene but retail's ambush
-        // beat is that they're WAITING when you descend. pause their patrol layer at the
-        // hide markers and release when the player passes the engine-room trigger. spawn
-        // staging only: no aggro/mind pokes, combat still overrides the hold by design.
+        // beat is that they're WAITING when you descend. the first `freePatrol` of them
+        // skip the hold entirely and Guard-roam the room (visible presence before the
+        // trigger); `holdCount` crouch at the hide markers via the bigbrain Hold job and
+        // release into Hunt when the player passes the engine-room trigger. spawn
+        // staging only: no aggro/mind pokes, combat still overrides everything by design.
         private bool _holdCombatLogged;
 
-        private IEnumerator HoldEngineSquad(int expected, int reinforcements = 0)
+        private IEnumerator HoldEngineSquad(int freePatrol, int holdCount, int reinforcements = 0)
         {
+            int expected = freePatrol + holdCount;
             // release box = the authored engine trigger; fallback = glowstick box (same
             // as the old engine-room watcher did). the authored box floats at chest height (y 10.3-12.4,
             // floor ~8.5) — fine for a physics trigger vs the player CAPSULE, but we test
@@ -637,7 +777,14 @@ namespace Manimal.Icebreaker
                 .FirstOrDefault(z => z.name == "BotZoneEngineHide" && z.SpawnPointMarkers != null && z.SpawnPointMarkers.Count > 0);
             var anchor = hideZone != null ? hideZone.SpawnPointMarkers[0].transform.position : EngineLandmarkFallback;
 
-            var held = new HashSet<BotOwner>();
+
+            var held = new HashSet<BotOwner>();      // ambushers — Hold job, released by the trigger
+            var free = new List<BotOwner>();         // room patrollers — Guard job, never held
+            // patrol box spans the hide markers AND the release-trigger area so the free
+            // pair visibly roams the engine room proper, not just the hide corners
+            var roamBox = new Bounds(bounds.center, new Vector3(12f, 5f, 12f));
+            roamBox.Encapsulate(anchor);
+            roamBox.Expand(new Vector3(4f, 2f, 4f));
             var world = Singleton<GameWorld>.Instance;
             float giveUp = Time.time + 900f; // failsafe: never hold a squad forever
             float nextHeavy = 0f;
@@ -648,17 +795,36 @@ namespace Manimal.Icebreaker
                 // any human trips the release, not just the host (coop)
                 if (Time.time < nextHeavy) { if (held.Count > 0 && FikaBridge.AnyHumanIn(bounds)) break; yield return null; continue; }
                 nextHeavy = Time.time + 0.5f;
-                if (held.Count < expected)
+                if (free.Count + held.Count < expected)
                     foreach (var b in UnityEngine.Object.FindObjectsOfType<BotOwner>())
                     {
-                        if (held.Count >= expected) break; // one sweep used to add 5/4
+                        if (free.Count + held.Count >= expected) break; // one sweep used to add 5/4
                         // IsPenBot: a pool bot in pen transit stands at its birth marker
                         // for a frame or two — the 07-28 raid held one, and it spent the
                         // rest of the raid paused under the ice
                         if (b != null && b.Profile?.Info?.Settings?.Role == (WildSpawnType)BdIb
                             && (b.Position - anchor).sqrMagnitude < 30f * 30f
-                            && !IsPenBot(b) && held.Add(b))
-                            Plugin.Log.LogDebug($"[Crew] engine squad member held ({held.Count}/{expected})");
+                            && !IsPenBot(b) && !free.Contains(b) && !held.Contains(b))
+                        {
+                            // first `freePatrol` roam the room (Guard); the rest are the
+                            // AMBUSH — Hold crouches them at the hide markers, WAITING when
+                            // you descend. the layer replaces the patrol-pause under SAIN;
+                            // the pokes below stay as vanilla fallback for the held only
+                            if (free.Count < freePatrol)
+                            {
+                                free.Add(b);
+                                // 10s rush: walk OUT of the hide room to the first roam
+                                // point no matter what SAIN thinks of the ambient noise
+                                IceCrewJobs.Assign(b, IceCrewJobs.Job.Guard, roamBox, rushSeconds: 10f);
+                                Plugin.Log.LogDebug($"[Crew] engine squad patroller loose in the room ({free.Count}/{freePatrol})");
+                            }
+                            else
+                            {
+                                held.Add(b);
+                                IceCrewJobs.Assign(b, IceCrewJobs.Job.Hold);
+                                Plugin.Log.LogDebug($"[Crew] engine squad member held ({held.Count}/{holdCount})");
+                            }
+                        }
                     }
 
                 // RE-pause every poll: activation and goal changes silently reset patrol
@@ -712,6 +878,9 @@ namespace Manimal.Icebreaker
                     // the remembered enemy hands control back to patrol; REAL contact
                     // re-acquires through vision instantly, so no combat ability is lost.
                     if (b.Memory != null && b.Memory.GoalEnemy != null) b.Memory.GoalEnemy = null;
+                    // 15s RUSH: the deploy must not lose a priority fight to SAIN's
+                    // hold-position combat — they move NOW, combat AI gets them after
+                    IceCrewJobs.Assign(b, IceCrewJobs.Job.Hunt, rushSeconds: 15f);
                     b.PatrollingData.Unpause();
                     b.PatrollingData.RefreshStatus();            // status = go, unconditionally
                     b.PatrollingData.FindNextPoint(true, false); // pick a point + set course
@@ -723,8 +892,18 @@ namespace Manimal.Icebreaker
                     Plugin.Log.LogWarning($"[Crew] release failed on '{b.name}': {e.Message}");
                 }
             }
+            // the loose patrollers join the push too — they're already in the room,
+            // Hunt just stops them wandering back to the far corner of the roam box
+            foreach (var b in free)
+                if (b != null && b.GetPlayer != null && b.GetPlayer.HealthController != null && b.GetPlayer.HealthController.IsAlive)
+                    IceCrewJobs.Assign(b, IceCrewJobs.Job.Hunt, rushSeconds: 15f);
             Plugin.Log.LogDebug($"[Crew] ENGINE SQUAD RELEASED — {released} black division moving out"
                 + (deadOrGone > 0 ? $" ({deadOrGone} of the held were dead/despawned by release time)" : ""));
+
+            // who actually owns each bot 8s in — the tell for a priority fight (SAIN
+            // layer name = we lost) or an uncovered brain (vanilla layer name = the
+            // ExUsec/Pmc* registration missed this bot's brain entirely)
+            StartCoroutine(LogCrewBrains(new List<BotOwner>(held.Concat(free)), "post-release"));
 
             // reinforcement wave (user call 07-28): the other half of the squad stayed in
             // the pen and pushes in the moment the trigger blows. 12m hard player
@@ -740,6 +919,7 @@ namespace Manimal.Icebreaker
                 {
                     try
                     {
+                        IceCrewJobs.Assign(b, IceCrewJobs.Job.Hunt, rushSeconds: 15f); // bigbrain: it's a push
                         // same dead-'stay' fix as the release above — Unpause alone
                         // restores a pre-'go' status and they'd stand at the drop point
                         b.PatrollingData.RefreshStatus();
@@ -839,8 +1019,7 @@ namespace Manimal.Icebreaker
         private async Task<BotCreationDataClass> CreateData(WildSpawnType role, int count = 1)
         {
             var spawnParams = new BotSpawnParams { ShallBeGroup = new ShallBeGroupParams(false, false, Math.Max(1, count)) };
-            var diff = Plugin.HardBots.Value ? BotDifficulty.hard : BotDifficulty.normal;
-            var profileData = new BotProfileDataClass(EPlayerSide.Savage, role, diff, 5f, spawnParams, false);
+            var profileData = new BotProfileDataClass(EPlayerSide.Savage, role, BotDifficulty.normal, 5f, spawnParams, false);
             var data = await BotCreationDataClass.Create(profileData, _spawner.BotCreator, count, _spawner);
             if (data == null) { Plugin.Log.LogWarning($"[Crew] profile creation failed for {role}"); return null; }
 

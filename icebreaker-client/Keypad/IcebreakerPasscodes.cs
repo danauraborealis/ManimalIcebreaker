@@ -83,7 +83,14 @@ namespace Manimal.Icebreaker.Keypad
                 Plugin.Log?.LogError("[Passcodes] keypad UI bundle missing — terminals not built.");
                 return;
             }
-            var rng = new System.Random();
+            // FIKA SYNC: codes and note placement are pure RNG, so on fika every peer
+            // must draw from the SAME sequence or host and clients see different codes
+            // on the same doors. the shared per-raid seed (RaidCode+ServerGuid, known to
+            // all peers before raid start) makes every draw below — group codes, spot
+            // shuffle, note variant — come out identical everywhere with no packets.
+            // determinism contract: same sidecar json + same draw ORDER on all peers;
+            // dont reorder the rng calls in this method without a fika retest.
+            var rng = FikaBridge.SharedRaidRng("passcodes") ?? new System.Random();
 
             // ---- parse all terminals first — shared-code groups need the full set ----
             var terms = new List<TermRec>();
@@ -213,8 +220,8 @@ namespace Manimal.Icebreaker.Keypad
                         int j = rng.Next(i + 1);
                         (spots[i], spots[j]) = (spots[j], spots[i]);
                     }
-                    SpawnNote(gw, notePrefab, spots[0], groupCode[g].Substring(0, PasscodeFormat.FirstHalfLength), label);
-                    SpawnNote(gw, notePrefab, spots[1], groupCode[g].Substring(PasscodeFormat.FirstHalfLength), label);
+                    SpawnNote(gw, notePrefab, spots[0], groupCode[g].Substring(0, PasscodeFormat.FirstHalfLength), label, rng);
+                    SpawnNote(gw, notePrefab, spots[1], groupCode[g].Substring(PasscodeFormat.FirstHalfLength), label, rng);
                 }
             }
 
@@ -263,19 +270,20 @@ namespace Manimal.Icebreaker.Keypad
             }
         }
 
-        private static void SpawnNote(GameWorld gw, GameObject prefab, (Vector3 p, Vector3 e) spot, string digits, string terminalId)
+        private static void SpawnNote(GameWorld gw, GameObject prefab, (Vector3 p, Vector3 e) spot, string digits, string terminalId, System.Random rng)
         {
             try
             {
                 var note = UnityEngine.Object.Instantiate(prefab, spot.p, Quaternion.Euler(spot.e), gw != null ? gw.transform : null);
 
-                // multi-variant prefab: keep one SM_note child at random, drop the rest
+                // multi-variant prefab: keep one SM_note child at random, drop the rest —
+                // drawn from the shared rng so fika peers see the same note model too
                 var children = new List<Transform>();
                 foreach (Transform c in note.transform) children.Add(c);
                 Transform variant = null;
                 if (children.Count > 0)
                 {
-                    int keep = UnityEngine.Random.Range(0, children.Count);
+                    int keep = rng.Next(children.Count);
                     for (int i = 0; i < children.Count; i++)
                         if (i == keep) variant = children[i];
                         else UnityEngine.Object.Destroy(children[i].gameObject);

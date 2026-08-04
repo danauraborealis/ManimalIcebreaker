@@ -186,10 +186,17 @@ namespace Manimal.Icebreaker
     [HarmonyPatch(typeof(WindowBreakerManager), "method_0")]
     internal static class Patch_WindowBreakerPrewarm
     {
-        private static Exception Finalizer(Exception __exception)
+        private static Exception Finalizer(Exception __exception, WindowBreakerManager __instance)
         {
             if (__exception == null) return null;
-            if (!IceGate.On) return __exception;
+            // scene-based gate (transit-gate-blindness): this manager Awakes during the
+            // transit preload window where IceGate still answers the old map — a player
+            // log caught this exact swallow NOT firing on a shoreline->icebreaker transit
+            bool ours;
+            try { ours = __instance != null && __instance.gameObject.scene.name != null
+                          && __instance.gameObject.scene.name.StartsWith("Icebreaker", StringComparison.OrdinalIgnoreCase); }
+            catch { ours = false; }
+            if (!ours && !IceGate.On) return __exception;
             Plugin.Log.LogWarning($"[RaidFix] swallowed WindowBreakerManager.method_0: {__exception.Message}");
             return null;
         }
@@ -379,6 +386,18 @@ namespace Manimal.Icebreaker
             // position while the static skybox draws over everything ("i dont see anything
             // about the sky being different"). fully self-contained (self-finds TOD_Sky,
             // no prefab assets) — safe to add; inert when no TOD_Sky exists.
+            // Cam2 gap #5 — the DLSS/menu-load black screen (2026-08-03). Cam2's
+            // PostProcessLayer carries no PostProcessResources, which was cosmetic-only
+            // (volume effects just dont run)... until a DLSS mod: TarkovDLSS45 IL-patches
+            // Unity.Postprocessing.Runtime and routes the FINAL UPSCALE through the layer,
+            // so a dead layer means the quarter-res DLSS frame never reaches the backbuffer
+            // — black screen + HUD burn-in, zero exceptions (autopsy: camera rect 0.5x0.5).
+            // transit raids dodge it because the camera survives from the origin map with a
+            // vanilla-inited layer — which is also why this stayed 'optional' for so long.
+            // heal: hand the layer the game's own live PostProcessResources and re-enable
+            // so OnEnable re-inits its bundles. no-op when resources are already present.
+            HealPostProcessLayer(__instance.gameObject);
+
             if (Plugin.WeatherSystem.Value && IcebreakerAcoustics.IcebreakerLoaded()
                 && __instance.GetComponent<TOD_Camera>() == null)
             {
@@ -409,6 +428,41 @@ namespace Manimal.Icebreaker
                 else
                     Plugin.Log.LogWarning("[RaidFix] TOD_Scattering skipped — scattering shader missing/unsupported (fog stays sky-haze only)");
             }
+        }
+
+        // reflection-only: the client project doesnt reference Unity.Postprocessing.Runtime,
+        // and TarkovDLSS45 IL-patches that assembly anyway — resolve at runtime, touch nothing
+        // when the layer is absent or already fed.
+        private static void HealPostProcessLayer(GameObject go)
+        {
+            try
+            {
+                var ppType = AccessTools.TypeByName("UnityEngine.Rendering.PostProcessing.PostProcessLayer");
+                if (ppType == null) return;
+                var layer = go.GetComponent(ppType) as Behaviour;
+                if (layer == null) { Plugin.Log.LogDebug("[RaidFix] no PostProcessLayer on fallback camera"); return; }
+                var resField = AccessTools.Field(ppType, "m_Resources");
+                if (resField == null) { Plugin.Log.LogWarning("[RaidFix] PostProcessLayer.m_Resources not found — PP version drift?"); return; }
+                var res = resField.GetValue(layer) as UnityEngine.Object;
+                if (res != null) { Plugin.Log.LogDebug("[RaidFix] PostProcessLayer resources already present — no heal needed"); return; }
+
+                var resType = AccessTools.TypeByName("UnityEngine.Rendering.PostProcessing.PostProcessResources");
+                var found = resType != null ? Resources.FindObjectsOfTypeAll(resType).FirstOrDefault() : null;
+                if (found == null)
+                {
+                    Plugin.Log.LogWarning("[RaidFix] PostProcessLayer has NO resources and none found in memory — layer stays dead (DLSS/FSR upscale will not run)");
+                    return;
+                }
+                // disable around Init so OnEnable re-runs bundle init with valid resources
+                bool wasEnabled = layer.enabled;
+                layer.enabled = false;
+                var init = AccessTools.Method(ppType, "Init", new[] { resType });
+                if (init != null) init.Invoke(layer, new object[] { found });
+                else resField.SetValue(layer, found); // older PP: field only, OnEnable does the rest
+                layer.enabled = wasEnabled;
+                Plugin.Log.LogWarning($"[RaidFix] HEALED PostProcessLayer: fed '{found.name}' resources (was null) — DLSS/FSR final pass can run");
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[RaidFix] PostProcessLayer heal failed: {e.Message}"); }
         }
     }
 
@@ -602,12 +656,16 @@ namespace Manimal.Icebreaker
                     IcebreakerAcoustics.ResetAmbientCache();
                 var crew = GetComponent<IcebreakerCrew>();
                 if (crew != null) Destroy(crew); // fresh spawner per raid
+                IceCrewJobs.Reset(); // stale profile-keyed jobs must not leak across raids
                 var heli = GetComponent<IcebreakerHeliExfil>();
                 if (heli != null) Destroy(heli);
                 return;
             }
 
             TickSpikeProbe(); // stutter forensics — logs spiked frames with toggle/GC counts
+            TickCameraAutopsy(); // one-shot render-chain dump (black-screen forensics)
+            TickChainPeeler();   // Home/End live bisect of the image-effect chain
+            TickDeadEffectGuard(); // strip image effects that cant work on the Cam2 fallback
             DrainPcGroupToggles(); // expand pending group flips into renderer pendings (budgeted)
             DrainPcToggles(); // apply queued PC visibility changes under a per-frame budget
 
@@ -1049,6 +1107,32 @@ namespace Manimal.Icebreaker
             "Cloth/ClothShader_backface",
         };
 
+        // OWNERSHIP GATE for the global rebind. the pass sweeps every Renderer in the
+        // world — ParticleSystemRenderer included — which meant it also grabbed OTHER
+        // MODS' materials (HollywoodFX, 2026-08-03: swapping their bundle's compiled
+        // particle shaders for the game's variant-stripped same-name copies rendered
+        // every particle as an opaque square card). shader-family exclusion is wrong —
+        // OUR rip uses particle shaders too. the correct discriminator is ORIGIN:
+        // materials embedded in the Icebreaker scenes are captured at scene load,
+        // before any mod instantiates anything, and the global pass touches ONLY those.
+        // our own runtime spawns (hovercraft, cutscene rig) use the scoped
+        // RebindShadersUnder, which is explicitly rooted and needs no gate.
+        private static readonly HashSet<int> _ourMaterials = new HashSet<int>();
+
+        internal static void CaptureSceneMaterials(UnityEngine.SceneManagement.Scene scene)
+        {
+            try
+            {
+                int added = 0;
+                foreach (var root in scene.GetRootGameObjects())
+                    foreach (var r in root.GetComponentsInChildren<Renderer>(true))
+                        foreach (var m in r.sharedMaterials)
+                            if (m != null && _ourMaterials.Add(m.GetInstanceID())) added++;
+                Plugin.Log.LogDebug($"[RebindShaders] captured {added} scene-owned material(s) from '{scene.name}' — the global rebind is fenced to these");
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[RebindShaders] material capture failed for '{scene.name}': {e.Message}"); }
+        }
+
         private static bool _aliasRetryNeeded;
 
         // late loaders (the cutscene scene arrives mid-raid) call this after their
@@ -1102,6 +1186,7 @@ namespace Manimal.Icebreaker
                     if (m == null || m.shader == null || !seen.Add(m)) continue;
                     if (!_rebindDone.Add(m.GetInstanceID())) continue; // handled in a prior pass
                     var name = m.shader.name;
+                    if (!_ourMaterials.Contains(m.GetInstanceID())) { sameOrMissing++; continue; } // not scene-owned: another mod's material — never ours to touch
                     if (RebindExclude.Contains(name)) { sameOrMissing++; continue; }   // bundle stand-in stays
                     bool aliased = ShaderAliases.TryGetValue(name, out var alias);
                     if (aliased) name = alias;
@@ -1183,6 +1268,7 @@ namespace Manimal.Icebreaker
                     foreach (var m in r.sharedMaterials)
                     {
                         if (m == null || m.shader == null || !seen.Add(m)) continue;
+                        if (!_ourMaterials.Contains(m.GetInstanceID())) continue; // ownership gate — see RebindShadersToGame
                         if (!_rebindDone.Add(m.GetInstanceID())) continue;
                         var name = m.shader.name;
                         if (RebindExclude.Contains(name)) continue;   // bundle stand-in stays
@@ -1365,23 +1451,43 @@ namespace Manimal.Icebreaker
                 Plugin.Log.LogWarning($"[LightLamps] {skipped} lamps native-owned (CullingLightObject) — LampIntensity slider drives only the {_lamps.Count} unowned");
         }
 
-        // native BSG culling gate: the restored retail bake cost fps vs our own bakes —
-        // suppress the grid's Awake entirely (no Instance, no packed load, no toggles)
-        // and AttachCullingCamera's existing fallback runs the sidecar driver instead
+        // native BSG culling suppression, now UNCONDITIONAL on this map (the NativeCulling
+        // toggle is gone with the Adaptive_grid scene object): the retail packed bake cost
+        // fps AND hard-reads StreamingAssets\Culling_Data at scene activation — a file no
+        // player install has, which was the infinite-load-with-ambient-audio crash
+        // (2026-08-02 field logs). the scene object is deleted in the rebake; this prefix
+        // stays as the backstop for OLD bundles still carrying it.
+        //
+        // KNOWN WEAKNESS in that backstop: TypeByName can resolve the OTHER twin — this
+        // class exists in both our self-hosted PerfectCullingRuntime.dll and bsg's fork in
+        // Assembly-CSharp, and the scene component binds bsg's. a wrong-twin patch lands
+        // silently and gates nothing (the probable reason a player crashed with this gate
+        // present). the scene deletion is the real fix; this is best-effort.
         [HarmonyPatch]
         internal static class Patch_NativeCullingGate
         {
             private static MethodBase TargetMethod() =>
                 HarmonyLib.AccessTools.Method(HarmonyLib.AccessTools.TypeByName("Koenigz.PerfectCulling.EFT.PerfectCullingAdaptiveGrid"), "Awake");
 
-            private static bool Prefix()
+            private static bool Prefix(MonoBehaviour __instance)
             {
                 // CRITICAL gate: vanilla maps run their own adaptive grids — suppressing
                 // those would strip occlusion culling from every real map (audit follow-up;
                 // this prefix was global for one day)
-                if (!IceGate.On) return true;
-                if (Plugin.NativeCulling.Value) return true;
-                Plugin.Log.LogDebug("[Culling] native BSG grid suppressed (NativeCulling=false) — our sidecar bakes drive culling");
+                //
+                // gate on the grid's OWN scene, not IceGate: SPT's transit PRELOADS the
+                // destination scenes before the new raid's creation, so during a
+                // shoreline->icebreaker transit IceGate still answers 'Shoreline' at the
+                // exact moment this Awake fires — proven by a player log (2026-08-02,
+                // capture at L1488 'Shoreline', grid crash at L1559, no Suburbs capture in
+                // between). the component's scene name is true on every entry path, and a
+                // vanilla map's grid can never live in an Icebreaker* scene.
+                bool ours;
+                try { ours = __instance != null && __instance.gameObject.scene.name != null
+                              && __instance.gameObject.scene.name.StartsWith("Icebreaker", StringComparison.OrdinalIgnoreCase); }
+                catch { ours = IceGate.On; }
+                if (!ours && !IceGate.On) return true;
+                Plugin.Log.LogDebug("[Culling] native BSG grid suppressed — sidecar bakes are the only culling driver on this map");
                 return false;
             }
         }
@@ -2011,6 +2117,183 @@ namespace Manimal.Icebreaker
                 _pcDrainScratch.Add(r);
             }
             foreach (var r in _pcDrainScratch) _pcPending.Remove(r);
+        }
+
+        // ---- black-screen forensics: what is actually ON the camera, once, at ~5s ----
+        // burn-in means the color target is never written, so the answer is always in the
+        // render chain: clearFlags, a disabled camera, or an OnRenderImage owner that
+        // blits nothing. image-effect failures are SILENT (no exception in either log —
+        // proven twice now), so the only way to tell which is to enumerate the chain while
+        // the screen is wrong. IMAGE EFFECTS RUN IN COMPONENT ORDER, so the order below is
+        // the actual execution order, and the first broken one eats every later one.
+        private static bool _camAutopsyDone;
+
+        // ---- dead-effect guard: the Cam2 fallback cannot host UltimateBloom ----
+        // every RETAIL camera prefab ships an UltimateBloom, configured by BSG. ours is the
+        // Cam2 fallback (LevelSettings has no prefab for this map), which predates it and
+        // has none — so a graphics mod that expects one and CONSTRUCTS it here gets a bare
+        // component it then fails to configure. measured 2026-08-03: HollywoodGraphics'
+        // Bloom ctor NREs in ResetIntensities during GraphicsController.Start, leaving an
+        // unconfigured UltimateBloom enabled LAST in the chain — last = owner of the final
+        // blit to the backbuffer, so nothing is ever written, the fade-from-black frame
+        // stands and the HUD accumulates on it. peeler-confirmed: disabling it alone
+        // restores the picture instantly.
+        // mod-agnostic by construction: the rule is about OUR camera lacking retail wiring,
+        // not about any one mod. only effects WE didnt add are touched, only on our map,
+        // and disabled (not destroyed) so the owner's own references stay alive.
+        private static readonly HashSet<string> CannotHostOnCam2 = new HashSet<string> { "UltimateBloom" };
+        private static readonly HashSet<Behaviour> _strippedEffects = new HashSet<Behaviour>();
+        private static int _guardSweeps;
+
+        private void TickDeadEffectGuard()
+        {
+            // sweep for the first ~30s: mods attach effects at wildly different moments
+            // (this one lands AFTER the 5s autopsy, which is why the first dumps missed it)
+            if (_iceFrames < 120 || _guardSweeps > 30 || _iceFrames % 60 != 0) return;
+            _guardSweeps++;
+            try
+            {
+                var cam = CameraRef != null ? CameraRef : Camera.main;
+                if (cam == null) return;
+                foreach (var c in cam.GetComponents<Component>())
+                {
+                    if (c == null || !(c is Behaviour b) || !b.enabled) continue;
+                    if (!CannotHostOnCam2.Contains(c.GetType().Name)) continue;
+                    // the HG provision is NOT exempt: even donor-serialized and HG-configured
+                    // it still doesnt blit on some installs (third strike of the lottery,
+                    // 2026-08-03 sonic retest — burn-in with zero exceptions). the provision's
+                    // job is only to keep HG's GraphicsController.Start alive (AO + motion
+                    // blur tuning); the component itself gets parked here and HG writes its
+                    // settings into a disabled renderer, harmlessly. no visible bloom on this
+                    // map — the one Hollywood feature the Cam2 chassis genuinely cant host.
+                    if (!_strippedEffects.Add(b)) continue;
+                    b.enabled = false;
+                    Plugin.Log.LogWarning($"[RaidFix] disabled {c.GetType().Name} on the icebreaker camera — the Cam2 "
+                        + "fallback has no retail configuration for it, and a mod that adds one here leaves it "
+                        + "unconfigured at the END of the effect chain, where it swallows the whole frame "
+                        + "(black screen + HUD burn-in). that mod's bloom is off on this map only.");
+                }
+            }
+            catch (Exception e) { Plugin.Log.LogDebug($"[RaidFix] dead-effect guard: {e.Message}"); }
+        }
+
+        // ---- render-chain PEELER (Home/End, DiagHotkeys) ----
+        // when the screen is stale-with-burn-in the world IS rendering (the pre-spawn map
+        // preview proves it) but something in the image-effect chain never blits to the
+        // backbuffer. effects run in COMPONENT ORDER and the LAST one owns the final write,
+        // so peeling from the end finds the culprit in one raid: HOME disables the last
+        // enabled image effect and logs it; keep tapping until the picture returns — the
+        // last name logged is the one eating the frame. END restores everything.
+        // NOT on F-keys: every F1-F12 is already taken here (F9 opens the fog tuner and
+        // grabs input, F10 is the torch pose probe, F12 is BepInEx's own config manager).
+        private static readonly List<Behaviour> _peeled = new List<Behaviour>();
+
+        private void TickChainPeeler()
+        {
+            if (!Plugin.DiagHotkeys.Value) return;
+
+            if (Input.GetKeyDown(KeyCode.Home))
+            {
+                var cam = CameraRef != null ? CameraRef : Camera.main;
+                if (cam == null) return;
+                var comps = cam.GetComponents<Component>();
+                for (int i = comps.Length - 1; i >= 0; i--)
+                {
+                    var c = comps[i];
+                    if (c == null || !(c is Behaviour b) || !b.enabled) continue;
+                    if (c.GetType().GetMethod("OnRenderImage",
+                        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly) == null) continue;
+                    b.enabled = false;
+                    _peeled.Add(b);
+                    Plugin.Log.LogWarning($"[Peeler] disabled #{i} {c.GetType().Name} — if the picture just came back, THAT is the culprit "
+                        + $"({_peeled.Count} peeled so far, END restores)");
+                    return;
+                }
+                Plugin.Log.LogWarning("[Peeler] no enabled image effects left on the camera — the frame is dying somewhere else "
+                    + "(camera/present level, not the effect chain)");
+            }
+
+            if (Input.GetKeyDown(KeyCode.End))
+            {
+                foreach (var b in _peeled) if (b != null) b.enabled = true;
+                Plugin.Log.LogWarning($"[Peeler] restored {_peeled.Count} effect(s)");
+                _peeled.Clear();
+            }
+        }
+
+        private void TickCameraAutopsy()
+        {
+            if (_camAutopsyDone || _iceFrames < 300) return;
+            _camAutopsyDone = true;
+            try
+            {
+                var cam = CameraRef != null ? CameraRef : Camera.main;
+                if (cam == null) { Plugin.Log.LogWarning("[CamAutopsy] no camera"); return; }
+                Plugin.Log.LogWarning($"[CamAutopsy] '{cam.name}' enabled={cam.enabled} activeGO={cam.gameObject.activeInHierarchy} "
+                    + $"clearFlags={cam.clearFlags} bg={cam.backgroundColor} cullingMask=0x{cam.cullingMask:X} "
+                    + $"depth={cam.depth} rect={cam.rect} target={(cam.targetTexture == null ? "screen" : cam.targetTexture.name)} "
+                    + $"allowHDR={cam.allowHDR} allowMSAA={cam.allowMSAA} near={cam.nearClipPlane} far={cam.farClipPlane}");
+                int i = 0;
+                foreach (var c in cam.GetComponents<Component>())
+                {
+                    if (c == null) { Plugin.Log.LogWarning($"[CamAutopsy] #{i++} <MISSING SCRIPT>"); continue; }
+                    string state = c is Behaviour b ? (b.enabled ? "on" : "off") : "-";
+                    // an image effect is anything overriding OnRenderImage — those are the
+                    // only components that can silently swallow the frame
+                    bool ire = c.GetType().GetMethod("OnRenderImage",
+                        System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public
+                        | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.DeclaredOnly) != null;
+                    Plugin.Log.LogWarning($"[CamAutopsy] #{i++} {c.GetType().Name} [{state}]{(ire ? " <IMAGE-EFFECT>" : "")}");
+                }
+                // other cameras can also own the final present (UI/overlay stacks)
+                foreach (var other in Camera.allCameras)
+                    if (other != cam)
+                        Plugin.Log.LogWarning($"[CamAutopsy] other camera '{other.name}' enabled={other.enabled} "
+                            + $"depth={other.depth} clearFlags={other.clearFlags} mask=0x{other.cullingMask:X}");
+
+                Plugin.Log.LogWarning($"[CamAutopsy] screen={Screen.width}x{Screen.height} "
+                    + $"camPixels={cam.pixelWidth}x{cam.pixelHeight} vsync={QualitySettings.vSyncCount}");
+
+                // the upscale suspects, field by field — under DLSS the final present runs
+                // through this machinery, and its failure mode is silent. dumping both the
+                // menu-load (broken) and transit (working) raids and diffing these lines is
+                // the whole point of this block.
+                foreach (var c in cam.GetComponents<Component>())
+                {
+                    if (c == null) continue;
+                    var tn = c.GetType().Name;
+                    if (tn != "SSAA" && tn != "SSAAImpl" && tn != "SSAAPropagator" && tn != "SSAAPropagatorOpaque"
+                        && tn != "PostProcessLayer" && tn != "EffectsController") continue;
+                    DumpComponentFields(c);
+                }
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[CamAutopsy] failed: {e.Message}"); }
+        }
+
+        private static void DumpComponentFields(Component c)
+        {
+            try
+            {
+                var sb = new System.Text.StringBuilder();
+                var t = c.GetType();
+                // walk the hierarchy too — BSG subclasses hide state in bases
+                for (var cur = t; cur != null && cur != typeof(MonoBehaviour) && cur != typeof(Behaviour); cur = cur.BaseType)
+                    foreach (var f in cur.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
+                    {
+                        object v;
+                        try { v = f.GetValue(c); } catch { continue; }
+                        string s;
+                        if (v == null) s = "null";
+                        else if (v is UnityEngine.Object uo) s = uo == null ? "FAKE-NULL" : $"'{uo.name}'";
+                        else if (f.FieldType.IsPrimitive || f.FieldType.IsEnum || v is string || v is Vector2 || v is Vector3) s = v.ToString();
+                        else if (v is RenderTexture rt) s = $"RT {rt.width}x{rt.height}";
+                        else continue; // complex refs: only interesting when null, handled above
+                        sb.Append(f.Name).Append('=').Append(s).Append(' ');
+                        if (sb.Length > 700) { Plugin.Log.LogWarning($"[CamAutopsy] {t.Name} fields: {sb}"); sb.Clear(); }
+                    }
+                if (sb.Length > 0) Plugin.Log.LogWarning($"[CamAutopsy] {t.Name} fields: {sb}");
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[CamAutopsy] field dump failed for {c.GetType().Name}: {e.Message}"); }
         }
 
         // ---- stutter forensics: when a frame spikes, log what actually ran in it ----
@@ -3054,6 +3337,122 @@ namespace Manimal.Icebreaker
     // our plugin loads BEFORE Waypoints (chainloader order), so TypeByName finds nothing at
     // startup. instead this is applied lazily from the BotsController.Init prefix above,
     // when every plugin assembly is guaranteed loaded. bots-off makes door links moot, and
+    // BOT-INIT FIREWALL — the client half of the choke-point defense. BotsController.Init
+    // sits on the raid-start critical path, and OTHER MODS' postfixes on it run inside the
+    // same call: ORBIT's waypoint table threw a KeyNotFoundException here and aborted raid
+    // creation outright (error screen, no spawn). the per-mod patch for that was removed
+    // by policy; this is the mod-agnostic replacement: on OUR map only, any exception
+    // escaping Init is swallowed WITH THE CULPRIT NAMED, so an unknown mod's missing-map
+    // table degrades that mod's feature instead of killing the raid. vanilla maps keep
+    // their exceptions — masking another map's failures is not this mod's business.
+    [HarmonyPatch(typeof(BotsController), "Init")]
+    internal static class Patch_BotsInitFirewall
+    {
+        private static void Prefix() => RaidFirewall.WrapForeignPostfixes(
+            AccessTools.Method(typeof(BotsController), "Init"));
+
+        private static Exception Finalizer(Exception __exception)
+            => RaidFirewall.Swallow(__exception, "BotsController.Init");
+    }
+
+    // GAME-START FIREWALL — same defense, second choke point. GameWorld.OnGameStarted is
+    // the other raid-start critical section mods postfix; unlike BotsController.Init an
+    // exception here climbs the TarkovApplication async chain, faults it with "Local game
+    // matching failed" and pops the error dialog MID-RAID while EFT half-tears the game
+    // down under you (repro 2026-08-03: SkillsExtended's lockpicking table had no
+    // 'Suburbs' entry — KeyNotFound after spawn, then SAIN/DynamicMaps died in the
+    // shrapnel). BSG's own body runs before the postfixes, so swallowing only costs the
+    // throwing mod (and any postfix queued after it) their game-start hook on our map.
+    [HarmonyPatch(typeof(GameWorld), "OnGameStarted")]
+    internal static class Patch_GameStartFirewall
+    {
+        private static void Prefix() => RaidFirewall.WrapForeignPostfixes(
+            AccessTools.Method(typeof(GameWorld), "OnGameStarted"));
+
+        private static Exception Finalizer(Exception __exception)
+            => RaidFirewall.Swallow(__exception, "GameWorld.OnGameStarted");
+    }
+
+    // shared machinery for the raid-start choke points above
+    internal static class RaidFirewall
+    {
+        private const string OwnPrefix = "com.manimal.icebreaker";
+        private static readonly HashSet<System.Reflection.MethodBase> Wrapped = new();
+
+        // PER-POSTFIX AIRBAG. a postfix that throws aborts every postfix queued after it
+        // in the same chain — so one mod's missing-map table would cost innocent mods
+        // their hook too. instead of letting the chain break, each foreign postfix method
+        // on the choke point gets its OWN finalizer: the throw is swallowed at that
+        // postfix's level and the chain continues. no argument re-binding, __state-safe
+        // (we never invoke anything ourselves — harmony's own call just gets an airbag).
+        // runs from the choke point's prefix so every plugin has patched by then; cheap
+        // set-diff per raid catches late patchers. inert off-map (finalizer checks
+        // IceGate). the outer Swallow stays as backstop for prefix throws and any postfix
+        // the jit inlined past our detour.
+        internal static void WrapForeignPostfixes(System.Reflection.MethodBase chokePoint)
+        {
+            // sweep only on our map — vanilla raids never touch other mods' methods.
+            // wraps persist into later raids, but the airbag is IceGate-inert there.
+            if (chokePoint == null || !IceGate.On) return;
+            try
+            {
+                var info = Harmony.GetPatchInfo(chokePoint);
+                if (info?.Postfixes == null) return;
+                var h = new Harmony(OwnPrefix + ".postfixairbag");
+                var airbag = new HarmonyMethod(AccessTools.Method(typeof(RaidFirewall), nameof(PostfixAirbag)));
+                foreach (var p in info.Postfixes)
+                {
+                    if (p.owner.StartsWith(OwnPrefix, StringComparison.OrdinalIgnoreCase)) continue;
+                    if (!Wrapped.Add(p.PatchMethod)) continue;
+                    try
+                    {
+                        h.Patch(p.PatchMethod, finalizer: airbag);
+                        Plugin.Log.LogDebug($"[Firewall] airbag on {p.PatchMethod.DeclaringType?.FullName}.{p.PatchMethod.Name} (owner {p.owner})");
+                    }
+                    catch (Exception e)
+                    {
+                        // unwrappable postfix (generic/inlined/weird) — outer backstop still covers it
+                        Plugin.Log.LogDebug($"[Firewall] couldnt wrap {p.PatchMethod.Name} of {p.owner}: {e.Message}");
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogWarning($"[Firewall] postfix sweep failed on {chokePoint.Name}: {e.Message}");
+            }
+        }
+
+        private static Exception PostfixAirbag(Exception __exception, System.Reflection.MethodBase __originalMethod)
+        {
+            if (__exception == null) return null;
+            if (!IceGate.On) return __exception;
+            var asm = __originalMethod?.DeclaringType?.Assembly.GetName().Name ?? "unknown";
+            Plugin.Log.LogError($"[Firewall] {asm}'s hook {__originalMethod?.DeclaringType?.Name}.{__originalMethod?.Name} "
+                + $"threw on the icebreaker — swallowed; only THAT mod's hook is skipped, later mods' hooks still run "
+                + $"(likely a per-map table with no 'Suburbs' entry — report it to {asm}'s author). inner: {__exception.Message}");
+            return null;
+        }
+
+        // choke-point backstop: swallow-and-name-the-culprit for anything the airbags missed
+        internal static Exception Swallow(Exception ex, string site)
+        {
+            if (ex == null) return null;
+            if (!IceGate.On) return ex;
+            string culprit = "unknown";
+            foreach (var line in (ex.StackTrace ?? "").Split('\n'))
+            {
+                var m = System.Text.RegularExpressions.Regex.Match(line,
+                    @"at (?!EFT\.|System\.|UnityEngine\.|Manimal\.|DMD|\(wrapper)([A-Za-z_][\w]*)[\w.]*\.");
+                if (m.Success) { culprit = m.Groups[1].Value; break; }
+            }
+            Plugin.Log.LogError($"[Firewall] a mod threw inside {site} on the icebreaker — "
+                + $"swallowed so the raid can start; that mod is INACTIVE this raid. culprit: {culprit} "
+                + $"(likely a per-map table with no 'Suburbs' entry — report it to that mod's author). "
+                + $"inner: {ex.Message}");
+            return null;
+        }
+    }
+
     // Waypoints stays fully functional on real maps. no-op if Waypoints isn't installed.
     internal static class LateWaypointsPatch
     {
@@ -3290,13 +3689,10 @@ namespace Manimal.Icebreaker
             {
                 if (wavesSettings.IsTaggedAndCursed && w.WildSpawnType == WildSpawnType.assault)
                     w.WildSpawnType = WildSpawnType.cursedAssault;
-                // retail icebreaker crew are elite rogues — hard across the board (config)
-                w.BotDifficulty = Plugin.HardBots.Value
-                    ? BotDifficulty.hard
-                    : wavesSettings.BotDifficulty.ToBotDifficulty();
+                // difficulty follows the player's raid-settings pick, same as any map
+                w.BotDifficulty = wavesSettings.BotDifficulty.ToBotDifficulty();
             }
-            Plugin.Log.LogDebug($"[RaidFix] wave slots kept as authored ({waves.Length} waves, bot-amount slider ignored"
-                + (Plugin.HardBots.Value ? ", difficulty forced HARD)" : ")"));
+            Plugin.Log.LogDebug($"[RaidFix] wave slots kept as authored ({waves.Length} waves, bot-amount slider ignored)");
             __result = waves;
             return false;
         }

@@ -52,10 +52,7 @@ namespace Manimal.Icebreaker
         internal static ConfigEntry<bool> LampShadows;
         internal static ConfigEntry<float> CullDistanceScale;
         internal static ConfigEntry<bool> PcDriverEnabled;
-        internal static ConfigEntry<bool> NativeCulling;
         internal static ConfigEntry<bool> ShadowProxyFix;
-        internal static ConfigEntry<int> CrewRoguesMin;
-        internal static ConfigEntry<int> CrewRoguesMax;
         internal static ConfigEntry<bool> CrewPreSpawnPool;
         internal static ConfigEntry<bool> CrewKnight;
         internal static ConfigEntry<bool> CrewBlackDiv;
@@ -66,7 +63,6 @@ namespace Manimal.Icebreaker
         internal static ConfigEntry<float> WindIndoorFraction;
         internal static ConfigEntry<bool> WeatherSystem;
         internal static ConfigEntry<bool> ForceWinter;
-        internal static ConfigEntry<bool> HardBots;
         internal static ConfigEntry<bool> DiagHotkeys;
         internal static ConfigEntry<bool> DevMode;
         internal static ConfigEntry<string> CamDonorSkip;
@@ -98,7 +94,6 @@ namespace Manimal.Icebreaker
         internal static readonly Val<float> SnowIntensity = new Val<float>(1.0f);
         internal static ConfigEntry<bool> TimelineCutscene;
         internal static ConfigEntry<bool> Tripwires;
-        internal static ConfigEntry<bool> BotFriendlyFire;
         internal static ConfigEntry<bool> HovercraftTransit;
         internal static ConfigEntry<float> TransitX;
         internal static ConfigEntry<float> TransitY;
@@ -209,8 +204,6 @@ namespace Manimal.Icebreaker
             CullDistanceScale = Config.Bind("Icebreaker", "CullDistanceScale", 0.5f,
                 new ConfigDescription("distance-culling aggressiveness for small props (lower = culls closer = more fps) (live)",
                     new AcceptableValueRange<float>(0.25f, 3f), new ConfigurationManagerAttributes { IsAdvanced = true }));
-            NativeCulling = Config.Bind("Icebreaker", "NativeCulling", false,
-                new ConfigDescription("use BSG's restored retail culling bake (Culling_Data) instead of our own sidecar bakes — the retail bake cost fps, so OFF: our .pcbake volumes drive culling; restart raid to switch", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             PcDriverEnabled = Config.Bind("Icebreaker", "PcDriverEnabled", true,
                 new ConfigDescription("occlusion culling driver — flip OFF (live) to un-cull everything; the pop-in isolation tool: if pops stop with this off, the bake's sightline data is the culprit", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             // NOTE: the old LodBiasClamp knob is gone — forcing QualitySettings.lodBias
@@ -230,14 +223,6 @@ namespace Manimal.Icebreaker
             // premake+prewarm makes on-demand spawns cheap enough.
             CrewPreSpawnPool = Config.Bind("Icebreaker", "CrewPreSpawnPool", false,
                 new ConfigDescription("pre-spawn the trigger squads into an off-map pen during the early raid and TELEPORT them in when events fire. off (default) = profiles premade + bundles prewarmed, bots spawned on demand through the real pipeline", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
-            // defaults trimmed a squad below retail's 9-15 (user call 07-27) — the full
-            // roster plus the trigger squads made the ship feel overcrowded
-            CrewRoguesMin = Config.Bind("Icebreaker", "CrewRoguesMin", 6,
-                new ConfigDescription("min rogue crew size — each raid rolls a random target in [min,max] (retail: 9-15)",
-                    new AcceptableValueRange<int>(0, 20), new ConfigurationManagerAttributes { IsAdvanced = true }));
-            CrewRoguesMax = Config.Bind("Icebreaker", "CrewRoguesMax", 11,
-                new ConfigDescription("max rogue crew size — each raid rolls a random target in [min,max] (retail: 9-15)",
-                    new AcceptableValueRange<int>(0, 20), new ConfigurationManagerAttributes { IsAdvanced = true }));
             CrewKnight = Config.Bind("Icebreaker", "CrewKnight", true,
                 new ConfigDescription("spawn solo Knight among the rogues", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             CrewBlackDiv = Config.Bind("Icebreaker", "CrewBlackDivision", true,
@@ -267,8 +252,6 @@ namespace Manimal.Icebreaker
                 new ConfigDescription("resurrect BSG's weather/sky stack (clouds, wind, rain/snow, time-of-day) from the recovered retail components (needs the Author 9 weather-asset bundle)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             ForceWinter = Config.Bind("Icebreaker", "ForceWinter", true,
                 new ConfigDescription("force Winter season on icebreaker only (snowfall; other maps keep the server's season; needs WeatherSystem)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
-            HardBots = Config.Bind("Icebreaker", "HardBots", true,
-                new ConfigDescription("force ALL icebreaker AI (waves + crew + black division) to HARD difficulty", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             Blizzard = Config.Bind("Icebreaker", "Blizzard", true,
                 new ConfigDescription("permanent blizzard: pins WeatherDebug (snow/wind/fog) + raises the winter STORM state; also pins the TOD hour (live)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             VolFog = Config.Bind("VolumetricFog2", "Enabled", true,
@@ -355,8 +338,6 @@ namespace Manimal.Icebreaker
             TransitActivateAfterSec = Config.Bind("Icebreaker", "TransitActivateAfterSec", 30,
                 new ConfigDescription("seconds before the crossing opens, listed red with a countdown until then (every vanilla transit uses 60)",
                     new AcceptableValueRange<int>(0, 600), new ConfigurationManagerAttributes { IsAdvanced = true }));
-            BotFriendlyFire = Config.Bind("Icebreaker", "BotFriendlyFire", false,
-                new ConfigDescription("allow bots to damage ALLIED bots (default off: crew sprays through squadmates in tight corridors and revenge-aggro wipes whole squads — real bot-vs-bot fights are always lethal regardless)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             Tripwires = Config.Bind("Icebreaker", "Tripwires", true,
                 new ConfigDescription("plant the authored grenade tripwires (manimal_tripwire* markers) at raid start", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             TripwireChance = Config.Bind("Icebreaker", "TripwireChance", 0.5f,
@@ -382,6 +363,19 @@ namespace Manimal.Icebreaker
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += (scene, mode) =>
             {
                 try { IcebreakerAcoustics.OnSceneLoaded(scene); } catch { }
+                // material ownership capture must beat every mod's runtime spawns —
+                // scene load IS that moment (see the rebind ownership gate)
+                try
+                {
+                    if (scene.name != null && scene.name.StartsWith("Icebreaker", System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        RenderEnvProbe.CaptureSceneMaterials(scene);
+                        // SAIN masquerade (user-approved special case, 2026-08-03) — was
+                        // wired to the tripwire hook, which never fires at default config;
+                        // scene load always does, and every plugin is loaded by now
+                        SainLocationCompat.TryPatch(new HarmonyLib.Harmony("com.manimal.icebreaker.saincompat"));
+                    }
+                } catch { }
             };
 
             // preload the self-hosted Perfect Culling runtime so the icebreaker scene
@@ -422,6 +416,12 @@ namespace Manimal.Icebreaker
                 Log.LogError($"PatchAll FAILED — some patches did not apply, the map still loads: {e}");
             }
             IcebreakerFikaCompat.TryApply(harmony); // no-op without fika
+
+            // bigbrain crew layer (hard dep, so the call is safe) — registration is
+            // global and one-time; IceGate keeps the layer inert off-map
+            try { IceCrewJobs.Register(); }
+            catch (System.Exception e) { Log.LogError($"[CrewLayer] registration failed — crew falls back to vanilla patrol pokes: {e.Message}"); }
+
             Log.LogInfo($"Manimal-Icebreaker {BuildInfo.Version} loaded");
             LogConfigBanner();
         }

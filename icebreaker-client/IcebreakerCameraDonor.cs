@@ -73,6 +73,20 @@ namespace Manimal.Icebreaker
         //   StreamingController              factory's streaming manager, not an effect
         //   ContactShadows                   its NoiseTextureSet is a ScriptableObject the
         //                                    carrier cannot ride yet
+        // ALLOWLIST — the graft model flipped after the fresh-install test (2026-08-03):
+        // UltimateBloom, permanently withheld on the dev install (dust texture never
+        // resolved), GRAFTED on a fresh install because a different mod set put a
+        // name-matching texture in the asset pool — and blitted garbage. that is the
+        // third name-resolution lottery (RainScreenDrops' cross-raid pool, ScreenWater's
+        // rip assets, now this), so eligibility is no longer "refs happened to resolve":
+        // ONLY components proven stable across installs graft at all. these four resolve
+        // exclusively against game-global assets (Shader.Find) and have rendered clean on
+        // every machine tested. additions require proving, not just resolving.
+        private static readonly HashSet<string> AllowGraft = new HashSet<string>
+        {
+            "DesaturateEffect", "Antialiasing", "Tonemapping", "PerfectCullingCamera",
+        };
+
         private static readonly HashSet<string> NeverGraft = new HashSet<string>
         {
             "MBOIT_Scattering", "ContactShadows",
@@ -84,6 +98,13 @@ namespace Manimal.Icebreaker
             // exception. the carrier stays (RainScreenDrops may still be salvageable);
             // these two effects are not worth the render chain.
             "ScreenWater", "InfectionEffect",
+            // the TRANSIT special: on a menu raid its refs never resolve (withheld, fine),
+            // but transiting FROM a rain-capable map, FindObjectsOfTypeAll finds the OLD
+            // raid's rain assets still in memory — self-withhold passes honestly, then the
+            // origin raid's resources unload and the component blits black off dead native
+            // objects (2026-08-02 transit log: the only delta vs the working raid). name
+            // resolution against a cross-raid asset pool is inherently unstable — poison.
+            "RainScreenDrops",
         };
 
         // ------------------------------------------------------------------ dump side
@@ -96,6 +117,13 @@ namespace Manimal.Icebreaker
             {
                 try
                 {
+                    // late graft: on a menu load SetCamera ran too early (bare camera) and
+                    // deferred — by OnGameStarted the stack is built, so try once more
+                    if (IceGate.On)
+                    {
+                        var live = CameraClass.Instance?.Camera;
+                        if (live != null) TryGraft(live.gameObject, "OnGameStarted");
+                    }
                     // vanilla maps only — dumping our own grafted camera would feed the
                     // graft its own output next raid
                     if (IceGate.On || !Plugin.DevMode.Value) return;
@@ -153,27 +181,54 @@ namespace Manimal.Icebreaker
         [HarmonyPatch(typeof(CameraClass), "SetCamera", typeof(Camera))]
         internal static class Patch_GraftDonorCamera
         {
-            private static bool _done;
-
             [HarmonyPrefix]
             private static void Prefix(Camera camera)
             {
                 if (!IceGate.On || camera == null) return;
-                // per-raid: CameraClass persists across raids, the camera GO does not
-                if (_done && camera.gameObject.GetComponent<EffectsController>() != null) return;
-                try
-                {
-                    if (!System.IO.File.Exists(DonorPath))
-                    {
-                        Plugin.Log.LogWarning("[CamDonor] no camera/camera_donor.json — run one vanilla raid "
-                            + "(any map) with DevMode on to record a donor. staying on plain Cam2.");
-                        return;
-                    }
-                    Graft(camera.gameObject, JObject.Parse(System.IO.File.ReadAllText(DonorPath)));
-                    _done = true;
-                }
-                catch (Exception e) { Plugin.Log.LogError($"[CamDonor] graft failed — plain Cam2 stands: {e}"); }
+                TryGraft(camera.gameObject, "SetCamera");
             }
+        }
+
+        // the camera GO we already grafted — per-GO, because CameraClass persists across
+        // raids but its camera object does not
+        private static GameObject _graftedGo;
+
+        // the UltimateBloom we grafted FOR HollywoodGraphics — the dead-effect guard must
+        // not strip this one (it's donor-serialized and HG-configured, not a raw corpse)
+        internal static Behaviour ProvisionedBloom;
+
+        // BARE-CAMERA TRAP (2026-08-03, the direct-from-menu black screen): SetCamera
+        // fires at two very different moments. transiting in, the camera is FULLY BUILT
+        // (working raid logged 50 chassis components already present, 106 donor fields) and
+        // our four effects graft onto the end of a live render chain. loading straight from
+        // the MENU it fires on a BARE camera — zero chassis components — so the graft's
+        // OnRenderImage owners end up FIRST in the chain, before the game builds its own
+        // stack, and the result is the classic silent non-blit: the first (black) fade
+        // frame never gets overwritten and the HUD accumulates on top of it.
+        // so: only graft a camera the game has finished furnishing (EffectsController is
+        // that marker), and retry from OnGameStarted, by which point it always is. if it
+        // never furnishes, we simply dont graft — plain Cam2 renders, better absent than
+        // hollow (the doctrine that got the allowlist here in the first place).
+        internal static void TryGraft(GameObject go, string site)
+        {
+            if (go == null || _graftedGo == go) return;
+            if (go.GetComponent<EffectsController>() == null)
+            {
+                Plugin.Log.LogDebug($"[CamDonor] {site}: camera not furnished yet (no EffectsController) — deferring graft");
+                return;
+            }
+            try
+            {
+                if (!System.IO.File.Exists(DonorPath))
+                {
+                    Plugin.Log.LogWarning("[CamDonor] no camera/camera_donor.json — run one vanilla raid "
+                        + "(any map) with DevMode on to record a donor. staying on plain Cam2.");
+                    return;
+                }
+                Graft(go, JObject.Parse(System.IO.File.ReadAllText(DonorPath)));
+                _graftedGo = go;
+            }
+            catch (Exception e) { Plugin.Log.LogError($"[CamDonor] graft failed — plain Cam2 stands: {e}"); }
         }
 
         private static void Graft(GameObject go, JObject donor)
@@ -209,7 +264,19 @@ namespace Manimal.Icebreaker
                     var type = AccessTools.TypeByName(typeName);
                     if (type == null || !typeof(Component).IsAssignableFrom(type)) { missingType++; continue; }
                     if (SkipTypes.Contains(type.Name)) continue;
-                    if (NeverGraft.Contains(type.Name)) { skipped++; continue; }  // measured poison
+                    // HG PROVISION: HollywoodGraphics' Bloom wrapper AddComponents a raw
+                    // UltimateBloom when the camera has none — and a raw one has NULL
+                    // serialized arrays (m_BloomIntensities etc. only exist via prefab
+                    // deserialization), so its ctor NREs, GraphicsController.Start dies,
+                    // and the half-built bloom eats the frame (the Sonic black screen).
+                    // when HG is installed, graft the donor's fully-serialized UltimateBloom
+                    // so HG finds a retail-shaped component and configures it like on any
+                    // map. the dust-texture lottery that banned UltimateBloom from the
+                    // allowlist doesnt apply here: the field is skipped below and HG loads
+                    // its OWN LensDust png from disk right after (Bloom.UpdateLensDust).
+                    bool hgBloom = type.Name == "UltimateBloom"
+                        && BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.janky.hollywoodgraphics");
+                    if (!AllowGraft.Contains(type.Name) && !hgBloom) { skipped++; continue; } // allowlist: proven-stable only
                     if (skip.Contains(type.Name)) { skipped++; continue; }        // bisect knob
                     if (go.GetComponent(type) != null) { existing++; continue; }  // chassis owns it
 
@@ -222,6 +289,8 @@ namespace Manimal.Icebreaker
                     if (fields != null)
                         foreach (var kv in fields)
                         {
+                            // the dust texture never resolves here and HG supplies its own
+                            if (hgBloom && kv.Key == "m_DustTexture") continue;
                             var f = SerializedFields(type).FirstOrDefault(x => x.Name == kv.Key);
                             if (f == null) continue;
                             try
@@ -233,6 +302,24 @@ namespace Manimal.Icebreaker
                             }
                             catch { }
                         }
+
+                    // no dust texture until HG assigns one — lens dust off so nothing
+                    // samples a null; HG's UpdateSettings sets it from its own config.
+                    // NOTE the renderer does NOT survive: even fully serialized it blits
+                    // nothing on some installs (lottery strike three), so the dead-effect
+                    // guard parks it right after HG's Start reads it. the provision exists
+                    // purely so HG's Bloom ctor lives and the REST of HG initializes.
+                    if (hgBloom && compRefMiss == 0)
+                    {
+                        try
+                        {
+                            var lensDust = SerializedFields(type).FirstOrDefault(x => x.Name == "m_UseLensDust");
+                            if (lensDust != null) lensDust.SetValue(c, false);
+                        }
+                        catch { }
+                        ProvisionedBloom = c as Behaviour;
+                        Plugin.Log.LogWarning("[CamDonor] UltimateBloom provisioned for HollywoodGraphics (keeps its init alive; the renderer itself gets parked by the guard)");
+                    }
 
                     // SELF-WITHHOLD: a camera effect with an unresolved shader/material/
                     // texture is exactly the silent black-blit class from the second boot.

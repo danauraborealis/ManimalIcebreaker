@@ -569,39 +569,17 @@ namespace Manimal.Icebreaker.Keypad
             // display lingers but the player is done typing
             ReleaseDigitLock();
 
-            // mark unlocked BEFORE the door flip so even if the door change
-            // errors, the action patch still greys out further attempts
-            _keypad.Unlocked = true;
-
             try
             {
-                var door = _keypad.BoundDoor;
-                if (door == null)
-                {
+                if (_keypad.BoundDoor == null)
                     Plugin.Log?.LogWarning("[Keypad] code accepted but no bound door — nothing to unlock.");
-                }
-                else
-                {
-                    // Locked -> Shut turns it into a regular openable door;
-                    // already-open states are left alone
-                    if (door.DoorState == EDoorState.Locked)
-                        door.DoorState = EDoorState.Shut;
-                    Plugin.Log?.LogInfo($"[Keypad] unlocked door '{door.Id}'.");
-                }
 
-                // spend the door's twin: shared-code peers within range disable
-                // too (and their door unlocks — a no-op when its the same door).
-                // a same-code terminal across the room stays live.
-                float rangeSq = KeypadConstants.LinkedDisableRange * KeypadConstants.LinkedDisableRange;
-                foreach (var twin in _keypad.LinkedKeypads)
-                {
-                    if (twin == null || twin.Unlocked) continue;
-                    if ((twin.transform.position - _keypad.transform.position).sqrMagnitude > rangeSq) continue;
-                    twin.Unlocked = true;
-                    if (twin.BoundDoor != null && twin.BoundDoor.DoorState == EDoorState.Locked)
-                        twin.BoundDoor.DoorState = EDoorState.Shut;
-                    Plugin.Log?.LogInfo($"[Keypad] linked terminal '{twin.name}' disabled (within {KeypadConstants.LinkedDisableRange:F0}m).");
-                }
+                // the shared commit path: marks unlocked, flips the door Locked->Shut,
+                // spends in-range twins, and raises the fika sync event (local commits
+                // only — remote applies run this same method with the event suppressed)
+                Keypad.CommitUnlock(_keypad);
+                if (_keypad.BoundDoor != null)
+                    Plugin.Log?.LogInfo($"[Keypad] unlocked door '{_keypad.BoundDoor.Id}'.");
             }
             catch (Exception ex)
             {

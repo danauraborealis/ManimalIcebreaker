@@ -69,7 +69,11 @@ namespace Manimal.Icebreaker
                     foreach (var t in asm.GetTypes())
                     {
                         if (t.Name == "FikaBackendUtils")
+                        {
                             _isServer = t.GetProperty("IsServer", BindingFlags.Public | BindingFlags.Static);
+                            _raidCode = t.GetProperty("RaidCode", BindingFlags.Public | BindingFlags.Static);
+                            _serverGuid = t.GetProperty("ServerGuid", BindingFlags.Public | BindingFlags.Static);
+                        }
                         else if (t.Name == "CoopHandler")
                         {
                             _tryGetCoop = t.GetMethod("TryGetCoopHandler", BindingFlags.Public | BindingFlags.Static);
@@ -83,6 +87,47 @@ namespace Manimal.Icebreaker
             catch (Exception e)
             {
                 Plugin.Log.LogWarning($"[Fika] detection failed (assuming solo): {e.Message}");
+            }
+        }
+
+        // ---- shared per-raid RNG (deterministic sync without packets) ----
+        // the host generates RaidCode + ServerGuid at match creation and every client
+        // receives both from the fika backend BEFORE the raid starts (verified in
+        // Fika-Plugin source: FikaBackendUtils setters on the host path and in the join
+        // result / FikaPingingClient) — so a Random seeded off them produces IDENTICAL
+        // draw sequences on every peer with zero networking. per-raid unique (host rolls
+        // a fresh code each raid, incl. transits re-creating the match). the salt keeps
+        // independent systems from correlating their draws off the same sequence.
+        private static PropertyInfo _raidCode;
+        private static PropertyInfo _serverGuid;
+
+        internal static System.Random SharedRaidRng(string salt)
+        {
+            Resolve();
+            if (!_present) return null; // solo: caller keeps its local random
+            try
+            {
+                var code = _raidCode?.GetValue(null) as string;
+                var guid = _serverGuid?.GetValue(null)?.ToString();
+                if (string.IsNullOrEmpty(code) && string.IsNullOrEmpty(guid))
+                {
+                    Plugin.Log.LogWarning("[Fika] RaidCode/ServerGuid unavailable — shared-seed sync degraded to local random (peers may desync). Report with your fika version.");
+                    return null;
+                }
+                // fnv-1a over the combined string — string.GetHashCode is not guaranteed
+                // stable across runtimes, and every peer MUST hash to the same seed
+                unchecked
+                {
+                    uint h = 2166136261;
+                    foreach (char c in $"{code}|{guid}|{salt}")
+                        h = (h ^ c) * 16777619;
+                    return new System.Random((int)h);
+                }
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogWarning($"[Fika] shared-seed derivation failed: {e.Message}");
+                return null;
             }
         }
 

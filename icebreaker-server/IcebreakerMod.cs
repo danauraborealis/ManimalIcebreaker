@@ -218,6 +218,7 @@ public class IcebreakerMod(
         }
 
         logger.Success("[Manimal-Icebreaker] Suburbs slot rebound to Icebreaker — enabled, icon placed, locale rebranded");
+        logger.Info("[Icebreaker] loot isolation armed (suspend/restore) — icebreaker raids run vanilla loot generation; other maps untouched");
     }
 
     private static readonly Random LootRng = new();

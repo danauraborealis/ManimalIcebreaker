@@ -282,7 +282,7 @@ namespace Manimal.Icebreaker
             }
         }
 
-        private static int GroupSize()
+        internal static int GroupSize()
         {
             // the same roster every other coop-aware path uses (CoopHandler.HumanPlayers
             // via the bridge, MainPlayer fallback) — RegisteredPlayers can disagree with

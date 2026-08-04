@@ -636,6 +636,34 @@ namespace Manimal.Icebreaker
 
         // the exfil stays LOCKED while the heli flies its 44s arrival — Update()'s re-lock
         // hold keeps running because _activated is still false. unlock lands with the skids.
+        // ENTRY-PATH-AGNOSTIC ELIGIBILITY. vanilla InfiltrationMatch demands the player's
+        // Profile.Info.EntryPoint be non-empty AND present in EligibleEntryPoints — and a
+        // TRANSIT arrival satisfies neither reliably (its entry point is empty or carries
+        // the origin map's value). the failure is perfectly silent: the exfil collider is
+        // on, the player stands inside, and no timer ever starts — measured 2026-08-03 as
+        // "IEAPI toggle does nothing" on a transited fresh-install raid, while menu-entry
+        // raids (EntryPoint='Icebreaker' from base.json) always worked. on OUR map every
+        // exit is authored by us for every entry path, so the match is simply YES here.
+        [HarmonyPatch(typeof(EFT.Interactive.ExfiltrationPoint), nameof(EFT.Interactive.ExfiltrationPoint.InfiltrationMatch))]
+        internal static class Patch_EntryAgnosticExfil
+        {
+            private static bool _logged;
+
+            [HarmonyPostfix]
+            private static void Postfix(Player player, ref bool __result)
+            {
+                if (__result || !IceGate.On) return;
+                if (player == null || !player.IsYourPlayer) return;
+                __result = true;
+                if (!_logged)
+                {
+                    _logged = true;
+                    Plugin.Log.LogInfo($"[HeliExfil] exfil eligibility forced for entry point "
+                        + $"'{player.Profile?.Info?.EntryPoint ?? "<null>"}' — vanilla match rejects transit arrivals");
+                }
+            }
+        }
+
         private System.Collections.IEnumerator HeliArrival()
         {
             yield return new WaitForSeconds(ArrivalSeconds);

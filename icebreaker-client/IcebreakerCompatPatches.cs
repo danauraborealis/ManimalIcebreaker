@@ -45,30 +45,53 @@ namespace Manimal.Icebreaker
         }
     }
 
-    // SAIN corridor fights: with a dozen rogues in tight ship hallways, sprays meant
-    // for the player rake through squadmates — the FF hit flips allies into revenge
-    // aggro and whole squads eat each other. rule: an AI hit by an AI that is NOT
-    // currently an enemy of its group takes no damage at all (ally accident, voided
-    // before the being-hit reaction chain even starts). genuine bot-vs-bot fights
-    // (attacker already in the group's enemy dict) stay fully lethal, and the player
-    // is never protected.
-    [HarmonyPatch(typeof(Player), nameof(Player.ApplyDamageInfo))]
-    internal static class Patch_NoAllyBotFriendlyFire
+    // ROGUE FORGIVENESS (user call 08-03 — replaces the removed damage-voider with
+    // something better-aimed). rogue-on-rogue accidents must not START fights: with
+    // SAIN the ship turned into a rogue deathmatch. BotsGroup.AddEnemy is the single
+    // gate — vanilla combat reads BotsGroup.Enemies, and SAIN seeds its ENTIRE enemy
+    // list from BotsGroup.OnEnemyAdd (verified in its EnemyListController), so one
+    // blocked add starves both retaliation paths. bonus, also verified in SAIN
+    // source: its fire-line check (SAINFriendlyFireClass) FriendlyBlocks any shot
+    // through a player who is NOT an enemy — keeping allies out of the enemy dict is
+    // exactly what makes SAIN stop aiming through them in the first place, which
+    // covers the "avoid friendly crossfire" ask with zero extra machinery.
+    // damage stays real (sprays can still down a squadmate) — only the GRUDGE is
+    // voided. the player is never protected (IsAI gate), and BD-vs-rogue stays a
+    // real fight (different faction, not allied).
+    [HarmonyPatch(typeof(BotsGroup), nameof(BotsGroup.AddEnemy))]
+    internal static class Patch_RogueForgiveness
     {
+        private static bool _logged;
+
+        private static bool Allied(WildSpawnType a, WildSpawnType b)
+            => (a == b && (a == WildSpawnType.exUsec || (int)a == IcebreakerCrew.BdIb))
+               || (a == WildSpawnType.exUsec && b == WildSpawnType.bossKnight)
+               || (a == WildSpawnType.bossKnight && b == WildSpawnType.exUsec);
+
         [HarmonyPrefix]
-        private static bool Prefix(Player __instance, DamageInfoStruct damageInfo)
+        private static bool Prefix(BotsGroup __instance, IPlayer person, ref bool __result)
         {
-            if (!IceGate.On || Plugin.BotFriendlyFire.Value) return true;
+            if (!IceGate.On) return true;
             try
             {
-                if (__instance == null || !__instance.IsAI) return true;
-                var attacker = damageInfo.Player != null ? damageInfo.Player.iPlayer : null;
-                if (attacker == null || !attacker.IsAI) return true;
-                if (ReferenceEquals(attacker, __instance)) return true; // self-damage (own grenade) stays real
-                var group = __instance.AIData?.BotOwner?.BotsGroup;
-                if (group == null) return true;
-                if (group.Enemies.ContainsKey(attacker)) return true;   // real fight — lethal
-                return false; // ally accident — voided
+                if (person == null || !person.IsAI) return true;
+                var attackerRole = person.Profile?.Info?.Settings?.Role;
+                if (attackerRole == null) return true;
+                // the group's faction = its first live member's role
+                WildSpawnType? groupRole = null;
+                for (int i = 0; i < __instance.MembersCount; i++)
+                {
+                    var m = __instance.Member(i);
+                    if (m != null) { groupRole = m.Profile?.Info?.Settings?.Role; break; }
+                }
+                if (groupRole == null || !Allied(attackerRole.Value, groupRole.Value)) return true;
+                if (!_logged)
+                {
+                    _logged = true;
+                    Plugin.Log.LogDebug($"[Forgive] blocked ally enemy-add ({attackerRole} vs {groupRole} group) — logged once, applies all raid");
+                }
+                __result = false;
+                return false;
             }
             catch { return true; }
         }
