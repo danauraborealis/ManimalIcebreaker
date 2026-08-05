@@ -100,35 +100,30 @@ namespace Manimal.Icebreaker
                 StartCoroutine(EngineAdvanceWatch());
             }
 
-            // HYBRID crew (user call after comparing behaviors): the BSG boss scenario
-            // spawns just 2 fireteams + the knight for instant raid-start presence, and
-            // OUR spawner fills the rest immediately — force-spawned bots get clean
-            // individual patrol brains, while boss-group bots drag follower-brain baggage
-            // and camp their marker ("not really patrolling, getting stuck").
+            // DETERMINISTIC crew (user call 08-05, replacing the fill + culler): the
+            // count-and-correct machinery raced the wave spawner every raid — the fill
+            // measured mid-landing, saw the not-yet-activated bots as missing, over-
+            // spawned, and the culler had to claw it back (which it cant do to anything
+            // a player can see, so a flood in your face just stayed). the authored
+            // waves reliably deliver the 6-man base crew and the T1 knight detail adds
+            // 2 escorts — theres nothing to count. coop just adds flat extras, one
+            // fire-and-forget batch, no measuring before or after.
             yield return new WaitForSeconds(4f);
 
-            int haveRogues = CountByRole(WildSpawnType.exUsec);
-            bool haveKnight = CountByRole(WildSpawnType.bossKnight) > 0;
-            // retail rolls a random crew size each raid — pick a target in [min,max]
-            // party-size scaling (user call 08-03, replaces the random roll AND the
-            // min/max config pair — scaling made the knobs redundant): solo gets the
-            // base crew, every extra coop player adds one rogue up to the cap — same
-            // roster source as the BD trigger brackets, counted at raid start.
-            // 6/10 not 8/12 (user call, same day): the knight detail adds 2 rogue
-            // escorts at T1, so TOTALS land at the intended 8 solo .. 12 full squad
+            // solo gets the base crew, every extra coop player adds one rogue up to
+            // the cap — same roster source as the BD trigger brackets. 6/10 not 8/12:
+            // the knight detail adds 2 escorts, so TOTALS land at 8 solo .. 12 full
             const int baseRogues = 6, capRogues = 10;
             int party = GroupSizeEventLogic.GroupSize();
-            int wantRogues = Mathf.Clamp(baseRogues + (party - 1), baseRogues, capRogues);
-            Plugin.Log.LogDebug($"[Crew] present: {haveRogues} rogues, knight={haveKnight}; target {wantRogues} ({party} player(s)) + knight={Plugin.CrewKnight.Value}");
-
-            if (haveRogues > wantRogues)
+            int extra = Mathf.Clamp(baseRogues + (party - 1), baseRogues, capRogues) - baseRogues;
+            Plugin.Log.LogInfo($"[Crew] waves bring {baseRogues}; party of {party} adds {extra}; knight={Plugin.CrewKnight.Value}");
+            if (extra > 0 && !BdPhase)
             {
-                TrimRogues(haveRogues - wantRogues);
-                // waves land staggered and the safety rules can starve one pass (13
-                // arrivals vs target 6, 08-03 raid) — keep shaving as sightlines close
-                if (CountByRole(WildSpawnType.exUsec) > wantRogues)
-                    StartCoroutine(RetrimLoop(wantRogues));
+                var shuffled = zones.OrderBy(_ => UnityEngine.Random.value).ToList();
+                var t = ForceSpawnBatch(WildSpawnType.exUsec, shuffled[0], extra);
+                while (!t.IsCompleted) yield return null;
             }
+
             // boss-group spawns stack leader+escorts on one marker (frozen conjoined
             // rogues) — and the wave lands STAGGERED, so a one-shot pass missed everyone
             // who arrived after it. patrol for the first few minutes instead.
@@ -136,36 +131,6 @@ namespace Manimal.Icebreaker
 
             // knight raid-start force REMOVED: retail base.json says he arrives via the
             // T1 trigger with 2 rogue escorts (SpawnKnightDetail) — never at raid start
-
-            // fill from the wave's count up to the rolled target with OUR spawner. ALL
-            // batches go in flight AT ONCE — the old sequential loop (await batch, 1.5s,
-            // next) stretched over minutes whenever the server's bot-gen queue was busy,
-            // and the player heard the tail of the fill land around him INSIDE the ship
-            int deficit = wantRogues - haveRogues;
-            if (deficit > 0 && !BdPhase)
-            {
-                var shuffled = zones.OrderBy(_ => UnityEngine.Random.value).ToList();
-                var fillTasks = new List<Task>();
-                int zi = 0;
-                for (int left = deficit; left > 0; )
-                {
-                    int batch = Mathf.Min(4, left);
-                    left -= batch;
-                    fillTasks.Add(ForceSpawnBatch(WildSpawnType.exUsec, shuffled[zi++ % shuffled.Count], batch));
-                }
-                var allFill = Task.WhenAll(fillTasks);
-                while (!allFill.IsCompleted) yield return null;
-
-                // one top-up pass for naked-profile skips
-                int shortfall = wantRogues - CountByRole(WildSpawnType.exUsec);
-                if (shortfall > 0 && !BdPhase)
-                {
-                    var t2 = ForceSpawnBatch(WildSpawnType.exUsec, shuffled[zi % shuffled.Count], shortfall);
-                    while (!t2.IsCompleted) yield return null;
-                }
-            }
-
-            Plugin.Log.LogDebug($"[Crew] done: {CountByRole(WildSpawnType.exUsec)} rogues, knight={CountByRole(WildSpawnType.bossKnight) > 0}");
 
             // NOW prepare the trigger squads — after the rogues are on deck, so the
             // build has the bot-gen queue to itself. pool mode goes one further than
@@ -229,101 +194,12 @@ namespace Manimal.Icebreaker
             return list;
         }
 
-        private static bool IsStacked(BotOwner b, List<BotOwner> all)
-        {
-            foreach (var o in all)
-                if (!ReferenceEquals(o, b) && (o.Position - b.Position).sqrMagnitude < 0.5625f) // <0.75m = capsules interpenetrating
-                    return true;
-            return false;
-        }
-
-        // retry shaver: the one-shot pass at raid start rarely finds enough safe
-        // victims (see SafeToCull) — bots and players move, sightlines close, and a
-        // rogue that was exposed a minute ago becomes safely deletable. stops when the
-        // knight lands (his 2 escorts are ADDITIVE by design and must not be counted
-        // against the crew target, let alone culled) or when the BD phase begins.
-        private IEnumerator RetrimLoop(int want)
-        {
-            for (int i = 0; i < 12; i++)
-            {
-                yield return new WaitForSeconds(20f);
-                if (BdPhase || CountByRole(WildSpawnType.bossKnight) > 0) yield break;
-                int surplus = CountByRole(WildSpawnType.exUsec) - want;
-                if (surplus <= 0) yield break;
-                TrimRogues(surplus);
-            }
-        }
-
-        private void TrimRogues(int count)
-        {
-            try
-            {
-                var game = Singleton<IBotGame>.Instance;
-                var player = Singleton<GameWorld>.Instance?.MainPlayer;
-                if (game == null || player == null) return;
-                var humans = new List<Player>();
-                FikaBridge.CollectHumans(humans);
-                if (humans.Count == 0) humans.Add(player);
-
-                // eligibility: >60m from every human is always safe — but the ship is
-                // ~33m wide, so a pure radius disqualified half the crew every raid
-                // (08-03: trimmed 3/7, then 10 rogues vs target 6). indoors the real
-                // question is line of sight: 15m+ away AND a bulkhead between the bot
-                // and every human = nobody can watch the despawn.
-                bool SafeToCull(BotOwner b)
-                {
-                    float nearSq = float.MaxValue;
-                    foreach (var h in humans)
-                        nearSq = Mathf.Min(nearSq, (b.Position - h.Position).sqrMagnitude);
-                    if (nearSq > 60f * 60f) return true;
-                    if (nearSq < 15f * 15f) return false; // a pop this close can be heard
-                    var head = b.Position + Vector3.up * 1.5f;
-                    foreach (var h in humans)
-                    {
-                        var eye = h.Position + Vector3.up * 1.6f;
-                        if (!Physics.Linecast(eye, head, LayerMaskClass.HighPolyWithTerrainMask))
-                            return false; // clear line to somebody — not safe
-                    }
-                    return true;
-                }
-
-                var all = AliveRogues();
-                var candidates = new List<BotOwner>();
-                foreach (var b in all)
-                    if (SafeToCull(b))
-                        candidates.Add(b);
-                // STACKED bots go first — the boss-group spawner piles leader+escorts on
-                // one marker and interpenetrating capsules freeze the movement solver, so
-                // the surplus we have to delete anyway should be the broken ones
-                candidates.Sort((a, b) =>
-                {
-                    bool sa = IsStacked(a, all), sb = IsStacked(b, all);
-                    if (sa != sb) return sb.CompareTo(sa);
-                    return (b.Position - player.Position).sqrMagnitude.CompareTo((a.Position - player.Position).sqrMagnitude);
-                });
-                int trimmed = 0;
-                foreach (var b in candidates)
-                {
-                    if (trimmed >= count) break;
-                    try
-                    {
-                        // LeaveData.RemoveFromMap, NOT raw BotDespawn: the leave path runs
-                        // Deactivate + Dispose first, which unhooks the bot from the
-                        // hearing/event graphs. raw-despawned bots left DANGLING transforms
-                        // in BotEventHandler — every later sound the PLAYER made (footsteps,
-                        // keycard swipes) threw an NRE inside PlaySound and tore the calling
-                        // movement/interaction routine mid-frame (08-04: 415 exceptions,
-                        // controller flip-out, stuck stutterstep swipe)
-                        if (b.LeaveData != null) b.LeaveData.RemoveFromMap();
-                        else game.BotDespawn(b);
-                        trimmed++;
-                    }
-                    catch (Exception e) { Plugin.Log.LogWarning($"[Crew] despawn failed on '{b.name}': {e.Message}"); }
-                }
-                Plugin.Log.LogDebug($"[Crew] trimmed {trimmed}/{count} wave rogues (stacked first, then farthest; {candidates.Count} culling-eligible of {all.Count})");
-            }
-            catch (Exception e) { Plugin.Log.LogWarning($"[Crew] trim failed: {e.Message}"); }
-        }
+        // trim/shaver machinery deleted 08-05 (user call): counting live rogues to
+        // decide corrections was a race against the staggered wave spawner, and every
+        // flood traced back to it. the deterministic spawn plan above replaced it.
+        // if a cull is ever needed again: LeaveData.RemoveFromMap, NEVER raw
+        // BotDespawn — raw despawns leave dangling transforms in BotEventHandler and
+        // every later player sound NREs in PlaySound (08-04: controller flip-out).
 
         private System.Collections.IEnumerator UnstackPatrol()
         {
@@ -668,6 +544,8 @@ namespace Manimal.Icebreaker
             var te = ForceSpawnBatch(WildSpawnType.exUsec, zone, 2);
             while (!te.IsCompleted) yield return null;
             _squadSpawnBusy = false;
+
+            // the escorts bring the TOTAL to 8 solo (6 wave crew + these 2)
         }
 
         // ENGINE-ROOM SQUAD — retail: a Black Division fireteam pops in the aft engine room
@@ -1049,6 +927,23 @@ namespace Manimal.Icebreaker
         // every properly generated bot carries at least a scabbard knife — a profile with
         // ALL weapon slots empty is the server generator failing under burst load on the
         // custom blackdiv types (the naked frozen mannequins). vet before spawning.
+        // "why" separates two entirely different diseases the old bool collapsed
+        // (08-05 rental naked-storm hunt): an EMPTY response is the server refusing to
+        // produce bots at all (per-raid cap/state — the transit leg is the suspect);
+        // unarmed profiles are the generator failing on equipment. the fix differs.
+        internal static string NakedWhy(BotCreationDataClass data)
+        {
+            try
+            {
+                if (data == null) return "null data";
+                var profiles = data.Profiles;
+                if (profiles == null) return "EMPTY RESPONSE (null profile list)";
+                if (profiles.Count == 0) return "EMPTY RESPONSE (0 profiles)";
+                return IsNakedProfile(data) ? $"UNARMED profiles ({profiles.Count} returned, all weapon slots empty)" : null;
+            }
+            catch (Exception e) { return $"vet failed: {e.Message}"; }
+        }
+
         private static bool IsNakedProfile(BotCreationDataClass data)
         {
             try
@@ -1086,14 +981,15 @@ namespace Manimal.Icebreaker
 
             // naked roll — give the generator a breather and re-request ONCE; if it
             // fails again, skip this batch entirely (a missing bot beats a mannequin)
-            if (IsNakedProfile(data))
+            var why = NakedWhy(data);
+            if (why != null)
             {
-                Plugin.Log.LogDebug($"[Crew] {role} profile arrived NAKED — re-requesting in 3s");
+                Plugin.Log.LogWarning($"[Crew] {role} profile arrived NAKED [{why}] — re-requesting in 3s");
                 await Task.Delay(3000);
                 data = await BotCreationDataClass.Create(profileData, _spawner.BotCreator, count, _spawner);
                 if (data == null || IsNakedProfile(data))
                 {
-                    Plugin.Log.LogWarning($"[Crew] {role} re-request also bad — skipping this spawn");
+                    Plugin.Log.LogWarning($"[Crew] {role} re-request also bad [{NakedWhy(data) ?? "ok??"}] — skipping this spawn");
                     return null;
                 }
             }

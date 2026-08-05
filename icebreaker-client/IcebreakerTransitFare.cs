@@ -163,7 +163,16 @@ namespace Manimal.Icebreaker
         // exactly this. simulate:false applies inline and is INVISIBLE to fika — and
         // combining simulate:false WITH the transaction double-executes (the old
         // chain-door flashing-item bug).
-        internal static bool TryTakeFare(Player player, int cost)
+        // inlineOps (08-05, the fika-client no-charge): on a fika CLIENT the network
+        // transaction round-trips through the HOST — and a TRANSIT confirm tears the
+        // raid down immediately after, so the op comes back to a dismantled inventory
+        // ("Could not find item" post-validation; money stayed). the raid is ENDING at
+        // that moment — there are no peers left to replicate to — so the client charge
+        // applies INLINE instead: pass 1 validates everything with simulate:true
+        // (applies nothing), pass 2 re-runs the same ops with simulate:false (applies
+        // immediately, same frame, before the teardown can move). the transit profile
+        // snapshot then carries the deduction to the next leg.
+        internal static bool TryTakeFare(Player player, int cost, bool inlineOps = false)
         {
             var inv = player.InventoryController;
             if (inv == null) { Plugin.Log.LogDebug("[Fare] no inventory controller"); return false; }
@@ -179,45 +188,68 @@ namespace Manimal.Icebreaker
 
             // validate EVERYTHING before applying ANYTHING (all-or-nothing): each op is
             // simulated against its own throwaway till so simulated ops can't fight
-            // over the same grid slot
-            int remaining = cost;
+            // over the same grid slot. `apply=false` builds the dispatch list (or, for
+            // the inline path, proves the plan); `apply=true` re-runs it for real.
             var dispatch = new List<Action>();
-            foreach (var stack in stacks)
+            int RunPass(bool apply)
             {
-                if (remaining <= 0) break;
-                var fakeStash = Singleton<ItemFactoryClass>.Instance.CreateFakeStash(null);
-                var till = new TraderControllerClass(fakeStash, "IcebreakerFare", "IcebreakerFare", true, EOwnerType.ExfilPoint);
-                var slot = ((StashItemClass)till.RootItem).Grid.FindLocationForItem(stack);
-                if (slot == null) { Plugin.Log.LogDebug("[Fare] till has no room for a stack, aborting"); break; }
+                int remaining = cost;
+                foreach (var stack in stacks)
+                {
+                    if (remaining <= 0) break;
+                    if (apply && (stack == null || stack.StackObjectsCount <= 0)) break; // pass-2 sanity
+                    var fakeStash = Singleton<ItemFactoryClass>.Instance.CreateFakeStash(null);
+                    var till = new TraderControllerClass(fakeStash, "IcebreakerFare", "IcebreakerFare", true, EOwnerType.ExfilPoint);
+                    var slot = ((StashItemClass)till.RootItem).Grid.FindLocationForItem(stack);
+                    if (slot == null) { Plugin.Log.LogDebug("[Fare] till has no room for a stack, aborting"); break; }
 
-                int take = Mathf.Min(remaining, stack.StackObjectsCount);
-                if (take >= stack.StackObjectsCount)
-                {
-                    var m = InteractionsHandlerClass.Move(stack, slot, inv, true);
-                    if (m.Failed) { Plugin.Log.LogWarning($"[Fare] move validation failed: {m.Error}"); break; }
-                    dispatch.Add(() => inv.TryRunNetworkTransaction(m, r =>
-                    { if (!r.Succeed) Plugin.Log.LogWarning($"[Fare] move execution failed post-validation: {r.Error}"); }));
+                    bool simulate = !apply;
+                    int take = Mathf.Min(remaining, stack.StackObjectsCount);
+                    if (take >= stack.StackObjectsCount)
+                    {
+                        var m = InteractionsHandlerClass.Move(stack, slot, inv, simulate);
+                        if (m.Failed) { Plugin.Log.LogWarning($"[Fare] move {(apply ? "apply" : "validation")} failed: {m.Error}"); break; }
+                        if (!apply)
+                            dispatch.Add(() => inv.TryRunNetworkTransaction(m, r =>
+                            { if (!r.Succeed) Plugin.Log.LogWarning($"[Fare] move execution failed post-validation: {r.Error}"); }));
+                    }
+                    else
+                    {
+                        var s = InteractionsHandlerClass.SplitExact(stack, take, slot, inv, inv, simulate);
+                        if (s.Failed) { Plugin.Log.LogWarning($"[Fare] split {(apply ? "apply" : "validation")} failed: {s.Error}"); break; }
+                        if (!apply)
+                            dispatch.Add(() => inv.TryRunNetworkTransaction(s, r =>
+                            { if (!r.Succeed) Plugin.Log.LogWarning($"[Fare] split execution failed post-validation: {r.Error}"); }));
+                    }
+                    remaining -= take;
                 }
-                else
-                {
-                    var s = InteractionsHandlerClass.SplitExact(stack, take, slot, inv, inv, true);
-                    if (s.Failed) { Plugin.Log.LogWarning($"[Fare] split validation failed: {s.Error}"); break; }
-                    dispatch.Add(() => inv.TryRunNetworkTransaction(s, r =>
-                    { if (!r.Succeed) Plugin.Log.LogWarning($"[Fare] split execution failed post-validation: {r.Error}"); }));
-                }
-                remaining -= take;
+                return remaining;
             }
 
-            if (remaining > 0)
+            if (RunPass(apply: false) > 0)
             {
                 Notify("The smugglers wave you off, the payment did not go through");
-                Plugin.Log.LogWarning($"[Fare] validation incomplete, {remaining} short of {cost} — transit blocked, nothing charged");
+                Plugin.Log.LogWarning($"[Fare] validation incomplete — transit blocked, nothing charged");
                 return false;
+            }
+
+            if (inlineOps)
+            {
+                int left = RunPass(apply: true);
+                if (left > 0)
+                {
+                    // validated a frame ago — an apply failure here is a genuine anomaly
+                    Plugin.Log.LogWarning($"[Fare] INLINE apply fell {left} short of {cost} after clean validation — partial charge possible, check the log above");
+                    return false;
+                }
+                Notify($"Paid {cost:N0} roubles for the crossing");
+                Plugin.Log.LogInfo($"[Fare] collected {cost} roubles INLINE (fika client, pre-teardown)");
+                return true;
             }
 
             foreach (var d in dispatch) d();
             Notify($"Paid {cost:N0} roubles for the crossing");
-            Plugin.Log.LogDebug($"[Fare] collected {cost} roubles ({dispatch.Count} ops dispatched)");
+            Plugin.Log.LogInfo($"[Fare] collected {cost} roubles ({dispatch.Count} ops dispatched)");
             return true;
         }
 

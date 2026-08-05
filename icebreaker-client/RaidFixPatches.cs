@@ -3755,7 +3755,7 @@ namespace Manimal.Icebreaker
                     if (d < bestD) { bestD = d; best = c; }
                 }
                 __result.StartCorePoint = best;
-                Plugin.Log.LogInfo($"[RaidFix] assigned StartCorePoint {best?.Id} to '{__result.name}' ({Mathf.Sqrt(bestD):F1}m away)");
+                Plugin.Log.LogDebug($"[RaidFix] assigned StartCorePoint {best?.Id} to '{__result.name}' ({Mathf.Sqrt(bestD):F1}m away)");
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[RaidFix] StartCorePoint assign failed: {e.Message}"); }
         }

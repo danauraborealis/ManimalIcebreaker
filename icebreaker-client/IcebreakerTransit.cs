@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Comfort.Common;
@@ -55,6 +56,22 @@ namespace Manimal.Icebreaker
 
         private static GameObject _prefab;
         private static Task<GameObject> _loadTask;
+
+        // PROMPT ARRIVAL TAP (08-05 coop hunt): method_14 is the single funnel every
+        // prompt goes through on every peer — on fika clients it runs when the host's
+        // TransitInteractionEvent.Show arrives. logging it for OUR point only turns
+        // "the prompt didn't come up" into "the Show did/didn't reach the client",
+        // which splits the fault between host detection and client display.
+        [HarmonyPatch(typeof(TransitInteractionControllerAbstractClass), "method_14")]
+        internal static class Patch_PromptTap
+        {
+            private static void Postfix(int pointId, Player player)
+            {
+                if (pointId != PointId) return;
+                TransitZoneExitWatch.Trace($"PROMPT_OFFERED to {player?.ProfileId} local={player?.IsYourPlayer}");
+                Plugin.Log.LogDebug($"[Transit] PROMPT OFFERED for point {pointId} to '{player?.Profile?.Nickname}' (local={player?.IsYourPlayer})");
+            }
+        }
 
         [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
         internal static class Patch_SpawnTransit
@@ -175,6 +192,35 @@ namespace Manimal.Icebreaker
                 point.Controller = controller;
                 controller.Dictionary_0[PointId] = point;
 
+                // FIKA CLIENT ARMING (2026-08-04, headless repro: zone silent, no prompt,
+                // no toast): the HOST arms every point in its dictionary at init, but a
+                // fika CLIENT only arms points named in the host's TransitInitEvent —
+                // which fika builds from Location.transitParameters, where this runtime
+                // point never appears. armed state is per-player (timers = fika's
+                // SetTimers = method_8; event/exit wiring = HandleExits = method_2), and
+                // an unarmed point processes the trigger enter against missing state and
+                // produces NOTHING. arm ours for the local player on every peer — both
+                // calls are idempotent, and solo's already-armed flow is unchanged.
+                try
+                {
+                    var me = world.MainPlayer;
+                    if (me != null && controller is TransitInteractionControllerAbstractClass tic)
+                    {
+                        var one = new List<TransitPoint> { point };
+                        tic.method_8(one, me, false);
+                        tic.method_2(one, me);
+                        TransitZoneExitWatch.Trace($"BUILD+ARM ctrl={controller.GetType().Name}#{controller.GetHashCode():X}");
+                        Plugin.Log.LogDebug($"[Transit] point armed for the local player (controller={controller.GetType().Name})");
+                    }
+                    else
+                        TransitZoneExitWatch.Trace($"BUILD unarmed (me={(me != null)}, ctrl={controller.GetType().Name})");
+                }
+                catch (Exception e)
+                {
+                    TransitZoneExitWatch.Trace($"BUILD arm FAILED: {e.Message}");
+                    Plugin.Log.LogWarning($"[Transit] arming failed — the prompt may not show on fika clients: {e.Message}");
+                }
+
                 // leaving the zone has to cancel the interaction, and on this runtime-built
                 // point Unity's OnTriggerExit was not arriving (the prompt survived walking
                 // right away from an 8x3x3 box). rather than depend on it, watch the
@@ -191,7 +237,7 @@ namespace Manimal.Icebreaker
                     if (ui != null && ui.TimerPanel != null)
                     {
                         ui.TimerPanel.SetTransits(new[] { point }, false);
-                        Plugin.Log.LogInfo("[Transit] listed in the extract panel");
+                        Plugin.Log.LogDebug("[Transit] listed in the extract panel");
                     }
                 }
                 catch (Exception e) { Plugin.Log.LogWarning($"[Transit] panel listing failed: {e.Message}"); }
@@ -217,9 +263,6 @@ namespace Manimal.Icebreaker
         {
             private TransitPoint _point;
             private BoxCollider _box;
-            private bool _inside;
-            private bool _drove;      // we supplied the enter ourselves for this visit
-            private float _armedAt;   // when we first saw the player inside
 
             internal void Bind(TransitPoint point, BoxCollider box)
             {
@@ -234,93 +277,215 @@ namespace Manimal.Icebreaker
             // across a 4m gap.
             private const float ExitMargin = 4f;
 
+            // per-player visit state — EVERY human, not just the local one. on a fika
+            // host (headless included) the client's PROMPT only appears when the HOST
+            // detects that client's observed body in the zone and sends
+            // TransitInteractionEvent.Show (client method_22 -> method_14; the client
+            // NEVER builds its own prompt — verified in GClass1906: no OnPlayerEnter ->
+            // prompt wiring exists there). the old local-player-only watch meant the
+            // headless never noticed anyone entering, so no Show was ever sent — zone
+            // silent for every client (08-05 repro).
+            private sealed class Visit { public bool Inside; public int DrivesLeft; public float NextDriveAt; public string LastGate; }
+
+            private void TraceGate(Visit v, Player p, string gate)
+            {
+                if (v.LastGate == gate) return; // once per state change, not per frame
+                v.LastGate = gate;
+                Trace($"GATE-BLOCKED {Who(p)}: {gate}");
+            }
+            private readonly System.Collections.Generic.Dictionary<string, Visit> _visits
+                = new System.Collections.Generic.Dictionary<string, Visit>();
+            private readonly System.Collections.Generic.List<Player> _humans
+                = new System.Collections.Generic.List<Player>();
+
             private void Update()
             {
                 try
                 {
                     if (_point == null || _box == null) return;
-                    var player = Singleton<GameWorld>.Instance?.MainPlayer;
-                    if (player == null) return;
-
-                    // local space, so the zone's yaw is respected the way the collider is.
-                    // Position is the body transform, which is the one that matches where
-                    // the collider actually caught the player.
-                    var local = transform.InverseTransformPoint(player.Position) - _box.center;
-                    var half = _box.size * 0.5f;
-                    var outside = new Vector3(
-                        Mathf.Max(0f, Mathf.Abs(local.x) - half.x),
-                        Mathf.Max(0f, Mathf.Abs(local.y) - half.y),
-                        Mathf.Max(0f, Mathf.Abs(local.z) - half.z));
-                    float gap = outside.magnitude;
-
-                    var controller = _point.Controller;
-                    var interaction = controller as TransitInteractionControllerAbstractClass;
-
-                    if (!_inside)
+                    _humans.Clear();
+                    FikaBridge.CollectHumans(_humans);
+                    if (_humans.Count == 0)
                     {
-                        if (gap > 0f) return;
-                        _inside = true;
-                        _drove = false;
-                        _armedAt = Time.time;
-                        Plugin.Log.LogInfo(
-                            $"[Transit] player inside the zone (active={_point.IsActive}, " +
-                            $"opensIn={_point.parameters.activateAfterSec}s, " +
-                            $"summoned={controller?.summonedTransits?.ContainsKey(player.ProfileId)})");
-                        return;
+                        var mp = Singleton<GameWorld>.Instance?.MainPlayer;
+                        if (mp == null) return;
+                        _humans.Add(mp);
                     }
-
-                    if (gap > ExitMargin)
+                    foreach (var player in _humans)
                     {
-                        _inside = false;
-                        _drove = false;
-                        // report what actually happened, not that we tried. OnPlayerExit is
-                        // only wired up by the LocalGameTransitControllerClass constructor,
-                        // so on a controller built any other way it is null and the earlier
-                        // "interaction cleared" line was reporting a no-op as a success.
-                        if (controller?.OnPlayerExit != null)
-                        {
-                            controller.OnPlayerExit(_point, player);
-                            Plugin.Log.LogInfo($"[Transit] player {gap:F1}m clear, interaction cleared");
-                        }
-                        else
-                        {
-                            interaction?.method_18(player);
-                            Plugin.Log.LogInfo($"[Transit] player {gap:F1}m clear, cleared directly (no OnPlayerExit)");
-                        }
-                        return;
-                    }
-
-                    // still inside. the engine's OnTriggerEnter is what normally reaches
-                    // method_14 and puts the prompt up, and on this runtime point it does
-                    // not always arrive. give it half a second to do its job, then drive
-                    // the same OnPlayerEnter ourselves. gated on AvailableInteractionState
-                    // still being empty so a working callback is never doubled up, which
-                    // matters because method_20 also builds the transfer stash.
-                    if (_drove || !_point.IsActive) return;
-                    if (Time.time - _armedAt < 0.5f) return;
-                    if (interaction == null || interaction.AvailableInteractionState != null) return;
-
-                    _drove = true;
-                    if (controller.OnPlayerEnter != null)
-                    {
-                        controller.OnPlayerEnter(_point, player);
-                        Plugin.Log.LogDebug("[Transit] engine never offered the interaction, replayed OnPlayerEnter");
-                    }
-                    else
-                    {
-                        // no delegate to go through, so build the offer ourselves. method_14
-                        // is the same call OnPlayerEnter would land on, and it is what puts
-                        // the prompt up and wires the interaction action. skipping method_20
-                        // also skips InitPlayerStash, which only the transfer-items screen
-                        // needs, not the long-tap confirm this point uses.
-                        interaction.method_14(_point.parameters.id, player, interaction.method_17());
-                        Plugin.Log.LogDebug("[Transit] no OnPlayerEnter on this controller, offered the interaction directly");
+                        if (player == null || string.IsNullOrEmpty(player.ProfileId)) continue;
+                        WatchOne(player);
                     }
                 }
                 catch (Exception e)
                 {
                     Plugin.Log.LogWarning($"[Transit] exit watch failed: {e.Message}");
                     enabled = false;
+                }
+            }
+
+            // RESTART-PROOF TRACE (08-04): the headless auto-restarts and wipes its
+            // BepInEx log before anyone can copy it — every transit-pipeline event also
+            // appends to icebreaker_transit_trace.log next to the plugin dll, which
+            // nothing deletes. tiny volume (zone events only), timestamped per line.
+            private static string _tracePath;
+
+            internal static void Trace(string line)
+            {
+                try
+                {
+                    _tracePath = _tracePath ?? System.IO.Path.Combine(
+                        System.IO.Path.GetDirectoryName(typeof(Plugin).Assembly.Location) ?? ".",
+                        "icebreaker_transit_trace.log");
+                    System.IO.File.AppendAllText(_tracePath,
+                        $"{DateTime.Now:MM-dd HH:mm:ss.fff} {line}{Environment.NewLine}");
+                }
+                catch { }
+            }
+
+            private static string Who(Player p)
+                => $"{p.ProfileId}{(p.IsYourPlayer ? "(local)" : $"('{p.Profile?.Nickname}')")}";
+
+            private void WatchOne(Player player)
+            {
+                if (!_visits.TryGetValue(player.ProfileId, out var v))
+                    _visits[player.ProfileId] = v = new Visit();
+
+                // local space, so the zone's yaw is respected the way the collider is.
+                // Position is the body transform (synced on observed remote bodies).
+                var local = transform.InverseTransformPoint(player.Position) - _box.center;
+                var half = _box.size * 0.5f;
+                var outside = new Vector3(
+                    Mathf.Max(0f, Mathf.Abs(local.x) - half.x),
+                    Mathf.Max(0f, Mathf.Abs(local.y) - half.y),
+                    Mathf.Max(0f, Mathf.Abs(local.z) - half.z));
+                float gap = outside.magnitude;
+
+                var controller = _point.Controller;
+                // SELF-HEAL controller drift: fika constructs its transit controllers on
+                // its own schedule — if the world now holds a DIFFERENT instance than the
+                // one this point bound at build time, every drive lands on a dead object.
+                // follow the world: rebind, re-register, re-arm.
+                var worldCtrl = Singleton<GameWorld>.Instance?.TransitController;
+                if (worldCtrl != null && !ReferenceEquals(controller, worldCtrl))
+                {
+                    Trace($"REBIND {(controller == null ? "NULL" : controller.GetType().Name)} -> {worldCtrl.GetType().Name}#{worldCtrl.GetHashCode():X}");
+                    _point.Controller = worldCtrl;
+                    if (!worldCtrl.Dictionary_0.ContainsKey(_point.parameters.id))
+                        worldCtrl.Dictionary_0[_point.parameters.id] = _point;
+                    try
+                    {
+                        var me = Singleton<GameWorld>.Instance?.MainPlayer;
+                        if (me != null && worldCtrl is TransitInteractionControllerAbstractClass t2)
+                        {
+                            var one = new System.Collections.Generic.List<TransitPoint> { _point };
+                            t2.method_8(one, me, false);
+                            t2.method_2(one, me);
+                        }
+                    }
+                    catch (Exception e) { Trace($"REBIND arm failed: {e.Message}"); }
+                    controller = worldCtrl;
+                }
+                var interaction = controller as TransitInteractionControllerAbstractClass;
+
+                if (!v.Inside)
+                {
+                    if (gap > 0f) return;
+                    v.Inside = true;
+                    // RETRYING drive (08-04, headless once-per-visit hunt): a single Show
+                    // can get lost or eaten with no observable trace — retry a few times
+                    // per visit. safe to repeat: method_14 just re-offers, the client
+                    // toast is a SINGLETON notification (self-replacing, no stacking).
+                    v.DrivesLeft = 4;
+                    v.NextDriveAt = Time.time + 0.5f;
+                    v.LastGate = null;
+                    // worldCtrl from the self-heal above — after it, same=True is the norm
+                    Trace($"ENTER {Who(player)} active={_point.IsActive} summoned={controller?.summonedTransits?.ContainsKey(player.ProfileId)} "
+                        + $"ptCtrl={(controller == null ? "NULL" : controller.GetType().Name)}#{controller?.GetHashCode():X} "
+                        + $"worldCtrl={(worldCtrl == null ? "NULL" : worldCtrl.GetType().Name)}#{worldCtrl?.GetHashCode():X} same={ReferenceEquals(controller, worldCtrl)}");
+                    Plugin.Log.LogDebug(
+                        $"[Transit] {(player.IsYourPlayer ? "player" : $"'{player.Profile?.Nickname}'")} inside the zone " +
+                        $"(active={_point.IsActive}, opensIn={_point.parameters.activateAfterSec}s, " +
+                        $"summoned={controller?.summonedTransits?.ContainsKey(player.ProfileId)})");
+                    return;
+                }
+
+                if (gap > ExitMargin)
+                {
+                    v.Inside = false;
+                    v.DrivesLeft = 0;
+                    Trace($"EXIT {Who(player)} gap={gap:F1}");
+                    // report what actually happened, not that we tried. OnPlayerExit is
+                    // only wired up by the LocalGameTransitControllerClass constructor,
+                    // so on a controller built any other way it is null and the earlier
+                    // "interaction cleared" line was reporting a no-op as a success.
+                    if (controller?.OnPlayerExit != null)
+                    {
+                        controller.OnPlayerExit(_point, player);
+                        Plugin.Log.LogDebug($"[Transit] {player.ProfileId} {gap:F1}m clear, interaction cleared");
+                    }
+                    else
+                    {
+                        interaction?.method_18(player);
+                        Plugin.Log.LogDebug($"[Transit] {player.ProfileId} {gap:F1}m clear, cleared directly (no OnPlayerExit)");
+                    }
+                    // 08-05 coop trace: fika 2.3.9's client exit chain does NOT clear
+                    // AvailableInteractionState, and its enter chain won't re-offer while
+                    // it's stale — the prompt showed exactly once per raid. method_18 IS
+                    // the clear (state null + ForceInteractionsChanged + panel close) and
+                    // it's idempotent, so force it for the local player on every exit.
+                    if (player.IsYourPlayer && interaction != null)
+                        interaction.method_18(player);
+                    return;
+                }
+
+                // still inside. the engine's OnTriggerEnter is what normally reaches
+                // method_14 / the host's Show-sender, and on this runtime point it does
+                // not always arrive. drive OnPlayerEnter ourselves, retrying every 2.5s
+                // up to the per-visit budget. the AvailableInteractionState no-double-up
+                // gate only makes sense for the LOCAL player — it is the host's OWN
+                // prompt UI state, and gating a REMOTE player's enter on it would starve
+                // every client the moment the host player stands near a transit.
+                // gate order matters — trace-solved 08-05: FikaHeadlessTransitController
+                // (the fika-headless plugin's own class) derives from the BASE transit
+                // controller, NOT the interaction subclass, and the old hard interaction
+                // cast silently ate every drive on the headless. its OnPlayerEnter
+                // delegate carries everything needed (access check + Show packet), so the
+                // DELEGATE is the requirement — the interaction cast is only needed for
+                // the direct-method_14 fallback and the local prompt-state gate.
+                if (v.DrivesLeft <= 0) return;
+                if (!_point.IsActive) { TraceGate(v, player, "point-inactive"); return; }
+                if (Time.time < v.NextDriveAt) return;
+                if (controller?.OnPlayerEnter == null && interaction == null)
+                {
+                    TraceGate(v, player, $"no-delegate-no-interaction (Controller={( _point.Controller == null ? "NULL" : _point.Controller.GetType().Name)})");
+                    return;
+                }
+                if (player.IsYourPlayer && interaction != null && interaction.AvailableInteractionState != null)
+                {
+                    TraceGate(v, player, "local-state-already-set");
+                    return;
+                }
+
+                v.DrivesLeft--;
+                v.NextDriveAt = Time.time + 2.5f;
+                Trace($"DRIVE {Who(player)} left={v.DrivesLeft} ctrl={controller.GetType().Name}");
+                if (controller.OnPlayerEnter != null)
+                {
+                    controller.OnPlayerEnter(_point, player);
+                    // demoted to Debug 08-05 once the headless-controller gate fix proved
+                    // out — the trace file still records every drive
+                    Plugin.Log.LogDebug($"[Transit] drove OnPlayerEnter for {player.ProfileId} "
+                        + $"(local={player.IsYourPlayer}, ctrl={controller.GetType().Name}, "
+                        + $"transitPlayer={controller.transitPlayers?.ContainsKey(player.ProfileId)})");
+                }
+                else
+                {
+                    // no delegate to go through, so build the offer ourselves. method_14
+                    // is the same call OnPlayerEnter would land on, and it is what puts
+                    // the prompt up and wires the interaction action.
+                    interaction.method_14(_point.parameters.id, player, interaction.method_17());
+                    Plugin.Log.LogDebug($"[Transit] no OnPlayerEnter delegate, offered the interaction directly for {player.ProfileId}");
                 }
             }
         }

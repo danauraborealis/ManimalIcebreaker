@@ -100,7 +100,7 @@
     {
       "BossChance": 100,
       "BossDifficult": "normal",
-      "BossEscortAmount": "1",
+      "BossEscortAmount": "0",
       "BossEscortDifficult": "normal",
       "BossEscortType": "exUsec",
       "BossName": "exUsec",
@@ -126,7 +126,7 @@
     {
       "BossChance": 100,
       "BossDifficult": "normal",
-      "BossEscortAmount": "1",
+      "BossEscortAmount": "0",
       "BossEscortDifficult": "normal",
       "BossEscortType": "exUsec",
       "BossName": "exUsec",
@@ -150,9 +150,9 @@
       "TriggerName": ""
     },
     {
-      "BossChance": 80,
+      "BossChance": 100,
       "BossDifficult": "normal",
-      "BossEscortAmount": "1",
+      "BossEscortAmount": "0",
       "BossEscortDifficult": "normal",
       "BossEscortType": "exUsec",
       "BossName": "exUsec",
@@ -176,9 +176,9 @@
       "TriggerName": ""
     },
     {
-      "BossChance": 80,
+      "BossChance": 100,
       "BossDifficult": "normal",
-      "BossEscortAmount": "1,2",
+      "BossEscortAmount": "0",
       "BossEscortDifficult": "normal",
       "BossEscortType": "exUsec",
       "BossName": "exUsec",
@@ -202,9 +202,9 @@
       "TriggerName": ""
     },
     {
-      "BossChance": 70,
+      "BossChance": 100,
       "BossDifficult": "normal",
-      "BossEscortAmount": "1",
+      "BossEscortAmount": "0",
       "BossEscortDifficult": "normal",
       "BossEscortType": "exUsec",
       "BossName": "exUsec",
@@ -228,40 +228,14 @@
       "TriggerName": ""
     },
     {
-      "BossChance": 70,
+      "BossChance": 100,
       "BossDifficult": "normal",
-      "BossEscortAmount": "1",
+      "BossEscortAmount": "0",
       "BossEscortDifficult": "normal",
       "BossEscortType": "exUsec",
       "BossName": "exUsec",
       "BossPlayer": false,
       "BossZone": "BotZoneMash_t1",
-      "Delay": 0,
-      "DependKarma": false,
-      "DependKarmaPVE": false,
-      "ForceSpawn": false,
-      "IgnoreMaxBots": true,
-      "RandomTimeSpawn": false,
-      "ShowOnTarkovMap": false,
-      "ShowOnTarkovMapPvE": false,
-      "SpawnMode": [
-        "regular",
-        "pve"
-      ],
-      "Supports": null,
-      "Time": -1,
-      "TriggerId": "",
-      "TriggerName": ""
-    },
-    {
-      "BossChance": 60,
-      "BossDifficult": "normal",
-      "BossEscortAmount": "0,1",
-      "BossEscortDifficult": "normal",
-      "BossEscortType": "exUsec",
-      "BossName": "exUsec",
-      "BossPlayer": false,
-      "BossZone": "BotZoneKorrDown1",
       "Delay": 0,
       "DependKarma": false,
       "DependKarmaPVE": false,

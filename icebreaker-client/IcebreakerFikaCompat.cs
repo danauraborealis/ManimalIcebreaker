@@ -89,7 +89,17 @@ namespace Manimal.Icebreaker
             => Patch_StripTorchOnExtract.Strip(profileId, exitStatus);
 
         private static void CoopGameCreatePrefix(Profile profile, LocationSettingsClass.Location location, LocalRaidSettings localRaidSettings)
-            => IcebreakerMapFare.Consume(profile, location, localRaidSettings);
+        {
+            // the solo capture (LocalGame.smethod_6) is inert in coop — without this,
+            // PendingLocationId stays stale/null on every fika peer and IceGate falls
+            // through to the loaded-scene check for the whole pre-GameWorld window
+            // (wrong in BOTH directions: late gating on icebreaker, possible leakage
+            // onto vanilla maps around scene teardown)
+            IceGate.PendingLocationId = location?.Id;
+            try { IcebreakerPhysicsRegions.ResetForNewRaid(); } catch { }
+            Plugin.Log.LogInfo($"[IceGate] raid location (coop): '{IceGate.PendingLocationId ?? "<null>"}'");
+            IcebreakerMapFare.Consume(profile, location, localRaidSettings);
+        }
 
         private static bool TransitConfirmPrefix(Player __instance, int transitPointId)
         {
@@ -99,8 +109,17 @@ namespace Manimal.Icebreaker
                 if (__instance == null || !__instance.IsYourPlayer) return true;
                 int cost = Plugin.TransitCost.Value;
                 if (cost <= 0) return true;
+                // Info on purpose — a coop transit that executes WITHOUT this line in the
+                // log means fika routed the confirm around vmethod_3 (2.3.9 no-charge
+                // report, 08-05) and the fare anchor needs to move
+                Plugin.Log.LogInfo($"[Fare] coop transit confirm fired (point {transitPointId}, cost {cost:N0}) — charging");
+                // clients charge INLINE: the network transaction loses the race against
+                // the transit teardown (proven 08-05 — validated, then 'Could not find
+                // item'). the host executes transactions locally anyway, keep it there.
+                bool ok = IcebreakerTransitFare.TryTakeFare(__instance, cost, inlineOps: !FikaBridge.BotsAuthority);
+                Plugin.Log.LogInfo($"[Fare] coop charge {(ok ? "SUCCEEDED — boarding" : "FAILED — boarding blocked")}");
                 // false blocks the whole interaction — fail closed, same as solo
-                return IcebreakerTransitFare.TryTakeFare(__instance, cost);
+                return ok;
             }
             catch (Exception e)
             {
