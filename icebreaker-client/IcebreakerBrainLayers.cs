@@ -251,11 +251,28 @@ namespace Manimal.Icebreaker
     internal class IceHoldLogic : CustomLogic
     {
         private float _next;
+        private bool _muted;
 
         public IceHoldLogic(BotOwner botOwner) : base(botOwner) { }
 
         public override void Update(CustomLayer.ActionData data)
         {
+            // AMBUSHERS DON'T CHAT (user call 08-07): held bots kept spouting idle
+            // voicelines. BotTalk.CanSay is THE gate — Say/TrySay/the query drain all
+            // early-out on it. (SetSilence/IsSilenced looks like the intended API but
+            // is VESTIGIAL in this build: the engine's own quiet logics set it and
+            // nothing anywhere reads it back.) re-assert every tick — Activate() and
+            // other systems may rewrite it. restored in Stop().
+            try
+            {
+                if (BotOwner.BotTalk != null && BotOwner.BotTalk.CanSay)
+                {
+                    BotOwner.BotTalk.CanSay = false;
+                    _muted = true;
+                }
+            }
+            catch { }
+
             if (Time.time < _next) return;
             _next = Time.time + 2f;
             // the post is captured at ASSIGN time (Rec.Zone.center) — where the spawner
@@ -281,6 +298,15 @@ namespace Manimal.Icebreaker
             base.Stop();
             BotOwner.Mover?.SetPose(1f); // stand up for whatever comes next (combat/hunt)
             _next = 0f;
+            // voice back on for combat/hunt — restore to the bot's OWN configured value,
+            // not a blind true (some roles ship CAN_TALK false)
+            try
+            {
+                if (_muted && BotOwner.BotTalk != null)
+                    BotOwner.BotTalk.CanSay = BotOwner.Settings?.FileSettings?.Mind?.CAN_TALK ?? true;
+            }
+            catch { }
+            _muted = false;
         }
     }
 
