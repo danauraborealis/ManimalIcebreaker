@@ -645,7 +645,7 @@ namespace Manimal.Icebreaker
             try { var w = Comfort.Common.Singleton<GameWorld>.Instance; onIce = w != null && string.Equals(w.LocationId, "Suburbs", StringComparison.OrdinalIgnoreCase); } catch { }
             if (!onIce)
             {
-                _iceFrames = 0; _autoRebindStage = 0; _lamps.Clear(); _lastLamp = -1f; _lastAmbient = -1f; _rendererPosMap = null; _volProbeIdx = 0; _rebindDone.Clear();
+                _iceFrames = 0; _autoRebindStage = 0; _amandsStateLogged = false; _ieapiLogged = false; _lamps.Clear(); _lastLamp = -1f; _lastAmbient = -1f; _rendererPosMap = null; _volProbeIdx = 0; _rebindDone.Clear();
                 // ONLY when the map is genuinely gone. the sound scene loads (and gets its
                 // authored volumes cached + muted for the load screen) well before GameWorld
                 // reports a location, and every frame in that gap lands here — wiping the
@@ -666,6 +666,8 @@ namespace Manimal.Icebreaker
             TickCameraAutopsy(); // one-shot render-chain dump (black-screen forensics)
             TickChainPeeler();   // Home/End live bisect of the image-effect chain
             TickDeadEffectGuard(); // strip image effects that cant work on the Cam2 fallback
+            TickAmandsReapply(); // reconcile AmandsGraphics' injected MotionBlur against the live profile
+            TickIeapiDisable(); // retire InteractableExfils on this map — our exits run their own machinery
             DrainPcGroupToggles(); // expand pending group flips into renderer pendings (budgeted)
             DrainPcToggles(); // apply queued PC visibility changes under a per-frame budget
 
@@ -2142,20 +2144,25 @@ namespace Manimal.Icebreaker
         // not about any one mod. only effects WE didnt add are touched, only on our map,
         // and disabled (not destroyed) so the owner's own references stay alive.
         private static readonly HashSet<string> CannotHostOnCam2 = new HashSet<string> { "UltimateBloom" };
-        private static readonly HashSet<Behaviour> _strippedEffects = new HashSet<Behaviour>();
-        private static int _guardSweeps;
+        private static readonly HashSet<Behaviour> _strippedEffects = new HashSet<Behaviour>(); // log dedup only
+        private static readonly List<Component> _guardScratch = new List<Component>(80); // zero-alloc sweeps
 
         private void TickDeadEffectGuard()
         {
-            // sweep for the first ~30s: mods attach effects at wildly different moments
-            // (this one lands AFTER the 5s autopsy, which is why the first dumps missed it)
-            if (_iceFrames < 120 || _guardSweeps > 30 || _iceFrames % 60 != 0) return;
-            _guardSweeps++;
+            // CONTINUOUS, once a second, for the whole raid. the FPS Camera SURVIVES
+            // across raids in one game session (component indices creep raid to raid in
+            // the autopsies), so any one-window guard dies with its static budget:
+            // 08-07 sonic, raid 1 parked the bloom fine, raids 2-5 burned in because HG
+            // re-enables its bloom every raid start and the old 30-sweep counter was
+            // spent — peeler had to kill it by hand each raid. a GetComponents once a
+            // second costs nothing; no sweep cap, no cross-raid state to reset.
+            if (_iceFrames < 120 || _iceFrames % 60 != 0) return;
             try
             {
                 var cam = CameraRef != null ? CameraRef : Camera.main;
                 if (cam == null) return;
-                foreach (var c in cam.GetComponents<Component>())
+                cam.GetComponents(_guardScratch);
+                foreach (var c in _guardScratch)
                 {
                     if (c == null || !(c is Behaviour b) || !b.enabled) continue;
                     if (!CannotHostOnCam2.Contains(c.GetType().Name)) continue;
@@ -2166,15 +2173,175 @@ namespace Manimal.Icebreaker
                     // blur tuning); the component itself gets parked here and HG writes its
                     // settings into a disabled renderer, harmlessly. no visible bloom on this
                     // map — the one Hollywood feature the Cam2 chassis genuinely cant host.
-                    if (!_strippedEffects.Add(b)) continue;
                     b.enabled = false;
-                    Plugin.Log.LogWarning($"[RaidFix] disabled {c.GetType().Name} on the icebreaker camera — the Cam2 "
-                        + "fallback has no retail configuration for it, and a mod that adds one here leaves it "
-                        + "unconfigured at the END of the effect chain, where it swallows the whole frame "
-                        + "(black screen + HUD burn-in). that mod's bloom is off on this map only.");
+                    if (_strippedEffects.Add(b))
+                        Plugin.Log.LogWarning($"[RaidFix] disabled {c.GetType().Name} on the icebreaker camera — the Cam2 "
+                            + "fallback has no retail configuration for it, and a mod that adds one here leaves it "
+                            + "unconfigured at the END of the effect chain, where it swallows the whole frame "
+                            + "(black screen + HUD burn-in). that mod's bloom is off on this map only.");
+                    else
+                        Plugin.Log.LogInfo($"[RaidFix] re-parked {c.GetType().Name} — its owner re-enabled it (new raid on the persistent camera)");
                 }
             }
             catch (Exception e) { Plugin.Log.LogDebug($"[RaidFix] dead-effect guard: {e.Message}"); }
+        }
+
+        // ---- AmandsGraphics stuck-motion-blur reconcile ----
+        // Amands INJECTS a MotionBlur settings block into the camera's PostProcessVolume
+        // profile if none exists, then keeps it off with an Override(false) on the
+        // instance it CAPTURED at camera activation. our Cam2 fallback is still being
+        // operated on for seconds after that (PPLayer resources heal, donor graft), so
+        // the live profile can end up carrying the injected MotionBlur WITHOUT the
+        // disable override — motion blur on, default settings, from raid start (08-07
+        // sonic). a one-shot re-apply through their own code proved insufficient (their
+        // reset/update writes to the same stale capture), so we reconcile the LIVE
+        // profile ourselves: once a second, if their MotionBlur config is Off but the
+        // live profile's MotionBlur is enabled, we override it off. continuous on
+        // purpose — persistent-camera lesson, and the profile can swap mid-raid.
+        private bool _amandsStateLogged;
+
+        private void TickAmandsReapply()
+        {
+            if (_iceFrames < 300 || _iceFrames % 60 != 0) return; // from ~5s, once a second
+            try
+            {
+                if (!BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.Amanda.Graphics")) return;
+                var pluginType = Type.GetType("AmandsGraphics.AmandsGraphicsPlugin, AmandsGraphics");
+                if (pluginType == null) return;
+
+                // their intent: is MotionBlur meant to be on? (BoxedValue avoids their enum type)
+                var mbCfg = pluginType.GetProperty("MotionBlur",
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)?.GetValue(null);
+                string cfgVal = (mbCfg as BepInEx.Configuration.ConfigEntryBase)?.BoxedValue?.ToString() ?? "?";
+                bool wantOn = cfgVal == "On";
+
+                // the LIVE profile on the camera, not their capture
+                var cam = CameraRef != null ? CameraRef : Camera.main;
+                if (cam == null) return;
+                var volType = AccessTools.TypeByName("UnityEngine.Rendering.PostProcessing.PostProcessVolume");
+                if (volType == null) return;
+                var vol = cam.GetComponent(volType);
+                if (vol == null) return;
+                var profile = AccessTools.Property(volType, "profile")?.GetValue(vol);
+                var settings = profile == null ? null
+                    : AccessTools.Field(profile.GetType(), "settings")?.GetValue(profile) as System.Collections.IEnumerable;
+                if (settings == null) return;
+
+                object mb = null;
+                foreach (var s in settings)
+                    if (s != null && s.GetType().Name == "MotionBlur") { mb = s; break; }
+
+                bool live = false;
+                if (mb != null)
+                {
+                    var enabledParam = AccessTools.Field(mb.GetType(), "enabled")?.GetValue(mb);
+                    if (enabledParam != null)
+                    {
+                        live = (bool)AccessTools.Field(enabledParam.GetType(), "value").GetValue(enabledParam);
+                        if (live && !wantOn)
+                        {
+                            AccessTools.Method(enabledParam.GetType(), "Override")?.Invoke(enabledParam, new object[] { false });
+                            Plugin.Log.LogWarning("[Amands] live profile MotionBlur was ON with their config Off — overridden off "
+                                + "(their disable landed on a stale capture while our camera surgery swapped the profile)");
+                        }
+                    }
+                }
+
+                if (!_amandsStateLogged)
+                {
+                    _amandsStateLogged = true;
+                    Plugin.Log.LogInfo($"[Amands] reconcile armed — config MotionBlur={cfgVal}, live profile MotionBlur "
+                        + $"{(mb == null ? "ABSENT" : live ? "enabled" : "disabled")}");
+                }
+            }
+            catch (Exception e)
+            {
+                if (!_amandsStateLogged) { _amandsStateLogged = true; Plugin.Log.LogWarning($"[Amands] reconcile failed (cosmetic only): {e.Message}"); }
+            }
+        }
+
+        // ---- InteractableExfils: OFF on this map (user call 08-07) ----
+        // IEAPI wraps every exfil in its own prompt trigger (vanilla collider off, the
+        // prompt switches it back on). our exits carry their own machinery — the heli's
+        // flare lock + paid till, the gate's chain lock — so on this map we retire the
+        // mod outright instead of compat-patching around it (the old manual-activation
+        // claim + trigger-exile pile is deleted; this sweep is the ONE mechanism, so a
+        // failure here must be LOUD, not degraded-silently). their API and every other
+        // map stay untouched. continuous sweep — they build on GameStarted and timing
+        // is theirs, not ours.
+        //
+        // type resolution survives their refactors: exact name first, then any
+        // MonoBehaviour named *ExfilTrigger* in any loaded InteractableExfils assembly.
+        // assembly present but nothing resolvable = Warning naming the failure, so it
+        // gets reported and fixed rather than shipping a silently-broken retirement.
+        private static bool _ieapiResolved;
+        private static readonly List<Type> _ieapiTriggerTypes = new List<Type>();
+        private bool _ieapiLogged;
+
+        private void TickIeapiDisable()
+        {
+            if (_iceFrames < 300 || _iceFrames % 300 != 0) return; // from ~5s, every 5s
+            try
+            {
+                if (!_ieapiResolved)
+                {
+                    _ieapiResolved = true;
+                    var exact = AccessTools.TypeByName("InteractableExfilsAPI.Components.CustomExfilTrigger");
+                    if (exact != null) _ieapiTriggerTypes.Add(exact);
+                    else
+                        foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+                        {
+                            if (asm.GetName().Name.IndexOf("InteractableExfils", StringComparison.OrdinalIgnoreCase) < 0) continue;
+                            try
+                            {
+                                foreach (var t in asm.GetTypes())
+                                    if (typeof(MonoBehaviour).IsAssignableFrom(t)
+                                        && t.Name.IndexOf("ExfilTrigger", StringComparison.OrdinalIgnoreCase) >= 0)
+                                        _ieapiTriggerTypes.Add(t);
+                            }
+                            catch { }
+                            if (_ieapiTriggerTypes.Count == 0)
+                                Plugin.Log.LogWarning($"[IEAPI] '{asm.GetName().Name}' is loaded but no *ExfilTrigger* type resolves — "
+                                    + "their layout changed and the icebreaker retirement is NOT active. their prompts will run on this map; report this.");
+                            else
+                                Plugin.Log.LogWarning($"[IEAPI] exact type name drifted — resolved by scan instead: "
+                                    + string.Join(", ", _ieapiTriggerTypes.Select(t => t.FullName)));
+                        }
+                }
+                if (_ieapiTriggerTypes.Count == 0) return; // not installed (or loudly unresolvable, above)
+
+                int killed = 0;
+                foreach (var triggerType in _ieapiTriggerTypes)
+                    foreach (var comp in Resources.FindObjectsOfTypeAll(triggerType))
+                    {
+                        var c = comp as Component;
+                        if (c == null || !c.gameObject.scene.IsValid()) continue; // assets/prefabs stay
+                        Destroy(c.gameObject);
+                        killed++;
+                    }
+                if (killed > 0)
+                {
+                    // their triggers switched the vanilla exfil colliders off — restore them.
+                    // (the heli's flare lock is positional, not collider-based, so this
+                    // cannot fight it: an enabled collider a kilometer under the ship is inert)
+                    foreach (var ep in UnityEngine.Object.FindObjectsOfType<EFT.Interactive.ExfiltrationPoint>())
+                    {
+                        var col = ep.GetComponent<BoxCollider>();
+                        if (col != null && !col.enabled) col.enabled = true;
+                    }
+                    Plugin.Log.LogWarning($"[IEAPI] retired {killed} InteractableExfils trigger(s) on the icebreaker — "
+                        + "vanilla exfil flow (with our own gates on it) is the only path on this map; other maps untouched");
+                }
+                else if (!_ieapiLogged)
+                {
+                    _ieapiLogged = true;
+                    Plugin.Log.LogDebug("[IEAPI] installed but no scene triggers found on the icebreaker");
+                }
+            }
+            catch (Exception e)
+            {
+                if (!_ieapiLogged) { _ieapiLogged = true; Plugin.Log.LogWarning($"[IEAPI] disable sweep FAILED — their prompts stay active on this map, report this: {e.Message}"); }
+            }
         }
 
         // ---- render-chain PEELER (Home/End, DiagHotkeys) ----

@@ -1,0 +1,70 @@
+{
+  "SKIER": {
+    "items": [
+      {
+        "_id": "6a757a2f478c184bd220c460",
+        "_tpl": "68947ad3e4bf255d1b0ca75c",
+        "parentId": "hideout",
+        "slotId": "hideout",
+        "location": null,
+        "upd": {
+          "UnlimitedCount": false,
+          "StackObjectsCount": 2,
+          "BuyRestrictionMax": 2,
+          "BuyRestrictionCurrent": 0
+        }
+      },
+      {
+        "_id": "6a757a2f478c184bd220c46a",
+        "_tpl": "68947a8ce4bf255d1b0ca759",
+        "parentId": "hideout",
+        "slotId": "hideout",
+        "location": null,
+        "upd": {
+          "UnlimitedCount": false,
+          "StackObjectsCount": 2,
+          "BuyRestrictionMax": 2,
+          "BuyRestrictionCurrent": 0
+        }
+      }
+    ],
+    "barter_scheme": {
+      "6a757a2f478c184bd220c460": [
+        [
+          {
+            "count": 2,
+            "_tpl": "59f32bb586f774757e1e8442",
+            "level": 20,
+            "side": "Bear"
+          },
+          {
+            "count": 2,
+            "_tpl": "59f32c3b86f77472a31742f0",
+            "level": 20,
+            "side": "Usec"
+          }
+        ]
+      ],
+      "6a757a2f478c184bd220c46a": [
+        [
+          {
+            "count": 3,
+            "_tpl": "59f32bb586f774757e1e8442",
+            "level": 25,
+            "side": "Bear"
+          },
+          {
+            "count": 3,
+            "_tpl": "59f32c3b86f77472a31742f0",
+            "level": 25,
+            "side": "Usec"
+          }
+        ]
+      ]
+    },
+    "loyal_level_items": {
+      "6a757a2f478c184bd220c460": 3,
+      "6a757a2f478c184bd220c46a": 3
+    }
+  }
+}

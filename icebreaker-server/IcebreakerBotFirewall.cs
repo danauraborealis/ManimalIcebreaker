@@ -64,11 +64,11 @@ public class IcebreakerBotFirewall(
     // lives CLIENT-side in IcebreakerCrew.PlaceChargeSweep: zone-squad aware,
     // backpack-preferring — things this server hook can't see.)
 
-    // C-3 KEYCARD DROP (user call 08-03): the Boreas Compartment C-3 keycard
-    // (WTT-ContentBackport 1.0 item) as an EXTREMELY RARE find on any rogue's body —
-    // ~1% per rogue, so with the 8-12 crew roughly one raid in ten sees one at all.
+    // C-3 KEYCARD DROP (user call 08-03, bumped 08-07): the Boreas Compartment C-3
+    // keycard (WTT-ContentBackport 1.0 item) as a RARE find on any rogue's body —
+    // 2% per rogue, so with the 8-12 crew roughly one raid in six sees one.
     private const string C3KeycardTpl = "69bb3f7df94327bc0f0230c9";
-    private const double C3ChancePercent = 1.0;
+    private const double C3ChancePercent = 2.0;
 
     // icebreaker raids only (raid-context latch); goons + rogues on vanilla maps stay
     // untouched by construction.

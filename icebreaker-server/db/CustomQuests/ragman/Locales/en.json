@@ -1,0 +1,27 @@
+{
+  "6a752a6bc498772c6a150baf name": "Fresh Stock",
+  "6a752a6bc498772c6a150baf description": "Howdy, ahper! I heard there's some serious commotion going on at some ship in the bay. Apparently some unknown group is operating there, definitely not one of your guys.\n\nYou see where I'm going with this? If it's neither BEAR nor USEC, then their gear has to be something special. And special goods are the best goods, brother!\n\nIf you can get to that ship and bring me back any captured armor or rigs, they'll fly off the shelves. And you'll get your cut too, you know me!",
+  "6a752a6bc498772c6a150baf startedMessageText": "Five carriers, brother, off their own backs. Nothing off a shelf, I'll know the difference.",
+  "6a752a6bc498772c6a150baf successMessageText": "Lemme take a look... With a bit of work, this could even pass as brand new! My guys have restored gear in worse condition than this. I never doubted you, brother, your share is already here. Come pick it up whenever it suits you, yeah?",
+  "6a752a6bc498772c6a150baf failMessageText": "No carriers, no business. The shelves stay empty, ahper.",
+  "6a752a6bc498772c6a150baf acceptPlayerMessage": "",
+  "6a752a6bc498772c6a150baf declinePlayerMessage": "",
+  "6a752a6bc498772c6a150baf completePlayerMessage": "",
+  "6a752a6bc498772c6a150baf changeQuestMessageText": "",
+  "6a752a6bc498772c6a150baf note": "",
+  "6a752a6bc498772c6a150bb0": "Find the item in raid: Black Division plate carrier",
+  "6a752a6bc498772c6a150bb1": "Hand over the items",
+
+  "6a752fa8c498772c6a150bbc name": "Fresh Stock - Part 2",
+  "6a752fa8c498772c6a150bbc description": "Brother! Those carriers you brought me? Gone. All of 'em, first day, and I had folks asking for more before I even got them on the shelf. Nobody in this city's got kit like that.\n\nSo I'm not gonna pretend I don't want more. Same deal, just bigger. Eight of 'em this time, straight off the ship, and they've gotta be fresh, not something you dug out of some stash.\n\nYou pull that off and I'll set you up proper. Been holding one of those Spiritus rigs back, the good one, and it's got your name on it.",
+  "6a752fa8c498772c6a150bbc startedMessageText": "Eight rigs, brother, and fresh ones. I'll know the difference.",
+  "6a752fa8c498772c6a150bbc successMessageText": "Ha! Look at this haul. My guys are gonna be stitching these back together for a week, and every single one's already spoken for. You've got a good eye, homie. That Spiritus rig I promised, it's yours, come see me about it.",
+  "6a752fa8c498772c6a150bbc failMessageText": "Nothing came in, shelves are bare, and my buyers are getting impatient. Not how business works, ahper.",
+  "6a752fa8c498772c6a150bbc acceptPlayerMessage": "",
+  "6a752fa8c498772c6a150bbc declinePlayerMessage": "",
+  "6a752fa8c498772c6a150bbc completePlayerMessage": "",
+  "6a752fa8c498772c6a150bbc changeQuestMessageText": "",
+  "6a752fa8c498772c6a150bbc note": "",
+  "6a752fa8c498772c6a150bbd": "Find the item in raid: Black Division plate carrier",
+  "6a752fa8c498772c6a150bbe": "Hand over the items"
+}

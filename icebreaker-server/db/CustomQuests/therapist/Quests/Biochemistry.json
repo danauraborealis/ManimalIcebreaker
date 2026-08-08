@@ -1,0 +1,162 @@
+{
+  "6a753cf3478c184bd220c426": {
+    "QuestName": "Biochemistry",
+    "_id": "6a753cf3478c184bd220c426",
+    "traderId": "54cb57776803fa99248b456e",
+    "type": "PickUp",
+    "location": "5714dc342459777137212e0b",
+    "image": "/files/quest/icon/Biochemistry_Banner",
+    "acceptanceAndFinishingSource": "eft",
+    "arenaLocations": [],
+    "instantComplete": false,
+    "isKey": false,
+    "secretQuest": false,
+    "gameModes": [],
+    "progressSource": "eft",
+    "rankingModes": [],
+    "side": "Pmc",
+    "canShowNotificationsInGame": true,
+    "restartable": false,
+    "status": 0,
+    "description": "6a753cf3478c184bd220c426 description",
+    "startedMessageText": "6a753cf3478c184bd220c426 startedMessageText",
+    "successMessageText": "6a753cf3478c184bd220c426 successMessageText",
+    "failMessageText": "6a753cf3478c184bd220c426 failMessageText",
+    "acceptPlayerMessage": "",
+    "declinePlayerMessage": "",
+    "completePlayerMessage": "",
+    "changeQuestMessageText": "",
+    "name": "6a753cf3478c184bd220c426 name",
+    "note": "6a753cf3478c184bd220c426 note",
+    "conditions": {
+      "AvailableForFinish": [
+        {
+          "conditionType": "FindItem",
+          "countInRaid": false,
+          "dogtagLevel": 0,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "6a753cf3478c184bd220c427",
+          "index": 0,
+          "isEncoded": false,
+          "maxDurability": 100,
+          "minDurability": 0,
+          "onlyFoundInRaid": true,
+          "parentId": "",
+          "target": [
+            "69bb435ff609db77390b0e25"
+          ],
+          "value": 3,
+          "visibilityConditions": []
+        },
+        {
+          "conditionType": "HandoverItem",
+          "dogtagLevel": 0,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "6a753cf3478c184bd220c428",
+          "index": 1,
+          "isEncoded": false,
+          "maxDurability": 100,
+          "minDurability": 0,
+          "onlyFoundInRaid": true,
+          "parentId": "",
+          "target": [
+            "69bb435ff609db77390b0e25"
+          ],
+          "value": 3,
+          "visibilityConditions": []
+        }
+      ],
+      "AvailableForStart": [
+        {
+          "availableAfter": 0,
+          "conditionType": "Quest",
+          "dispersion": 0,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "6a753cf3478c184bd220c429",
+          "index": 0,
+          "parentId": "",
+          "status": [
+            4
+          ],
+          "target": "6a753b58478c184bd220c417",
+          "visibilityConditions": []
+        }
+      ],
+      "Fail": []
+    },
+    "rewards": {
+      "Fail": [],
+      "Started": [],
+      "Success": [
+        {
+          "availableInGameEditions": [],
+          "id": "6a753cf3478c184bd220c42a",
+          "index": 0,
+          "type": "Experience",
+          "value": 32000,
+          "unknown": false,
+          "isHidden": false
+        },
+        {
+          "availableInGameEditions": [],
+          "findInRaid": false,
+          "id": "6a753cf3478c184bd220c42b",
+          "index": 1,
+          "isEncoded": false,
+          "isHidden": false,
+          "items": [
+            {
+              "_id": "6a753cf3478c184bd220c42c",
+              "_tpl": "5449016a4bdc2d6f028b456f",
+              "upd": {
+                "StackObjectsCount": 360000
+              }
+            }
+          ],
+          "target": "6a753cf3478c184bd220c42c",
+          "type": "Item",
+          "unknown": false,
+          "value": 360000
+        },
+        {
+          "availableInGameEditions": [],
+          "gameMode": [
+            "regular",
+            "pve"
+          ],
+          "id": "6a753cf3478c184bd220c42d",
+          "index": 2,
+          "isHidden": false,
+          "items": [
+            {
+              "_id": "6a753cf3478c184bd220c42e",
+              "_tpl": "59fb016586f7746d0d4b423a"
+            }
+          ],
+          "loyaltyLevel": 1,
+          "target": "6a753cf3478c184bd220c42e",
+          "traderId": "54cb57776803fa99248b456e",
+          "type": "AssortmentUnlock",
+          "unknown": false
+        },
+        {
+          "availableInGameEditions": [],
+          "gameMode": [
+            "regular",
+            "pve"
+          ],
+          "id": "6a7561d6478c184bd220c430",
+          "index": 3,
+          "isHidden": false,
+          "target": "Surgery",
+          "type": "Skill",
+          "unknown": false,
+          "value": 200
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "RAGMAN": {
+    "items": [
+      {
+        "_id": "6a752a6bc498772c6a150bb7",
+        "_tpl": "689479cb47e5acd1e10be986",
+        "parentId": "hideout",
+        "slotId": "hideout",
+        "location": null,
+        "upd": {
+          "UnlimitedCount": false,
+          "StackObjectsCount": 2,
+          "BuyRestrictionMax": 2,
+          "BuyRestrictionCurrent": 0
+        }
+      },
+      {
+        "_id": "6a752a6bc498772c6a150bb8",
+        "_tpl": "68a5ec952295a9739b032dd8",
+        "parentId": "6a752a6bc498772c6a150bb7",
+        "slotId": "Soft_armor_front",
+        "location": null
+      },
+      {
+        "_id": "6a752a6bc498772c6a150bb9",
+        "_tpl": "68a5ec3731f944d6be0efd64",
+        "parentId": "6a752a6bc498772c6a150bb7",
+        "slotId": "Soft_armor_back",
+        "location": null
+      },
+      {
+        "_id": "6a752a6bc498772c6a150bba",
+        "_tpl": "68a5ecd83acdf023050b1c1c",
+        "parentId": "6a752a6bc498772c6a150bb7",
+        "slotId": "Soft_armor_left",
+        "location": null
+      },
+      {
+        "_id": "6a752a6bc498772c6a150bbb",
+        "_tpl": "68a5ee4b91ebcb4d0c019d88",
+        "parentId": "6a752a6bc498772c6a150bb7",
+        "slotId": "soft_armor_right",
+        "location": null
+      },
+      {
+        "_id": "6a752fa8c498772c6a150bc5",
+        "_tpl": "689479eb30cc5ba7be00f5ff",
+        "parentId": "hideout",
+        "slotId": "hideout",
+        "location": null,
+        "upd": {
+          "UnlimitedCount": false,
+          "StackObjectsCount": 2,
+          "BuyRestrictionMax": 2,
+          "BuyRestrictionCurrent": 0
+        }
+      },
+      {
+        "_id": "6a752fa8c498772c6a150bc6",
+        "_tpl": "68a5f30248f18317750ab20b",
+        "parentId": "6a752fa8c498772c6a150bc5",
+        "slotId": "Soft_armor_front",
+        "location": null
+      },
+      {
+        "_id": "6a752fa8c498772c6a150bc7",
+        "_tpl": "68a5f3a348f18317750ab4be",
+        "parentId": "6a752fa8c498772c6a150bc5",
+        "slotId": "Soft_armor_back",
+        "location": null
+      }
+    ],
+    "barter_scheme": {
+      "6a752a6bc498772c6a150bb7": [
+        [
+          {
+            "count": 2,
+            "_tpl": "59f32bb586f774757e1e8442",
+            "level": 20,
+            "side": "Bear"
+          },
+          {
+            "count": 2,
+            "_tpl": "59f32c3b86f77472a31742f0",
+            "level": 20,
+            "side": "Usec"
+          }
+        ]
+      ],
+      "6a752fa8c498772c6a150bc5": [
+        [
+          {
+            "count": 3,
+            "_tpl": "59f32bb586f774757e1e8442",
+            "level": 25,
+            "side": "Bear"
+          },
+          {
+            "count": 3,
+            "_tpl": "59f32c3b86f77472a31742f0",
+            "level": 25,
+            "side": "Usec"
+          }
+        ]
+      ]
+    },
+    "loyal_level_items": {
+      "6a752a6bc498772c6a150bb7": 3,
+      "6a752fa8c498772c6a150bc5": 3
+    }
+  }
+}

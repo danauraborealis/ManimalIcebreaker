@@ -50,7 +50,19 @@ namespace Manimal.Icebreaker
                     }
                     return false;
                 }
-                try { return (bool)_isServer.GetValue(null); }
+                // fika INSTALLED is not fika IN USE (08-05 field report: a player had
+                // fika core only as a dependency of a combat mod and raided solo — the
+                // raid ran as plain LocalGame, IsServer stayed false, and the host-gate
+                // turned the whole crew off with nobody else to spawn it). a real fika
+                // raid runs CoopGame; any other game type under an installed fika is
+                // solo semantics, full authority. game null (menus/loading) falls
+                // through to the fika flags as before.
+                try
+                {
+                    var game = Singleton<AbstractGame>.Instance;
+                    if (game != null && !game.GetType().Name.Contains("Coop")) return true;
+                    return (bool)_isServer.GetValue(null);
+                }
                 catch { return false; }
             }
         }

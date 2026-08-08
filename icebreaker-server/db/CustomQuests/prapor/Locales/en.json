@@ -21,5 +21,17 @@
   "6ae67821fba98a599d75d6b6 changeQuestMessageText": "",
   "6ae67821fba98a599d75d6b6 note": "",
   "c145e5b75c3e56f82cbbb25b": "Locate the AMG-10 hydraulic fluid on Reserve",
-  "c47a9ae5d9dea9381f719443": "Hand over the AMG-10 fluid to Prapor"
+  "c47a9ae5d9dea9381f719443": "Hand over the AMG-10 fluid to Prapor",
+  "6a75661b478c184bd220c433 name": "Oil Change",
+  "6a75661b478c184bd220c433 description": "Heya there, warrior! Since you already know about my little helicopter secret, I've got a job for you. If you want my bird to keep picking you up from the ship, it needs regular maintenance. Remember that special lubricant you brought me? You won't find that stuff in Tarkov, but there should still be some supplies left on the Icebreaker. Go take a look, check the helipad and storage areas. Anything you find in cans, bring it back to me. You've got your own interest in this too, so you won't be doing it for nothing. And if you manage to pull together a decent stock, I'll even pay extra.",
+  "6a75661b478c184bd220c433 startedMessageText": "Five cans, soldier. Helipad and the storage areas, that is where they will be.",
+  "6a75661b478c184bd220c433 successMessageText": "Alright, you handled that job well. I'll give you that. Maybe things between us will keep going smooth, just don't forget your reputation and don't even think about screwing me over. You're dismissed for now, soldier.",
+  "6a75661b478c184bd220c433 failMessageText": "No fluid, no maintenance. My bird stays grounded, and that is on you.",
+  "6a75661b478c184bd220c433 acceptPlayerMessage": "",
+  "6a75661b478c184bd220c433 declinePlayerMessage": "",
+  "6a75661b478c184bd220c433 completePlayerMessage": "",
+  "6a75661b478c184bd220c433 changeQuestMessageText": "",
+  "6a75661b478c184bd220c433 note": "",
+  "6a75661b478c184bd220c434": "Find AMG-10 hydraulic fluid in raid",
+  "6a75661b478c184bd220c435": "Hand over the items"
 }

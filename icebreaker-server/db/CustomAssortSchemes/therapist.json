@@ -1,0 +1,32 @@
+{
+  "THERAPIST": {
+    "items": [
+      {
+        "_id": "6a753cf3478c184bd220c42f",
+        "_tpl": "59fb016586f7746d0d4b423a",
+        "parentId": "hideout",
+        "slotId": "hideout",
+        "location": null,
+        "upd": {
+          "UnlimitedCount": false,
+          "StackObjectsCount": 1,
+          "BuyRestrictionMax": 1,
+          "BuyRestrictionCurrent": 0
+        }
+      }
+    ],
+    "barter_scheme": {
+      "6a753cf3478c184bd220c42f": [
+        [
+          {
+            "count": 3,
+            "_tpl": "69bb43df99f3fda8f1072483"
+          }
+        ]
+      ]
+    },
+    "loyal_level_items": {
+      "6a753cf3478c184bd220c42f": 1
+    }
+  }
+}

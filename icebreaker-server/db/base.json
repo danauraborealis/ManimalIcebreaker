@@ -473,9 +473,9 @@
   "DisabledScavExits": "Cellars,Gate 0",
   "EnableCoop": true,
   "Enabled": true,
-  "EscapeTimeLimit": 40,
-  "EscapeTimeLimitCoop": 40,
-  "EscapeTimeLimitPVE": 40,
+  "EscapeTimeLimit": 45,
+  "EscapeTimeLimitCoop": 45,
+  "EscapeTimeLimitPVE": 45,
   "Events": {
     "Halloween2024": {
       "CrowdAttackBlockRadius": 100,

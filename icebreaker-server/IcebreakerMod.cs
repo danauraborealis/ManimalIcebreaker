@@ -300,6 +300,11 @@ public class IcebreakerQuestRegistration(
         // in-raid trader dialogue trees (db/CustomDialogues) — the BTR driver's Boreas
         // conversation. quests point at their tree through the quest's dialogueId.
         await wttCommon.CustomDialogueService.CreateCustomDialogues(assembly);
+        // trader stock we ADD (db/CustomAssortSchemes) — Ragman's Black Division carrier
+        // barter. the offer only becomes visible once Fresh Stock is handed in: that gate
+        // is the QuestAssort mapping shipped alongside the quest, NOT this file. the
+        // AssortmentUnlock reward on the quest is only the "unlocks purchase" UI line.
+        await wttCommon.CustomAssortSchemeService.CreateCustomAssortSchemes(assembly);
 
         // ONE canister, random spot. CommonLib injected every candidate as a forced
         // spawn (its own LooseLoot transformer), so ours registers AFTER and prunes all
@@ -383,6 +388,21 @@ public class IcebreakerFlyerGateRouter(
     // regardless: a gate naming an id no quest carries simply filters nothing, so this
     // costs nothing until the quest exists and needs no second edit when it does.
     private const string BtrChainNext = "3f8d2c5a9b17e04d6ca8f312";
+    // Ragman wants Black Division kit, and he can only have heard about the ship once
+    // you've actually come back off it — same first-crossing gate as Stick to It, but
+    // an entirely separate trader and chain.
+    private const string FreshStock = "6a752a6bc498772c6a150baf";
+    // Therapist's iodide order. same first-crossing gate: the high dose only turns up on
+    // the ship, and her surprise at the source ("The Icebreaker?") only lands if she is
+    // asking someone who has already been out there.
+    private const string WarNeverChanges = "6a753b58478c184bd220c417";
+    // Prapor's helicopter upkeep. the callback ("you already know about my little
+    // helicopter secret") is satisfied for free by this gate: the hard map lock means
+    // nobody survives a crossing without having finished the Boreas chain first.
+    private const string OilChange = "6a75661b478c184bd220c433";
+    // Skier's courier bags. part 2 chains off this one natively, so only the opener
+    // needs a crossing gate.
+    private const string PackMule = "6a757a2f478c184bd220c458";
 
     // quests gated on "come back alive from the icebreaker". AfterQuest null means the
     // first crossing ever; otherwise it must be a crossing made AFTER that quest was
@@ -395,6 +415,10 @@ public class IcebreakerFlyerGateRouter(
         new(StickToIt, null),
         new(BitterVictory, PrivateRoman),
         new(BtrChainNext, BitterVictory),
+        new(FreshStock, null),
+        new(WarNeverChanges, null),
+        new(OilChange, null),
+        new(PackMule, null),
     };
 
     private static ValueTask<string> GateQuests(

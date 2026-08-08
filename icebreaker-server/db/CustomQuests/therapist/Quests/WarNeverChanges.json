@@ -1,0 +1,223 @@
+{
+  "6a753b58478c184bd220c417": {
+    "QuestName": "War Never Changes",
+    "_id": "6a753b58478c184bd220c417",
+    "traderId": "54cb57776803fa99248b456e",
+    "type": "PickUp",
+    "location": "5714dc342459777137212e0b",
+    "image": "/files/quest/icon/War_Never_Changes_Banner",
+    "acceptanceAndFinishingSource": "eft",
+    "arenaLocations": [],
+    "instantComplete": false,
+    "isKey": false,
+    "secretQuest": false,
+    "gameModes": [],
+    "progressSource": "eft",
+    "rankingModes": [],
+    "side": "Pmc",
+    "canShowNotificationsInGame": true,
+    "restartable": false,
+    "status": 0,
+    "description": "6a753b58478c184bd220c417 description",
+    "startedMessageText": "6a753b58478c184bd220c417 startedMessageText",
+    "successMessageText": "6a753b58478c184bd220c417 successMessageText",
+    "failMessageText": "6a753b58478c184bd220c417 failMessageText",
+    "acceptPlayerMessage": "",
+    "declinePlayerMessage": "",
+    "completePlayerMessage": "",
+    "changeQuestMessageText": "",
+    "name": "6a753b58478c184bd220c417 name",
+    "note": "6a753b58478c184bd220c417 note",
+    "conditions": {
+      "AvailableForFinish": [
+        {
+          "conditionType": "FindItem",
+          "countInRaid": false,
+          "dogtagLevel": 0,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "6a753b58478c184bd220c418",
+          "index": 0,
+          "isEncoded": false,
+          "maxDurability": 100,
+          "minDurability": 0,
+          "onlyFoundInRaid": true,
+          "parentId": "",
+          "target": [
+            "69bb43df99f3fda8f1072483"
+          ],
+          "value": 10,
+          "visibilityConditions": []
+        },
+        {
+          "conditionType": "HandoverItem",
+          "dogtagLevel": 0,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "6a753b58478c184bd220c419",
+          "index": 1,
+          "isEncoded": false,
+          "maxDurability": 100,
+          "minDurability": 0,
+          "onlyFoundInRaid": true,
+          "parentId": "",
+          "target": [
+            "69bb43df99f3fda8f1072483"
+          ],
+          "value": 10,
+          "visibilityConditions": []
+        }
+      ],
+      "AvailableForStart": [],
+      "Fail": []
+    },
+    "rewards": {
+      "Fail": [],
+      "Started": [],
+      "Success": [
+        {
+          "availableInGameEditions": [],
+          "id": "6a753b58478c184bd220c41a",
+          "index": 0,
+          "type": "Experience",
+          "value": 27000,
+          "unknown": false,
+          "isHidden": false
+        },
+        {
+          "availableInGameEditions": [],
+          "findInRaid": false,
+          "id": "6a753b58478c184bd220c41b",
+          "index": 1,
+          "isEncoded": false,
+          "isHidden": false,
+          "items": [
+            {
+              "_id": "6a753b58478c184bd220c41c",
+              "_tpl": "5449016a4bdc2d6f028b456f",
+              "upd": {
+                "StackObjectsCount": 250000
+              }
+            }
+          ],
+          "target": "6a753b58478c184bd220c41c",
+          "type": "Item",
+          "unknown": false,
+          "value": 250000
+        },
+        {
+          "availableInGameEditions": [],
+          "findInRaid": true,
+          "id": "6a753b58478c184bd220c41d",
+          "index": 2,
+          "isEncoded": false,
+          "isHidden": false,
+          "items": [
+            {
+              "_id": "6a753b58478c184bd220c41e",
+              "_tpl": "637b620db7afa97bfc3d7009",
+              "upd": {
+                "StackObjectsCount": 1,
+                "SpawnedInSession": true
+              }
+            },
+            {
+              "_id": "6a753b58478c184bd220c41f",
+              "_tpl": "637b620db7afa97bfc3d7009",
+              "upd": {
+                "StackObjectsCount": 1,
+                "SpawnedInSession": true
+              }
+            },
+            {
+              "_id": "6a753b58478c184bd220c420",
+              "_tpl": "637b620db7afa97bfc3d7009",
+              "upd": {
+                "StackObjectsCount": 1,
+                "SpawnedInSession": true
+              }
+            },
+            {
+              "_id": "6a753b58478c184bd220c421",
+              "_tpl": "637b620db7afa97bfc3d7009",
+              "upd": {
+                "StackObjectsCount": 1,
+                "SpawnedInSession": true
+              }
+            },
+            {
+              "_id": "6a753b58478c184bd220c422",
+              "_tpl": "637b620db7afa97bfc3d7009",
+              "upd": {
+                "StackObjectsCount": 1,
+                "SpawnedInSession": true
+              }
+            }
+          ],
+          "target": "6a753b58478c184bd220c41e",
+          "type": "Item",
+          "unknown": false,
+          "value": 5
+        },
+        {
+          "availableInGameEditions": [],
+          "findInRaid": true,
+          "id": "6a753b58478c184bd220c423",
+          "index": 3,
+          "isEncoded": false,
+          "isHidden": false,
+          "items": [
+            {
+              "_id": "6a753b58478c184bd220c424",
+              "_tpl": "5d02797c86f774203f38e30a",
+              "upd": {
+                "StackObjectsCount": 1,
+                "SpawnedInSession": true
+              }
+            },
+            {
+              "_id": "6a753b58478c184bd220c425",
+              "_tpl": "5d02797c86f774203f38e30a",
+              "upd": {
+                "StackObjectsCount": 1,
+                "SpawnedInSession": true
+              }
+            }
+          ],
+          "target": "6a753b58478c184bd220c424",
+          "type": "Item",
+          "unknown": false,
+          "value": 2
+        },
+        {
+          "availableInGameEditions": [],
+          "gameMode": [
+            "regular",
+            "pve"
+          ],
+          "id": "6a75624c478c184bd220c431",
+          "index": 4,
+          "isHidden": false,
+          "target": "Health",
+          "type": "Skill",
+          "unknown": false,
+          "value": 100
+        },
+        {
+          "availableInGameEditions": [],
+          "gameMode": [
+            "regular",
+            "pve"
+          ],
+          "id": "6a75624c478c184bd220c432",
+          "index": 5,
+          "isHidden": false,
+          "target": "Vitality",
+          "type": "Skill",
+          "unknown": false,
+          "value": 100
+        }
+      ]
+    }
+  }
+}

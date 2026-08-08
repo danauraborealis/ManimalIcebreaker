@@ -1,0 +1,136 @@
+{
+  "6a757a2f478c184bd220c458": {
+    "QuestName": "Pack Mule",
+    "_id": "6a757a2f478c184bd220c458",
+    "traderId": "58330581ace78e27b8b10cee",
+    "type": "PickUp",
+    "location": "5714dc342459777137212e0b",
+    "image": "/files/quest/icon/Pack_Mule_Banner",
+    "acceptanceAndFinishingSource": "eft",
+    "arenaLocations": [],
+    "instantComplete": false,
+    "isKey": false,
+    "secretQuest": false,
+    "gameModes": [],
+    "progressSource": "eft",
+    "rankingModes": [],
+    "side": "Pmc",
+    "canShowNotificationsInGame": true,
+    "restartable": false,
+    "status": 0,
+    "description": "6a757a2f478c184bd220c458 description",
+    "startedMessageText": "6a757a2f478c184bd220c458 startedMessageText",
+    "successMessageText": "6a757a2f478c184bd220c458 successMessageText",
+    "failMessageText": "6a757a2f478c184bd220c458 failMessageText",
+    "acceptPlayerMessage": "",
+    "declinePlayerMessage": "",
+    "completePlayerMessage": "",
+    "changeQuestMessageText": "",
+    "name": "6a757a2f478c184bd220c458 name",
+    "note": "6a757a2f478c184bd220c458 note",
+    "conditions": {
+      "AvailableForFinish": [
+        {
+          "conditionType": "FindItem",
+          "countInRaid": false,
+          "dogtagLevel": 0,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "6a757a2f478c184bd220c459",
+          "index": 0,
+          "isEncoded": false,
+          "maxDurability": 100,
+          "minDurability": 0,
+          "onlyFoundInRaid": true,
+          "parentId": "",
+          "target": [
+            "68947a8ce4bf255d1b0ca759",
+            "68947ad3e4bf255d1b0ca75c",
+            "68947ab5a733b1602007e2fe"
+          ],
+          "value": 5,
+          "visibilityConditions": []
+        },
+        {
+          "conditionType": "HandoverItem",
+          "dogtagLevel": 0,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "6a757a2f478c184bd220c45a",
+          "index": 1,
+          "isEncoded": false,
+          "maxDurability": 100,
+          "minDurability": 0,
+          "onlyFoundInRaid": true,
+          "parentId": "",
+          "target": [
+            "68947a8ce4bf255d1b0ca759",
+            "68947ad3e4bf255d1b0ca75c",
+            "68947ab5a733b1602007e2fe"
+          ],
+          "value": 5,
+          "visibilityConditions": []
+        }
+      ],
+      "AvailableForStart": [],
+      "Fail": []
+    },
+    "rewards": {
+      "Fail": [],
+      "Started": [],
+      "Success": [
+        {
+          "availableInGameEditions": [],
+          "id": "6a757a2f478c184bd220c45b",
+          "index": 0,
+          "type": "Experience",
+          "value": 25000,
+          "unknown": false,
+          "isHidden": false
+        },
+        {
+          "availableInGameEditions": [],
+          "findInRaid": false,
+          "id": "6a757a2f478c184bd220c45c",
+          "index": 1,
+          "isEncoded": false,
+          "isHidden": false,
+          "items": [
+            {
+              "_id": "6a757a2f478c184bd220c45d",
+              "_tpl": "5449016a4bdc2d6f028b456f",
+              "upd": {
+                "StackObjectsCount": 300000
+              }
+            }
+          ],
+          "target": "6a757a2f478c184bd220c45d",
+          "type": "Item",
+          "unknown": false,
+          "value": 300000
+        },
+        {
+          "availableInGameEditions": [],
+          "gameMode": [
+            "regular",
+            "pve"
+          ],
+          "id": "6a757a2f478c184bd220c45e",
+          "index": 2,
+          "isHidden": false,
+          "items": [
+            {
+              "_id": "6a757a2f478c184bd220c45f",
+              "_tpl": "68947ad3e4bf255d1b0ca75c"
+            }
+          ],
+          "loyaltyLevel": 3,
+          "target": "6a757a2f478c184bd220c45f",
+          "traderId": "58330581ace78e27b8b10cee",
+          "type": "AssortmentUnlock",
+          "unknown": false
+        }
+      ]
+    }
+  }
+}

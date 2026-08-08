@@ -206,19 +206,54 @@ namespace Manimal.Icebreaker
         // vmethod_1, the method fika overrides to replicate inventory to peers.
         // the flashing-item bug of the first version was simulate:FALSE (already
         // applied) COMBINED with the transaction: that pairing double-executes.
-        internal static bool ConsumeCharge(Player player)
+        private static void DispatchRemove(Player player, Item item)
         {
-            var item = FindCharge(player);
-            if (item == null) return false;
             var op = InteractionsHandlerClass.Remove(item, player.InventoryController, true);
             if (op.Failed)
             {
                 Plugin.Log.LogWarning($"[Plant] charge remove validation failed: {op.Error}");
-                return false;
+                return;
             }
             player.InventoryController.TryRunNetworkTransaction(op, r =>
             { if (!r.Succeed) Plugin.Log.LogWarning($"[Plant] charge remove execution failed post-validation: {r.Error}"); });
             Plugin.Log.LogInfo($"[Plant] consumed charge '{item.Name.Localized()}' ({item.Id})");
+        }
+
+        internal static bool ConsumeCharge(Player player)
+        {
+            var item = FindCharge(player);
+            if (item == null) return false;
+
+            // the SZ-1s are spec-item clones (MS2000 marker / signal jammer) — HOLDABLE,
+            // and pulling the charge out to plant it is the natural move. deleting the
+            // hands item out from under its controller left ghost blinking arms, no
+            // weapon and a broken camera (08-07). if it's in hands, swap to the first
+            // available weapon FIRST and consume only once the swap completes — the
+            // fuse starts immediately either way, the inventory op just trails the
+            // re-equip by a beat.
+            bool inHands = player.HandsController != null && ReferenceEquals(player.HandsController.Item, item);
+            if (!inHands)
+            {
+                DispatchRemove(player, item);
+                return true;
+            }
+
+            Plugin.Log.LogInfo("[Plant] charge was IN HANDS — swapping to a weapon before consuming it");
+            player.SetFirstAvailableItem(new Callback<IHandsController>(r =>
+            {
+                try
+                {
+                    if (player.HandsController != null && ReferenceEquals(player.HandsController.Item, item))
+                    {
+                        // nothing to swap to (no weapons at all) — rare, but never delete a
+                        // live hands item; the charge simply stays in inventory unspent
+                        Plugin.Log.LogWarning("[Plant] no weapon to swap to — charge NOT consumed (still in hands)");
+                        return;
+                    }
+                    DispatchRemove(player, item);
+                }
+                catch (Exception e) { Plugin.Log.LogWarning($"[Plant] post-swap consume failed: {e.Message}"); }
+            }));
             return true;
         }
 

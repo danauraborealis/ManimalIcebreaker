@@ -55,7 +55,15 @@ namespace Manimal.Icebreaker
             // at 80, and every SAIN layer (<=99). self-limits to the RushUntil window,
             // then the bot drops back to whatever combat AI owns it.
             BrainManager.AddCustomLayer(typeof(IceRushLayer), brains, 110);
-            Plugin.Log.LogInfo("[CrewLayer] bigbrain layers registered (ExUsec/PmcBear/PmcUsec/PMC, crew 68 / rush 110)");
+            // HOLD tier (08-07: held engine squads kept walking out early): at 68 the
+            // hold lost to PMC combat 70-78 AND AvoidDanger 80 — any grenade, gunfire
+            // or heard-footstep danger event upstairs pulled the ambush out with
+            // nobody visible. 95 clears both for the "PMC" brain the BD squads run;
+            // the yield narrows to VISIBLE enemy / actually under fire, same doctrine
+            // as the rush tier. deliberate trade: a grenade landing in the hide room
+            // no longer scatters them (AvoidDanger is outranked) — ambushers hold.
+            BrainManager.AddCustomLayer(typeof(IceHoldLayer), brains, 95);
+            Plugin.Log.LogInfo("[CrewLayer] bigbrain layers registered (ExUsec/PmcBear/PmcUsec/PMC, crew 68 / hold 95 / rush 110)");
         }
 
         internal static void Assign(BotOwner bot, Job job, Bounds zone = default, float rushSeconds = 0f)
@@ -118,6 +126,7 @@ namespace Manimal.Icebreaker
             if (!IceGate.On) return false;
             var rec = IceCrewJobs.For(BotOwner);
             if (rec == null || rec.Job == IceCrewJobs.Job.None) return false;
+            if (rec.Job == IceCrewJobs.Job.Hold) return false; // hold has its own tier at 95
             var p = BotOwner.GetPlayer;
             if (p == null || p.HealthController == null || !p.HealthController.IsAlive) return false;
             // any live threat = stand down instantly; combat layers own the bot. cheap
@@ -136,7 +145,6 @@ namespace Manimal.Icebreaker
             switch (IceCrewJobs.For(BotOwner)?.Job)
             {
                 case IceCrewJobs.Job.Hunt: return new Action(typeof(IceHuntLogic), "hunt the players");
-                case IceCrewJobs.Job.Hold: return new Action(typeof(IceHoldLogic), "hold the ambush");
                 default: return new Action(typeof(IceGuardLogic), "guard the zone");
             }
         }
@@ -147,11 +155,45 @@ namespace Manimal.Icebreaker
             switch (IceCrewJobs.For(BotOwner)?.Job)
             {
                 case IceCrewJobs.Job.Hunt: want = typeof(IceHuntLogic); break;
-                case IceCrewJobs.Job.Hold: want = typeof(IceHoldLogic); break;
                 default: want = typeof(IceGuardLogic); break;
             }
             return CurrentAction == null || CurrentAction.Type != want;
         }
+    }
+
+    // HOLD — the ambush tier. its own layer ABOVE vanilla combat/AvoidDanger because
+    // the ambush must not be walked out by noise: at crew-tier 68 every danger event
+    // upstairs (grenade, gunfire, heard steps -> GoalEnemy memory) activated a higher
+    // vanilla layer and the hide room emptied with nobody visible (08-07 reports).
+    // yields ONLY on a VISIBLE enemy or actually taking fire — a blown ambush is
+    // combat's bot; everything quieter keeps them crouched at their markers.
+    internal class IceHoldLayer : CustomLayer
+    {
+        public IceHoldLayer(BotOwner botOwner, int priority) : base(botOwner, priority) { }
+
+        public override string GetName() => "IceCrewHold";
+
+        public override bool IsActive()
+        {
+            if (!IceGate.On) return false;
+            var rec = IceCrewJobs.For(BotOwner);
+            if (rec == null || rec.Job != IceCrewJobs.Job.Hold) return false;
+            var p = BotOwner.GetPlayer;
+            if (p == null || p.HealthController == null || !p.HealthController.IsAlive) return false;
+            try
+            {
+                var ge = BotOwner.Memory?.GoalEnemy;
+                if (ge != null && ge.IsVisible) return false;         // walked in on — fight
+                if (BotOwner.Memory != null && BotOwner.Memory.IsUnderFire) return false; // shot at — fight
+            }
+            catch { return false; }
+            return true;
+        }
+
+        public override Action GetNextAction() => new Action(typeof(IceHoldLogic), "hold the ambush");
+
+        public override bool IsCurrentActionEnding()
+            => CurrentAction == null || CurrentAction.Type != typeof(IceHoldLogic);
     }
 
     // RUSH — the deployment override. same jobs, same logics, but priority 30 and NO

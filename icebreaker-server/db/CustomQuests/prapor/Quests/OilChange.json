@@ -1,0 +1,153 @@
+{
+  "6a75661b478c184bd220c433": {
+    "QuestName": "Oil Change",
+    "_id": "6a75661b478c184bd220c433",
+    "traderId": "54cb50c76803fa8b248b4571",
+    "type": "PickUp",
+    "location": "5714dc342459777137212e0b",
+    "image": "/files/quest/icon/Oil_Change_Banner",
+    "acceptanceAndFinishingSource": "eft",
+    "arenaLocations": [],
+    "instantComplete": false,
+    "isKey": false,
+    "secretQuest": false,
+    "gameModes": [],
+    "progressSource": "eft",
+    "rankingModes": [],
+    "side": "Pmc",
+    "canShowNotificationsInGame": true,
+    "restartable": false,
+    "status": 0,
+    "description": "6a75661b478c184bd220c433 description",
+    "startedMessageText": "6a75661b478c184bd220c433 startedMessageText",
+    "successMessageText": "6a75661b478c184bd220c433 successMessageText",
+    "failMessageText": "6a75661b478c184bd220c433 failMessageText",
+    "acceptPlayerMessage": "",
+    "declinePlayerMessage": "",
+    "completePlayerMessage": "",
+    "changeQuestMessageText": "",
+    "name": "6a75661b478c184bd220c433 name",
+    "note": "6a75661b478c184bd220c433 note",
+    "conditions": {
+      "AvailableForFinish": [
+        {
+          "conditionType": "FindItem",
+          "countInRaid": false,
+          "dogtagLevel": 0,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "6a75661b478c184bd220c434",
+          "index": 0,
+          "isEncoded": false,
+          "maxDurability": 100,
+          "minDurability": 0,
+          "onlyFoundInRaid": true,
+          "parentId": "",
+          "target": [
+            "699f09de81a6c812900a77b7"
+          ],
+          "value": 5,
+          "visibilityConditions": []
+        },
+        {
+          "conditionType": "HandoverItem",
+          "dogtagLevel": 0,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "6a75661b478c184bd220c435",
+          "index": 1,
+          "isEncoded": false,
+          "maxDurability": 100,
+          "minDurability": 0,
+          "onlyFoundInRaid": true,
+          "parentId": "",
+          "target": [
+            "699f09de81a6c812900a77b7"
+          ],
+          "value": 5,
+          "visibilityConditions": []
+        }
+      ],
+      "AvailableForStart": [],
+      "Fail": []
+    },
+    "rewards": {
+      "Fail": [],
+      "Started": [],
+      "Success": [
+        {
+          "availableInGameEditions": [],
+          "id": "6a75661b478c184bd220c436",
+          "index": 0,
+          "type": "Experience",
+          "value": 32000,
+          "unknown": false,
+          "isHidden": false
+        },
+        {
+          "availableInGameEditions": [],
+          "findInRaid": false,
+          "id": "6a75661b478c184bd220c437",
+          "index": 1,
+          "isEncoded": false,
+          "isHidden": false,
+          "items": [
+            {
+              "_id": "6a75661b478c184bd220c438",
+              "_tpl": "5449016a4bdc2d6f028b456f",
+              "upd": {
+                "StackObjectsCount": 330000
+              }
+            }
+          ],
+          "target": "6a75661b478c184bd220c438",
+          "type": "Item",
+          "unknown": false,
+          "value": 330000
+        },
+        {
+          "availableInGameEditions": [],
+          "gameMode": [
+            "regular",
+            "pve"
+          ],
+          "id": "6a756dda478c184bd220c439",
+          "index": 2,
+          "isHidden": false,
+          "items": [
+            {
+              "_id": "6a756dda478c184bd220c43a",
+              "_tpl": "69d28cdc274c032dd804afe0"
+            }
+          ],
+          "loyaltyLevel": 2,
+          "target": "6a756dda478c184bd220c43a",
+          "traderId": "54cb50c76803fa8b248b4571",
+          "type": "AssortmentUnlock",
+          "unknown": false
+        },
+        {
+          "availableInGameEditions": [],
+          "gameMode": [
+            "regular",
+            "pve"
+          ],
+          "id": "6a756dda478c184bd220c443",
+          "index": 3,
+          "isHidden": false,
+          "items": [
+            {
+              "_id": "6a756dda478c184bd220c444",
+              "_tpl": "689166b6c2d6fa42e7044756"
+            }
+          ],
+          "loyaltyLevel": 3,
+          "target": "6a756dda478c184bd220c444",
+          "traderId": "54cb50c76803fa8b248b4571",
+          "type": "AssortmentUnlock",
+          "unknown": false
+        }
+      ]
+    }
+  }
+}

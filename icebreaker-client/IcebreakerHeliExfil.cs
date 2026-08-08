@@ -52,7 +52,6 @@ namespace Manimal.Icebreaker
             _live = this; // remote heli-call applies route through the live component
 
             AttachFare();
-            StartCoroutine(ClaimIEAPITrigger());
 
             var zoneSrc = GameObject.Find("NotificationZone");
             if (zoneSrc == null || zoneSrc.GetComponent<BoxCollider>() == null)
@@ -74,12 +73,12 @@ namespace Manimal.Icebreaker
             _exitCol = _exit.GetComponent<BoxCollider>();
 
             // THE definitive lock (user call): the whole point PHYSICALLY leaves the map
-            // until the heli lands. no collider to toggle, no world marker on the pad, no
-            // prompt for any exfil mod to build — patching around InteractableExfils'
-            // status-free collider toggle was a losing game of whack-a-mole.
+            // until the heli lands. no collider to toggle, no world marker on the pad,
+            // nothing for any mod to prompt against. (exfil-mod compat used to live here
+            // too — retired 08-07: TickIeapiDisable removes InteractableExfils from this
+            // map entirely, so there is no prompt trigger left to chase.)
             _exitHome = _exit.transform.position;
             _exit.transform.position = _exitHome + Vector3.down * 1000f;
-            MoveIeaTriggers(_exit.transform.position); // if the mod built its prompt trigger already, exile it too
 
             BuildDetectorZone(zoneSrc.GetComponent<BoxCollider>());
 
@@ -124,69 +123,18 @@ namespace Manimal.Icebreaker
         // UncompleteRequirements for SharedTimer or WorldEvent requirements, so a plain
         // transfer requirement sits in RegularMode exactly like a vanilla car extract, and
         // the flare lock keeps owning the status.
-        // INTERACTABLE EXFILS API compat. with its "auto extract" setting on, IEAPI's
-        // CustomExfilTrigger.OnTriggerEnter calls ForceSetExfilZoneEnabled(true) the moment
-        // you walk into the zone — and that method is documented, in their own source, as
-        // "does not do any exfil requirement checks". it just switches the exfil's
-        // BoxCollider on. their MANUAL path (ToggleExfilZoneEnabled) is the one that
-        // validates, so with auto on the 2400-euro fare was simply never consulted and the
-        // ride was free (user report 07-31).
-        //
-        // the fix is their own escape hatch, not a patch: RequiresManualActivation is a
-        // public settable property that OnTriggerEnter checks FIRST, and their comment at
-        // the prompt site says outright that a handler is expected to modify it. setting it
-        // forces our exfil down the manual, requirement-checking path. we only claim it
-        // when a fare actually exists — a free ride leaves auto-extract alone.
-        //
-        // reflection, no assembly reference: IEAPI is optional and must stay that way.
-        private System.Collections.IEnumerator ClaimIEAPITrigger()
-        {
-            if (Plugin.HeliExfilCost.Value <= 0) yield break;
-            var triggerType = HarmonyLib.AccessTools.TypeByName("InteractableExfilsAPI.Components.CustomExfilTrigger");
-            if (triggerType == null) yield break;   // not installed, nothing to do
-            var exfilProp = HarmonyLib.AccessTools.Property(triggerType, "Exfil");
-            var manualProp = HarmonyLib.AccessTools.Property(triggerType, "RequiresManualActivation");
-            if (exfilProp == null || manualProp == null)
-            {
-                Plugin.Log.LogWarning("[HeliExfil] InteractableExfilsAPI present but its trigger API changed shape — "
-                                      + "auto-extract may bypass the fare, report this");
-                yield break;
-            }
-
-            // IEAPI builds its triggers on GameStarted, which can land after us — retry
-            // rather than race it. ~30s is far longer than it needs and costs nothing.
-            for (int i = 0; i < 60; i++)
-            {
-                bool claimed = false;
-                foreach (var comp in Resources.FindObjectsOfTypeAll(triggerType))
-                {
-                    if (!ReferenceEquals(exfilProp.GetValue(comp, null), _exit)) continue;
-                    manualProp.SetValue(comp, true, null);
-                    claimed = true;
-                }
-                if (claimed)
-                {
-                    Plugin.Log.LogDebug("[HeliExfil] IEAPI trigger claimed — heli exfil forced to manual activation "
-                                          + "so the fare is checked (auto-extract skips requirement checks by design)");
-                    yield break;
-                }
-                yield return new WaitForSeconds(0.5f);
-            }
-            Plugin.Log.LogDebug("[HeliExfil] InteractableExfilsAPI is loaded but no trigger bound to our exfil after 30s — "
-                                  + "if auto-extract is on, the fare may be bypassed");
-        }
-
-        private void AttachFare()
+        // idempotent, and called from MORE than raid start: the requirements array has
+        // exactly two writers in the engine (LoadSettings — whose PassageRequirement=None
+        // path assigns an EMPTY array — and OnDestroy), and a free ride was reported
+        // 08-07 with the fare verifiably attached at raid start. so the fare re-asserts
+        // at heli arrival and after any late LoadSettings instead of trusting one attach.
+        private void EnsureFare(string when)
         {
             try
             {
                 int fare = Plugin.HeliExfilCost.Value;
-                if (fare <= 0) return;
-                if (_exit.Requirements != null && _exit.Requirements.OfType<TransferItemRequirement>().Any())
-                {
-                    Plugin.Log.LogInfo("[HeliExfil] exfil already carries a transfer requirement, leaving it");
-                    return;
-                }
+                if (fare <= 0 || _exit == null) return;
+                if (_exit.Requirements != null && _exit.Requirements.OfType<TransferItemRequirement>().Any()) return;
 
                 var req = ExfiltrationRequirement.CreateRequirement(ERequirementState.TransferItem) as ExfiltrationRequirement;
                 if (req == null) { Plugin.Log.LogWarning("[HeliExfil] could not build the transfer requirement"); return; }
@@ -200,9 +148,54 @@ namespace Manimal.Icebreaker
                 req.Start(_exit);
 
                 _exit.Requirements = new ExfiltrationRequirement[] { req };
-                Plugin.Log.LogDebug($"[HeliExfil] fare attached: {fare} euros to board");
+                Plugin.Log.LogWarning($"[HeliExfil] fare attached ({when}): {fare} euros to board");
             }
-            catch (Exception e) { Plugin.Log.LogWarning($"[HeliExfil] fare attach failed, ride stays free: {e.Message}"); }
+            catch (Exception e) { Plugin.Log.LogWarning($"[HeliExfil] fare attach failed ({when}), ride stays free: {e.Message}"); }
+        }
+
+        private void AttachFare() => EnsureFare("raid start");
+
+        // a LoadSettings that lands AFTER our attach rebuilds Requirements from the
+        // server exits row (PassageRequirement None = EMPTY) — the one engine path that
+        // silently deletes the fare. re-assert immediately and say so.
+        [HarmonyPatch(typeof(ExfiltrationPoint), nameof(ExfiltrationPoint.LoadSettings))]
+        internal static class Patch_FareSurvivesLoadSettings
+        {
+            [HarmonyPostfix]
+            private static void Postfix(ExfiltrationPoint __instance)
+            {
+                try
+                {
+                    if (!IceGate.On || _live == null || __instance == null) return;
+                    if (__instance.Settings == null || __instance.Settings.Name != ExitName) return;
+                    Plugin.Log.LogWarning("[HeliExfil] LoadSettings ran on the heli exit AFTER raid start — re-asserting the fare");
+                    _live.EnsureFare("post-LoadSettings");
+                }
+                catch (Exception e) { Plugin.Log.LogWarning($"[HeliExfil] LoadSettings re-assert failed: {e.Message}"); }
+            }
+        }
+
+        // forensics for the free-ride report: every Proceed on the heli logs what the
+        // requirement check actually saw. one line per entry, cheap, and it turns the
+        // next "it was free" into an immediate diagnosis instead of a deduction chain.
+        [HarmonyPatch(typeof(ExfiltrationPoint), nameof(ExfiltrationPoint.Proceed))]
+        internal static class Patch_ProceedDiag
+        {
+            [HarmonyPostfix]
+            private static void Postfix(ExfiltrationPoint __instance, Player player)
+            {
+                try
+                {
+                    if (!IceGate.On || __instance?.Settings == null || __instance.Settings.Name != ExitName) return;
+                    if (player == null || !player.IsYourPlayer) return;
+                    int reqs = __instance.Requirements?.Length ?? 0;
+                    int unmet = __instance.UnmetRequirements(player).Count();
+                    bool queued = __instance.QueuedPlayers.Contains(player.ProfileId);
+                    Plugin.Log.LogWarning($"[HeliExfil] Proceed: requirements={reqs} unmet={unmet} queued={queued} "
+                        + $"status={__instance.Status} met={__instance.HasMetRequirements(player.ProfileId)}");
+                }
+                catch { }
+            }
         }
 
         // FLAT FARE. the pilot is not Fence and does not do loyalty deals: 2400 euros is
@@ -319,26 +312,6 @@ namespace Manimal.Icebreaker
         // no Update() status-slapping, no collider fights, no prompt-latch ejection: the
         // teleport lock supersedes the whole patch pile — a point a kilometer under the
         // ship can't be prompted, toggled or extracted through, whatever any mod does.
-
-        // the exfil mod (InteractableExfilsAPI) builds its own prompt-trigger GO with a
-        // copy of the point's collider — wherever the point goes, that goes
-        private void MoveIeaTriggers(Vector3 pos)
-        {
-            try
-            {
-                foreach (var mb in FindObjectsOfType<MonoBehaviour>(true))
-                {
-                    if (mb == null || mb.GetType().Name != "CustomExfilTrigger") continue;
-                    var exfil = HarmonyLib.AccessTools.Property(mb.GetType(), "Exfil")?.GetValue(mb) as ExfiltrationPoint;
-                    if (exfil == _exit)
-                    {
-                        mb.transform.position = pos;
-                        Plugin.Log.LogInfo($"[HeliExfil] moved exfil-mod prompt trigger to {pos}");
-                    }
-                }
-            }
-            catch (Exception e) { Plugin.Log.LogWarning($"[HeliExfil] IEA trigger move failed: {e.Message}"); }
-        }
 
         private void OnZoneEvent(GClass3552 ev)
         {
@@ -668,10 +641,8 @@ namespace Manimal.Icebreaker
         {
             yield return new WaitForSeconds(ArrivalSeconds);
             _activated = true;
-            // bring the point home — and the exfil mod's prompt trigger with it (it copied
-            // our exiled position if it built while we were away)
-            _exit.transform.position = _exitHome;
-            MoveIeaTriggers(_exitHome);
+            EnsureFare("heli arrival"); // last line of defense — never open the doors on a wiped fare
+            _exit.transform.position = _exitHome; // bring the point home
             if (_exitCol != null) _exitCol.enabled = true; // trigger back online with the skids
             _exit.Status = EExfiltrationStatus.RegularMode;
             NotificationManagerClass.DisplayMessageNotification(

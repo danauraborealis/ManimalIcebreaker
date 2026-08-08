@@ -405,13 +405,12 @@ namespace Manimal.Icebreaker
                 ? eventId[eventId.Length - 1] - '0' : 0;
             if (eventId.StartsWith("hides"))
             {
-                // hold/release STAGING (07-17), split (07-28), re-split (08-03 user call):
-                // the whole squad spawns at the hide markers — 2 start WITHOUT the hold
-                // and patrol out into the engine room immediately (visible presence before
-                // the trigger, the thing SAIN killed), the other 2 hold the ambush at the
-                // hide spots, and the extras push in from the pen when the trigger blows.
+                // hold/release STAGING (07-17), split (07-28), re-split (08-03), back to
+                // VANILLA (08-07 user call): all 4 hold the ambush at the hide markers
+                // until the release trigger blows — retail's behavior, no early
+                // patrollers. the extras still push in from the pen on release.
                 StartCoroutine(SpawnSquad("engine room", new[] { "BotZoneEngineHide" }, 4, null));
-                StartCoroutine(HoldEngineSquad(2, 2, extras));
+                StartCoroutine(HoldEngineSquad(0, 4, extras));
                 StartCoroutine(PlaceChargeSweep("BotZoneEngineHide"));
             }
             else if (eventId.StartsWith("stern"))

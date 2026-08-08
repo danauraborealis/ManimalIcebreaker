@@ -9,7 +9,7 @@
     "ff56532d9100ce03006493e9 completePlayerMessage": " ",
     "ff56532d9100ce03006493e9 changeQuestMessageText": "",
     "ff56532d9100ce03006493e9 note": "",
-    "80627eaca06d7a50d838c784": "Locate and repair the equipment under the cellular tower on Woods",
+    "80627eaca06d7a50d838c784": "Locate and repair the equipment under the cellular tower on Woods using a Toolset",
     "07c1ecde2c4652876fc769b1 name": "Boreas - Part 2",
     "07c1ecde2c4652876fc769b1 description": "While I dig for information online, you work the ground. But you won't be able to get into the port terminal. Thinking about the unloading zones, or that terminal with their logo on the customs territory? Unlikely anything is still there. Try the railway station near the lighthouse instead. Most of their cargo passed through there, beyond the water treatment plant. There's no point searching the containers themselves, but the nearby hangar might still have documents. Shipping manifests, freight directives, anything with the icebreaker's name on it. Bring me what you find.",
     "07c1ecde2c4652876fc769b1 startedMessageText": "The railway station, beyond the water treatment plant. The hangar is what you want. Leave the containers alone.",
@@ -32,8 +32,8 @@
     "9d5e3f7d6320a7fd139a2772 completePlayerMessage": "",
     "9d5e3f7d6320a7fd139a2772 changeQuestMessageText": "",
     "9d5e3f7d6320a7fd139a2772 note": "",
-    "82c33ef9da1054dac7e059bd": "Arrange transport to reach the icebreaker",
-    "6caf3eb17fdc63f4ffc3554f": "Arrange extraction from the icebreaker",
+    "82c33ef9da1054dac7e059bd": "Arrange transport to reach the icebreaker with the BTR driver",
+    "6caf3eb17fdc63f4ffc3554f": "Arrange extraction from the icebreaker with Prapor",
     "ddddc8217a1f742fdae9bddd": "Reach loyalty level 3 with Mechanic",
     "a1c4f0e2b7d3946815ef2c60": "Hand over the Paradigm Shipping poster to Mechanic"
 }

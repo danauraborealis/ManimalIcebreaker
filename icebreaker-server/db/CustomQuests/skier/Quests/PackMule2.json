@@ -1,0 +1,152 @@
+{
+  "6a757a2f478c184bd220c461": {
+    "QuestName": "Pack Mule - Part 2",
+    "_id": "6a757a2f478c184bd220c461",
+    "traderId": "58330581ace78e27b8b10cee",
+    "type": "PickUp",
+    "location": "5714dc342459777137212e0b",
+    "image": "/files/quest/icon/Pack_Mule_Banner",
+    "acceptanceAndFinishingSource": "eft",
+    "arenaLocations": [],
+    "instantComplete": false,
+    "isKey": false,
+    "secretQuest": false,
+    "gameModes": [],
+    "progressSource": "eft",
+    "rankingModes": [],
+    "side": "Pmc",
+    "canShowNotificationsInGame": true,
+    "restartable": false,
+    "status": 0,
+    "description": "6a757a2f478c184bd220c461 description",
+    "startedMessageText": "6a757a2f478c184bd220c461 startedMessageText",
+    "successMessageText": "6a757a2f478c184bd220c461 successMessageText",
+    "failMessageText": "6a757a2f478c184bd220c461 failMessageText",
+    "acceptPlayerMessage": "",
+    "declinePlayerMessage": "",
+    "completePlayerMessage": "",
+    "changeQuestMessageText": "",
+    "name": "6a757a2f478c184bd220c461 name",
+    "note": "6a757a2f478c184bd220c461 note",
+    "conditions": {
+      "AvailableForFinish": [
+        {
+          "conditionType": "FindItem",
+          "countInRaid": false,
+          "dogtagLevel": 0,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "6a757a2f478c184bd220c462",
+          "index": 0,
+          "isEncoded": false,
+          "maxDurability": 100,
+          "minDurability": 0,
+          "onlyFoundInRaid": true,
+          "parentId": "",
+          "target": [
+            "68947a8ce4bf255d1b0ca759",
+            "68947ad3e4bf255d1b0ca75c",
+            "68947ab5a733b1602007e2fe"
+          ],
+          "value": 8,
+          "visibilityConditions": []
+        },
+        {
+          "conditionType": "HandoverItem",
+          "dogtagLevel": 0,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "6a757a2f478c184bd220c463",
+          "index": 1,
+          "isEncoded": false,
+          "maxDurability": 100,
+          "minDurability": 0,
+          "onlyFoundInRaid": true,
+          "parentId": "",
+          "target": [
+            "68947a8ce4bf255d1b0ca759",
+            "68947ad3e4bf255d1b0ca75c",
+            "68947ab5a733b1602007e2fe"
+          ],
+          "value": 8,
+          "visibilityConditions": []
+        }
+      ],
+      "AvailableForStart": [
+        {
+          "availableAfter": 0,
+          "conditionType": "Quest",
+          "dispersion": 0,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "6a757a2f478c184bd220c464",
+          "index": 0,
+          "parentId": "",
+          "status": [
+            4
+          ],
+          "target": "6a757a2f478c184bd220c458",
+          "visibilityConditions": []
+        }
+      ],
+      "Fail": []
+    },
+    "rewards": {
+      "Fail": [],
+      "Started": [],
+      "Success": [
+        {
+          "availableInGameEditions": [],
+          "id": "6a757a2f478c184bd220c465",
+          "index": 0,
+          "type": "Experience",
+          "value": 40000,
+          "unknown": false,
+          "isHidden": false
+        },
+        {
+          "availableInGameEditions": [],
+          "findInRaid": false,
+          "id": "6a757a2f478c184bd220c466",
+          "index": 1,
+          "isEncoded": false,
+          "isHidden": false,
+          "items": [
+            {
+              "_id": "6a757a2f478c184bd220c467",
+              "_tpl": "5449016a4bdc2d6f028b456f",
+              "upd": {
+                "StackObjectsCount": 450000
+              }
+            }
+          ],
+          "target": "6a757a2f478c184bd220c467",
+          "type": "Item",
+          "unknown": false,
+          "value": 450000
+        },
+        {
+          "availableInGameEditions": [],
+          "gameMode": [
+            "regular",
+            "pve"
+          ],
+          "id": "6a757a2f478c184bd220c468",
+          "index": 2,
+          "isHidden": false,
+          "items": [
+            {
+              "_id": "6a757a2f478c184bd220c469",
+              "_tpl": "68947a8ce4bf255d1b0ca759"
+            }
+          ],
+          "loyaltyLevel": 3,
+          "target": "6a757a2f478c184bd220c469",
+          "traderId": "58330581ace78e27b8b10cee",
+          "type": "AssortmentUnlock",
+          "unknown": false
+        }
+      ]
+    }
+  }
+}

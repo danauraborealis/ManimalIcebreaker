@@ -1,0 +1,27 @@
+{
+  "6a753b58478c184bd220c417 name": "War Never Changes",
+  "6a753b58478c184bd220c417 description": "Hello, mercenary. In field conditions it is extremely important to anticipate any potential hazards in advance. Once a patient is already on the operating table, you can only work with whatever is available at hand. That is why I would like you to bring me high-dose potassium iodide tablets. Yes, these are used in cases of severe radiation exposure. And no, we have not recorded any leaks recently. I must ask you not to spread information about this order. You do not realize how severely panic among the population can complicate the work of my department. I am simply preparing for any incidents that may occur in the future. The issue is that in Tarkov itself we have never found this dosage. Such preparations are typically stored at nuclear facilities, as they are only relevant there. I hope your search proves more successful than that of my staff.",
+  "6a753b58478c184bd220c417 startedMessageText": "Ten packs, and the dosage must be the high one. Please be discreet about where you are looking.",
+  "6a753b58478c184bd220c417 successMessageText": "Where did you manage to obtain so many? I was not even expecting five packs... The Icebreaker? Such a find could be extremely important for supporting our work. I need to check something in the department, and then I will return to you with a new task. We cannot afford to miss an opportunity of this value.",
+  "6a753b58478c184bd220c417 failMessageText": "The order was not filled. I will have to plan around the shortage, as always.",
+  "6a753b58478c184bd220c417 acceptPlayerMessage": "",
+  "6a753b58478c184bd220c417 declinePlayerMessage": "",
+  "6a753b58478c184bd220c417 completePlayerMessage": "",
+  "6a753b58478c184bd220c417 changeQuestMessageText": "",
+  "6a753b58478c184bd220c417 note": "",
+  "6a753b58478c184bd220c418": "Find Nooby Shield potassium iodide tablets in raid",
+  "6a753b58478c184bd220c419": "Hand over the items",
+
+  "6a753cf3478c184bd220c426 name": "Biochemistry",
+  "6a753cf3478c184bd220c426 description": "This icebreaker you've found is a real discovery! If it is located that far out, there could still be medical equipment on board that survived the blast in the city center... We will not get a second opportunity like this. In conditions of isolation and the inability to provide full hospital care, we usually rely on specialized biochemical analyzers. They allow us to perform a wide range of tests quickly and with the necessary accuracy. However, most of the reserve units in Tarkov were taken by emergency services during the evacuation. But on the icebreaker there could still be analyzers in working condition. Especially if it is connected to TerraGroup. Search for them for me, preferably several. The ship likely had its own medical section where they could have been installed.",
+  "6a753cf3478c184bd220c426 startedMessageText": "Three analyzers, and they must be intact. Check the medical section of the ship first.",
+  "6a753cf3478c184bd220c426 successMessageText": "You found the Aceso? That is probably the best news of the day. Given the shortages in Tarkov, they will be a very valuable asset... But of course, I will only consider parting with them in cases of extreme necessity. For now, they will go straight into operation and greatly ease the workload of my staff and patients.",
+  "6a753cf3478c184bd220c426 failMessageText": "No analyzers, then. My department will continue as it has been.",
+  "6a753cf3478c184bd220c426 acceptPlayerMessage": "",
+  "6a753cf3478c184bd220c426 declinePlayerMessage": "",
+  "6a753cf3478c184bd220c426 completePlayerMessage": "",
+  "6a753cf3478c184bd220c426 changeQuestMessageText": "",
+  "6a753cf3478c184bd220c426 note": "",
+  "6a753cf3478c184bd220c427": "Find Aceso Xpress semi-automatic biochemical analyzers in raid",
+  "6a753cf3478c184bd220c428": "Hand over the items"
+}
