@@ -52,11 +52,20 @@ namespace Manimal.Icebreaker
         internal static ConfigEntry<bool> LampShadows;
         internal static ConfigEntry<float> CullDistanceScale;
         internal static ConfigEntry<bool> PcDriverEnabled;
+        internal static ConfigEntry<bool> NativeCulling;
+        internal static ConfigEntry<float> LodBiasClamp;
+        internal static ConfigEntry<int> MaxLodClamp;
+        internal static ConfigEntry<float> LodCullFloor;
+        internal static ConfigEntry<float> LodCullNearFloor;
+        internal static ConfigEntry<float> LodCullNearRadius;
+        internal static ConfigEntry<float> LodCullNearRadiusIndoor;
         internal static ConfigEntry<bool> ShadowProxyFix;
         internal static ConfigEntry<bool> CrewPreSpawnPool;
+        internal static ConfigEntry<bool> NativeBdWaves;
         internal static ConfigEntry<bool> CrewKnight;
         internal static ConfigEntry<bool> CrewBlackDiv;
         internal static ConfigEntry<bool> SpatialAudio;
+        internal static ConfigEntry<bool> LensFlares;
         internal static ConfigEntry<bool> EnvTriggers;
         internal static ConfigEntry<float> DoorSoundBoost;
         internal static ConfigEntry<bool> AmbientBeds;
@@ -206,6 +215,39 @@ namespace Manimal.Icebreaker
                     new AcceptableValueRange<float>(0.25f, 3f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             PcDriverEnabled = Config.Bind("Icebreaker", "PcDriverEnabled", true,
                 new ConfigDescription("occlusion culling driver — flip OFF (live) to un-cull everything; the pop-in isolation tool: if pops stop with this off, the bake's sightline data is the culprit", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
+            NativeCulling = Config.Bind("Icebreaker", "NativeCulling", false,
+                new ConfigDescription("EXPERIMENTAL: run BSG's own 84k-cell retail culling bake instead of our 6 sidecar volumes. needs the 231MB 065281ec..._packed_cull.bytes in EscapeFromTarkov_Data\\StreamingAssets\\Culling_Data (NOT shipped in the mod zip) — silently falls back to the sidecars when the file is missing. much finer room-vs-room isolation indoors; tested slower overall in July (outdoor-heavy), re-trialing for interiors. needs a raid restart", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
+            // PixelLightClamp lived for one day (08-09): clamping 5 -> 1 changed nothing
+            // — the map renders deferred, per-pixel light count only taxes the few
+            // forward-rendered objects. lever tested dead, knob removed.
+            // Shadow{Distance,Cascades}Clamp RETIRED (08-09): both tested as no-ops —
+            // the rip lost the baked lighting, the map barely casts shadows, and the
+            // user's game already ran distance 40 / cascades 2. dead knobs don't ship
+            LodBiasClamp = Config.Bind("Icebreaker", "LodBiasClamp", 0.7f,
+                new ConfigDescription("override unity's LOD bias on this map (live). THE dense-view fps fix (08-08 FrameSplit hunt) — but NOT for the reason the name suggests: 97.5% of this map's 82k LODGroups are single-LOD, so bias here scales how far out props CULL, not mesh detail. lower = props cull nearer = fps; the LodCullFloor cap keeps near-cullers (furniture) from popping in plain sight. 0.7 + floor 0.01 is the tested sweet spot; -1 = hands off (the game's 2.0 = retail distances)",
+                    new AcceptableValueRange<float>(-1f, 2f), new ConfigurationManagerAttributes { IsAdvanced = false }));
+            LodCullFloor = Config.Bind("Icebreaker", "LodCullFloor", 0.1f,
+                new ConfigDescription("FAR-tier cull cap (LIVE): beyond the near radius, props cull when smaller than this screen fraction. the proven fps lever — higher = earlier culls = more fps + more distant pop; -1 = retail cull heights. pairs with the near tier so aggression out here never touches whats in your face",
+                    new AcceptableValueRange<float>(-1f, 0.1f), new ConfigurationManagerAttributes { IsAdvanced = true }));
+            LodCullNearFloor = Config.Bind("Icebreaker", "LodCullNearFloor", 0.006f,
+                new ConfigDescription("NEAR-tier cull cap (LIVE): inside LodCullNearRadius, props only vanish below this screen fraction — the anti-dither guarantee for furniture around you. -1 = retail heights near you",
+                    new AcceptableValueRange<float>(-1f, 0.05f), new ConfigurationManagerAttributes { IsAdvanced = true }));
+            LodCullNearRadius = Config.Bind("Icebreaker", "LodCullNearRadius", 26f,
+                new ConfigDescription("meters around the camera that count as the near tier while OUTDOORS (LIVE). cells re-tier when you cross a cell boundary",
+                    new AcceptableValueRange<float>(5f, 100f), new ConfigurationManagerAttributes { IsAdvanced = true }));
+            LodCullNearRadiusIndoor = Config.Bind("Icebreaker", "LodCullNearRadiusIndoor", 19.49f,
+                new ConfigDescription("near-tier radius while INDOORS (LIVE). corridor sightlines are short — a tighter bubble lets the far tier eat the rest of the deck",
+                    new AcceptableValueRange<float>(5f, 100f), new ConfigurationManagerAttributes { IsAdvanced = true }));
+            // CellCull config REMOVED pre-release (08-09): the experiment never engaged
+            // in the field — GClass1238 needs a CullingGridPreProcess the shipped bundle
+            // lacks, plus the 231MB packed bake no player has. a knob that cannot work
+            // does not ship; the design notes live in memory if the restore ever lands
+            MaxLodClamp = Config.Bind("Icebreaker", "MaxLodClamp", -1,
+                new ConfigDescription("force-skip LOD0 globally (live diagnostic). 1 = every LODGroup renders LOD1 or lower — brutal visually but if fps rockets, the dense-view cost is LOD0 mesh detail and lod bias tuning is the shipping fix. -1 = off",
+                    new AcceptableValueList<int>(-1, 0, 1, 2), new ConfigurationManagerAttributes { IsAdvanced = true }));
+            // StaticBatch config RETIRED (user call 08-09): the bundle already ships
+            // 91% build-time batched (verified in the bundle) — the runtime pass only
+            // caught ~2.2k leftover renderers and never measured an fps win
             // NOTE: the old LodBiasClamp knob is gone — forcing QualitySettings.lodBias
             // overrode the player's own Object LOD quality setting and halved loose
             // loot visibility (loot LODGroups cull on lodBias). vanilla settings stay
@@ -223,12 +265,19 @@ namespace Manimal.Icebreaker
             // premake+prewarm makes on-demand spawns cheap enough.
             CrewPreSpawnPool = Config.Bind("Icebreaker", "CrewPreSpawnPool", false,
                 new ConfigDescription("pre-spawn the trigger squads into an off-map pen during the early raid and TELEPORT them in when events fire. off (default) = profiles premade + bundles prewarmed, bots spawned on demand through the real pipeline", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
+            NativeBdWaves = Config.Bind("Icebreaker", "NativeBdWaves", false,
+                new ConfigDescription("EXPERIMENTAL: spawn the trigger squads (BD/knight/wedges) through BSG's own BossLocationSpawn botEvent pipeline with the retail 1.0 wave table, instead of our force-spawner. retail-exact squad sizes and grouping; known tradeoffs: spawn-moment generation hitch (no premake), boss-group follower quirks. needs a raid restart", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             CrewKnight = Config.Bind("Icebreaker", "CrewKnight", true,
                 new ConfigDescription("spawn solo Knight among the rogues", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             CrewBlackDiv = Config.Bind("Icebreaker", "CrewBlackDivision", true,
                 new ConfigDescription("spawn Black Division squads when the start-cutscene trigger is hit (needs the BlackDiv mod)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             SpatialAudio = Config.Bind("Icebreaker", "SpatialAudio", true,
                 new ConfigDescription("resurrect BSG's spatial audio (room/portal occlusion) from the recovered retail bake — needs the acoustics sidecar next to the dll", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
+            LensFlares = Config.Bind("Icebreaker", "LensFlares", true,
+                new ConfigDescription("restore the ~1100 retail lens flares (lamp glow sprites). OFF is a perf A/B lever — over a thousand flare components have measurable render cost. needs a raid restart", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
+            // SsrQuality config RETIRED (user call 08-09): the clamp itself stays,
+            // hardcoded to full-size (kills the retail profile's supersampled SSR,
+            // near-identical look) — the knob was clutter, the fix is not optional
             EnvTriggers = Config.Bind("Icebreaker", "EnvironmentTriggers", true,
                 new ConfigDescription("rebuild the retail indoor/outdoor switcher volumes (indoor sound banks, exposure, rain muffling)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             DoorSoundBoost = Config.Bind("Icebreaker", "DoorSoundBoost", 4.0f,

@@ -641,11 +641,38 @@ namespace Manimal.Icebreaker
                 catch (Exception e) { Plugin.Log.LogWarning($"[LightAutopsy] failed: {e.Message}"); }
             }
 
+            // INSERT — the LODGroup.enabled semantics probe (08-08 retail-parity hunt).
+            // bsg's dormant cell autocull culls by `lodgroup.enabled = false` per cell;
+            // unity's docs are ambiguous on whether a disabled LODGroup HIDES its
+            // renderers or renders them unmanaged. one keypress settles it: toggle every
+            // map LODGroup within 40m and look — props vanish = disable culls (resurrect
+            // the cell system), props stay = disable un-culls (dead end, build our own).
+            if (Plugin.DiagHotkeys.Value && IceGate.On && Input.GetKeyDown(KeyCode.Insert))
+            {
+                try
+                {
+                    var cam = CameraRef != null ? CameraRef.transform.position : Vector3.zero;
+                    _lodProbeOff = !_lodProbeOff;
+                    int hit = 0;
+                    foreach (var g in UnityEngine.Object.FindObjectsOfType<LODGroup>())
+                    {
+                        if (g == null) continue;
+                        var sc = g.gameObject.scene.name;
+                        if (sc == null || !sc.StartsWith("Icebreaker")) continue;
+                        if ((g.transform.position - cam).sqrMagnitude > 40f * 40f) continue;
+                        g.enabled = !_lodProbeOff;
+                        hit++;
+                    }
+                    Plugin.Log.LogWarning($"[LodProbe] {hit} LODGroups within 40m now enabled={!_lodProbeOff} — do the props VANISH or STAY?");
+                }
+                catch (Exception e) { Plugin.Log.LogWarning($"[LodProbe] failed: {e.Message}"); }
+            }
+
             var onIce = false;
             try { var w = Comfort.Common.Singleton<GameWorld>.Instance; onIce = w != null && string.Equals(w.LocationId, "Suburbs", StringComparison.OrdinalIgnoreCase); } catch { }
             if (!onIce)
             {
-                _iceFrames = 0; _autoRebindStage = 0; _amandsStateLogged = false; _ieapiLogged = false; _lamps.Clear(); _lastLamp = -1f; _lastAmbient = -1f; _rendererPosMap = null; _volProbeIdx = 0; _rebindDone.Clear();
+                _iceFrames = 0; _autoRebindStage = 0; _amandsStateLogged = false; _ieapiLogged = false; _ieapiEmptyStreak = 0; _ieapiNextSweep = 0f; _lamps.Clear(); _lastLamp = -1f; _lastAmbient = -1f; _rendererPosMap = null; _volProbeIdx = 0; _rebindDone.Clear();
                 // ONLY when the map is genuinely gone. the sound scene loads (and gets its
                 // authored volumes cached + muted for the load screen) well before GameWorld
                 // reports a location, and every frame in that gap lands here — wiping the
@@ -654,6 +681,9 @@ namespace Manimal.Icebreaker
                 // in it waiting on the host: silent wind + dead zone tones, 07-31
                 if (!IcebreakerAcoustics.IcebreakerLoaded())
                     IcebreakerAcoustics.ResetAmbientCache();
+                TickVanillaPerfCensus(); // any-map native-perf inventory (vanilla comparison)
+                _mixNextSweep = 0f; _mixAdopted = 0; // fresh adoption count per raid
+                try { IceHoldLogic.MutedSpeakers.Clear(); } catch { } // dead speakers out of the muzzle set
                 var crew = GetComponent<IcebreakerCrew>();
                 if (crew != null) Destroy(crew); // fresh spawner per raid
                 IceCrewJobs.Reset(); // stale profile-keyed jobs must not leak across raids
@@ -662,14 +692,22 @@ namespace Manimal.Icebreaker
                 return;
             }
 
-            TickSpikeProbe(); // stutter forensics — logs spiked frames with toggle/GC counts
-            TickCameraAutopsy(); // one-shot render-chain dump (black-screen forensics)
-            TickChainPeeler();   // Home/End live bisect of the image-effect chain
-            TickDeadEffectGuard(); // strip image effects that cant work on the Cam2 fallback
-            TickAmandsReapply(); // reconcile AmandsGraphics' injected MotionBlur against the live profile
-            TickIeapiDisable(); // retire InteractableExfils on this map — our exits run their own machinery
-            DrainPcGroupToggles(); // expand pending group flips into renderer pendings (budgeted)
-            DrainPcToggles(); // apply queued PC visibility changes under a per-frame budget
+            TickSpikeProbe(); // stutter forensics — logs spiked frames with per-tick attribution
+            TickFrameSplit(); // steady-state forensics — 10s main/render/gpu/wait split
+            TickQualityClamps(); // live LOD bias/maxLOD caps + the one-shot quality census
+            var camPos = CameraRef != null ? CameraRef.transform.position : Vector3.zero;
+            IcebreakerLodCullFloor.Tick(camPos); // cell-tiered cull floors
+            TickMixerRoute(); // unrouted ambient sources -> master mixer (volume sliders)
+            // every tick is stopwatched into _tickMs so a spiked frame can say WHICH of
+            // our systems (if any) ate it — "counters all zero" exonerated only the four
+            // counted systems, not this list (08-08 lesson)
+            TickBegin(); TickCameraAutopsy(); TickEnd(0);
+            TickBegin(); TickChainPeeler(); TickEnd(1);
+            TickBegin(); TickDeadEffectGuard(); TickEnd(2);
+            TickBegin(); TickAmandsReapply(); TickEnd(3);
+            TickBegin(); TickIeapiDisable(); TickEnd(4);
+            TickBegin(); DrainPcGroupToggles(); TickEnd(5);
+            TickBegin(); DrainPcToggles(); TickEnd(6);
 
             // AUTOMATIC shader rebind: our bundle's p0/* SMap shaders are broken copies; the
             // game has the working ones. rebind at ~2s (bulk geometry loaded) and again at ~6s
@@ -686,28 +724,34 @@ namespace Manimal.Icebreaker
 
             // size-classed distance culling of small props — the residual 27k draws are
             // mostly distant clutter contributing zero pixels. same for far lights.
-            if (_autoRebindStage == 2) { TickDistanceCuller(); TickLightCuller(); TickCrossCull(); TickPcDriver(); }
+            if (_autoRebindStage == 2)
+            {
+                TickBegin(); TickDistanceCuller(); TickEnd(7);
+                TickBegin(); TickLightCuller(); TickEnd(8);
+                TickBegin(); TickCrossCull(); TickEnd(9);
+                TickBegin(); TickPcDriver(); TickEnd(10);
+            }
 
             // aliased shader targets live in bundles that may load late — keep retrying
             // until every stand-in material lands on its real shader. the retry only
             // walks the pending-materials list now; it used to re-run the FULL scene
             // sweep every 300 frames, a steady 5-second heartbeat of hitches
             if (_aliasRetryNeeded && (_iceFrames % 300) == 43)
-                RetryAliasPending();
+            { TickBegin(); RetryAliasPending(); TickEnd(11); }
 
             // keep the ambient beds alive — the raid-start audio reset stops them once, so
             // check every ~30 frames and replay any that stopped (cheap: cached source list)
             if (Plugin.EnvTriggers.Value && (_iceFrames % 30) == 0)
-                IcebreakerAcoustics.KeepAmbientAlive();
+            { TickBegin(); IcebreakerAcoustics.KeepAmbientAlive(); TickEnd(12); }
 
             // self-drive indoor/outdoor detection — BSG's polling task dies silently on the
             // first half-spawned player it trips over; without this the env never switches
             if (Plugin.EnvTriggers.Value && (_iceFrames % 15) == 0)
-                IcebreakerAcoustics.DriveEnvironment();
+            { TickBegin(); IcebreakerAcoustics.DriveEnvironment(); TickEnd(13); }
 
             // crossfade the ambient beds by environment: wind outside, room tones inside
             if (Plugin.EnvTriggers.Value)
-                IcebreakerAcoustics.TickAmbientBlend(Time.deltaTime);
+            { TickBegin(); IcebreakerAcoustics.TickAmbientBlend(Time.deltaTime); TickEnd(14); }
 
             // live config: whenever the BepInEx sliders change, apply immediately in-raid
             if (Plugin.LampIntensity.Value != _lastLamp || Plugin.LampShadows.Value != _lastShadows)
@@ -749,16 +793,16 @@ namespace Manimal.Icebreaker
             // blizzard pin — every ~30 frames is plenty (WeatherDebug values are read
             // continuously once Enabled)
             if (Plugin.WeatherSystem.Value && (_iceFrames % 30) == 7)
-                IcebreakerWeather.TickBlizzard();
+            { TickBegin(); IcebreakerWeather.TickBlizzard(); TickEnd(15); }
 
             // per-frame: the MBOIT compute's CameraParameters buffer tracks fov (ads
             // zoom) — self-gates to a no-op until the volumetric constructed it
-            IcebreakerWeather.TickCameraParams();
+            TickBegin(); IcebreakerWeather.TickCameraParams(); TickEnd(16);
 
             // our raymarched volumetric (VolumetricFog & Mist 2) — every 30 frames,
             // config live-applied
             if ((_iceFrames % 30) == 13)
-                IcebreakerVolFog.Tick();
+            { TickBegin(); IcebreakerVolFog.Tick(); TickEnd(17); }
 
             // the F1-F12 suite below is perf-hunt archaeology — it hijacks keys real
             // features want (F9 lights-off collided with the fog tuner) so its dead
@@ -1341,6 +1385,12 @@ namespace Manimal.Icebreaker
             if (GetComponent<IcebreakerCrew>() == null) gameObject.AddComponent<IcebreakerCrew>();
             if (GetComponent<IcebreakerHeliExfil>() == null) gameObject.AddComponent<IcebreakerHeliExfil>();
             IcebreakerSnowGusts.Spawn();
+            // (runtime StaticBatch retired 08-09: the bundle ships 91% pre-batched and
+            // the runtime pass only ever caught ~2.2k leftovers with no measured win)
+            // cull-height floor so the sub-2 lod bias doesnt make furniture vanish in
+            // plain sight — sliced walk over ~40k+ LODGroups
+            StartCoroutine(IcebreakerLodCullFloor.Apply());
+            ApplySsrClamp(); yield return null;
         }
 
         // fika resolves every cross-peer door/keycard interaction via World.FindDoor's
@@ -1489,8 +1539,76 @@ namespace Manimal.Icebreaker
                               && __instance.gameObject.scene.name.StartsWith("Icebreaker", StringComparison.OrdinalIgnoreCase); }
                 catch { ours = IceGate.On; }
                 if (!ours && !IceGate.On) return true;
+                // NativeCulling re-trial (08-08): with the config on the retail grid is
+                // wanted alive again — the runtime graft (Patch_GraftNativeGrid) adds the
+                // component and this same Awake must run to set Instance
+                if (Plugin.NativeCulling.Value) return true;
                 Plugin.Log.LogDebug("[Culling] native BSG grid suppressed — sidecar bakes are the only culling driver on this map");
                 return false;
+            }
+        }
+
+        // NativeCulling runtime graft (08-08): the current bundle ships the Adaptive_grid GO
+        // with the PerfectCullingAdaptiveGrid component STRIPPED (its Awake-time hard-read of
+        // the 231MB packed bake infinite-loaded every install without the file). the component
+        // itself serializes just two fields (_gridData null + _gridHash), so instead of a
+        // bundle rebuild we re-add it here, right before the game's own
+        // InitializeAutoCulling — which is the code that actually initializes the grid
+        // (packed-file load, guid->group resolve, BVH) whenever Instance is non-null.
+        // File.Exists gate keeps it ship-safe: config on without the bake = sidecars as usual.
+        [HarmonyPatch]
+        internal static class Patch_GraftNativeGrid
+        {
+            private const string RetailGridHash = "065281ec5449481391979c8269072a13";
+
+            private static MethodBase TargetMethod() =>
+                HarmonyLib.AccessTools.Method(
+                    // assembly-qualified on purpose — TypeByName can land on the Asset Store
+                    // twin assembly (the Patch_NativeCullingGate lesson); the EFT-layer
+                    // sampler only exists in bsg's fork
+                    System.Type.GetType("Koenigz.PerfectCulling.EFT.PerfectCullingCrossSceneSampler, Assembly-CSharp"),
+                    "InitializeAutoCulling");
+
+            private static void Prefix()
+            {
+                try
+                {
+                    if (!Plugin.NativeCulling.Value) return;
+                    var gridT = System.Type.GetType("Koenigz.PerfectCulling.EFT.PerfectCullingAdaptiveGrid, Assembly-CSharp");
+                    if (gridT == null) return;
+                    var inst = gridT.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
+                    if (inst != null && !inst.Equals(null)) return; // vanilla map, or an old bundle still carrying the component
+
+                    // icebreaker detection by the GO itself: only our culling scene ships a
+                    // bare Adaptive_grid root (transit-safe — no IceGate dependence)
+                    GameObject host = null;
+                    for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount && host == null; i++)
+                    {
+                        var s = UnityEngine.SceneManagement.SceneManager.GetSceneAt(i);
+                        if (!s.isLoaded || s.name == null || !s.name.StartsWith("Icebreaker", StringComparison.OrdinalIgnoreCase)) continue;
+                        foreach (var root in s.GetRootGameObjects())
+                            if (root.name == "Adaptive_grid") { host = root; break; }
+                    }
+                    if (host == null) return;
+
+                    var packed = SysIoPath.Combine(Application.streamingAssetsPath, "Culling_Data", RetailGridHash + "_packed_cull.bytes");
+                    if (!System.IO.File.Exists(packed))
+                    {
+                        Plugin.Log.LogWarning($"[Culling] NativeCulling is ON but the retail packed bake is missing ({packed}) — sidecar volumes stay in charge");
+                        return;
+                    }
+
+                    // AddComponent fires Awake immediately (sets Instance); the Awake gate
+                    // lets it through because the config is on. hash set right after —
+                    // nothing reads it until method_0 runs inside InitializeAutoCulling.
+                    var comp = host.AddComponent(gridT);
+                    HarmonyLib.AccessTools.Field(gridT, "_gridHash")?.SetValue(comp, RetailGridHash);
+                    Plugin.Log.LogWarning("[Culling] grafted the retail PerfectCullingAdaptiveGrid — InitializeAutoCulling loads the 84k-cell packed bake next; sidecar driver will stand down");
+                }
+                catch (Exception e)
+                {
+                    Plugin.Log.LogError($"[Culling] native grid graft failed — sidecar volumes stay in charge: {e}");
+                }
             }
         }
 
@@ -2200,58 +2318,85 @@ namespace Manimal.Icebreaker
         // purpose — persistent-camera lesson, and the profile can swap mid-raid.
         private bool _amandsStateLogged;
 
+        // ALL reflection cached (08-08 stutter hunt: the uncached version cost ~31ms
+        // EVERY second — AccessTools.TypeByName scans every loaded assembly, and it ran
+        // per tick. it WAS the rhythmic stutter). resolved once per session; only the
+        // per-profile pieces re-resolve, and only when the profile instance changes.
+        private static bool _amResolved;
+        private static bool _amPresent;
+        private static BepInEx.Configuration.ConfigEntryBase _amMbCfg;
+        private static Type _amVolType;
+        private static System.Reflection.PropertyInfo _amProfileProp;
+        private static object _amCachedProfile;
+        private static object _amEnabledParam;      // the MotionBlur.enabled BoolParameter of the cached profile
+        private static System.Reflection.FieldInfo _amValueField;
+        private static System.Reflection.MethodInfo _amOverride;
+
         private void TickAmandsReapply()
         {
-            if (_iceFrames < 300 || _iceFrames % 60 != 0) return; // from ~5s, once a second
+            if (_iceFrames < 300 || _iceFrames % 120 != 0) return; // from ~5s, every ~2s
             try
             {
-                if (!BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.Amanda.Graphics")) return;
-                var pluginType = Type.GetType("AmandsGraphics.AmandsGraphicsPlugin, AmandsGraphics");
-                if (pluginType == null) return;
+                if (!_amResolved)
+                {
+                    _amResolved = true;
+                    _amPresent = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.Amanda.Graphics");
+                    if (_amPresent)
+                    {
+                        var pluginType = Type.GetType("AmandsGraphics.AmandsGraphicsPlugin, AmandsGraphics");
+                        _amMbCfg = pluginType?.GetProperty("MotionBlur",
+                            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
+                            ?.GetValue(null) as BepInEx.Configuration.ConfigEntryBase;
+                        _amVolType = AccessTools.TypeByName("UnityEngine.Rendering.PostProcessing.PostProcessVolume");
+                        if (_amVolType != null) _amProfileProp = AccessTools.Property(_amVolType, "profile");
+                        _amPresent = _amMbCfg != null && _amProfileProp != null;
+                    }
+                }
+                if (!_amPresent) return;
 
-                // their intent: is MotionBlur meant to be on? (BoxedValue avoids their enum type)
-                var mbCfg = pluginType.GetProperty("MotionBlur",
-                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)?.GetValue(null);
-                string cfgVal = (mbCfg as BepInEx.Configuration.ConfigEntryBase)?.BoxedValue?.ToString() ?? "?";
-                bool wantOn = cfgVal == "On";
-
-                // the LIVE profile on the camera, not their capture
+                bool wantOn = _amMbCfg.BoxedValue?.ToString() == "On";
                 var cam = CameraRef != null ? CameraRef : Camera.main;
                 if (cam == null) return;
-                var volType = AccessTools.TypeByName("UnityEngine.Rendering.PostProcessing.PostProcessVolume");
-                if (volType == null) return;
-                var vol = cam.GetComponent(volType);
+                var vol = cam.GetComponent(_amVolType);
                 if (vol == null) return;
-                var profile = AccessTools.Property(volType, "profile")?.GetValue(vol);
-                var settings = profile == null ? null
-                    : AccessTools.Field(profile.GetType(), "settings")?.GetValue(profile) as System.Collections.IEnumerable;
-                if (settings == null) return;
+                var profile = _amProfileProp.GetValue(vol);
+                if (profile == null) return;
 
-                object mb = null;
-                foreach (var s in settings)
-                    if (s != null && s.GetType().Name == "MotionBlur") { mb = s; break; }
-
-                bool live = false;
-                if (mb != null)
+                // re-walk the settings list ONLY when the profile instance changed
+                // (that swap is the very bug being reconciled) — steady state is two
+                // cached field reads
+                if (!ReferenceEquals(profile, _amCachedProfile))
                 {
-                    var enabledParam = AccessTools.Field(mb.GetType(), "enabled")?.GetValue(mb);
-                    if (enabledParam != null)
+                    _amCachedProfile = profile;
+                    _amEnabledParam = null;
+                    var settings = AccessTools.Field(profile.GetType(), "settings")?.GetValue(profile) as System.Collections.IEnumerable;
+                    if (settings != null)
+                        foreach (var s in settings)
+                            if (s != null && s.GetType().Name == "MotionBlur")
+                            {
+                                _amEnabledParam = AccessTools.Field(s.GetType(), "enabled")?.GetValue(s);
+                                if (_amEnabledParam != null)
+                                {
+                                    _amValueField = AccessTools.Field(_amEnabledParam.GetType(), "value");
+                                    _amOverride = AccessTools.Method(_amEnabledParam.GetType(), "Override");
+                                }
+                                break;
+                            }
+                    if (!_amandsStateLogged)
                     {
-                        live = (bool)AccessTools.Field(enabledParam.GetType(), "value").GetValue(enabledParam);
-                        if (live && !wantOn)
-                        {
-                            AccessTools.Method(enabledParam.GetType(), "Override")?.Invoke(enabledParam, new object[] { false });
-                            Plugin.Log.LogWarning("[Amands] live profile MotionBlur was ON with their config Off — overridden off "
-                                + "(their disable landed on a stale capture while our camera surgery swapped the profile)");
-                        }
+                        _amandsStateLogged = true;
+                        bool liveNow = _amEnabledParam != null && _amValueField != null && (bool)_amValueField.GetValue(_amEnabledParam);
+                        Plugin.Log.LogInfo($"[Amands] reconcile armed — config MotionBlur={_amMbCfg.BoxedValue}, live profile MotionBlur "
+                            + $"{(_amEnabledParam == null ? "ABSENT" : liveNow ? "enabled" : "disabled")}");
                     }
                 }
 
-                if (!_amandsStateLogged)
+                if (_amEnabledParam == null || _amValueField == null) return;
+                if ((bool)_amValueField.GetValue(_amEnabledParam) && !wantOn)
                 {
-                    _amandsStateLogged = true;
-                    Plugin.Log.LogInfo($"[Amands] reconcile armed — config MotionBlur={cfgVal}, live profile MotionBlur "
-                        + $"{(mb == null ? "ABSENT" : live ? "enabled" : "disabled")}");
+                    _amOverride?.Invoke(_amEnabledParam, new object[] { false });
+                    Plugin.Log.LogWarning("[Amands] live profile MotionBlur was ON with their config Off — overridden off "
+                        + "(their disable landed on a stale capture while our camera surgery swapped the profile)");
                 }
             }
             catch (Exception e)
@@ -2277,10 +2422,21 @@ namespace Manimal.Icebreaker
         private static bool _ieapiResolved;
         private static readonly List<Type> _ieapiTriggerTypes = new List<Type>();
         private bool _ieapiLogged;
+        private int _ieapiEmptyStreak;
+        private float _ieapiNextSweep;
 
         private void TickIeapiDisable()
         {
-            if (_iceFrames < 300 || _iceFrames % 300 != 0) return; // from ~5s, every 5s
+            // FindObjectsOfTypeAll costs 50-110ms on this scene (08-08 stutter hunt),
+            // and the cost is paid even when the sweep finds nothing — so the sweep
+            // must END, not decay: their triggers only ever build at GameStarted.
+            // TIME-based cadence (frame-counted "%3600" ran every ~25s at high fps —
+            // second time that trap bit today): 5s beats while their build could
+            // still land, and after three consecutive empties we stop for the raid.
+            // a kill resets the streak, so a late build gets a few more fast sweeps.
+            if (_ieapiEmptyStreak >= 3) return; // done this raid
+            if (_iceFrames < 300 || Time.unscaledTime < _ieapiNextSweep) return;
+            _ieapiNextSweep = Time.unscaledTime + 5f;
             try
             {
                 if (!_ieapiResolved)
@@ -2321,6 +2477,7 @@ namespace Manimal.Icebreaker
                     }
                 if (killed > 0)
                 {
+                    _ieapiEmptyStreak = 0; // they built late once — stay on the fast cadence a while
                     // their triggers switched the vanilla exfil colliders off — restore them.
                     // (the heli's flare lock is positional, not collider-based, so this
                     // cannot fight it: an enabled collider a kilometer under the ship is inert)
@@ -2332,10 +2489,16 @@ namespace Manimal.Icebreaker
                     Plugin.Log.LogWarning($"[IEAPI] retired {killed} InteractableExfils trigger(s) on the icebreaker — "
                         + "vanilla exfil flow (with our own gates on it) is the only path on this map; other maps untouched");
                 }
-                else if (!_ieapiLogged)
+                else
                 {
-                    _ieapiLogged = true;
-                    Plugin.Log.LogDebug("[IEAPI] installed but no scene triggers found on the icebreaker");
+                    _ieapiEmptyStreak++;
+                    if (_ieapiEmptyStreak == 3)
+                        Plugin.Log.LogInfo("[IEAPI] three empty sweeps — their GameStarted build isn't coming, sweep retired for this raid");
+                    if (!_ieapiLogged)
+                    {
+                        _ieapiLogged = true;
+                        Plugin.Log.LogDebug("[IEAPI] installed but no scene triggers found on the icebreaker");
+                    }
                 }
             }
             catch (Exception e)
@@ -2479,22 +2642,293 @@ namespace Manimal.Icebreaker
         private static float _lastSpikeLog;
         private static int _gc0Prev, _gc1Prev;
 
+        // per-tick attribution (08-08 stutter hunt): every one of OUR Update callees is
+        // stopwatched by name, so a spike either names its eater or proves the frame
+        // was lost OUTSIDE this component ("untracked" = engine, other mods, coroutines,
+        // FixedUpdate, rendering). the old counters only ever exonerated four systems.
+        private static readonly string[] _tickNames =
+        {
+            "autopsy", "peeler", "deadFx", "amands", "ieapi", "pcGrpDrain", "pcDrain",
+            "distCull", "lightCull", "crossCull", "pcDriver", "alias", "ambKeep",
+            "envDrive", "ambBlend", "blizzard", "camPar", "volFog",
+        };
+        private static readonly double[] _tickMs = new double[18];
+        private static readonly System.Diagnostics.Stopwatch _tickSw = new System.Diagnostics.Stopwatch();
+        private static void TickBegin() => _tickSw.Restart();
+        private static void TickEnd(int i) => _tickMs[i] += _tickSw.Elapsed.TotalMilliseconds;
+
+        // last-8-frames ring (ms) — a spike log that also shows the run-up separates
+        // "one giant frame" from "every frame creeping up" (audit suggestion 08-08)
+        private static readonly float[] _dtRing = new float[8];
+        private static int _dtRingIdx;
+        private static int _pcRunsPrev;
+
         private void TickSpikeProbe()
         {
             float dt = Time.unscaledDeltaTime;
             int gc0 = System.GC.CollectionCount(0);
             int gc1 = System.GC.CollectionCount(1);
+            int pcRunsDelta = _pcDriverRuns - _pcRunsPrev; // per-frame, not cumulative
             if (dt > 0.025f && dt > _ftAvg * 2.2f && Time.unscaledTime - _lastSpikeLog > 1f)
             {
                 _lastSpikeLog = Time.unscaledTime;
-                Plugin.Log.LogDebug($"[Stutter] {dt * 1000f:F0}ms frame (avg {_ftAvg * 1000f:F1}ms): "
-                    + $"pcToggles={_pcWrites} pcRuns={_pcDriverRuns} distCull={_distWrites} lightCull={_lightWrites} "
+                // _tickMs still holds LAST frame's costs (cleared below, filled after
+                // this probe ran last frame) — the same frame dt measures. attribution
+                // lines up exactly.
+                double ours = 0;
+                var parts = new System.Text.StringBuilder();
+                for (int i = 0; i < _tickMs.Length; i++)
+                {
+                    ours += _tickMs[i];
+                    if (_tickMs[i] >= 0.3)
+                        parts.Append(_tickNames[i]).Append('=').Append(_tickMs[i].ToString("F1")).Append("ms ");
+                }
+                var ring = new System.Text.StringBuilder();
+                for (int i = 1; i <= _dtRing.Length; i++)
+                    ring.Append((_dtRing[(_dtRingIdx + i) % _dtRing.Length] * 1000f).ToString("F0")).Append(' ');
+                Plugin.Log.LogDebug($"[Stutter] f={Time.frameCount} {dt * 1000f:F0}ms frame (avg {_ftAvg * 1000f:F1}ms, prev8: {ring.ToString().TrimEnd()}): "
+                    + $"OURS={ours:F1}ms UNTRACKED={dt * 1000f - ours:F0}ms {parts}| "
+                    + $"pcToggles={_pcWrites} pcRunsΔ={pcRunsDelta} distCull={_distWrites} lightCull={_lightWrites} "
                     + $"nav={NavCalls}x/{NavMs:F1}ms gc0={gc0 - _gc0Prev} gc1={gc1 - _gc1Prev} t={Time.timeSinceLevelLoad:F0}s");
             }
+            _dtRing[_dtRingIdx] = dt;
+            _dtRingIdx = (_dtRingIdx + 1) % _dtRing.Length;
+            _pcRunsPrev = _pcDriverRuns;
             _gc0Prev = gc0; _gc1Prev = gc1;
             _ftAvg = Mathf.Lerp(_ftAvg, dt, 0.05f);
             _pcWrites = _distWrites = _lightWrites = 0;
             NavCalls = 0; NavMs = 0f;
+            Array.Clear(_tickMs, 0, _tickMs.Length);
+        }
+
+        // FRAME SPLIT (08-08): steady-state fps triage. the in-game overlay shows ~30 fps
+        // with GPU ~30-50% and CPU ~35-45% — nothing saturated, so the wall lives on ONE
+        // thread and the spike probe cant see engine time. FrameTimingManager came back
+        // EMPTY (bsg's build lacks the frame-timing-stats flag), so this is the
+        // hand-rolled version: Camera.onPreCull..onPostRender brackets the main-thread
+        // camera window (view culling + draw submission — batching/culling territory),
+        // a WaitForEndOfFrame marker catches the post-render tail (present/vsync/
+        // render-thread wait), and whats left of dt is the script phase (AI, animation,
+        // physics, every mod's Update). the three-way split names the bottleneck; bot
+        // count rides along for correlation (script-phase cost usually scales with it).
+        private static readonly System.Diagnostics.Stopwatch _fsClock = System.Diagnostics.Stopwatch.StartNew();
+        private static bool _fsHooked;
+        private static int _fsCamFrame = -1;
+        private static double _fsCamStart, _fsCamEnd, _fsEofMark;
+        private static double _fsDtSum, _fsDtMax, _fsCamSum, _fsCamMax, _fsTailSum;
+        private static int _fsN, _fsFixed;
+        private static float _fsNextLog;
+        private bool _eofStarted;
+
+        private void FixedUpdate() => _fsFixed++;
+
+        // raid teardown with a clamp active would leak it into the menus/next map —
+        // QualitySettings is global state, hand it back
+        private void OnDestroy()
+        {
+            if (_lodBiasOrig >= 0f) { QualitySettings.lodBias = _lodBiasOrig; _lodBiasOrig = -1f; }
+            if (_maxLodOrig >= 0) { QualitySettings.maximumLODLevel = _maxLodOrig; _maxLodOrig = -1; }
+            _qsLogged = false;
+        }
+
+        private System.Collections.IEnumerator EofMarker()
+        {
+            var eof = new WaitForEndOfFrame();
+            while (true) { yield return eof; _fsEofMark = _fsClock.Elapsed.TotalMilliseconds; }
+        }
+
+        // VANILLA-MAP PERF CENSUS (08-09, user: "spt's normal maps run better than our
+        // icebreaker — they're doing something we aren't"). one log line per VANILLA
+        // raid, ~60s in, inventorying which native perf systems are actually ALIVE
+        // there — measured on a live customs/streets raid instead of read out of a
+        // decompiler (which mis-called the LODGroup toggle once already). the money
+        // field is autocullCells: populated on a vanilla map = the cell autocull DOES
+        // run in this engine and the icebreaker resurrection is back on the table.
+        private static bool _vanCensusDone;
+        private static float _vanCensusAt;
+
+        private void TickVanillaPerfCensus()
+        {
+            var gw = Comfort.Common.Singleton<GameWorld>.Instance;
+            if (gw == null || gw.MainPlayer == null) { _vanCensusDone = false; _vanCensusAt = 0f; return; }
+            if (_vanCensusDone) return;
+            if (_vanCensusAt == 0f) { _vanCensusAt = Time.unscaledTime + 60f; return; }
+            if (Time.unscaledTime < _vanCensusAt) return;
+            _vanCensusDone = true;
+            try
+            {
+                var gridT = System.Type.GetType("Koenigz.PerfectCulling.EFT.PerfectCullingAdaptiveGrid, Assembly-CSharp");
+                var grid = gridT?.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
+                bool gridAlive = grid != null && !grid.Equals(null);
+                bool packedOk = false;
+                if (gridAlive)
+                {
+                    try
+                    {
+                        var packed = gridT.GetProperty("PackedData")?.GetValue(grid);
+                        packedOk = packed != null && Equals(packed.GetType().GetProperty("IsValid")?.GetValue(packed), true);
+                    }
+                    catch { }
+                }
+                int autocullCells = GClass1237.List_0 != null ? GClass1237.List_0.Count : -1;
+                bool sampler = GClass1238.Instance != null;
+                int crossVols = -1;
+                try { crossVols = Koenigz.PerfectCulling.EFT.PerfectCullingCrossSceneVolume.AllRuntimeCrossGroupVolumes.Count; } catch { }
+                int gridContent = 0, populatedCells = 0;
+                foreach (var cgc in UnityEngine.Object.FindObjectsOfType<Koenigz.PerfectCulling.EFT.CullingGridContent>())
+                {
+                    gridContent++;
+                    var cells = cgc.CellContent;
+                    if (cells == null) continue;
+                    foreach (var c in cells)
+                        if (c != null && c.LodGroupCell != null && c.LodGroupCell._lodGroups != null && c.LodGroupCell._lodGroups.Count > 0)
+                            populatedCells++;
+                }
+                int lodGroups = 0, oneLod = 0;
+                foreach (var g in UnityEngine.Object.FindObjectsOfType<LODGroup>())
+                {
+                    lodGroups++;
+                    if (g.lodCount <= 1) oneLod++;
+                }
+                Plugin.Log.LogWarning($"[PerfCensus] map={gw.LocationId} grid={gridAlive} packed={packedOk} sampler1238={sampler} "
+                    + $"autocullCells={autocullCells} crossVolumes={crossVols} gridContentComps={gridContent} populatedLodCells={populatedCells} "
+                    + $"lodGroups={lodGroups} oneLod={oneLod}");
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[PerfCensus] failed: {e.Message}"); }
+        }
+
+        // MIXER ROUTING (08-08, "wind ignores the volume slider"): every resurrected
+        // ambient source — our wind/room beds, door foley, and the retail sound-scene
+        // sources whose serialized mixer refs died in the rip — plays with
+        // outputAudioMixerGroup null, which BYPASSES bsg's mixer and therefore the
+        // in-game volume sliders (max volume forever; the game applies OverallVolume
+        // as a mixer channel, never AudioListener.volume). adopt any null-group
+        // source into MasterMixerGroup. 10s cadence, idempotent, catches
+        // late-created sources; a deliberately-null-routed source doesn't exist in
+        // EFT, so adopt-all-null is safe by construction.
+        private static float _mixNextSweep;
+        private static int _mixAdopted;
+
+        private void TickMixerRoute()
+        {
+            if (Time.unscaledTime < _mixNextSweep) return;
+            _mixNextSweep = Time.unscaledTime + 10f;
+            try
+            {
+                var ba = Comfort.Common.Singleton<BetterAudio>.Instance;
+                var master = ba != null ? ba.MasterMixerGroup : null;
+                if (master == null) return;
+                int adopted = 0;
+                foreach (var src in UnityEngine.Object.FindObjectsOfType<AudioSource>())
+                    if (src != null && src.outputAudioMixerGroup == null)
+                    {
+                        src.outputAudioMixerGroup = master;
+                        adopted++;
+                    }
+                if (adopted > 0)
+                {
+                    _mixAdopted += adopted;
+                    Plugin.Log.LogDebug($"[AudioRoute] {adopted} unrouted AudioSource(s) adopted into the master mixer "
+                        + $"(total {_mixAdopted}) — game volume sliders now apply to them");
+                }
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[AudioRoute] sweep failed: {e.Message}"); }
+        }
+
+        // live QualitySettings clamps (08-08): global state the game re-asserts on
+        // settings-apply, so we re-assert every frame (a float compare — free).
+        // originals captured on first touch, restored the moment the config goes back
+        // to -1, so mid-raid A/B is safe in both directions. (the shadow clamps that
+        // pioneered this pattern retired 08-09 — both no-ops on this shadow-poor map)
+        private static float _lodBiasOrig = -1f;
+        private static int _maxLodOrig = -1;
+        private static bool _qsLogged;
+        private static bool _lodProbeOff;
+
+        private void TickQualityClamps()
+        {
+            float wantBias = Plugin.LodBiasClamp.Value;
+            if (wantBias >= 0f)
+            {
+                if (_lodBiasOrig < 0f) { _lodBiasOrig = QualitySettings.lodBias; Plugin.Log.LogDebug($"[LOD] bias clamp on (game was {_lodBiasOrig:F2})"); }
+                if (QualitySettings.lodBias != wantBias) QualitySettings.lodBias = wantBias;
+            }
+            else if (_lodBiasOrig >= 0f)
+            {
+                QualitySettings.lodBias = _lodBiasOrig;
+                Plugin.Log.LogDebug($"[LOD] bias clamp off (restored {_lodBiasOrig:F2})");
+                _lodBiasOrig = -1f;
+            }
+
+            int wantMaxLod = Plugin.MaxLodClamp.Value;
+            if (wantMaxLod >= 0)
+            {
+                if (_maxLodOrig < 0) { _maxLodOrig = QualitySettings.maximumLODLevel; Plugin.Log.LogDebug($"[LOD] maxLOD clamp on (game was {_maxLodOrig})"); }
+                if (QualitySettings.maximumLODLevel != wantMaxLod) QualitySettings.maximumLODLevel = wantMaxLod;
+            }
+            else if (_maxLodOrig >= 0)
+            {
+                QualitySettings.maximumLODLevel = _maxLodOrig;
+                Plugin.Log.LogDebug($"[LOD] maxLOD clamp off (restored {_maxLodOrig})");
+                _maxLodOrig = -1;
+            }
+
+            // one-shot truth line so no more A/Bing values the game already had: the
+            // full QualitySettings picture at raid start
+            if (!_qsLogged)
+            {
+                _qsLogged = true;
+                Plugin.Log.LogWarning($"[QualityCensus] shadows={QualitySettings.shadows} shadowDist={QualitySettings.shadowDistance:F0} "
+                    + $"cascades={QualitySettings.shadowCascades} lodBias={QualitySettings.lodBias:F2} maxLOD={QualitySettings.maximumLODLevel} "
+                    + $"pixelLights={QualitySettings.pixelLightCount} vsync={QualitySettings.vSyncCount} targetFps={Application.targetFrameRate} "
+                    + $"aniso={QualitySettings.anisotropicFiltering} softParticles={QualitySettings.softParticles}");
+            }
+        }
+
+        private void TickFrameSplit()
+        {
+            double now = _fsClock.Elapsed.TotalMilliseconds;
+            if (!_fsHooked)
+            {
+                // static guard — the camera delegates survive across raids
+                _fsHooked = true;
+                Camera.onPreCull += c =>
+                {
+                    if (Time.frameCount != _fsCamFrame) { _fsCamFrame = Time.frameCount; _fsCamStart = _fsClock.Elapsed.TotalMilliseconds; }
+                };
+                Camera.onPostRender += c => _fsCamEnd = _fsClock.Elapsed.TotalMilliseconds;
+            }
+            if (!_eofStarted)
+            {
+                // instance guard — the coroutine dies with this component every raid
+                // end and must restart on the next raid's probe
+                _eofStarted = true;
+                StartCoroutine(EofMarker());
+                return;
+            }
+
+            // all three marks are LAST frame's (cameras + eof run after Update) — same
+            // frame unscaledDeltaTime measures, so the split lines up exactly.
+            double dt = Time.unscaledDeltaTime * 1000.0;
+            double cam = (_fsCamEnd > _fsCamStart && _fsCamEnd - _fsCamStart < dt * 2) ? _fsCamEnd - _fsCamStart : 0;
+            // eof-to-this-Update gap: present wait + next-frame engine preamble
+            double tail = (_fsEofMark > 0 && now > _fsEofMark && now - _fsEofMark < dt * 2) ? now - _fsEofMark : 0;
+            _fsDtSum += dt; if (dt > _fsDtMax) _fsDtMax = dt;
+            _fsCamSum += cam; if (cam > _fsCamMax) _fsCamMax = cam;
+            _fsTailSum += tail;
+            _fsN++;
+
+            if (Time.unscaledTime < _fsNextLog) return;
+            _fsNextLog = Time.unscaledTime + 10f;
+            if (_fsN == 0) return;
+            int alive = 0;
+            try { alive = Comfort.Common.Singleton<EFT.GameWorld>.Instance?.AllAlivePlayersList?.Count ?? 0; } catch { }
+            double avgDt = _fsDtSum / _fsN, avgCam = _fsCamSum / _fsN, avgTail = _fsTailSum / _fsN;
+            Plugin.Log.LogDebug($"[FrameSplit] {_fsN}f/10s: frame {avgDt:F1}ms (max {_fsDtMax:F0}) = "
+                + $"scripts {avgDt - avgCam - avgTail:F1} + camMain {avgCam:F1} (max {_fsCamMax:F0}) + presentTail {avgTail:F1} | "
+                + $"fixedUpd {(float)_fsFixed / _fsN:F1}/f | alive={alive}");
+            _fsDtSum = _fsDtMax = _fsCamSum = _fsCamMax = _fsTailSum = 0;
+            _fsN = 0; _fsFixed = 0;
         }
 
         // DISTANCE CULLING — the missing BSG system (their CullingLightObject/"GameObjects
@@ -2522,6 +2956,109 @@ namespace Manimal.Icebreaker
         private struct DistEntry { public Renderer R; public Vector3 Pos; public float CullDist; public bool WeDisabled; }
         private static readonly List<DistEntry> _distEntries = new List<DistEntry>();
         private static int _distCursor;
+
+        // ---- SSR cost clamp (08-08, the center-view fps hunt) ----
+        // the retail post volumes bake SSR at SUPERSAMPLED resolution + 256 iterations,
+        // and nothing binds it to the player's graphics settings on this map. its cost
+        // is per-pixel-with-geometry (sky early-outs), so it is heaviest EXACTLY in the
+        // dense center view — the F4 archaeology called it a "per-pixel GPU monster".
+        // hardcoded to full-size since 08-09 (SsrQuality config retired): kills the
+        // supersampling only — near-identical look, the whole GPU win, no knob.
+        private const int SsrMode = 2;
+        private static void ApplySsrClamp()
+        {
+            int mode = SsrMode;
+            try
+            {
+                // make the IN-GAME SSR setting actually work here: vanilla maps apply
+                // it via CameraClass.SetSSR, which only touches the CAMERA's volume
+                // (and NREs when that profile lacks an SSR block — our Cam2 case). the
+                // supersampled monster lives in the RETAIL SCENE volumes the setting
+                // never reaches — so every player was paying the retail preset no
+                // matter what they selected. mirror SetSSR's own mapping onto the
+                // scene volumes: Off kills SSR, Low/Medium keep their presets,
+                // High/Ultra map to High (exactly what SetSSR does on vanilla maps).
+                string gamePreset = null;
+                try
+                {
+                    var gfx = Comfort.Common.Singleton<SharedGameSettingsClass>.Instance?.Graphics?.Settings;
+                    if (gfx != null)
+                    {
+                        switch ((int)gfx.SSR.Value)
+                        {
+                            case 0:
+                                Plugin.Log.LogInfo("[SSR] in-game SSR setting is OFF — disabling SSR everywhere (the vanilla setting never reached the scene volumes on this map)");
+                                mode = 0;
+                                break;
+                            case 1: gamePreset = "Low"; break;
+                            case 2: gamePreset = "Medium"; break;
+                            default: gamePreset = "High"; break;
+                        }
+                    }
+                }
+                catch { }
+
+                int touched = 0;
+                var ppvType = AccessTools.TypeByName("UnityEngine.Rendering.PostProcessing.PostProcessVolume");
+                if (ppvType == null) return;
+                foreach (var volObj in UnityEngine.Object.FindObjectsOfType(ppvType))
+                {
+                    var profile = GetMember(volObj, "sharedProfile") ?? GetMember(volObj, "profile");
+                    var settings = GetMember(profile, "settings") as System.Collections.IEnumerable;
+                    if (settings == null) continue;
+                    foreach (var s in settings)
+                    {
+                        if (s == null || !s.GetType().Name.Contains("ScreenSpaceReflections")) continue;
+                        if (mode == 0)
+                        {
+                            s.GetType().GetProperty("active")?.SetValue(s, false);
+                            touched++;
+                            continue;
+                        }
+                        // honor the game setting's PRESET on the scene volumes (what
+                        // SetSSR would have done if it could reach them)
+                        if (gamePreset != null)
+                        {
+                            var preParam = AccessTools.Field(s.GetType(), "preset")?.GetValue(s);
+                            var preVal = preParam == null ? null : AccessTools.Field(preParam.GetType(), "value");
+                            if (preVal != null)
+                            {
+                                object curPre = preVal.GetValue(preParam);
+                                object wantPre = Enum.Parse(preVal.FieldType, gamePreset);
+                                if (!Equals(curPre, wantPre))
+                                {
+                                    preVal.SetValue(preParam, wantPre);
+                                    AccessTools.Field(preParam.GetType(), "overrideState")?.SetValue(preParam, true);
+                                    touched++;
+                                    Plugin.Log.LogInfo($"[SSR] preset {curPre} -> {gamePreset} (your in-game SSR setting, finally applied to the scene volumes)");
+                                }
+                            }
+                        }
+
+                        // resolution is a ParameterOverride<ScreenSpaceReflectionResolution>:
+                        // Downsampled=0, FullSize=1, Supersampled=2
+                        var resParam = AccessTools.Field(s.GetType(), "resolution")?.GetValue(s);
+                        if (resParam == null) continue;
+                        var valField = AccessTools.Field(resParam.GetType(), "value");
+                        var stateField = AccessTools.Field(resParam.GetType(), "overrideState");
+                        if (valField == null) continue;
+                        object cur = valField.GetValue(resParam);
+                        int want = mode == 1 ? 0 : 1;
+                        if (Convert.ToInt32(cur) > want)
+                        {
+                            valField.SetValue(resParam, Enum.ToObject(valField.FieldType, want));
+                            stateField?.SetValue(resParam, true);
+                            touched++;
+                            Plugin.Log.LogInfo($"[SSR] clamped {cur} -> {(want == 0 ? "Downsampled" : "FullSize")} on a post volume");
+                        }
+                    }
+                }
+                if (touched > 0)
+                    Plugin.Log.LogWarning($"[SSR] cost clamp applied to {touched} SSR block(s) — "
+                        + "the retail profile's supersampled SSR was the per-pixel cost that peaks in the dense center view");
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[SSR] clamp failed (retail SSR stays): {e.Message}"); }
+        }
 
         private static void BuildDistanceCuller()
         {
@@ -2551,6 +3088,12 @@ namespace Manimal.Icebreaker
                 if (containerProp) continue;
                 var size = mr.bounds.size.magnitude;
                 if (size > 12f) continue; // structural — always rendered
+                // do NOT skip isPartOfStaticBatch here — tried 08-08 on the theory
+                // that batched draws are cheap and enabled-toggles on batched
+                // renderers are costly. reality: releasing the 148k batched props
+                // from distance culling COST fps (they render at all ranges) and the
+                // microstutter stayed (its probe counters were zero all along —
+                // distCull was never the culprit). the culling earns its keep.
                 float cullDist = size < 0.75f ? 40f
                                : size < 2f ? 80f
                                : size < 5f ? 150f
@@ -2560,6 +3103,21 @@ namespace Manimal.Icebreaker
                 _distEntries.Add(new DistEntry { R = mr, Pos = mr.bounds.center, CullDist = cullDist });
             }
             Plugin.Log.LogDebug($"[DistCull] tracking {_distEntries.Count} renderers (size-classed cull distances x{Plugin.CullDistanceScale.Value:F2})");
+        }
+
+        // called by the static batcher after a combine: toggling enabled on a
+        // statically-batched renderer is drastically more expensive than on a loose
+        // one (08-08: steady ~1s-cadence 40-100ms stutters, every spike at the
+        // distCull=250 budget cap, started the raid the combine first ran). batched
+        // renderers draw cheap anyway — they no longer need distance culling at all.
+        internal static int PruneDistCullStaticBatched()
+        {
+            int before = _distEntries.Count;
+            _distEntries.RemoveAll(e => e.R == null || e.R.isPartOfStaticBatch);
+            int removed = before - _distEntries.Count;
+            if (removed > 0)
+                Plugin.Log.LogInfo($"[DistCull] released {removed} statically-batched renderer(s) from distance culling ({_distEntries.Count} still tracked)");
+            return removed;
         }
 
         // retail maps ship a scene-resident CullingManager (jobified distance culler that

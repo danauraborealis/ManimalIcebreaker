@@ -74,11 +74,42 @@ namespace Manimal.Icebreaker
             {
                 if (p == null || !p.IsAI || !p.HealthController.IsAlive) continue;
                 var owner = p.AIData?.BotOwner;
-                if (owner == null || owner.BotState != EBotState.Active) continue;
+                if (owner == null || owner.BotState != EBotState.Active)
+                {
+                    // MANNEQUIN SWEEP (08-09, native-waves T4 raid): a bot whose
+                    // activation chain died silently leaves an invisible gear shell
+                    // with no AI (Bot32: one core-point line, then nothing, ever).
+                    // 30s of never-activated = despawn — a missing bot beats a
+                    // haunted coat rack holding a rifle.
+                    float since;
+                    if (!_limbo.TryGetValue(p.Id, out since)) _limbo[p.Id] = Time.time;
+                    else if (Time.time - since > 30f)
+                    {
+                        _limbo.Remove(p.Id);
+                        Plugin.Log.LogWarning($"[Stuck] MANNEQUIN: '{p.name}' never activated in 30s "
+                            + $"(owner={(owner == null ? "null" : owner.BotState.ToString())}) — despawning the shell");
+                        try
+                        {
+                            var bc = Singleton<IBotGame>.Instance?.BotsController;
+                            if (bc != null) bc.DestroyInfo(p);
+                            else
+                            {
+                                Singleton<GameWorld>.Instance?.UnregisterPlayer(p);
+                                Destroy(p.gameObject);
+                            }
+                        }
+                        catch (Exception e) { Plugin.Log.LogWarning($"[Stuck] mannequin despawn failed: {e.Message}"); }
+                    }
+                    continue;
+                }
+                _limbo.Remove(p.Id);
                 try { Tick(owner); }
                 catch { }
             }
         }
+
+        // players seen alive-but-never-activated, first-seen timestamps
+        private readonly Dictionary<int, float> _limbo = new Dictionary<int, float>();
 
         private void Tick(BotOwner owner)
         {

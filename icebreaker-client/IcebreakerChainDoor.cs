@@ -208,6 +208,22 @@ namespace Manimal.Icebreaker
         // applied) COMBINED with the transaction: that pairing double-executes.
         private static void DispatchRemove(Player player, Item item)
         {
+            // UNBIND FIRST (08-08: ghost-hands struck MINUTES after a clean plant, mid
+            // Wedge fight — the delayed pattern of a quickbind still pointing at the
+            // deleted charge; pressing that key equips a dead item and the hands
+            // controller dies). Remove does not clean fast-access bindings for us.
+            try
+            {
+                var unbind = player.InventoryController.UnbindItemDirect(item, true);
+                if (!unbind.Failed)
+                {
+                    player.InventoryController.TryRunNetworkTransaction(unbind, r =>
+                    { if (!r.Succeed) Plugin.Log.LogWarning($"[Plant] charge unbind failed post-validation: {r.Error}"); });
+                    Plugin.Log.LogInfo("[Plant] charge was quick-bound — binding removed before consume");
+                }
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[Plant] unbind attempt threw (continuing to remove): {e.Message}"); }
+
             var op = InteractionsHandlerClass.Remove(item, player.InventoryController, true);
             if (op.Failed)
             {
@@ -231,7 +247,14 @@ namespace Manimal.Icebreaker
             // available weapon FIRST and consume only once the swap completes — the
             // fuse starts immediately either way, the inventory op just trails the
             // re-equip by a beat.
-            bool inHands = player.HandsController != null && ReferenceEquals(player.HandsController.Item, item);
+            //
+            // TEMPLATE match, not ReferenceEquals (08-08: hands broke AGAIN with no
+            // 'IN HANDS' line logged — the controller's Item failed the reference test
+            // while the charge was visibly in hand; spec-item controllers don't
+            // guarantee instance identity). any SZ-1 in hands means swap first.
+            var handsItem = player.HandsController != null ? player.HandsController.Item : null;
+            bool inHands = handsItem != null
+                && (ReferenceEquals(handsItem, item) || handsItem.Id == item.Id || IsCharge(handsItem));
             if (!inHands)
             {
                 DispatchRemove(player, item);
@@ -243,11 +266,11 @@ namespace Manimal.Icebreaker
             {
                 try
                 {
-                    if (player.HandsController != null && ReferenceEquals(player.HandsController.Item, item))
+                    // same template-based test as above — never delete while ANY charge
+                    // is still the hands item (swap failed / nothing to swap to)
+                    if (player.HandsController != null && IsCharge(player.HandsController.Item))
                     {
-                        // nothing to swap to (no weapons at all) — rare, but never delete a
-                        // live hands item; the charge simply stays in inventory unspent
-                        Plugin.Log.LogWarning("[Plant] no weapon to swap to — charge NOT consumed (still in hands)");
+                        Plugin.Log.LogWarning("[Plant] hands still hold a charge after swap attempt — NOT consumed (no weapon to swap to?)");
                         return;
                     }
                     DispatchRemove(player, item);

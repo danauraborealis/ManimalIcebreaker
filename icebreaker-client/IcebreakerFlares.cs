@@ -28,6 +28,12 @@ namespace Manimal.Icebreaker
         internal static void TryBuild()
         {
             if (_built) return;
+            if (!Plugin.LensFlares.Value)
+            {
+                _built = true; // dont re-log every caller
+                Plugin.Log.LogInfo("[Flares] disabled by config (perf A/B lever) — no flares this raid");
+                return;
+            }
             var jsonPath = SysIoPath.Combine(Dir, "flares.json");
             if (!File.Exists(jsonPath)) { Plugin.Log.LogWarning("[Flares] no flares.json sidecar — lens flares skipped"); return; }
             _built = true;

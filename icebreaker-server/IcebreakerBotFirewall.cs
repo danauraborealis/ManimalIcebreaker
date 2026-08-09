@@ -51,8 +51,18 @@ public class IcebreakerBotFirewall(
     private readonly BotGeneratorHelper _botGeneratorHelper = botGeneratorHelper;
     private readonly RandomUtil _randomUtil = randomUtil;
 
+    private static bool _aliveLogged;
+
     public override BotBase PrepareAndGenerateBot(MongoId sessionId, BotGenerationDetails botGenerationDetails)
     {
+        // one-time proof-of-life: if a player's server log LACKS this line, our DI
+        // override lost the BotGenerator slot to another mod (the 08-09 field log
+        // theory for APBS 2.2.0) — that diagnosis becomes a grep instead of a maybe
+        if (!_aliveLogged)
+        {
+            _aliveLogged = true;
+            _log.Info("[Icebreaker] bot firewall generator ACTIVE (DI override holds the BotGenerator slot)");
+        }
         IcebreakerPbsMasquerade.Apply(_log);
         var bot = base.PrepareAndGenerateBot(sessionId, botGenerationDetails);
         TryInjectSpecials(bot, botGenerationDetails);
@@ -70,6 +80,12 @@ public class IcebreakerBotFirewall(
     private const string C3KeycardTpl = "69bb3f7df94327bc0f0230c9";
     private const double C3ChancePercent = 2.0;
 
+    // WEDGE CARRIES EUROS (user call 08-08): the BlackDiv mod gives bossWedge dollar
+    // stacks, but the icebreaker's economy runs on euros (heli fare, quests). tpl
+    // swap at generation, stack counts untouched. ids verified in items.json.
+    private const string DollarsTpl = "5696686a4bdc2da3298b456a";
+    private const string EurosTpl = "569668774bdc2da2298b4568";
+
     // icebreaker raids only (raid-context latch); goons + rogues on vanilla maps stay
     // untouched by construction.
     private void TryInjectSpecials(BotBase bot, BotGenerationDetails details)
@@ -81,6 +97,20 @@ public class IcebreakerBotFirewall(
             if (string.Equals(details?.RoleLowercase, "exusec", StringComparison.OrdinalIgnoreCase)
                 && _randomUtil.GetChance100(C3ChancePercent))
                 InjectItem(bot, C3KeycardTpl, "C-3 keycard on a rogue", warnOnFail: false);
+
+            if (string.Equals(details?.RoleLowercase, "bosswedge", StringComparison.OrdinalIgnoreCase)
+                && bot.Inventory.Items != null)
+            {
+                int swapped = 0;
+                foreach (var it in bot.Inventory.Items)
+                    if (it != null && string.Equals(it.Template.ToString(), DollarsTpl, StringComparison.OrdinalIgnoreCase))
+                    {
+                        it.Template = new MongoId(EurosTpl);
+                        swapped++;
+                    }
+                if (swapped > 0)
+                    _log.Info($"[Icebreaker] wedge currency fix — {swapped} dollar stack(s) swapped to euros");
+            }
         }
         catch (Exception e)
         {
@@ -127,9 +157,40 @@ internal static class IcebreakerPbsMasquerade
                     var n = asm.GetName().Name ?? "";
                     if (n.IndexOf("progressivebotsystem", StringComparison.OrdinalIgnoreCase) < 0
                         && n.IndexOf("ProgressiveBotSystem", StringComparison.Ordinal) < 0) continue;
+
+                    // fast path: the 2.0.0 layout we verified
                     var ri = asm.GetType("ProgressiveBotSystem.Models.RaidInformation");
                     _prop = ri?.GetProperty("RaidLocation", BindingFlags.Public | BindingFlags.Static);
-                    if (_prop != null) break;
+
+                    // version-adaptive fallback (08-09 field log: APBS 2.2.0 on a player's
+                    // server, no masquerade engagement, every vanilla bot dead with
+                    // "Map 'Suburbs' not found" — if the type moved, find ANY static
+                    // string RaidLocation in their assembly instead of giving up silently)
+                    if (_prop == null)
+                    {
+                        Type[] types;
+                        try { types = asm.GetTypes(); }
+                        catch (ReflectionTypeLoadException rtle) { types = rtle.Types; }
+                        foreach (var t in types)
+                        {
+                            if (t == null) continue;
+                            var p = t.GetProperty("RaidLocation", BindingFlags.Public | BindingFlags.Static);
+                            if (p != null && p.PropertyType == typeof(string) && p.CanWrite)
+                            {
+                                _prop = p;
+                                log.Info($"[Icebreaker] APBS layout drifted — RaidLocation found on '{t.FullName}' (adaptive search)");
+                                break;
+                            }
+                        }
+                    }
+
+                    if (_prop == null)
+                        // presence without a hook point is the one state that must be LOUD:
+                        // this exact silence cost a player every vanilla bot on the map
+                        log.Warning($"[Icebreaker] Progressive Bot System assembly '{n}' is present but no static RaidLocation "
+                            + "property was found — the labs masquerade CANNOT protect this raid; expect 'Map Suburbs not found' "
+                            + "bot failures. report the APBS version so the shim can be updated");
+                    break;
                 }
             }
             if (_prop == null || _prop.PropertyType != typeof(string)) return; // PBS absent or drifted

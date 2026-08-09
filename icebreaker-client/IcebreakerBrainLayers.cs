@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
+using HarmonyLib;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -263,11 +264,23 @@ namespace Manimal.Icebreaker
             // is VESTIGIAL in this build: the engine's own quiet logics set it and
             // nothing anywhere reads it back.) re-assert every tick — Activate() and
             // other systems may rewrite it. restored in Stop().
+            //
+            // AND the terminal sink (08-09, "they still say voicelines"): SAIN and
+            // other AI mods speak through Player.Speaker directly, never consulting
+            // BotTalk — the CanSay mute never touched those lines. the held speaker
+            // set gates PhraseSpeakerClass.Play/Queue at the last hop, so every talk
+            // path funnels into the same muzzle.
             try
             {
                 if (BotOwner.BotTalk != null && BotOwner.BotTalk.CanSay)
                 {
                     BotOwner.BotTalk.CanSay = false;
+                    _muted = true;
+                }
+                var spk = BotOwner.GetPlayer?.Speaker;
+                if (spk != null && MutedSpeakers.Add(spk))
+                {
+                    try { spk.Shut(); } catch { } // cut any line already queued/mid-cadence
                     _muted = true;
                 }
             }
@@ -304,9 +317,34 @@ namespace Manimal.Icebreaker
             {
                 if (_muted && BotOwner.BotTalk != null)
                     BotOwner.BotTalk.CanSay = BotOwner.Settings?.FileSettings?.Mind?.CAN_TALK ?? true;
+                var spk = BotOwner.GetPlayer?.Speaker;
+                if (spk != null) MutedSpeakers.Remove(spk);
             }
             catch { }
             _muted = false;
+        }
+
+        // speakers of currently-held bots — gated at the sink so SAIN's direct
+        // Speaker calls are muzzled too, not just vanilla BotTalk
+        internal static readonly HashSet<PhraseSpeakerClass> MutedSpeakers = new HashSet<PhraseSpeakerClass>();
+
+        [HarmonyPatch(typeof(PhraseSpeakerClass), nameof(PhraseSpeakerClass.Play))]
+        internal static class Patch_MuteHeldSpeakerPlay
+        {
+            [HarmonyPrefix]
+            private static bool Prefix(PhraseSpeakerClass __instance, ref TagBank __result)
+            {
+                if (!MutedSpeakers.Contains(__instance)) return true;
+                __result = null;
+                return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(PhraseSpeakerClass), nameof(PhraseSpeakerClass.Queue))]
+        internal static class Patch_MuteHeldSpeakerQueue
+        {
+            [HarmonyPrefix]
+            private static bool Prefix(PhraseSpeakerClass __instance) => !MutedSpeakers.Contains(__instance);
         }
     }
 

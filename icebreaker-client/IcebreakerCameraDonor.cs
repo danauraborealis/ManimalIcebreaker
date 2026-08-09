@@ -274,8 +274,18 @@ namespace Manimal.Icebreaker
                     // map. the dust-texture lottery that banned UltimateBloom from the
                     // allowlist doesnt apply here: the field is skipped below and HG loads
                     // its OWN LensDust png from disk right after (Bloom.UpdateLensDust).
+                    // ALSO provisioned for HollywoodFX-without-HG (08-07, yamaica's
+                    // permanent battle blur): HFX's ConcussionController does
+                    // camera.GetComponent<UltimateBloom>() with NO null check and its
+                    // Update writes _bloom.m_DustIntensity BEFORE the concussion decay
+                    // line — on a camera without the component the write NREs every
+                    // frame and the blur applied by the preceding line never fades.
+                    // retail cameras all ship an UltimateBloom so vanilla maps never
+                    // see it; our Cam2 fallback must provide one. parked-but-present
+                    // satisfies GetComponent and the dust write lands harmlessly.
                     bool hgBloom = type.Name == "UltimateBloom"
-                        && BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.janky.hollywoodgraphics");
+                        && (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.janky.hollywoodgraphics")
+                         || BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.janky.hollywoodfx"));
                     if (!AllowGraft.Contains(type.Name) && !hgBloom) { skipped++; continue; } // allowlist: proven-stable only
                     if (skip.Contains(type.Name)) { skipped++; continue; }        // bisect knob
                     if (go.GetComponent(type) != null) { existing++; continue; }  // chassis owns it

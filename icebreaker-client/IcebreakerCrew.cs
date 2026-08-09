@@ -137,8 +137,12 @@ namespace Manimal.Icebreaker
             // the profile premake: the bots are fully SPAWNED into an off-map pen and
             // events teleport them in, so the instantiation + gear-bundle cost lands
             // here in the quiet early raid (the ice climb) instead of on a trigger frame
+            // native-waves mode: the POOL would double-spawn (pen bots + native rows),
+            // but the profile PREMAKE stays valuable — it warms the server's bot-gen
+            // cache so the native trigger spawns draw prebuilt profiles (less hitch)
             if (Plugin.CrewBlackDiv.Value)
-                StartCoroutine(Plugin.CrewPreSpawnPool.Value ? PoolSpawnTriggerSquads() : PreMakeTriggerSquads());
+                StartCoroutine(Plugin.CrewPreSpawnPool.Value && !Plugin.NativeBdWaves.Value
+                    ? PoolSpawnTriggerSquads() : PreMakeTriggerSquads());
 
             // the resurrected retail trigger layer raises the events (hides0/stern0/wedges1
             // + the group-size ladder) and OUR force-spawner delivers them — the server's
@@ -400,6 +404,32 @@ namespace Manimal.Icebreaker
         private void OnSpawnEvent(string eventId)
         {
             if (string.IsNullOrEmpty(eventId) || !_firedEvents.Add(eventId)) return; // one-shot per event
+
+            // NATIVE WAVES MODE: our trigger ids ARE the retail TriggerIds, so the
+            // whole delivery reduces to raising BSG's own bot event — the appended
+            // BossLocationSpawn rows do the spawning. the staging extras that aren't
+            // spawns stay ours: the engine hold watcher (scans arrivals regardless of
+            // who spawned them), the SZ-1 charge sweeps, and the progress doors.
+            if (Plugin.NativeBdWaves.Value)
+            {
+                try
+                {
+                    Singleton<BotEventHandler>.Instance?.AnyEvent(eventId);
+                    Plugin.Log.LogWarning($"[Crew] native wave trigger raised: '{eventId}' (BSG pipeline delivers the squad)");
+                }
+                catch (Exception e) { Plugin.Log.LogError($"[Crew] native trigger raise failed for '{eventId}': {e.Message}"); }
+
+                if (eventId.StartsWith("hides"))
+                {
+                    StartCoroutine(HoldEngineSquad(0, 4, 0)); // watcher — holds whoever arrives at the hide markers
+                    StartCoroutine(PlaceChargeSweep("BotZoneEngineHide"));
+                }
+                else if (eventId.StartsWith("stern"))
+                    StartCoroutine(PlaceChargeSweep("BotZoneSternTop", "BotZoneStern"));
+                else if (eventId == "T3")
+                    StartCoroutine(PlaceChargeSweep("BotZoneOutside_t3"));
+                return;
+            }
             // suffix = extras over the base squad (decoded retail group-size ladder)
             int extras = eventId.Length > 0 && char.IsDigit(eventId[eventId.Length - 1])
                 ? eventId[eventId.Length - 1] - '0' : 0;

@@ -1,0 +1,609 @@
+{
+ "level698": {
+  "scene": "Icebreaker_Scripts",
+  "renderers": 380,
+  "batched": 0,
+  "top_batched": [],
+  "top_unbatched": [
+   [
+    "STAIRS",
+    22
+   ],
+   [
+    "Cube (12)",
+    3
+   ],
+   [
+    "Cube (10)",
+    3
+   ],
+   [
+    "Cube (9)",
+    3
+   ],
+   [
+    "Cube (11)",
+    3
+   ],
+   [
+    "RainFall(16383)",
+    3
+   ],
+   [
+    "Cube (7)",
+    2
+   ],
+   [
+    "Cube (5)",
+    2
+   ],
+   [
+    "Cube (1)",
+    2
+   ],
+   [
+    "Cube (14)",
+    2
+   ],
+   [
+    "Cube",
+    2
+   ],
+   [
+    "Cube (8)",
+    2
+   ]
+  ]
+ },
+ "level699": {
+  "scene": "Icebreaker_Outdoor",
+  "renderers": 31986,
+  "batched": 0,
+  "top_batched": [],
+  "top_unbatched": [
+   [
+    "Icebreaker_wires_support_LOD0",
+    2521
+   ],
+   [
+    "Icebreaker_wires_05_LOD0",
+    1695
+   ],
+   [
+    "Icebreaker_deck_railing_01_SHADOW_LOD0",
+    1351
+   ],
+   [
+    "Icebreaker_deck_railing_01_LOD0",
+    1351
+   ],
+   [
+    "Icebreaker_wires_01_LOD0",
+    1082
+   ],
+   [
+    "Icebreaker_accommodation_railing_support_02_LOD0",
+    926
+   ],
+   [
+    "Icebreaker_accommodation_railing_support_02_SHADOW_LOD0",
+    926
+   ],
+   [
+    "Icebreaker_deck_railing_support_02_SHADOW_LOD0",
+    803
+   ],
+   [
+    "Icebreaker_deck_railing_support_02_LOD0",
+    803
+   ],
+   [
+    "Icebreaker_accommodation_railing_support_01_LOD0",
+    768
+   ],
+   [
+    "Icebreaker_accommodation_railing_support_01_SHADOW_LOD0",
+    768
+   ],
+   [
+    "Icebreaker_accommodation_railing_02_SHADOW_LOD0",
+    654
+   ]
+  ]
+ },
+ "level700": {
+  "scene": "Icebreaker_Indoor_01",
+  "renderers": 33535,
+  "batched": 0,
+  "top_batched": [],
+  "top_unbatched": [
+   [
+    "Icebreaker_handle_03_SHADOW_LOD0",
+    647
+   ],
+   [
+    "Icebreaker_handle_03_LOD0",
+    647
+   ],
+   [
+    "Icebreaker_handle_01_SHADOW_LOD0",
+    483
+   ],
+   [
+    "Icebreaker_handle_01_LOD0",
+    483
+   ],
+   [
+    "Icebreaker_wires_shelf_03_SHADOW_LOD0",
+    437
+   ],
+   [
+    "Icebreaker_wires_shelf_03_LOD0",
+    437
+   ],
+   [
+    "Icebreaker_wires_shelf_04_SHADOW_LOD0",
+    429
+   ],
+   [
+    "Icebreaker_wires_shelf_04_LOD0",
+    429
+   ],
+   [
+    "Icebreaker_interior_pipe_utility_03_SHADOW_LOD0",
+    401
+   ],
+   [
+    "Icebreaker_interior_pipe_utility_03_LOD0",
+    401
+   ],
+   [
+    "Decal_atlas_02_strip_01_LOD0",
+    399
+   ],
+   [
+    "Icebreaker_sign_decal_navigation_22_LOD0",
+    367
+   ]
+  ]
+ },
+ "level701": {
+  "scene": "Icebreaker_Indoor_02",
+  "renderers": 79065,
+  "batched": 0,
+  "top_batched": [],
+  "top_unbatched": [
+   [
+    "Icebreaker_wires_shelf_03_SHADOW_LOD0",
+    3825
+   ],
+   [
+    "Icebreaker_wires_shelf_03_LOD0",
+    3825
+   ],
+   [
+    "Icebreaker_wires_shelf_04_SHADOW_LOD0",
+    3680
+   ],
+   [
+    "Icebreaker_wires_shelf_04_LOD0",
+    3680
+   ],
+   [
+    "Icebreaker_interior_pipe_utility_02_LOD0",
+    3589
+   ],
+   [
+    "Icebreaker_interior_pipe_utility_02_SHADOW_LOD0",
+    3589
+   ],
+   [
+    "Icebreaker_interior_pipe_utility_03_SHADOW_LOD0",
+    2380
+   ],
+   [
+    "Icebreaker_interior_pipe_utility_03_LOD0",
+    2380
+   ],
+   [
+    "Icebreaker_interior_wires_03_A_LOD0",
+    1938
+   ],
+   [
+    "Icebreaker_wires_shelf_01_LOD0",
+    1641
+   ],
+   [
+    "Icebreaker_wires_shelf_01_SHADOW_LOD0",
+    1641
+   ],
+   [
+    "Icebreaker_interior_pipe_utility_04_LOD0",
+    1613
+   ]
+  ]
+ },
+ "level702": {
+  "scene": "Icebreaker_Indoor_03",
+  "renderers": 10000,
+  "batched": 0,
+  "top_batched": [],
+  "top_unbatched": [
+   [
+    "Icebreaker_wires_shelf_03_SHADOW_LOD0",
+    452
+   ],
+   [
+    "Icebreaker_wires_shelf_03_LOD0",
+    452
+   ],
+   [
+    "Icebreaker_interior_wires_03_A_LOD0",
+    437
+   ],
+   [
+    "Icebreaker_wires_shelf_04_SHADOW_LOD0",
+    371
+   ],
+   [
+    "Icebreaker_wires_shelf_04_LOD0",
+    371
+   ],
+   [
+    "Icebreaker_interior_pipe_utility_02_LOD0",
+    343
+   ],
+   [
+    "Icebreaker_interior_pipe_utility_02_SHADOW_LOD0",
+    343
+   ],
+   [
+    "Icebreaker_interior_pipe_utility_03_SHADOW_LOD0",
+    269
+   ],
+   [
+    "Icebreaker_interior_pipe_utility_03_LOD0",
+    269
+   ],
+   [
+    "Icebreaker_interior_pipe_utility_04_LOD0",
+    268
+   ],
+   [
+    "Icebreaker_interior_pipe_utility_04_SHADOW_LOD0",
+    268
+   ],
+   [
+    "Icebreaker_wires_shelf_01_SHADOW_LOD0",
+    204
+   ]
+  ]
+ },
+ "level703": {
+  "scene": "Icebreaker_Lights",
+  "renderers": 3640,
+  "batched": 0,
+  "top_batched": [],
+  "top_unbatched": [
+   [
+    "Icebreaker_accommodation_lamp_01_LOD0",
+    443
+   ],
+   [
+    "Icebreaker_accommodation_lamp_01_SHADOW_LOD0",
+    443
+   ],
+   [
+    "Icebreaker_interior_lamp_02_SHADOW_LOD0",
+    368
+   ],
+   [
+    "Icebreaker_interior_lamp_02_LOD0",
+    368
+   ],
+   [
+    "Icebreaker_accommodation_lamp_02_LOD0",
+    298
+   ],
+   [
+    "Icebreaker_accommodation_lamp_02_SHADOW_LOD0",
+    298
+   ],
+   [
+    "Icebreaker_interior_lamp_01_LOD0",
+    293
+   ],
+   [
+    "Icebreaker_interior_lamp_01_SHADOW_LOD0",
+    293
+   ],
+   [
+    "Icebreaker_interior_lamp_03_LOD0",
+    243
+   ],
+   [
+    "Icebreaker_interior_lamp_03_SHADOW_LOD0",
+    243
+   ],
+   [
+    "ShadowPlane_Box_Medium_LOD0",
+    97
+   ],
+   [
+    "Glowstick_01_source_LOD0",
+    84
+   ]
+  ]
+ },
+ "level704": {
+  "scene": "Icebreaker_Design_Stuff",
+  "renderers": 2931,
+  "batched": 0,
+  "top_batched": [],
+  "top_unbatched": [
+   [
+    "Decal_sign_circle_01_LOD0",
+    190
+   ],
+   [
+    "Decal_sign_letter_o_01_LOD0",
+    182
+   ],
+   [
+    "Icebreaker_sign_decal_navigation_07_LOD0",
+    182
+   ],
+   [
+    "Decal_sign_letter_P_01_LOD0",
+    182
+   ],
+   [
+    "Icebreaker_sign_decal_navigation_11_LOD0",
+    182
+   ],
+   [
+    "Decal_sign_letter_z_01_LOD0",
+    182
+   ],
+   [
+    "Door_Arrow_01_LOD0",
+    182
+   ],
+   [
+    "Decal_sign_A_class_door_WT_01_LOD0",
+    91
+   ],
+   [
+    "Icebreaker_sign_decal_navigation_02_LOD0",
+    91
+   ],
+   [
+    "Exterior_door_handle_02_LOD0",
+    61
+   ],
+   [
+    "Exterior_door_frame_02_SHADOW_LOD0",
+    61
+   ],
+   [
+    "Exterior_door_frame_02_LOD0",
+    61
+   ]
+  ]
+ },
+ "level705": {
+  "scene": "Icebreaker_Design_Main",
+  "renderers": 142,
+  "batched": 0,
+  "top_batched": [],
+  "top_unbatched": [
+   [
+    "scontainer_bag_sport_LOD0",
+    33
+   ],
+   [
+    "scontainer_bag_sport_SHADOW_LOD0",
+    33
+   ],
+   [
+    "scontainer_toolbox_01_SHADOW_LOD0",
+    14
+   ],
+   [
+    "scontainer_toolbox_01_LOD0",
+    14
+   ],
+   [
+    "scontainer_toolbox_01_Cup_SHADOW_LOD0",
+    14
+   ],
+   [
+    "scontainer_toolbox_01_Cup_LOD0",
+    14
+   ],
+   [
+    "scontainer_medbag_smu06_LOD0",
+    10
+   ],
+   [
+    "scontainer_medbag_smu06_SHADOW_LOD0",
+    10
+   ]
+  ]
+ },
+ "level706": {
+  "scene": "Icebreaker_AI",
+  "renderers": 26,
+  "batched": 0,
+  "top_batched": [],
+  "top_unbatched": [
+   [
+    "Sphere",
+    11
+   ],
+   [
+    "AIGrenadeThrowPlaceTarget",
+    5
+   ],
+   [
+    "Target (3)",
+    1
+   ],
+   [
+    "Target (6)",
+    1
+   ],
+   [
+    "Target (4)",
+    1
+   ],
+   [
+    "Target",
+    1
+   ],
+   [
+    "Target (8)",
+    1
+   ],
+   [
+    "Target (2)",
+    1
+   ],
+   [
+    "Target (5)",
+    1
+   ],
+   [
+    "Target (1)",
+    1
+   ],
+   [
+    "Target (9)",
+    1
+   ],
+   [
+    "Target (7)",
+    1
+   ]
+  ]
+ },
+ "level707": {
+  "scene": "Icebreaker_Sound",
+  "renderers": 476,
+  "batched": 0,
+  "top_batched": [],
+  "top_unbatched": [
+   [
+    "AudioTriggerArea",
+    269
+   ],
+   [
+    "AudioPortal_FROM_pectopah_TO_pectopah_kitchen",
+    6
+   ],
+   [
+    "AudioPortal_FROM_Control_center_TO_Icebreaker_outdoor",
+    5
+   ],
+   [
+    "AudioPortal_FROM_Captian_cabin_TO_Icebreaker_outdoor",
+    4
+   ],
+   [
+    "AudioPortal_FROM_Engine_main_room_TO_near_engine_stairs_-1 (1)",
+    4
+   ],
+   [
+    "AudioPortal_FROM_Engine_booth_TO_Engine_main_room",
+    3
+   ],
+   [
+    "AudioPortal_FROM_lab_small_TO_lab_main",
+    2
+   ],
+   [
+    "AudioPortal_FROM_Engine_main_room_TO_near_engine_L-coridor (1)",
+    2
+   ],
+   [
+    "AudioPortal_FROM_Icebreaker_outdoor_TO_Outdoor_coridor",
+    2
+   ],
+   [
+    "AudioPortal_FROM_Icebreaker_outdoor_TO_Hangar",
+    2
+   ],
+   [
+    "AudioPortal_FROM_Engine_main_room_TO_near_engine_L-coridor",
+    2
+   ],
+   [
+    "AudioPortal_FROM_Icebreaker_outdoor_TO_stern_cabin_low",
+    2
+   ]
+  ]
+ },
+ "level708": {
+  "scene": "Icebreaker_Culling",
+  "renderers": 0,
+  "batched": 0,
+  "top_batched": [],
+  "top_unbatched": []
+ },
+ "level709": {
+  "scene": "Icebreaker_cutscene_01",
+  "renderers": 916,
+  "batched": 0,
+  "top_batched": [],
+  "top_unbatched": [
+   [
+    "nvg_wilcox_l4g24_mount_LOD0",
+    16
+   ],
+   [
+    "nvg_wilcox_l4g24_mount_axis_LOD0",
+    16
+   ],
+   [
+    "nvg_l3_pvs31a_mount_LOD0",
+    16
+   ],
+   [
+    "nvg_l3_pvs31a_device_01_LOD0",
+    16
+   ],
+   [
+    "nvg_l3_pvs31a_device_02_LOD0",
+    16
+   ],
+   [
+    "linza",
+    12
+   ],
+   [
+    "mount_all_surefire_scout_thumbscrew_mount_LOD0",
+    10
+   ],
+   [
+    "flashlight_surefire_m600_ultra_scout_LOD0",
+    10
+   ],
+   [
+    "flashlight_surefire_m600_ultra_scout_LOD1",
+    10
+   ],
+   [
+    "flashlight_surefire_m600_ultra_scout_glass_LOD0",
+    10
+   ],
+   [
+    "Item_equipment_glasses_oakley_LOD0_custom",
+    10
+   ],
+   [
+    "mount_all_surefire_scout_thumbscrew_mount_LOD1",
+    10
+   ]
+  ]
+ }
+}
