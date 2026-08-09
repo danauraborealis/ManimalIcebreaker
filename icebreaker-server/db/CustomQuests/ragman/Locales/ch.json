@@ -1,0 +1,27 @@
+{
+  "6a752a6bc498772c6a150baf name": "新商机 - 1",
+  "6a752a6bc498772c6a150baf description": "嘿，老兄！我听说海湾那边有艘船上闹出了不小的动静。据说有个不知名的组织在那儿活动，肯定不是你们的人。你懂我意思吧？既然不是BEAR也不是USEC，那他们的装备肯定不一般。不一般的货就是最好的货，兄弟！你要是能上那艘船，给我带回来任何缴获的装甲或胸挂，肯定能抢购一空！放心吧，你是了解我的，你的那份也少不了！",
+  "6a752a6bc498772c6a150baf startedMessageText": "五件装备，兄弟，得是从他们身上扒下来的。别拿我货架上的那些玩意儿糊弄我，我分得清。",
+  "6a752a6bc498772c6a150baf successMessageText": "让我看看……稍微打理一下，这都能当新的卖！我的人修过比这还破的装备。我从来就没怀疑过你，兄弟，你的那份已经在这儿了。方便的时候来取，成不？",
+  "6a752a6bc498772c6a150baf failMessageText": "没装备就就没生意，我的货架可都空着呢，哥们儿。",
+  "6a752a6bc498772c6a150baf acceptPlayerMessage": "",
+  "6a752a6bc498772c6a150baf declinePlayerMessage": "",
+  "6a752a6bc498772c6a150baf completePlayerMessage": "",
+  "6a752a6bc498772c6a150baf changeQuestMessageText": "",
+  "6a752a6bc498772c6a150baf note": "",
+  "6a752a6bc498772c6a150bb0": "在战局中找到任意黑色军团版本的防弹装备",
+  "6a752a6bc498772c6a150bb1": "上交找到的装备",
+
+  "6a752fa8c498772c6a150bbc name": "新商机 - 2",
+  "6a752fa8c498772c6a150bbc description": "老兄！还记得你带给我的那些装备吗？全卖光了，全部！第一天就没了，而且还没等新货上架就有人来问。这城里没人有这样的顶级货。所以我也懒得绕弯子了，我要更多，同样的装备，不过量得更多，这次要八件。直接从那艘船上弄来，得是新鲜的，可不是你从哪个犄角旮旯翻出来的旧货。你要是搞定了，我肯定少不了你的好处。我一直留着那件Spiritus胸挂，那可是好东西，以后就归你了。",
+  "6a752fa8c498772c6a150bbc startedMessageText": "八件装备，兄弟，别忘了要新鲜的！",
+  "6a752fa8c498772c6a150bbc successMessageText": "哈！瞧瞧这批货，我的人得缝上一个礼拜！每件都已经有人预订好了。你眼光不错，哥们儿。那件Spiritus胸挂，是你的了，有空来找我拿走就行。",
+  "6a752fa8c498772c6a150bbc failMessageText": "什么也没弄来？货架空着呢，我的买家都等得不耐烦了。生意可不是这么做的，哥们儿。",
+  "6a752fa8c498772c6a150bbc acceptPlayerMessage": "",
+  "6a752fa8c498772c6a150bbc declinePlayerMessage": "",
+  "6a752fa8c498772c6a150bbc completePlayerMessage": "",
+  "6a752fa8c498772c6a150bbc changeQuestMessageText": "",
+  "6a752fa8c498772c6a150bbc note": "",
+  "6a752fa8c498772c6a150bbd": "在战局中找到任意黑色军团版本的防弹装备",
+  "6a752fa8c498772c6a150bbe": "上交找到的装备"
+}
