@@ -501,7 +501,7 @@ namespace Manimal.Icebreaker
                         _panelShown = true;
                     }
                     var mc = player.MovementContext;
-                    if (mc != null) { mc.BlockFirearms = true; _handsLocked = true; }
+                    if (mc != null) { mc.BlockFirearms = true; _handsLocked = true; IcebreakerHoldLock.Acquire(); }
                     transform.position = Switch.transform.position;
 
                     // plant foley for the duration of the hold — cut off with the session
@@ -519,7 +519,7 @@ namespace Manimal.Icebreaker
 
                 if (Input.GetKeyDown(KeyCode.Escape)) { End(false); return; }
                 if ((player.Position - Switch.transform.position).sqrMagnitude > 25f) { End(false); return; }
-                if (!Input.GetKey(KeyCode.F)) { End(false); return; }
+                if (!IcebreakerInteractKey.Held()) { End(false); return; }
                 if (Time.time - _start >= IcebreakerChainDoor.PlantSeconds) { End(true); return; }
             }
             catch (Exception e)
@@ -564,6 +564,7 @@ namespace Manimal.Icebreaker
             {
                 var mc = Singleton<GameWorld>.Instance?.MainPlayer?.MovementContext;
                 if (mc != null) mc.BlockFirearms = false;
+                IcebreakerHoldLock.Release();
             }
             if (_panelShown && Owner != null) Owner.CloseObjectivesPanel();
         }

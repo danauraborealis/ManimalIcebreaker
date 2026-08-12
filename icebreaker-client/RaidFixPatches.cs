@@ -4150,8 +4150,13 @@ namespace Manimal.Icebreaker
     [HarmonyPatch(typeof(BotsController), "Init")]
     internal static class Patch_BotsInitFirewall
     {
-        private static void Prefix() => RaidFirewall.WrapForeignPostfixes(
-            AccessTools.Method(typeof(BotsController), "Init"));
+        private static void Prefix()
+        {
+            RaidFirewall.WrapForeignPostfixes(AccessTools.Method(typeof(BotsController), "Init"));
+            // group construction runs per spawning bot, long after Init — but every
+            // plugin has patched by now, so this is the right moment to airbag it
+            RaidFirewall.WrapForeignPostfixes(AccessTools.Method(typeof(BotsGroup), nameof(BotsGroup.IsPlayerEnemy)));
+        }
 
         private static Exception Finalizer(Exception __exception)
             => RaidFirewall.Swallow(__exception, "BotsController.Init");
@@ -4173,6 +4178,28 @@ namespace Manimal.Icebreaker
 
         private static Exception Finalizer(Exception __exception)
             => RaidFirewall.Swallow(__exception, "GameWorld.OnGameStarted");
+    }
+
+    // GROUP-CONSTRUCTION FIREWALL — the third choke point, and the one that was eating
+    // BOTS rather than features. BotsGroup's constructor calls IsPlayerEnemy while
+    // BotSpawner.GetGroupAndSetEnemies builds the group for a spawning bot, so a foreign
+    // postfix that throws there kills the CONSTRUCTOR: the group never finishes, the
+    // bot's activation chain dies partway, and what's left standing in the world is an
+    // invisible shell with floating gear and no AI. that is exactly the "mannequin" this
+    // map has been reporting for weeks, and a player finally caught the culprit in the
+    // act (08-12 field report):
+    //     MoreBotsAPI.Components.FactionManager.ShouldBeRevenged
+    //     MoreBotsAPI.Patches.BotsGroupIsPlayerEnemyPatch.PatchPostfix
+    //     BotsGroup..ctor -> BotSpawner.GetGroupAndSetEnemies
+    // they wrote a MoreBotsAPI-specific patch; this is the mod-agnostic version — the
+    // same per-postfix airbag we already use elsewhere, so ANY mod throwing on this path
+    // loses its own hook instead of costing us the bot. wrapped from the Init prefix
+    // (every plugin has patched by then); the finalizer is the backstop for the rest.
+    [HarmonyPatch(typeof(BotsGroup), nameof(BotsGroup.IsPlayerEnemy))]
+    internal static class Patch_GroupEnemyFirewall
+    {
+        private static Exception Finalizer(Exception __exception)
+            => RaidFirewall.Swallow(__exception, "BotsGroup.IsPlayerEnemy");
     }
 
     // SOUND-PIPELINE AIRBAG — BotEventHandler.PlaySound runs SYNCHRONOUSLY inside

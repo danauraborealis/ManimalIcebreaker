@@ -423,6 +423,10 @@ namespace Manimal.Icebreaker
                         // wired to the tripwire hook, which never fires at default config;
                         // scene load always does, and every plugin is loaded by now
                         SainLocationCompat.TryPatch(new HarmonyLib.Harmony("com.manimal.icebreaker.saincompat"));
+                        // same moment, same reason: every plugin has loaded, so its patch
+                        // types resolve. gated on IceGate at call time, so the mod keeps
+                        // working normally on every other map.
+                        IcebreakerLockableDoorsOff.TryPatch(new HarmonyLib.Harmony("com.manimal.icebreaker.lockabledoors"));
                     }
                 } catch { }
             };

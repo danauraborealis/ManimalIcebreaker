@@ -154,7 +154,7 @@ namespace Manimal.Icebreaker
                             _panelShown = true;
                         }
                         var mc = player.MovementContext;
-                        if (mc != null) { mc.BlockFirearms = true; _handsLocked = true; }
+                        if (mc != null) { mc.BlockFirearms = true; _handsLocked = true; IcebreakerHoldLock.Acquire(); }
 
                         // foley: start clip immediately, loop takes over underneath it
                         EnsureClips();
@@ -177,7 +177,7 @@ namespace Manimal.Icebreaker
 
                     if (Input.GetKeyDown(KeyCode.Escape)) { End(false); return; }
                     if ((player.Position - Door.transform.position).sqrMagnitude > 25f) { End(false); return; }
-                    if (!Input.GetKey(KeyCode.F)) { End(false); return; }
+                    if (!IcebreakerInteractKey.Held()) { End(false); return; }
                     if (Time.time - _start >= HoldSeconds) { End(true); return; }
                 }
                 catch (Exception e)
@@ -215,6 +215,7 @@ namespace Manimal.Icebreaker
                 {
                     var mc = Singleton<GameWorld>.Instance?.MainPlayer?.MovementContext;
                     if (mc != null) mc.BlockFirearms = false;
+                    IcebreakerHoldLock.Release();
                 }
                 if (_panelShown && Owner != null) Owner.CloseObjectivesPanel();
             }

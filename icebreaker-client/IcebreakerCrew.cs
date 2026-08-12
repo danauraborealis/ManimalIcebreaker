@@ -33,6 +33,7 @@ namespace Manimal.Icebreaker
             IcebreakerCutscene.ResetForRaid();
             IcebreakerChainDoor.ResetForRaid();
             IcebreakerFlares.ResetForRaid();
+            IcebreakerHoldLock.ResetForRaid(); // a raid that ended mid-hold must not carry the lock over
             ResetCutsceneGate();
             StartCoroutine(Run());
             // DoorProbe: retired once it nailed the MidOpen/MidClose bug, RE-ARMED behind
@@ -273,7 +274,14 @@ namespace Manimal.Icebreaker
                     OnSpawnEvent("hides0");        // no-op if the BSG box already queued them
                 }
                 if (videoPlayed && (beatFired || !FikaBridge.BotsAuthority)) yield break;
-                yield return new WaitForSeconds(0.5f);
+                // EVERY FRAME, not twice a second (fika report 08-09: "Host Does not get
+                // Cut Scene ... its kinda random when it happens"). the authored box is
+                // ~4.5m across and padded down only; a sprinting player crosses it in
+                // well under 0.5s, so a half-second poll can miss the crossing entirely —
+                // and on the host a missed crossing means their own ProfileId never
+                // enters _cutsceneSeen, which deadlocks the door gate for the whole squad.
+                // two Bounds.Contains per frame is free.
+                yield return null;
             }
         }
 
@@ -331,16 +339,21 @@ namespace Manimal.Icebreaker
             CheckCutsceneGate();
         }
 
+        // FIRST PLAYER THROUGH OPENS IT (user call 08-12). this used to wait for EVERY
+        // living player to trigger their own cutscene, on the theory that the squad
+        // regroups at the engine-section exit. in practice that made one shared door
+        // depend on N independent things going right — a missed box crossing, a stale
+        // fika addon dropping the kind-9 activation, or a teammate who simply never
+        // walked the box each left the door shut forever with no black division and no
+        // way on (fika reports 08-09/08-10, three raids lost). the door is a route, not a
+        // rendezvous: whoever finishes or skips their cutscene first unlocks it for
+        // everyone, and there is no state left that can deadlock.
         private static void CheckCutsceneGate()
         {
             if (_doorGateOpen || !FikaBridge.BotsAuthority) return;
             if (_cutsceneSeen.Count == 0) return; // nobody has crossed yet
-            var humans = new List<Player>();
-            FikaBridge.CollectHumans(humans);
-            foreach (var h in humans)
-                if (h != null && h.ProfileId != null && !_cutsceneSeen.Contains(h.ProfileId)) return;
             _doorGateOpen = true;
-            Plugin.Log.LogDebug($"[Crew] cutscene gate OPEN — all {humans.Count} living player(s) triggered the cutscene, progress door unlocking");
+            Plugin.Log.LogDebug($"[Crew] cutscene gate OPEN — first player through ({_cutsceneSeen.Count} activation(s) seen), progress door unlocking");
             UnlockDoorById(ProgressDoorId);
             try { ProgressDoorUnlocked?.Invoke(); } // kind 4 -> every peer unlocks
             catch (Exception e) { Plugin.Log.LogWarning($"[Crew] progress-door hook failed: {e.Message}"); }

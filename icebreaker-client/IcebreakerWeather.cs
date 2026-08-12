@@ -1116,4 +1116,45 @@ namespace Manimal.Icebreaker
             return g;
         }
     }
+
+    // BLUE SKY IN POWERED SCOPES (field report 08-08, fixed 08-12). magnified optics
+    // render through a second camera (BaseOpticCamera prefab) carrying its OWN
+    // TOD_Scattering. this map freezes the sky — the TOD dome painters are switched off
+    // and RenderSettings.skybox is the authored skybox_night — but the optic's private
+    // scattering never got that memo, so it paints live atmospheric scattering over the
+    // magnified view: a daylight-blue sky inside the scope on a night map.
+    //
+    // we already disabled that component from the fog tick, but OpticComponentUpdater
+    // .LateUpdate re-mirrors the MAIN camera's scattering onto the optic EVERY FRAME
+    // (tod_Scattering_1.enabled = tod_Scattering_0.enabled), so a once-per-tick disable
+    // was always racing it — which is exactly why the report said "sometimes". patch the
+    // sync itself and the race is gone: whatever the updater just copied, we re-clear on
+    // the same frame, before anything renders.
+    [HarmonyPatch(typeof(EFT.CameraControl.OpticComponentUpdater), nameof(EFT.CameraControl.OpticComponentUpdater.LateUpdate))]
+    internal static class Patch_OpticScatteringOff
+    {
+        private static System.Reflection.FieldInfo _fScat, _fMboit;
+
+        [HarmonyPostfix]
+        private static void Postfix(EFT.CameraControl.OpticComponentUpdater __instance)
+        {
+            if (!IceGate.On) return; // vanilla maps keep their scattering
+            try
+            {
+                if (_fScat == null)
+                    _fScat = AccessTools.Field(typeof(EFT.CameraControl.OpticComponentUpdater), "tod_Scattering_1");
+                if (_fMboit == null)
+                    _fMboit = AccessTools.Field(typeof(EFT.CameraControl.OpticComponentUpdater), "mboit_Scattering_1");
+
+                var scat = _fScat?.GetValue(__instance) as Behaviour;
+                if (scat != null && scat.enabled) scat.enabled = false;
+                // MBOIT rides the same sync and needs WindowsManager, which this map has
+                // none of (icebreaker fog lesson) — leaving it on is a second way to
+                // repaint the scope
+                var mb = _fMboit?.GetValue(__instance) as Behaviour;
+                if (mb != null && mb.enabled) mb.enabled = false;
+            }
+            catch { }
+        }
+    }
 }
