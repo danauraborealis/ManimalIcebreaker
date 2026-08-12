@@ -311,6 +311,28 @@ namespace Manimal.Icebreaker
             base.Stop();
             BotOwner.Mover?.SetPose(1f); // stand up for whatever comes next (combat/hunt)
             _next = 0f;
+            // PRIME THE VOXEL (08-12, the ghosting-through-doors bug). CurVoxel is only
+            // refreshed inside BotMover's MOVEMENT code, every 0.5s, and a held bot never
+            // runs it — so a bot released from the hold charges off with CurVoxel null.
+            // BotNearDoorData.CurrentDoorLinks() returns null for a null voxel, so
+            // BotDoorOpener never gets a door, and since a SHUT door carves no navmesh the
+            // doorway is still walkable: they run straight through it. whoever is nearest
+            // the door reaches it inside that half-second window and ghosts it, while the
+            // ones further back cross a refresh tick on the way and open the same door
+            // normally — exactly what the DoorProbe showed (same bot, curVoxel False then
+            // True). one explicit refresh here closes the window.
+            // ...and REPORT it: SetPosToVoxel routes through GClass588.SetPos, which
+            // assigns whatever GetVoxelSafe(pos) returns — including null. so a prime can
+            // "run" and still leave CurVoxel null if the hide markers sit in an actual
+            // voxel grid hole. that is a completely different fix (grid data, not timing),
+            // so the log has to tell the two apart.
+            try
+            {
+                BotOwner.AIData?.SetPosToVoxel(BotOwner.Position);
+                bool ok = BotOwner.VoxelesPersonalData?.CurVoxel != null;
+                Plugin.Log.LogDebug($"[Hold] '{BotOwner.name}' released — voxel prime {(ok ? "OK" : "FAILED (no voxel at " + BotOwner.Position + " — grid hole)")}");
+            }
+            catch (Exception e) { Plugin.Log.LogWarning($"[Hold] voxel prime threw on '{BotOwner.name}': {e.Message}"); }
             // voice back on for combat/hunt — restore to the bot's OWN configured value,
             // not a blind true (some roles ship CAN_TALK false)
             try
@@ -359,6 +381,11 @@ namespace Manimal.Icebreaker
 
         public override void Update(CustomLayer.ActionData data)
         {
+            // same reason as IceHuntLogic: a CustomLogic that drives movement must also
+            // drive the door opener, or the bot walks through every shut door en route
+            try { BotOwner.DoorOpener?.UpdateDoorInteractionStatus(); }
+            catch { }
+
             if (Time.time < _next) return;
             _next = Time.time + UnityEngine.Random.Range(6f, 12f);
             var rec = IceCrewJobs.For(BotOwner);
@@ -393,6 +420,18 @@ namespace Manimal.Icebreaker
 
         public override void Update(CustomLayer.ActionData data)
         {
+            // DRIVE THE DOOR OPENER (08-12). BotDoorOpener.ManualUpdate() early-returns
+            // unless the mover is already in EBotMoverState.NearDoor, and the ONLY thing
+            // that puts it there is UpdateDoorInteractionStatus() -> method_3 -> method_2.
+            // in vanilla that call is made every tick by BSG's own movement logics; a
+            // CustomLogic that drives the bot itself replaces those logics and therefore
+            // silently replaces the door handling too. result: our bots pathed straight at
+            // the player and, because a SHUT door carves no navmesh, walked through every
+            // closed door on the way. one call per tick restores it (it is cheap and
+            // self-throttling — SearchCloseDoorTime gates the real work to 20/sec).
+            try { BotOwner.DoorOpener?.UpdateDoorInteractionStatus(); }
+            catch { }
+
             if (Time.time < _next) return;
             _next = Time.time + 3f;
 

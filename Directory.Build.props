@@ -1,7 +1,7 @@
-<Project>
+﻿<Project>
   <!-- single source of truth for version + identity, per manimal mod conventions -->
   <PropertyGroup>
-    <ModVersion>0.2.3</ModVersion>
+    <ModVersion>0.2.4</ModVersion>
     <ModGuid>com.manimal.icebreaker</ModGuid>
     <ModUsername>Manimal</ModUsername>
     <ModDisplayName>Icebreaker</ModDisplayName>

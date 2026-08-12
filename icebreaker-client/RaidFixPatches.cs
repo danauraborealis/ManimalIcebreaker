@@ -639,6 +639,28 @@ namespace Manimal.Icebreaker
                     }
                 }
                 catch (Exception e) { Plugin.Log.LogWarning($"[LightAutopsy] failed: {e.Message}"); }
+                // fade-clamp truth census (08-09, "but was it actually culling them tho"):
+                // writing _fadeEndDistance proves nothing — count every lamp by distance
+                // and report who still carries intensity beyond the window. litBeyond>0
+                // at meaningful counts = the clamp is decorative and we go digging.
+                try
+                {
+                    var cam = CameraRef != null ? CameraRef.transform.position : Vector3.zero;
+                    float dEnd = Plugin.LightCullDistance.Value;
+                    int inWin = 0, beyond = 0, litBeyond = 0, litInWin = 0;
+                    foreach (var clo in UnityEngine.Object.FindObjectsOfType<CullingLightObject>())
+                    {
+                        var l = clo.GetLight();
+                        if (l == null) continue;
+                        float dist = (clo.transform.position - cam).magnitude;
+                        bool lit = l.enabled && l.intensity > 0.01f;
+                        if (dist <= dEnd) { inWin++; if (lit) litInWin++; }
+                        else { beyond++; if (lit) litBeyond++; }
+                    }
+                    Plugin.Log.LogWarning($"[LightCensus] window={dEnd:0}m: {litInWin}/{inWin} lit inside, "
+                        + $"{litBeyond}/{beyond} STILL LIT beyond — {(litBeyond == 0 ? "clamp verified culling" : "clamp NOT fully effective")}");
+                }
+                catch (Exception e) { Plugin.Log.LogWarning($"[LightCensus] failed: {e.Message}"); }
             }
 
             // INSERT — the LODGroup.enabled semantics probe (08-08 retail-parity hunt).
@@ -754,9 +776,11 @@ namespace Manimal.Icebreaker
             { TickBegin(); IcebreakerAcoustics.TickAmbientBlend(Time.deltaTime); TickEnd(14); }
 
             // live config: whenever the BepInEx sliders change, apply immediately in-raid
-            if (Plugin.LampIntensity.Value != _lastLamp || Plugin.LampShadows.Value != _lastShadows)
+            if (Plugin.LampIntensity.Value != _lastLamp || Plugin.LampShadows.Value != _lastShadows
+                || Plugin.LightCullDistance.Value != _lastLightCull)
             {
                 _lastShadows = Plugin.LampShadows.Value;
+                _lastLightCull = Plugin.LightCullDistance.Value;
                 ApplyLamps();
             }
             if (Plugin.AmbientIntensity.Value != _lastAmbient)
@@ -1378,10 +1402,14 @@ namespace Manimal.Icebreaker
                 catch (Exception e) { Plugin.Log.LogWarning($"[Perf] client shadow split failed: {e.Message}"); }
                 yield return null;
             }
-            // host-side only: bots exist on the authority, so a client watchdog would
-            // be watching observed puppets that never move under their own power anyway
-            if (FikaBridge.BotsAuthority && GetComponent<IcebreakerStuckBots>() == null)
-                gameObject.AddComponent<IcebreakerStuckBots>();
+            // BOT BABYSITTING DELETED WHOLESALE (user call 08-12). the stuck-bot watchdog
+            // treated deliberately-motionless bots as stuck and kept walking the held
+            // engine ambush out of its hide area; the mannequin sweep that shipped beside
+            // it never fired once in any log, because it only despawned bots that never
+            // reach Active while the real shells DO activate (BotWitness: "activated WITH
+            // 1 failed step(s)"). the shells' actual cause was SPT's 18-bot default cap
+            // truncating late waves, fixed server-side. if they come back, diagnose the
+            // activation failure rather than re-adding a sweeper that matches nothing.
             if (GetComponent<IcebreakerCrew>() == null) gameObject.AddComponent<IcebreakerCrew>();
             if (GetComponent<IcebreakerHeliExfil>() == null) gameObject.AddComponent<IcebreakerHeliExfil>();
             IcebreakerSnowGusts.Spawn();
@@ -1469,6 +1497,7 @@ namespace Manimal.Icebreaker
         }
         private static int _autoRebindStage;
         private static float _lastLamp = -1f;
+        private static float _lastLightCull = -1f;
         private static float _lastAmbient = -1f;
         private static bool _lastShadows;
         // the discovered dead lamps, cached so the slider can re-drive them repeatedly (once
@@ -3301,13 +3330,15 @@ namespace Manimal.Icebreaker
             Plugin.Log.LogDebug($"[CutsceneHold] released — healed {native} native lights, culling unlocked");
         }
 
-        // all lights every ~15 frames — 1.8k distance checks is nothing
+        // all lights every ~15 frames — 1.8k distance checks is nothing.
+        // own knob since 08-09 (was 80m x CullDistanceScale): deferred lamp lights
+        // are a GPU cost the prop-culling scale shouldn't govern
         private static void TickLightCuller()
         {
             if (CutsceneHold) return;
             if (_lightEntries.Count == 0 || CameraRef == null || Time.frameCount % 15 != 0) return;
             var camPos = CameraRef.transform.position;
-            float d = 80f * Plugin.CullDistanceScale.Value;
+            float d = Plugin.LightCullDistance.Value;
             float d2 = d * d;
             foreach (var e in _lightEntries)
             {
@@ -3365,18 +3396,48 @@ namespace Manimal.Icebreaker
             var shadows = Plugin.LampShadows.Value ? LightShadows.Hard : LightShadows.None;
             int n = 0;
             foreach (var l in _lamps)
-                if (l != null) { l.intensity = v; l.shadows = shadows; n++; }
+                if (l != null)
+                {
+                    l.intensity = v; l.shadows = shadows; n++;
+                    // slider at 0 = the lights OFF, guaranteed — not "intensity 0 and
+                    // hope unity skips it" (yamaica's discovery 08-09: killing the lamp
+                    // lights is a big GPU win and the emissives/flares carry the look).
+                    // re-enable on raise; the light culler re-disables far ones next pass
+                    if (v <= 0.01f) l.enabled = false;
+                    else if (!l.enabled) l.enabled = true;
+                }
 
-            int natives = 0;
+            int natives = 0, windowed = 0;
             var fMax = AccessTools.Field(typeof(CullingLightObject), "_maxLightIntensity");
             var fCached = AccessTools.Field(typeof(CullingLightObject), "float_1");
+            // LightCullDistance drives the NATIVE fade window (08-09 discovery: the
+            // CullingManager path FADES intensity across the authored 50->80m window
+            // and never disables lights — our distance culler stands down on this map,
+            // so tightening bsg's own window IS the light-distance lever). one-way
+            // shrink per raid; raising the value back up needs a raid restart.
+            var fFadeStart = AccessTools.Field(typeof(CullingLightObject), "_fadeStartDistance");
+            var fFadeEnd = AccessTools.Field(typeof(CullingLightObject), "_fadeEndDistance");
+            float dCull = Plugin.LightCullDistance.Value;
             foreach (var clo in UnityEngine.Object.FindObjectsOfType<CullingLightObject>())
             {
                 if (clo.GetLight() == null) continue;
                 fMax?.SetValue(clo, v);
                 fCached?.SetValue(clo, v);
                 natives++;
+                try
+                {
+                    if (fFadeStart != null && fFadeEnd != null && dCull < (float)fFadeEnd.GetValue(clo))
+                    {
+                        fFadeStart.SetValue(clo, Mathf.Min((float)fFadeStart.GetValue(clo), dCull * 0.6f));
+                        fFadeEnd.SetValue(clo, dCull);
+                        clo.method_3(); // recompute the squared-distance caches
+                        windowed++;
+                    }
+                }
+                catch { }
             }
+            if (windowed > 0)
+                Plugin.Log.LogDebug($"[LightLamps] native fade window tightened to {dCull:0}m on {windowed} lights");
             _lastLamp = v;
             Plugin.Log.LogDebug($"[LightLamps] drove {n} plain lamps + {natives} native culling lights to intensity {v:F2} (shadows={Plugin.LampShadows.Value})");
         }

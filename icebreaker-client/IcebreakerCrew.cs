@@ -35,9 +35,13 @@ namespace Manimal.Icebreaker
             IcebreakerFlares.ResetForRaid();
             ResetCutsceneGate();
             StartCoroutine(Run());
-            // DoorProbe retired: it nailed the MidOpen/MidClose bug and doors work now —
-            // re-arm here if bots ever ghost doors again
-            // StartCoroutine(DoorProbe());
+            // DoorProbe: retired once it nailed the MidOpen/MidClose bug, RE-ARMED behind
+            // DevMode 08-12 — the released engine squad ghosts the engine-room doors
+            // again. it logs every gate in the BotDoorOpener chain per bot+door pair, so
+            // it names the cause (null CurVoxel = grid hole, empty cell links = the
+            // doorway carries no NavMeshDoorLink, wrong mover state, or no link authored
+            // there at all) instead of us guessing at brain layers.
+            if (Plugin.DevMode.Value) StartCoroutine(DoorProbe());
         }
 
         private IEnumerator Run()
@@ -100,60 +104,27 @@ namespace Manimal.Icebreaker
                 StartCoroutine(EngineAdvanceWatch());
             }
 
-            // DETERMINISTIC crew (user call 08-05, replacing the fill + culler): the
-            // count-and-correct machinery raced the wave spawner every raid — the fill
-            // measured mid-landing, saw the not-yet-activated bots as missing, over-
-            // spawned, and the culler had to claw it back (which it cant do to anything
-            // a player can see, so a flood in your face just stayed). the authored
-            // waves reliably deliver the 6-man base crew and the T1 knight detail adds
-            // 2 escorts — theres nothing to count. coop just adds flat extras, one
-            // fire-and-forget batch, no measuring before or after.
+            // THE CLIENT NO LONGER SPAWNS ANYONE (2026-08-11). base.json now carries the
+            // retail BossLocationSpawn table — rogues at raid start (2 guaranteed pairs +
+            // four 50% pairs), the knight at T1, and the whole BD trigger choreography
+            // with the live roles remapped to blackDivIb. BSG's wave generator delivers
+            // all of it, so the client-side rogue top-up is gone: it existed only because
+            // our old base.json had six lone rows and no zone spawn points to grow from,
+            // and every count-and-correct pass we ever built on top of it raced the real
+            // spawner. no fill, no culler, no force-spawner.
             yield return new WaitForSeconds(4f);
-
-            // solo gets the base crew, every extra coop player adds one rogue up to
-            // the cap — same roster source as the BD trigger brackets. 6/10 not 8/12:
-            // the knight detail adds 2 escorts, so TOTALS land at 8 solo .. 12 full
-            const int baseRogues = 6, capRogues = 10;
-            int party = GroupSizeEventLogic.GroupSize();
-            int extra = Mathf.Clamp(baseRogues + (party - 1), baseRogues, capRogues) - baseRogues;
-            Plugin.Log.LogInfo($"[Crew] waves bring {baseRogues}; party of {party} adds {extra}; knight={Plugin.CrewKnight.Value}");
-            if (extra > 0 && !BdPhase)
-            {
-                var shuffled = zones.OrderBy(_ => UnityEngine.Random.value).ToList();
-                var t = ForceSpawnBatch(WildSpawnType.exUsec, shuffled[0], extra);
-                while (!t.IsCompleted) yield return null;
-            }
 
             // boss-group spawns stack leader+escorts on one marker (frozen conjoined
             // rogues) — and the wave lands STAGGERED, so a one-shot pass missed everyone
             // who arrived after it. patrol for the first few minutes instead.
             StartCoroutine(UnstackPatrol());
+            StartCoroutine(C3KeycardSweep()); // rare keycard on a rogue body
 
-            // knight raid-start force REMOVED: retail base.json says he arrives via the
-            // T1 trigger with 2 rogue escorts (SpawnKnightDetail) — never at raid start
-
-            // NOW prepare the trigger squads — after the rogues are on deck, so the
-            // build has the bot-gen queue to itself. pool mode goes one further than
-            // the profile premake: the bots are fully SPAWNED into an off-map pen and
-            // events teleport them in, so the instantiation + gear-bundle cost lands
-            // here in the quiet early raid (the ice climb) instead of on a trigger frame
-            // native-waves mode: the POOL would double-spawn (pen bots + native rows),
-            // but the profile PREMAKE stays valuable — it warms the server's bot-gen
-            // cache so the native trigger spawns draw prebuilt profiles (less hitch)
+            // the profile premake stays: it has nothing to do with delivery any more, it
+            // just asks the server for blackDivIb profiles early and PREWARMS their gear
+            // bundles, so the trigger frame doesn't pay a cold bundle load per bot.
             if (Plugin.CrewBlackDiv.Value)
-                StartCoroutine(Plugin.CrewPreSpawnPool.Value && !Plugin.NativeBdWaves.Value
-                    ? PoolSpawnTriggerSquads() : PreMakeTriggerSquads());
-
-            // the resurrected retail trigger layer raises the events (hides0/stern0/wedges1
-            // + the group-size ladder) and OUR force-spawner delivers them — the server's
-            // BossLocationSpawn pipeline silently refused the custom blackdiv roles, so
-            // triggers fired and zero bots arrived. everything is armed up top (bridge +
-            // cutscene watcher + premake); nothing starts here any more.
-            //
-            // the old EventSpawns=false fallback (BlackDivisionWatch + EngineRoomWatch) was
-            // deleted 08-01: unused since the switch, and a silently-drifting second copy of
-            // the spawn logic — the blackDivIb retype and the bossWedge restore both landed
-            // in it first and did nothing, because it never ran.
+                StartCoroutine(PreMakeTriggerSquads());
         }
 
         // ---- retail-event -> force-spawn bridge ----
@@ -405,65 +376,29 @@ namespace Manimal.Icebreaker
         {
             if (string.IsNullOrEmpty(eventId) || !_firedEvents.Add(eventId)) return; // one-shot per event
 
-            // NATIVE WAVES MODE: our trigger ids ARE the retail TriggerIds, so the
-            // whole delivery reduces to raising BSG's own bot event — the appended
-            // BossLocationSpawn rows do the spawning. the staging extras that aren't
-            // spawns stay ours: the engine hold watcher (scans arrivals regardless of
-            // who spawned them), the SZ-1 charge sweeps, and the progress doors.
-            if (Plugin.NativeBdWaves.Value)
-            {
-                try
-                {
-                    Singleton<BotEventHandler>.Instance?.AnyEvent(eventId);
-                    Plugin.Log.LogWarning($"[Crew] native wave trigger raised: '{eventId}' (BSG pipeline delivers the squad)");
-                }
-                catch (Exception e) { Plugin.Log.LogError($"[Crew] native trigger raise failed for '{eventId}': {e.Message}"); }
-
-                if (eventId.StartsWith("hides"))
-                {
-                    StartCoroutine(HoldEngineSquad(0, 4, 0)); // watcher — holds whoever arrives at the hide markers
-                    StartCoroutine(PlaceChargeSweep("BotZoneEngineHide"));
-                }
-                else if (eventId.StartsWith("stern"))
-                    StartCoroutine(PlaceChargeSweep("BotZoneSternTop", "BotZoneStern"));
-                else if (eventId == "T3")
-                    StartCoroutine(PlaceChargeSweep("BotZoneOutside_t3"));
-                return;
-            }
-            // suffix = extras over the base squad (decoded retail group-size ladder)
-            int extras = eventId.Length > 0 && char.IsDigit(eventId[eventId.Length - 1])
-                ? eventId[eventId.Length - 1] - '0' : 0;
+            // POST-EVENT JOBS ONLY (2026-08-11 rework). the spawning itself is BSG's now:
+            // our trigger ids ARE the retail TriggerIds, base.json carries the retail
+            // BossLocationSpawn table (roles remapped to blackDivIb), and BossSpawnScenario
+            // subscribes to BotEventHandler natively — so by the time we get here the squad
+            // is already on its way. we do NOT re-raise the event: the trigger box raised it
+            // to begin with, and this handler runs BECAUSE of that raise (the old code's
+            // second raise was the duplicate seen in the 08-09 logs).
+            //
+            // what stays ours is everything that isn't a spawn: the engine hold watcher
+            // (scans arrivals regardless of who spawned them), the SZ-1 charge sweeps, and
+            // the progress doors.
+            Plugin.Log.LogWarning($"[Crew] trigger '{eventId}' fired — BSG's wave pipeline delivers the squad");
             if (eventId.StartsWith("hides"))
             {
-                // hold/release STAGING (07-17), split (07-28), re-split (08-03), back to
-                // VANILLA (08-07 user call): all 4 hold the ambush at the hide markers
-                // until the release trigger blows — retail's behavior, no early
-                // patrollers. the extras still push in from the pen on release.
-                StartCoroutine(SpawnSquad("engine room", new[] { "BotZoneEngineHide" }, 4, null));
-                StartCoroutine(HoldEngineSquad(0, 4, extras));
+                StartCoroutine(HoldEngineSquad(0, 4, 0)); // watcher — holds whoever arrives at the hide markers
                 StartCoroutine(PlaceChargeSweep("BotZoneEngineHide"));
             }
             else if (eventId.StartsWith("stern"))
-                StartCoroutine(SpawnSternDeployment(extras));
-            // bossWedge leads this detail again (user, 08-01). SpawnSquad already takes a
-            // bossRole — it was simply being passed null. assaults drop by one so the detail
-            // stays the same size: boss + 3 instead of 4 escorts.
-            // the AIPlaces trigger fires 'wedges1' and lands here — this is the only wedge
-            // path now that the legacy watcher is gone.
-            else if (eventId.StartsWith("wedges"))
-                StartCoroutine(SpawnSquad("wedge detail", WedgeZones, 3 + (extras - 1), (WildSpawnType)BdWedge));
-            // retail base.json truth (recovered 07-09): T1 = the knight + 2 rogue escorts
-            // at Mash_t1 (he was never a raid-start spawn); T3/T4 = BD deployments at the
-            // outside/inside zones we previously never delivered
-            else if (eventId == "T1")
-                StartCoroutine(SpawnKnightDetail());
+                StartCoroutine(PlaceChargeSweep("BotZoneSternTop", "BotZoneStern"));
             else if (eventId == "T3")
-            {
-                StartCoroutine(SpawnSquad("outside t3", new[] { "BotZoneOutside_t3" }, 3, null));
                 StartCoroutine(PlaceChargeSweep("BotZoneOutside_t3"));
-            }
-            else if (eventId == "T4")
-                StartCoroutine(SpawnSquad("inside t4", new[] { "BotZoneInside_t4" }, 5, null));
+            else if (eventId.StartsWith("wedges"))
+                StartCoroutine(PlaceWedgeTag()); // his guaranteed red tag — see PlaceWedgeTag
             else
                 _firedEvents.Remove(eventId); // not ours (T2 etc) — leave re-armable
         }
@@ -483,7 +418,7 @@ namespace Manimal.Icebreaker
         private IEnumerator DoorProbe()
         {
             NavMeshDoorLink[] links = null;
-            while (_probeLogs < 24)
+            while (_probeLogs < 400)
             {
                 yield return new WaitForSeconds(3f);
                 if (links == null || links.Length == 0)
@@ -675,13 +610,108 @@ namespace Manimal.Icebreaker
             catch { return null; }
         }
 
-        private static bool StuffCharge(BotOwner b)
+        // WEDGE'S RED TAG (08-12): his BlackDiv loadout carries no labs keycard, so the
+        // server-side keycard->dogtag swap that gives the grunts their tags has nothing
+        // to trade on him. and the server CANNOT simply add one — SPT frees each bot's
+        // container cache at the end of generation, so every server-side add fails with
+        // a misleading NO_SPACE (that bug ate the whole first version of this feature).
+        // this is the SZ-1 path instead, which has always worked because it stuffs a
+        // LIVE bot's grids client-side.
+        private bool _wedgeTagPlaced;
+
+        private IEnumerator PlaceWedgeTag()
+        {
+            if (_wedgeTagPlaced) yield break;
+            float giveUp = Time.time + 90f; // he generates on the trigger frame; wait him out
+            while (Time.time < giveUp && !_wedgeTagPlaced)
+            {
+                foreach (var b in UnityEngine.Object.FindObjectsOfType<BotOwner>())
+                {
+                    if (b == null || b.Profile?.Info?.Settings?.Role != (WildSpawnType)BdWedge) continue;
+                    var p = b.GetPlayer;
+                    if (p == null || p.HealthController == null || !p.HealthController.IsAlive) continue;
+                    // he can ALREADY hold one: if he rolled a labs keycard, the server's
+                    // swap turned it red before he ever spawned. adding a second here
+                    // would double the rarest tag in the raid.
+                    if (AlreadyCarriesTag(b))
+                    {
+                        _wedgeTagPlaced = true;
+                        Plugin.Log.LogDebug("[Crew] wedge already carries a BD tag (server keycard swap) — not adding a second");
+                        yield break;
+                    }
+                    if (StuffItem(b, BdDogtagRedTpl, "BD RED dogtag"))
+                    {
+                        _wedgeTagPlaced = true;
+                        yield break;
+                    }
+                }
+                yield return new WaitForSeconds(1f);
+            }
+            if (!_wedgeTagPlaced)
+                Plugin.Log.LogWarning("[Crew] wedge never turned up (or had no room) — his red dogtag went unplaced");
+        }
+
+        internal const string BdDogtagRedTpl = "6a461c41ec88c6b9a509fb17";
+        private static readonly string[] BdDogtagTpls =
+        {
+            "6a461c41ec88c6b9a509fb17", // red
+            "6a461bf82b2264dbe10d0ee6", // green
+            "6a461aed7391ab085a093760", // ferrum
+        };
+
+        private static bool AlreadyCarriesTag(BotOwner b)
+        {
+            try
+            {
+                var inv = b?.Profile?.Inventory;
+                if (inv == null) return false;
+                foreach (var it in inv.AllRealPlayerItems)
+                    if (it != null && Array.IndexOf(BdDogtagTpls, it.TemplateId.ToString()) >= 0) return true;
+            }
+            catch { }
+            return false;
+        }
+
+        // C-3 KEYCARD ON A ROGUE (moved client-side 08-12). it lived in the server's bot
+        // firewall as an AddItemWithChildrenToEquipmentSlot call, which means it has never
+        // once dropped since it shipped: SPT frees the bot's container cache at the end of
+        // generation, so every server-side add after that fails with a misleading NO_SPACE.
+        // same rate as before (2% per rogue, roughly one raid in six across the crew), now
+        // placed through the SZ-1 path that actually works.
+        private const string C3KeycardTpl = "69bb3f7df94327bc0f0230c9";
+        private const float C3ChancePercent = 2f;
+        private readonly HashSet<string> _c3Rolled = new HashSet<string>();
+
+        private IEnumerator C3KeycardSweep()
+        {
+            // rogues are raid-start rows but land staggered, so sweep rather than
+            // one-shot; each body is rolled exactly once, tracked by profile id
+            float until = Time.time + 300f;
+            while (Time.time < until)
+            {
+                foreach (var b in UnityEngine.Object.FindObjectsOfType<BotOwner>())
+                {
+                    if (b == null || b.Profile?.Info?.Settings?.Role != WildSpawnType.exUsec) continue;
+                    var pid = b.Profile?.Id;
+                    if (string.IsNullOrEmpty(pid) || !_c3Rolled.Add(pid)) continue;
+                    var p = b.GetPlayer;
+                    if (p == null || p.HealthController == null || !p.HealthController.IsAlive) continue;
+                    if (UnityEngine.Random.Range(0f, 100f) < C3ChancePercent && StuffItem(b, C3KeycardTpl, "C-3 keycard"))
+                        Plugin.Log.LogInfo($"[Crew] C-3 keycard placed on rogue '{b.name}' — rare find, go loot him");
+                }
+                yield return new WaitForSeconds(5f);
+            }
+        }
+
+        private static bool StuffCharge(BotOwner b) => StuffItem(b, IcebreakerChainDoor.ChargeTpls[0], "SZ-1 charge");
+
+        private static bool StuffItem(BotOwner b, string tpl, string label)
         {
             try
             {
                 var factory = Singleton<ItemFactoryClass>.Instance;
                 if (factory == null) return false;
-                var item = factory.CreateItem(factory.MongoID_0, IcebreakerChainDoor.ChargeTpls[0], null);
+                var item = factory.CreateItem(factory.MongoID_0, tpl, null);
                 if (item == null) return false;
 
                 var grids = new List<StashGridClass>();
@@ -697,16 +727,16 @@ namespace Manimal.Icebreaker
                     var loc = grids[i].FindFreeSpace(item);
                     if (loc == null) continue;
                     // WithoutRestrictions: skip container FILTERS (geometry still applies) —
-                    // a pocket excluded-filter must not veto the guaranteed charge
+                    // a pocket excluded-filter must not veto a guaranteed placement
                     if (!grids[i].AddItemWithoutRestrictions(item, loc).Succeeded) continue;
-                    Plugin.Log.LogDebug($"[Crew] SZ-1 charge placed in '{b.name}' {(i < bagGrids ? "BACKPACK" : "pockets")} — one per raid, go find him");
+                    Plugin.Log.LogDebug($"[Crew] {label} placed in '{b.name}' {(i < bagGrids ? "BACKPACK" : "pockets")}");
                     return true;
                 }
                 return false;
             }
             catch (Exception e)
             {
-                Plugin.Log.LogWarning($"[Crew] SZ-1 stuff failed on '{b?.name}': {e.Message}");
+                Plugin.Log.LogWarning($"[Crew] {label} stuff failed on '{b?.name}': {e.Message}");
                 return false;
             }
         }
@@ -1354,42 +1384,11 @@ namespace Manimal.Icebreaker
         private int DeliverFromPool(WildSpawnType role, BotZone zone, int count,
             float minPlayerDist = 0f, List<BotOwner> deliveredOut = null)
         {
-            if (!Plugin.CrewPreSpawnPool.Value) return 0;
-            if (!_pool.TryGetValue((int)role, out var list) || list.Count == 0) return 0;
-            bool zoneIsWedge = WedgeFamily.Contains(zone.name);
-            var picks = new List<BotOwner>();
-            for (int pass = 0; pass < 2 && picks.Count < count; pass++)
-                for (int i = list.Count - 1; i >= 0 && picks.Count < count; i--)
-                {
-                    var e = list[i];
-                    if (e.Bot == null || e.Bot.IsDead) { list.RemoveAt(i); continue; }
-                    if (pass == 0 && e.ZoneName != zone.name) continue;
-                    if (pass == 1 && !(zoneIsWedge && WedgeFamily.Contains(e.ZoneName))) continue;
-                    picks.Add(e.Bot);
-                    list.RemoveAt(i);
-                }
-            if (picks.Count == 0) return 0;
-
-            var pts = PickPoints(zone, picks.Count, minPlayerDist); // trigger squads spawn close by default
-            for (int i = 0; i < picks.Count; i++)
-            {
-                var b = picks[i];
-                var pos = pts != null ? pts[i % pts.Count].Position : zone.transform.position;
-                // wrapped onto an already-used point (zone has fewer free markers than
-                // bots): ring-offset so nobody teleports inside a squadmate
-                if (pts == null || i >= pts.Count)
-                {
-                    float ang = i * 2.4f; // golden-angle-ish, no two offsets align
-                    pos += new Vector3(Mathf.Cos(ang), 0f, Mathf.Sin(ang)) * 1.6f;
-                }
-                try { b.GetPlayer.Teleport(pos); }
-                catch (Exception e) { Plugin.Log.LogWarning($"[Crew] pool delivery teleport failed: {e.Message}"); }
-                ReanchorCore(b, pos);
-                try { b.PatrollingData.Unpause(); } catch { }
-                deliveredOut?.Add(b);
-            }
-            Plugin.Log.LogDebug($"[Crew] delivered {picks.Count}/{count}x {role} from the pen into {zone.name}");
-            return picks.Count;
+            // pool retired with the force-spawner (2026-08-11): nothing fills _pool any
+            // more, so this is a permanent no-op. kept as a shim only because the dead
+            // spawn machinery around it is excised in its own verified pass; IsPenBot
+            // likewise always answers false now.
+            return 0;
         }
 
         // the hold scan and other role-based sweeps must never claim a bot that is

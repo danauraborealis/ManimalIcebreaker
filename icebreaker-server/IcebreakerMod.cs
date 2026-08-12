@@ -35,7 +35,12 @@ public record ModMetadata : AbstractModMetadata
     {
         // blowtorch item registration (custom parent + item clone) goes through
         // WTT CommonLib — already a hard dependency of the icebreaker modpack
-        { "com.wtt.commonlib", new SemanticVersioning.Range("~2.0.20") }
+        { "com.wtt.commonlib", new SemanticVersioning.Range("~2.0.20") },
+        // HARD since 0.2.4: the kordbreach set supplies the C-3 keycard AND the
+        // black division dogtags — the tags are the currency for the ragman/skier
+        // quest-reward barters, so without this the barters are unbuyable and BD
+        // bodies drop nothing. 1.1.4 is the release the tags shipped in.
+        { "com.wtt.contentbackport", new SemanticVersioning.Range(">=1.1.4") }
     };
     public override string? Url { get; init; }
     public override bool? IsBundleMod { get; init; } = true; // ships the scene + preset bundles
@@ -57,6 +62,9 @@ public class IcebreakerMod(
     ISptLogger<IcebreakerMod> logger)
     : IOnLoad
 {
+    // the retail trigger table's own ceiling — see the cap note in OnLoad
+    private const int IcebreakerBotCap = 40;
+
     public async Task OnLoad()
     {
         var modDir = SysPath.GetDirectoryName(typeof(IcebreakerMod).Assembly.Location)!;
@@ -76,6 +84,22 @@ public class IcebreakerMod(
         }
 
         suburbs.Base = newBase;
+
+        // ALIVE-BOT CAP (2026-08-12): SPT caps concurrent bots per map from
+        // configs/bot.json maxBotCap, and an unlisted map silently falls through to
+        // "default" = 18. the retail trigger table peaks near 40 alive if the player
+        // kills nobody (12ish rogues + knight detail, then hides 4, stern 9, wedges 4,
+        // T3 3, T4 5) — so from mid-raid on, every later wave was being truncated:
+        // squads arriving short, and half-built "invisible gear" bots where a spawn was
+        // cut off partway (field report 08-12, T4 delivered 2 of 5 and one was a shell).
+        // 40 matches the table's own ceiling; terminal needed the same treatment.
+        var botConfig = configServer.GetConfig<BotConfig>();
+        if (botConfig?.MaxBotCap != null)
+        {
+            botConfig.MaxBotCap["suburbs"] = IcebreakerBotCap;
+            logger.Info($"[Icebreaker] alive-bot cap set to {IcebreakerBotCap} (SPT's unlisted-map default of "
+                + $"{botConfig.MaxBotCap.GetValueOrDefault("default", 18)} truncated the late trigger waves)");
+        }
         // scavs never cross: DisabledForScav is the exact lever labs uses, and the map
         // screen natively greys the location out for scav raids on it. the hovercraft
         // side of the same rule lives in the client's transit access gate.

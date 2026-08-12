@@ -72,11 +72,37 @@ public class IcebreakerLootFirewall(
 
     private static bool Ours(string id) => string.Equals(id, "suburbs", StringComparison.OrdinalIgnoreCase);
 
+    // GOON-SYSTEM GUARD (2026-08-11, found while moving spawns onto BSG's wave generator).
+    // SPT relocates the goons daily by zeroing BossChance on EVERY bossKnight row on EVERY
+    // map, then restoring it on one randomly-chosen map from its own location pool — a pool
+    // our map will never be in. our T1 knight row is a bossKnight row, so it gets zeroed and
+    // the knight simply never arrives. the zeroing hits the LIVE database while the client
+    // is served a CLONE taken moments earlier, so restoring here (after the clone, every
+    // raid start, whatever map is loading) leaves the database correct for the next clone.
+    // runs for other maps too — otherwise a customs raid between two icebreaker raids
+    // leaves ours zeroed for the next one.
+    private void RestoreKnightChance()
+    {
+        try
+        {
+            var suburbs = databaseService.GetLocations().Suburbs?.Base?.BossLocationSpawn;
+            if (suburbs is null) return;
+            foreach (var row in suburbs)
+                if (row.BossName == "bossKnight" && row.BossChance != 100)
+                {
+                    row.BossChance = 100;
+                    _log.Debug("[Icebreaker] knight T1 spawn chance restored to 100 (SPT's goon relocation had zeroed it)");
+                }
+        }
+        catch (Exception e) { _log.Warning($"[Icebreaker] knight chance restore failed: {e.Message}"); }
+    }
+
     public override List<SpawnpointTemplate> GenerateLocationLoot(string locationId)
     {
         // raid-context latch: loot generates at StartLocalRaid, bots on later requests —
         // this is the only place the server tells us which map the active raid is on
         IcebreakerRaidContext.OnIcebreaker = Ours(locationId);
+        RestoreKnightChance();
         if (!Ours(locationId)) return base.GenerateLocationLoot(locationId);
 
         lock (Gate) // raid starts are rare; simplest way to keep suspend/restore atomic

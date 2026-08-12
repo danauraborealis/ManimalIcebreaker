@@ -37,6 +37,21 @@ namespace Manimal.Icebreaker
         internal static Action<string> Bridge;
         internal static readonly List<string> PendingEvents = new List<string>();
 
+        // every botEvent raise, from EVERY source, with a timestamp. the trigger boxes
+        // raise these and BSG's BossSpawnScenario acts on them, so this line is the only
+        // proof of "which wave fired and when" — it turned a player's "guys spawned in
+        // the wrong place" report into a five-second grep (08-09).
+        [HarmonyPatch(typeof(BotEventHandler), nameof(BotEventHandler.AnyEvent), new[] { typeof(string) })]
+        internal static class Patch_LogAnyEvent
+        {
+            [HarmonyPostfix]
+            private static void Postfix(string eventId)
+            {
+                if (IceGate.On)
+                    Plugin.Log.LogWarning($"[Waves] botEvent '{eventId}' raised t={UnityEngine.Time.timeSinceLevelLoad:F0}s");
+            }
+        }
+
         private static void OnAnyEvent(string id)
         {
             var b = Bridge;
@@ -169,6 +184,14 @@ namespace Manimal.Icebreaker
                         holder.AddPlace(place);
                     place.Init(doors, controller);
                     built++;
+                    // WHERE each box actually is (added 08-11): a spawn trigger firing
+                    // from somewhere the player never meant to go reads as a bug, and
+                    // without this line there is no way to tell a retail-authored
+                    // approach box from one the rip moved or inflated. terminal logs the
+                    // same thing; we never did.
+                    var bc = go.GetComponent<BoxCollider>();
+                    if (bc != null)
+                        Plugin.Log.LogDebug($"[AIPlaces] box '{go.name}' at {t.position} size {Vector3.Scale(bc.size, t.lossyScale)}");
                 }
 
                 // subscribe NOW — before any player movement can fire a trigger

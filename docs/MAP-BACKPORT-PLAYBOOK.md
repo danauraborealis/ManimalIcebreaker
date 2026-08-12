@@ -308,3 +308,81 @@ When a BSG shader can't be bound at runtime and needs an SDK stand-in:
    clean 255s; the BUNDLE texture is what the shader samples). Fix: import the
    mask uncompressed. Identical-result fixes exclude the mechanism you touched;
    the fourth identical result should have pointed at the render path itself.
+
+## Performance playbook (learned on Icebreaker, Aug 2026 — read BEFORE optimizing)
+
+The dense-view fps hunt burned a week. The final map of what matters, so the next
+map skips straight to the answer:
+
+- **Measure before touching anything.** Port the `[FrameSplit]` probe first
+  (RaidFixPatches: Camera.onPreCull..onPostRender bracket + WaitForEndOfFrame
+  marker; FrameTimingManager returns NOTHING in this client build). It splits every
+  frame into scripts / camMain / presentTail. camMain-bound = draw submission
+  (LOD/cull territory); scripts-bound = AI (bot count); presentTail = GPU.
+  Also port `[QualityCensus]` (one-shot QualitySettings dump) — we A/B'd shadow
+  values the game was already running and learned nothing for a whole round.
+- **LOD bias is THE lever on ripped maps.** EFT's Object LOD slider hard-clamps to
+  [2,4] (validator in GraphicsSettingsClass; slider "2" = Unity lodBias 2.0 —
+  verified 1:1). BSG authors LODGroup CULL thresholds assuming bias >= 2, and most
+  map LODGroups are 1-LOD (Icebreaker: 79.8k of 81.8k; Customs: 50k of 67k) — they
+  are a CULL system, not a detail system. Sub-2 bias = everything culls closer =
+  the fps win, but near-field props visibly pop. Fix: cell-tiered cull floors
+  (IcebreakerLodCullFloor.cs) — protective floor near the camera, aggressive floor
+  beyond, indoor/outdoor radius split via EnvironmentManager. Shipped defaults:
+  bias 0.7, far 0.1, near 0.006, radii 27.1/19.49m.
+- **Lamps are realtime deferred lights** (the rip loses baked lighting) and BSG's
+  CullingLightObject system FADES intensity (authored 50→80m window) but never
+  disables a light — GPU-bound players bleed here even when the dev box (GPU idle)
+  shows nothing. Clamp the fade window (`_fadeStartDistance`/`_fadeEndDistance` +
+  `method_3()` recompute) — shipped default 25m — and force-restore during any
+  cutscene wide shots (CutsceneShowAll already does). LampIntensity 0 is the
+  nuclear option and the map stays readable (emissives/flares carry the look).
+- **Exonerated — do not re-litigate without new evidence:** occlusion culling
+  (retail's own 84k-cell bake made ZERO difference — dense views are open
+  sightlines), runtime static batching (bundles ship ~91% pre-batched at build
+  time), shadows (rip loses baked lighting; barely any shadow work exists),
+  pixel light count (map renders deferred), far-plane/visibility (nothing but
+  ocean past the map), and BSG's cell autocull + area-light instancing (both are
+  post-0.16 engine work — dormant/absent in SPT's client, confirmed on a live
+  Customs census; nothing to feed data to).
+- **Verify a lever ENGAGES before trusting its A/B.** Three separate knobs this
+  week were inert when first tested (LODGroup.enabled toggling, the first
+  LightCullDistance, CellCull) — a "no effect" result on a knob that never fired
+  is measuring nothing. Every clamp should log what it changed FROM.
+
+## Spawning and third-party coexistence (Aug 2026)
+
+- **Deterministic spawn tables, never count-and-correct.** The rogue flood was
+  chance-rolled BossLocationSpawn rows + client double-fill; the fix was exact
+  rows at 100%, and DELETING the culler machinery, not tuning it.
+- **Native botEvent waves work** (BossSpawnScenario.smethod_0 prefix appends rows;
+  TriggerName="botEvent" + TriggerId; MoreBots prepatcher makes custom role enums
+  parse) but the native pipeline has no naked-profile guards and tears bots under
+  load (invisible gear-shell mannequins) — keep a force-spawner as default and a
+  mannequin sweeper (never-activated bot for 30s → despawn) regardless.
+- **Third-party mods WILL break on an unknown map id.** The choke-point firewall
+  pattern (wrap our critical path, name the culprit, degrade not die) plus targeted
+  shims: PBS/APBS needs the map masqueraded as 'laboratory' INSIDE the bot
+  generator call (their router hook stomps it back later), and the shim must be
+  LOUD when it can't find its hook point — a silent no-op cost a player every
+  vanilla bot for days. Add a one-time proof-of-life log to any DI override so
+  "did our generator even run" is a grep.
+- **Voice muting for held/ambush bots**: BotTalk.CanSay only gates vanilla lines —
+  SAIN speaks through Player.Speaker directly. Gate PhraseSpeakerClass.Play/Queue
+  (the terminal sink) for held bots.
+- **Audio sources from restores bypass the game's volume sliders** — EFT applies
+  volume via mixer channels, never AudioListener. Adopt every null-group
+  AudioSource into BetterAudio.MasterMixerGroup on a 10s sweep.
+
+## Feeding a new project this project's memory
+
+The assistant's persistent memories for Icebreaker live as plain markdown at
+`C:\Users\peard\.claude\projects\C--Users-peard-Desktop-megagugged-spt-hideoutcat-main\memory\`
+(index: MEMORY.md). They are keyed to the session's working directory — a session
+started in a new project folder will NOT auto-load them. To transfer: point the
+new session at that folder (it can read the files directly if given the path), or
+copy the relevant .md files into the new project's docs. The highest-value ones
+for a new backport: map-backport-playbook (pointer), eft-bot-ai-and-map-data,
+eft-navmesh-and-waypoints, icebreaker-native-culling, icebreaker-fps-lodbias,
+icebreaker-audio-parity, icebreaker-loot-pipeline, fika-compat-audit,
+choke-point-firewalls.

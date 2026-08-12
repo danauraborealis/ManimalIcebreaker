@@ -74,32 +74,16 @@
       "6a752a6bc498772c6a150bb7": [
         [
           {
-            "count": 2,
-            "_tpl": "59f32bb586f774757e1e8442",
-            "level": 20,
-            "side": "Bear"
-          },
-          {
-            "count": 2,
-            "_tpl": "59f32c3b86f77472a31742f0",
-            "level": 20,
-            "side": "Usec"
+            "count": 1,
+            "_tpl": "6a461bf82b2264dbe10d0ee6"
           }
         ]
       ],
       "6a752fa8c498772c6a150bc5": [
         [
           {
-            "count": 3,
-            "_tpl": "59f32bb586f774757e1e8442",
-            "level": 25,
-            "side": "Bear"
-          },
-          {
-            "count": 3,
-            "_tpl": "59f32c3b86f77472a31742f0",
-            "level": 25,
-            "side": "Usec"
+            "count": 2,
+            "_tpl": "6a461bf82b2264dbe10d0ee6"
           }
         ]
       ]

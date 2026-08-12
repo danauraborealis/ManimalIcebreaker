@@ -27,7 +27,10 @@ namespace Manimal.Icebreaker
     // guids are the real ones read off the loaded plugins, NOT guessed — a typo here
     // makes bepinex silently refuse to load us at all.
     [BepInDependency("com.wtt.commonlib", BepInDependency.DependencyFlags.HardDependency)]
-    [BepInDependency("com.wtt.contentbackport", BepInDependency.DependencyFlags.HardDependency)]
+    // version floor since 0.2.4: 1.1.4 is where the black division dogtags (the
+    // ragman/skier barter currency) ship. an older build loads but leaves the
+    // barters unbuyable and BD bodies tagless
+    [BepInDependency("com.wtt.contentbackport", "1.1.4")]
     [BepInDependency("xyz.drakia.bigbrain", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("com.morebotsapi.tacticaltoaster", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("com.blackdiv.tacticaltoaster", BepInDependency.DependencyFlags.HardDependency)]
@@ -51,6 +54,7 @@ namespace Manimal.Icebreaker
         internal static ConfigEntry<float> AmbientIntensity;
         internal static ConfigEntry<bool> LampShadows;
         internal static ConfigEntry<float> CullDistanceScale;
+        internal static ConfigEntry<float> LightCullDistance;
         internal static ConfigEntry<bool> PcDriverEnabled;
         internal static ConfigEntry<bool> NativeCulling;
         internal static ConfigEntry<float> LodBiasClamp;
@@ -60,9 +64,6 @@ namespace Manimal.Icebreaker
         internal static ConfigEntry<float> LodCullNearRadius;
         internal static ConfigEntry<float> LodCullNearRadiusIndoor;
         internal static ConfigEntry<bool> ShadowProxyFix;
-        internal static ConfigEntry<bool> CrewPreSpawnPool;
-        internal static ConfigEntry<bool> NativeBdWaves;
-        internal static ConfigEntry<bool> CrewKnight;
         internal static ConfigEntry<bool> CrewBlackDiv;
         internal static ConfigEntry<bool> SpatialAudio;
         internal static ConfigEntry<bool> LensFlares;
@@ -202,8 +203,8 @@ namespace Manimal.Icebreaker
 
             // Icebreaker's interior lamps serialize at intensity 0 (retail baked them into
             // lightmaps we don't have), so we revive them realtime. these apply live in-raid.
-            LampIntensity = Config.Bind("Icebreaker", "LampIntensity", 3.0f,
-                new ConfigDescription("brightness of the revived interior lamp lights",
+            LampIntensity = Config.Bind("Icebreaker", "LampIntensity", 2.0f,
+                new ConfigDescription("brightness of the revived interior lamp lights (0 = lights fully OFF — a big GPU win, the emissives/flares carry the look)",
                     new AcceptableValueRange<float>(0f, 12f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             AmbientIntensity = Config.Bind("Icebreaker", "AmbientIntensity", 0.8f,
                 new ConfigDescription("flat ambient fill light — lifts shadowed areas out of black (no real bounce without a bake)",
@@ -213,6 +214,9 @@ namespace Manimal.Icebreaker
             CullDistanceScale = Config.Bind("Icebreaker", "CullDistanceScale", 0.5f,
                 new ConfigDescription("distance-culling aggressiveness for small props (lower = culls closer = more fps) (live)",
                     new AcceptableValueRange<float>(0.25f, 3f), new ConfigurationManagerAttributes { IsAdvanced = true }));
+            LightCullDistance = Config.Bind("Icebreaker", "LightCullDistance", 25f,
+                new ConfigDescription("meters at which lamp lights finish fading to zero (live, lowering only — raising needs a raid restart). the 1581 lamps ride bsg's native CullingManager, which FADES intensity across an authored 50-80m window and never disables a light — this tightens that window, so far lamps stop costing GPU sooner (field report 08-09: lamp light cost measurably hurts GPU-bound players; LampIntensity 0 is the nuclear version). lower = more fps + darker distance, 80 = authored retail look",
+                    new AcceptableValueRange<float>(20f, 80f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             PcDriverEnabled = Config.Bind("Icebreaker", "PcDriverEnabled", true,
                 new ConfigDescription("occlusion culling driver — flip OFF (live) to un-cull everything; the pop-in isolation tool: if pops stop with this off, the bake's sightline data is the culprit", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             NativeCulling = Config.Bind("Icebreaker", "NativeCulling", false,
@@ -232,7 +236,7 @@ namespace Manimal.Icebreaker
             LodCullNearFloor = Config.Bind("Icebreaker", "LodCullNearFloor", 0.006f,
                 new ConfigDescription("NEAR-tier cull cap (LIVE): inside LodCullNearRadius, props only vanish below this screen fraction — the anti-dither guarantee for furniture around you. -1 = retail heights near you",
                     new AcceptableValueRange<float>(-1f, 0.05f), new ConfigurationManagerAttributes { IsAdvanced = true }));
-            LodCullNearRadius = Config.Bind("Icebreaker", "LodCullNearRadius", 26f,
+            LodCullNearRadius = Config.Bind("Icebreaker", "LodCullNearRadius", 27.1f,
                 new ConfigDescription("meters around the camera that count as the near tier while OUTDOORS (LIVE). cells re-tier when you cross a cell boundary",
                     new AcceptableValueRange<float>(5f, 100f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             LodCullNearRadiusIndoor = Config.Bind("Icebreaker", "LodCullNearRadiusIndoor", 19.49f,
@@ -258,17 +262,10 @@ namespace Manimal.Icebreaker
             // reports need to distinguish dead knob from wrong suspect
             CullDistanceScale.SettingChanged += (_, __) => Log.LogDebug($"[DistCull] scale -> {CullDistanceScale.Value:F2} (live)");
             PcDriverEnabled.SettingChanged += (_, __) => Log.LogDebug($"[Culling] PcDriverEnabled -> {PcDriverEnabled.Value}");
-            // default OFF (user call 07-28): the pen cant actually hold bots — the mover
-            // keeps a ship-side path and drags escapees back to the nearest navmesh edge
-            // (black division surfacing on the starboard walkway). the spawn hitches the
-            // pool was built for turned out to be init-burst/log-storm bugs, since fixed;
-            // premake+prewarm makes on-demand spawns cheap enough.
-            CrewPreSpawnPool = Config.Bind("Icebreaker", "CrewPreSpawnPool", false,
-                new ConfigDescription("pre-spawn the trigger squads into an off-map pen during the early raid and TELEPORT them in when events fire. off (default) = profiles premade + bundles prewarmed, bots spawned on demand through the real pipeline", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
-            NativeBdWaves = Config.Bind("Icebreaker", "NativeBdWaves", false,
-                new ConfigDescription("EXPERIMENTAL: spawn the trigger squads (BD/knight/wedges) through BSG's own BossLocationSpawn botEvent pipeline with the retail 1.0 wave table, instead of our force-spawner. retail-exact squad sizes and grouping; known tradeoffs: spawn-moment generation hitch (no premake), boss-group follower quirks. needs a raid restart", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
-            CrewKnight = Config.Bind("Icebreaker", "CrewKnight", true,
-                new ConfigDescription("spawn solo Knight among the rogues", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
+            // CrewPreSpawnPool + NativeBdWaves RETIRED (2026-08-11): spawning moved wholesale
+            // to BSG's wave generator (retail BossLocationSpawn table in base.json), so
+            // there is no force-spawner left for a pen to feed or a flag to switch between.
+            // CrewKnight went with them — the knight is a T1 row now, not a client spawn.
             CrewBlackDiv = Config.Bind("Icebreaker", "CrewBlackDivision", true,
                 new ConfigDescription("spawn Black Division squads when the start-cutscene trigger is hit (needs the BlackDiv mod)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             SpatialAudio = Config.Bind("Icebreaker", "SpatialAudio", true,
