@@ -300,8 +300,11 @@ namespace Manimal.Icebreaker
                 new ConfigDescription("force Winter season on icebreaker only (snowfall; other maps keep the server's season; needs WeatherSystem)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             Blizzard = Config.Bind("Icebreaker", "Blizzard", true,
                 new ConfigDescription("permanent blizzard: pins WeatherDebug (snow/wind/fog) + raises the winter STORM state; also pins the TOD hour (live)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
+            // user-facing since 0.2.4: raymarched fog is the one look-vs-fps lever a
+            // player might reasonably want, so it sits with the other visible settings
+            // rather than behind the advanced flag (live — no raid restart)
             VolFog = Config.Bind("VolumetricFog2", "Enabled", true,
-                new ConfigDescription("the REAL volumetric fog (Volumetric Fog & Mist 2, raymarched) — needs volumetricfog.bundle next to the plugin dll (live)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
+                new ConfigDescription("the REAL volumetric fog (Volumetric Fog & Mist 2, raymarched) — the ship's haze and light shafts. turn OFF for a few extra fps on weaker GPUs; the map still has its normal distance fog (live)", null, new ConfigurationManagerAttributes { IsAdvanced = false }));
 
             // cutscene fog profile twins — routed to by Fog()/FogColorEntry while the
             // cutscene profile is live: thinner, lower-noise fog with a closer wall and

@@ -25,6 +25,10 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="ItemComponent.Types">
+      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\ItemComponent.Types.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="WTT-ClientCommonLib">
       <HintPath>D:\SPTDev\BepInEx\plugins\WTT-ClientCommonLib\WTT-ClientCommonLib.dll</HintPath>
     </Reference>

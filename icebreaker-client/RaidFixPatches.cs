@@ -1130,6 +1130,13 @@ namespace Manimal.Icebreaker
                         foreach (var mr in root.GetComponentsInChildren<MeshRenderer>())
                         {
                             if (mr.GetComponentInParent<WorldInteractiveObject>() != null) continue;
+                // LOOSE LOOT IS NOT A WorldInteractiveObject (08-12, "loot is invisible
+                // until my camera is close"). LootItem derives from InteractableObject,
+                // so the exclusion above never covered it — every loose item in the map
+                // scene was being distance-culled as if it were scenery, and at the
+                // shipped 0.5 scale a small item (<0.75m) died at 40 x 0.5 = 20m. loot is
+                // gameplay: it must render as far as the engine will draw it.
+                if (mr.GetComponentInParent<EFT.Interactive.LootItem>() != null) continue;
                             var mf = mr.GetComponent<MeshFilter>();
                             if (mf == null || mf.sharedMesh == null) continue;
                             gos.Add(mr.gameObject);
@@ -1410,6 +1417,10 @@ namespace Manimal.Icebreaker
             // 1 failed step(s)"). the shells' actual cause was SPT's 18-bot default cap
             // truncating late waves, fixed server-side. if they come back, diagnose the
             // activation failure rather than re-adding a sweeper that matches nothing.
+            // loose loot renders enabled-but-undrawn when its bounds are wrong — see
+            // IcebreakerLootBounds. runs on every peer: it is a local render fix, not
+            // world state, so fika clients need it as much as the host.
+            if (GetComponent<IcebreakerLootBounds>() == null) gameObject.AddComponent<IcebreakerLootBounds>();
             if (GetComponent<IcebreakerCrew>() == null) gameObject.AddComponent<IcebreakerCrew>();
             if (GetComponent<IcebreakerHeliExfil>() == null) gameObject.AddComponent<IcebreakerHeliExfil>();
             IcebreakerSnowGusts.Spawn();

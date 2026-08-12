@@ -64,6 +64,7 @@ namespace Manimal.Icebreaker
             // is mostly moving disappear distances, not mesh swaps (08-08 verdict:
             // 79.8k of 81.8k are 1-lod â€” this map's LODGroups ARE the culling system)
             var histo = new int[5];
+            int skippedLoot = 0;
             var sw = System.Diagnostics.Stopwatch.StartNew();
             foreach (var g in groups)
             {
@@ -73,6 +74,16 @@ namespace Manimal.Icebreaker
                 if (sc == null || !sc.StartsWith("Icebreaker")) continue;
                 var lods = g.GetLODs();
                 if (lods == null || lods.Length == 0) continue;
+                // LOOT IS GAMEPLAY, NOT DECORATION (08-12: "loose loot is invisible until
+                // I get close"). our floors are tuned for scenery — at the shipped
+                // values a ~10cm item drops under the near floor (0.006) around 14m and
+                // under the far floor (0.1) inside a metre, so any loot item captured
+                // here effectively stops rendering. same principle as the distance
+                // culler's container-prop exclusion: never cull what the player loots.
+                if (g.GetComponentInParent<EFT.Interactive.LootItem>() != null
+                    || g.GetComponentInParent<EFT.Interactive.LootableContainer>() != null)
+                { skippedLoot++; continue; }
+
                 histo[Math.Min(lods.Length, histo.Length - 1)]++;
                 _g[_n] = g;
                 _orig[_n] = lods[lods.Length - 1].screenRelativeTransitionHeight;
@@ -93,7 +104,8 @@ namespace Manimal.Icebreaker
             }
             _built = true;
             Plugin.Log.LogInfo($"[LodCullFloor] {_n} map LODGroups in {_cells.Count} cells of {CellSize:0}m (cell-tiered culling live) | "
-                + $"lod counts: 1-lod={histo[1]} 2-lod={histo[2]} 3-lod={histo[3]} 4+lod={histo[4]}");
+                + $"lod counts: 1-lod={histo[1]} 2-lod={histo[2]} 3-lod={histo[3]} 4+lod={histo[4]}"
+                + (skippedLoot > 0 ? $" | {skippedLoot} loot group(s) left alone" : ""));
         }
 
         internal static void Tick(Vector3 cam)
