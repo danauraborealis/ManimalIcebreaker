@@ -71,11 +71,18 @@ public class IcebreakerMod(
     // rebrand above is: english text in every language beats a raw key showing
     // through on the loading screen. keys are "<bannerId> Name"/"<bannerId>
     // Description", matching the ids in base.json's Banners array.
+    // the ship blurb, shared by the loading screen banner and the map-select card so
+    // the two can never drift apart. live breaks it into two paragraphs at "It appears",
+    // so the break lives in the text rather than being a card-only flourish.
+    private const string IcebreakerBlurb =
+        "In the Gulf of Finland, trapped within the blockade surrounding Tarkov, lies the nuclear-powered icebreaker \"Boreas\", owned by the logistics corporation Paradigm Shipping. The exact purpose of \"Boreas\" and the cargo it carries remain unknown."
+        + "\n\n"
+        + "It appears that Paradigm Shipping and TerraGroup made special efforts to minimize any mention of the icebreaker in the press and keep its routes and assignments classified.";
+
     private static readonly (string Key, string Text)[] BannerLocales =
     {
         ("icebreaker_cover Name", "Icebreaker"),
-        ("icebreaker_cover Description",
-            "In the Gulf of Finland, trapped within the blockade surrounding Tarkov, lies the nuclear-powered icebreaker \"Boreas\", owned by the logistics corporation Paradigm Shipping. The exact purpose of \"Boreas\" and the cargo it carries remain unknown. It appears that Paradigm Shipping and TerraGroup made special efforts to minimize any mention of the icebreaker in the press and keep its routes and assignments classified."),
+        ("icebreaker_cover Description", IcebreakerBlurb),
 
         ("blackdiv_banner Name", "Black Division"),
         ("blackdiv_banner Description",
@@ -246,11 +253,12 @@ public class IcebreakerMod(
                 {
                     locale["5714dc342459777137212e0b Name"] = "Icebreaker";
                     locale["Suburbs"] = "Icebreaker";
-                    // the map-select card prints the LOCALE description, not Base
-                    // .Description — so the slot kept advertising suburbs' "commuter
-                    // areas of Tarkov" under our banner. retail's icebreaker ships no
-                    // Description field at all and the card renders bare, so blank it.
-                    locale["5714dc342459777137212e0b Description"] = "";
+                    // the map-select card prints the LOCALE description, not
+                    // Base.Description — LocationInfoPanel does
+                    // (location._Id + " Description").Localized(), so the slot kept
+                    // advertising suburbs' "commuter areas of Tarkov" under our banner.
+                    // live runs the same ship blurb here as on the banner.
+                    locale["5714dc342459777137212e0b Description"] = IcebreakerBlurb;
                     // the extraction panel prints Settings.Name.Localized() for the row
                     // label (ExitTimerPanel), and the "EXFIL01" tag beside it is generated
                     // from the point's index, not from us. with no locale entry the raw

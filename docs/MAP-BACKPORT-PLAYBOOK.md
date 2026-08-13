@@ -386,3 +386,40 @@ for a new backport: map-backport-playbook (pointer), eft-bot-ai-and-map-data,
 eft-navmesh-and-waypoints, icebreaker-native-culling, icebreaker-fps-lodbias,
 icebreaker-audio-parity, icebreaker-loot-pipeline, fika-compat-audit,
 choke-point-firewalls.
+
+## The map-select card (EFT.UI.LocationInfoPanel)
+
+Everything on the location card is read from a specific field, verified by decompiling
+`LocationInfoPanel` rather than guessed. When a backported slot shows the DONOR map's
+data, it is always one of these:
+
+- **Name** -> locale key `"<location._Id> Name"`. NOT `Base.Name`.
+- **Description** -> locale key `"<location._Id> Description"`. NOT `Base.Description`,
+  which is never read by this panel. A borrowed slot keeps advertising the donor map
+  until you override the locale key. Note the absence of a `Description` field in a
+  ripped `base.json` proves NOTHING about whether the card shows text, because the text
+  never lived in that field: retail Icebreaker has no `Description` and still renders a
+  full blurb, sourced from the locale. Live also runs the same text here as on the
+  map's cover banner, so share one constant between the two.
+- **Timer** -> `AveragePlayTime + " MIN"`. NOT `EscapeTimeLimit`, which is the real raid
+  length. These two disagree freely, so set BOTH or the card lies about the raid.
+- **Players** -> `MinPlayers + "-" + MaxPlayers`.
+- **Area** -> `Area + " KM2"`.
+- **Banner** -> `location.Banners.First()`. **ONLY the first entry is used here**; an
+  empty array falls back to `_defaultImage`. Put the map's own cover art at index 0.
+
+**Difficulty is RELATIVE to the player, not a map property.** There is no "difficulty"
+field. The panel computes `num = location.AveragePlayerLevel - selfLevel` and picks:
+
+| num          | label  | with AveragePlayerLevel 60, that is player level |
+|--------------|--------|--------------------------------------------------|
+| `< -20`      | BREEZE | 81+                                              |
+| `< -10`      | EASY   | 71-80                                            |
+| `< 0`        | NORMAL | 61-70                                            |
+| `< 15`       | HARD   | 46-60                                            |
+| otherwise    | INSANE | <= 45                                            |
+
+So no value makes the card read HARD for everyone, and a high-level dev profile seeing
+EASY on a correctly configured map is not a bug. Retail Icebreaker uses 60. Neither
+`AveragePlayerLevel` nor `AveragePlayTime` is read anywhere in the SPT server, so both
+are safe to set purely for presentation.
