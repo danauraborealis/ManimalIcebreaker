@@ -91,8 +91,10 @@ public class IcebreakerBotFirewall(
     // SWAPPING a template needs no container logic at all, so it always works — and
     // the BlackDiv loadout hands every blackDivIb a shot at a Labs access keycard
     // (weight 60 in their pocket pool), an item that has no business on this ship.
-    // so the keycard IS the dogtag: swap it in place, green or ferrum at even odds.
-    // the keycard's own spawn rate becomes the tag drop rate.
+    // so the keycard IS the dogtag: swap it in place, ferrum common and green rare at
+    // a 75/25 split (user call 08-13 — even odds made the two tags feel interchangeable,
+    // and green is the scarcer barter currency). the keycard's own spawn rate becomes
+    // the tag drop rate.
     private const string BdDogtagGreenTpl = "6a461bf82b2264dbe10d0ee6";
     private const string BdDogtagFerrumTpl = "6a461aed7391ab085a093760";
     // wedge is their most formidable fighter and the red tag's own description says
@@ -133,7 +135,8 @@ public class IcebreakerBotFirewall(
         string what = null;
         if (first != null)
         {
-            bool green = _randomUtil.GetChance100(50.0);
+            // 25 = green, the other 75 = ferrum
+            bool green = _randomUtil.GetChance100(25.0);
             what = isWedge ? "red" : (green ? "green" : "ferrum");
             first.Template = new MongoId(isWedge ? BdDogtagRedTpl : (green ? BdDogtagGreenTpl : BdDogtagFerrumTpl));
         }

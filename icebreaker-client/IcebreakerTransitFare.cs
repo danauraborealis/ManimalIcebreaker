@@ -125,6 +125,11 @@ namespace Manimal.Icebreaker
                     int cost = Plugin.TransitCost.Value;
                     if (cost <= 0) return true;
                     if (player == null || !player.IsYourPlayer) return true;
+                    if (AlreadyPaid(player))
+                    {
+                        Plugin.Log.LogInfo("[Fare] already paid this raid — boarding free (repeat confirm)");
+                        return true;
+                    }
 
                     return TryTakeFare(player, cost);
                 }
@@ -172,6 +177,21 @@ namespace Manimal.Icebreaker
         // (applies nothing), pass 2 re-runs the same ops with simulate:false (applies
         // immediately, same frame, before the teardown can move). the transit profile
         // snapshot then carries the deduction to the next leg.
+        // ALREADY-PAID LEDGER (08-13 fika host log: two "coop transit confirm fired"
+        // lines back to back, two "collected 400000 roubles" — the player paid 800k for
+        // one crossing). the confirm is reachable more than once per raid: nothing in
+        // the engine retires the interaction after a successful board, so a player who
+        // sees no countdown and clicks again pays again. the fare is ours, so the
+        // idempotency has to be ours too — charge once per profile per raid, then wave
+        // subsequent confirms through UNCHARGED rather than blocking them (they already
+        // paid; blocking would stranded them on the ice).
+        private static readonly HashSet<string> _paid = new HashSet<string>();
+
+        internal static void ResetForNewRaid() => _paid.Clear();
+
+        internal static bool AlreadyPaid(Player player)
+            => player != null && !string.IsNullOrEmpty(player.ProfileId) && _paid.Contains(player.ProfileId);
+
         internal static bool TryTakeFare(Player player, int cost, bool inlineOps = false)
         {
             var inv = player.InventoryController;
@@ -244,13 +264,22 @@ namespace Manimal.Icebreaker
                 }
                 Notify($"Paid {cost:N0} roubles for the crossing");
                 Plugin.Log.LogInfo($"[Fare] collected {cost} roubles INLINE (fika client, pre-teardown)");
+                MarkPaid(player);
                 return true;
             }
 
             foreach (var d in dispatch) d();
             Notify($"Paid {cost:N0} roubles for the crossing");
             Plugin.Log.LogInfo($"[Fare] collected {cost} roubles ({dispatch.Count} ops dispatched)");
+            MarkPaid(player);
             return true;
+        }
+
+        // only ever called after the roubles actually left the inventory, so a failed or
+        // blocked attempt never buys a free ride
+        private static void MarkPaid(Player player)
+        {
+            if (player != null && !string.IsNullOrEmpty(player.ProfileId)) _paid.Add(player.ProfileId);
         }
 
         private static void Notify(string text)

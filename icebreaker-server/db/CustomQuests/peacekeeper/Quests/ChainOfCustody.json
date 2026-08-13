@@ -1,0 +1,197 @@
+{
+  "6a7e0916b881de241018539d": {
+    "QuestName": "Chain of Custody",
+    "_id": "6a7e0916b881de241018539d",
+    "traderId": "5935c25fb3acc3127c3d8cd9",
+    "type": "Elimination",
+    "location": "5714dc342459777137212e0b",
+    "image": "/files/quest/icon/Chain_Of_Custody_Banner",
+    "acceptanceAndFinishingSource": "eft",
+    "arenaLocations": [],
+    "instantComplete": false,
+    "isKey": false,
+    "secretQuest": false,
+    "gameModes": [],
+    "progressSource": "eft",
+    "rankingModes": [],
+    "side": "Pmc",
+    "canShowNotificationsInGame": true,
+    "restartable": false,
+    "status": 0,
+    "description": "6a7e0916b881de241018539d description",
+    "startedMessageText": "6a7e0916b881de241018539d startedMessageText",
+    "successMessageText": "6a7e0916b881de241018539d successMessageText",
+    "failMessageText": "6a7e0916b881de241018539d failMessageText",
+    "acceptPlayerMessage": "",
+    "declinePlayerMessage": "",
+    "completePlayerMessage": "",
+    "changeQuestMessageText": "",
+    "name": "6a7e0916b881de241018539d name",
+    "note": "6a7e0916b881de241018539d note",
+    "conditions": {
+      "AvailableForFinish": [
+        {
+          "completeInSeconds": 0,
+          "conditionType": "CounterCreator",
+          "counter": {
+            "conditions": [
+              {
+                "bodyPart": [],
+                "compareMethod": ">=",
+                "conditionType": "Kills",
+                "daytime": {
+                  "from": 0,
+                  "to": 0
+                },
+                "distance": {
+                  "compareMethod": ">=",
+                  "value": 0
+                },
+                "dynamicLocale": false,
+                "enemyEquipmentExclusive": [],
+                "enemyEquipmentInclusive": [],
+                "enemyHealthEffects": [],
+                "id": "6a7e0916b881de24101853a2",
+                "resetOnSessionEnd": false,
+                "savageRole": [
+                  "blackDivIb",
+                  "bossWedge",
+                  "blackDivAssault"
+                ],
+                "target": "Savage",
+                "value": 1,
+                "weapon": [],
+                "weaponCaliber": [],
+                "weaponModsExclusive": [],
+                "weaponModsInclusive": []
+              }
+            ],
+            "id": "6a7e0916b881de24101853a1"
+          },
+          "doNotResetIfCounterCompleted": false,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "6a7e0916b881de24101853a0",
+          "index": 0,
+          "isNecessary": false,
+          "isResetOnConditionFailed": false,
+          "oneSessionOnly": false,
+          "parentId": "",
+          "type": "Elimination",
+          "value": 10,
+          "visibilityConditions": []
+        },
+        {
+          "conditionType": "FindItem",
+          "countInRaid": false,
+          "dogtagLevel": 0,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "6a7e0916b881de241018539e",
+          "index": 1,
+          "isEncoded": false,
+          "maxDurability": 100,
+          "minDurability": 0,
+          "onlyFoundInRaid": true,
+          "parentId": "",
+          "target": [
+            "6a461aed7391ab085a093760",
+            "6a461bf82b2264dbe10d0ee6",
+            "6a461c41ec88c6b9a509fb17"
+          ],
+          "value": 5,
+          "visibilityConditions": []
+        },
+        {
+          "conditionType": "HandoverItem",
+          "dogtagLevel": 0,
+          "dynamicLocale": false,
+          "globalQuestCounterId": "",
+          "id": "6a7e0916b881de241018539f",
+          "index": 2,
+          "isEncoded": false,
+          "maxDurability": 100,
+          "minDurability": 0,
+          "onlyFoundInRaid": true,
+          "parentId": "",
+          "target": [
+            "6a461aed7391ab085a093760",
+            "6a461bf82b2264dbe10d0ee6",
+            "6a461c41ec88c6b9a509fb17"
+          ],
+          "value": 5,
+          "visibilityConditions": []
+        }
+      ],
+      "AvailableForStart": [],
+      "Fail": []
+    },
+    "rewards": {
+      "Fail": [],
+      "Started": [],
+      "Success": [
+        {
+          "availableInGameEditions": [],
+          "id": "6a7e0916b881de24101853a3",
+          "index": 0,
+          "type": "Experience",
+          "value": 18000,
+          "unknown": false,
+          "isHidden": false
+        },
+        {
+          "availableInGameEditions": [],
+          "id": "6a7e0916b881de24101853a4",
+          "index": 1,
+          "target": "5935c25fb3acc3127c3d8cd9",
+          "type": "TraderStanding",
+          "value": 0.03,
+          "unknown": false,
+          "isHidden": false
+        },
+        {
+          "availableInGameEditions": [],
+          "findInRaid": false,
+          "id": "6a7e0916b881de24101853a5",
+          "index": 2,
+          "isEncoded": false,
+          "isHidden": false,
+          "items": [
+            {
+              "_id": "6a7e0916b881de24101853a6",
+              "_tpl": "5696686a4bdc2da3298b456a",
+              "upd": {
+                "StackObjectsCount": 1800
+              }
+            }
+          ],
+          "target": "6a7e0916b881de24101853a6",
+          "type": "Item",
+          "unknown": false,
+          "value": 1800
+        },
+        {
+          "availableInGameEditions": [],
+          "gameMode": [
+            "regular",
+            "pve"
+          ],
+          "id": "6a7e0916b881de24101853a7",
+          "index": 3,
+          "isHidden": false,
+          "items": [
+            {
+              "_id": "6a7e0923b881de24101853a8",
+              "_tpl": "6a7dfef811aec9601b11cc1c"
+            }
+          ],
+          "loyaltyLevel": 3,
+          "target": "6a7e0923b881de24101853a8",
+          "traderId": "5935c25fb3acc3127c3d8cd9",
+          "type": "AssortmentUnlock",
+          "unknown": false
+        }
+      ]
+    }
+  }
+}

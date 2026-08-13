@@ -97,6 +97,7 @@ namespace Manimal.Icebreaker
             // onto vanilla maps around scene teardown)
             IceGate.PendingLocationId = location?.Id;
             try { IcebreakerPhysicsRegions.ResetForNewRaid(); } catch { }
+            try { IcebreakerTransitFare.ResetForNewRaid(); } catch { }
             Plugin.Log.LogInfo($"[IceGate] raid location (coop): '{IceGate.PendingLocationId ?? "<null>"}'");
             IcebreakerMapFare.Consume(profile, location, localRaidSettings);
         }
@@ -109,6 +110,12 @@ namespace Manimal.Icebreaker
                 if (__instance == null || !__instance.IsYourPlayer) return true;
                 int cost = Plugin.TransitCost.Value;
                 if (cost <= 0) return true;
+                // repeat confirm — they already paid, let them board without a second bill
+                if (IcebreakerTransitFare.AlreadyPaid(__instance))
+                {
+                    Plugin.Log.LogInfo("[Fare] coop repeat confirm — already paid this raid, boarding free");
+                    return true;
+                }
                 // Info on purpose — a coop transit that executes WITHOUT this line in the
                 // log means fika routed the confirm around vmethod_3 (2.3.9 no-charge
                 // report, 08-05) and the fare anchor needs to move

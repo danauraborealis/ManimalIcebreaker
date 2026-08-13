@@ -2,95 +2,32 @@
   "AccessKeys": [],
   "AccessKeysPvE": [],
   "Area": 0.9,
-  "AveragePlayTime": 15,
-  "AveragePlayerLevel": 1,
+  "AveragePlayTime": 50,
+  "AveragePlayerLevel": 60,
   "Banners": [
     {
-      "id": "67d13656443d3073a3a92427",
+      "id": "icebreaker_cover",
       "pic": {
-        "file": "67e40482bec96f5d8e09732b.png",
-        "path": "banners/67e40482bec96f5d8e09732b.png",
+        "file": "icebreaker_cover.jpg",
+        "path": "banners/icebreaker_cover.jpg",
         "rcid": "",
         "type": "banners"
       }
     },
     {
-      "id": "5464e0404bdc2d2a708b4567",
+      "id": "blackdiv_banner",
       "pic": {
-        "file": "67e404de22d6081b78031de2.jpg",
-        "path": "banners/67e404de22d6081b78031de2.jpg",
+        "file": "blackdiv_banner.jpg",
+        "path": "banners/blackdiv_banner.jpg",
         "rcid": "",
         "type": "banners"
       }
     },
     {
-      "id": "5464e0454bdc2d06708b4567",
+      "id": "wedge_banner",
       "pic": {
-        "file": "67e4045225a1aca9270117e7.jpg",
-        "path": "banners/67e4045225a1aca9270117e7.jpg",
-        "rcid": "",
-        "type": "banners"
-      }
-    },
-    {
-      "id": "5803a58524597710ca36fcb2",
-      "pic": {
-        "file": "67e404d9bec96f5d8e097331.jpg",
-        "path": "banners/67e404d9bec96f5d8e097331.jpg",
-        "rcid": "",
-        "type": "banners"
-      }
-    },
-    {
-      "id": "5807bfe124597742a92e0a4c",
-      "pic": {
-        "file": "67e404ffbec96f5d8e097333.jpg",
-        "path": "banners/67e404ffbec96f5d8e097333.jpg",
-        "rcid": "",
-        "type": "banners"
-      }
-    },
-    {
-      "id": "5807c3f124597746bf2db2ce",
-      "pic": {
-        "file": "67e404c222d6081b78031ddf.jpg",
-        "path": "banners/67e404c222d6081b78031ddf.jpg",
-        "rcid": "",
-        "type": "banners"
-      }
-    },
-    {
-      "id": "5807be8924597742c603fa19",
-      "pic": {
-        "file": "67e4046dbec96f5d8e09732a.jpg",
-        "path": "banners/67e4046dbec96f5d8e09732a.jpg",
-        "rcid": "",
-        "type": "banners"
-      }
-    },
-    {
-      "id": "5805f617245977100b2c1f41",
-      "pic": {
-        "file": "67e404d9bec96f5d8e097331.jpg",
-        "path": "banners/67e404d9bec96f5d8e097331.jpg",
-        "rcid": "",
-        "type": "banners"
-      }
-    },
-    {
-      "id": "5c1b857086f77465f465faa4",
-      "pic": {
-        "file": "67e404c5bec96f5d8e09732f.jpg",
-        "path": "banners/67e404c5bec96f5d8e09732f.jpg",
-        "rcid": "",
-        "type": "banners"
-      }
-    },
-    {
-      "id": "64c0ad6af99768b777048f4e",
-      "pic": {
-        "file": "67e4047d22d6081b78031ddb.jpg",
-        "path": "banners/67e4047d22d6081b78031ddb.jpg",
+        "file": "wedge_banner.jpg",
+        "path": "banners/wedge_banner.jpg",
         "rcid": "",
         "type": "banners"
       }
@@ -1277,9 +1214,9 @@
   "DisabledScavExits": "Cellars,Gate 0",
   "EnableCoop": true,
   "Enabled": true,
-  "EscapeTimeLimit": 45,
-  "EscapeTimeLimitCoop": 45,
-  "EscapeTimeLimitPVE": 45,
+  "EscapeTimeLimit": 50,
+  "EscapeTimeLimitCoop": 50,
+  "EscapeTimeLimitPVE": 50,
   "Events": {
     "Halloween2024": {
       "CrowdAttackBlockRadius": 100,
@@ -1424,12 +1361,12 @@
   "MaxBotPerZone": 2,
   "MaxCoopGroup": 6,
   "MaxDistToFreePoint": 100,
-  "MaxPlayers": 8,
+  "MaxPlayers": 3,
   "MinDistToExitPoint": 0,
   "MinDistToFreePoint": 0,
   "MinMaxBots": [],
   "MinPlayerLvlAccessKeys": 0,
-  "MinPlayers": 7,
+  "MinPlayers": 1,
   "Name": "Icebreaker",
   "NewSpawn": false,
   "NewSpawnForPlayers": false,

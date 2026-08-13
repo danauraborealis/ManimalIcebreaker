@@ -314,14 +314,26 @@ namespace Manimal.Icebreaker
                     foreach (var player in _humans)
                     {
                         if (player == null || string.IsNullOrEmpty(player.ProfileId)) continue;
-                        WatchOne(player);
+                        // per-player, so one bad profile cannot skip everyone behind it in
+                        // the list — and NOT fatal. this used to set enabled=false, which
+                        // turned a single throw into a dead watcher for the whole raid:
+                        // no exits, no prompt clears, wedged countdown panel (08-13 fika
+                        // report). log rate-limited and keep watching.
+                        try { WatchOne(player); }
+                        catch (Exception e) { Fail(player.ProfileId, e); }
                     }
                 }
-                catch (Exception e)
-                {
-                    Plugin.Log.LogWarning($"[Transit] exit watch failed: {e.Message}");
-                    enabled = false;
-                }
+                catch (Exception e) { Fail("<sweep>", e); }
+            }
+
+            private readonly System.Collections.Generic.HashSet<string> _failed
+                = new System.Collections.Generic.HashSet<string>();
+
+            private void Fail(string who, Exception e)
+            {
+                Trace($"WATCH-FAIL {who}: {e.GetType().Name}: {e.Message}");
+                if (!_failed.Add($"{who}|{e.Message}")) return; // once per distinct fault
+                Plugin.Log.LogWarning($"[Transit] exit watch failed for {who}: {e.Message} (still watching)");
             }
 
             // RESTART-PROOF TRACE (08-04): the headless auto-restarts and wipes its
@@ -454,6 +466,21 @@ namespace Manimal.Icebreaker
                 // DELEGATE is the requirement — the interaction cast is only needed for
                 // the direct-method_14 fallback and the local prompt-state gate.
                 if (v.DrivesLeft <= 0) return;
+                // STOP DRIVING ONCE THEY'VE PAID (08-13 fika report: "i paid for transit
+                // then no countdown happened"). the retry loop above exists to re-offer a
+                // prompt that got lost, but OnPlayerEnter -> method_20 branches on this
+                // very dictionary: NOT registered = re-offer the interaction (idempotent,
+                // what we want), REGISTERED = GroupEnter -> method_3 -> an UNGUARDED
+                // dictionary_0.Add(profileId, groupId). so every retry after payment threw
+                // "An item with the same key has already been added" mid-way through the
+                // group registration, leaving the countdown half-wired. once they're in
+                // transitPlayers the engine owns them and there is nothing left to offer.
+                if (controller?.transitPlayers != null && controller.transitPlayers.ContainsKey(player.ProfileId))
+                {
+                    v.DrivesLeft = 0;
+                    TraceGate(v, player, "already-committed (in transitPlayers)");
+                    return;
+                }
                 if (!_point.IsActive) { TraceGate(v, player, "point-inactive"); return; }
                 if (Time.time < v.NextDriveAt) return;
                 if (controller?.OnPlayerEnter == null && interaction == null)

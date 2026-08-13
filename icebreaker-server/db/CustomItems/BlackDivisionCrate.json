@@ -1,0 +1,26 @@
+{
+  "6a7dfef811aec9601b11cc1c": {
+    "itemTplToClone": "665730fa4de4820934746c48",
+    "parentId": "62f109593b54472778797866",
+    "handbookParentId": "5b47574386f77428ca22b2f4",
+    "overrideProperties": {
+      "Width": 4,
+      "Height": 2,
+      "Prefab": {
+        "path": "assets/content/items/containers/item_container_tarkov_battlepass/item_container_tarkov_battlepass.bundle",
+        "rcid": ""
+      },
+      "DiscardLimit": -1,
+      "QuestItem": false
+    },
+    "locales": {
+      "en": {
+        "name": "Black Division gear crate",
+        "shortName": "BD",
+        "description": "A heavy transport crate with no identifying markings. Inside is a full set of Black Division equipment: helmets, body armor, chest rigs, backpacks, and protective gear.\n\nJudging by its contents, this crate was prepared for a team expected to operate far from any safe zone."
+      }
+    },
+    "handbookPriceRoubles": 150000,
+    "fleaPriceRoubles": 150000
+  }
+}

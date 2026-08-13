@@ -6,6 +6,7 @@ using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Spt.Mod;
 using SPTarkov.Server.Core.Models.Utils;
+using SPTarkov.Server.Core.Routers;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
@@ -59,11 +60,31 @@ public class IcebreakerMod(
     ConfigServer configServer,
     ICloner cloner,
     JsonUtil jsonUtil,
+    ImageRouter imageRouter,
     ISptLogger<IcebreakerMod> logger)
     : IOnLoad
 {
     // the retail trigger table's own ceiling — see the cap note in OnLoad
     private const int IcebreakerBotCap = 40;
+
+    // banner captions, written into EVERY global locale the same way the Suburbs
+    // rebrand above is: english text in every language beats a raw key showing
+    // through on the loading screen. keys are "<bannerId> Name"/"<bannerId>
+    // Description", matching the ids in base.json's Banners array.
+    private static readonly (string Key, string Text)[] BannerLocales =
+    {
+        ("icebreaker_cover Name", "Icebreaker"),
+        ("icebreaker_cover Description",
+            "In the Gulf of Finland, trapped within the blockade surrounding Tarkov, lies the nuclear-powered icebreaker \"Boreas\", owned by the logistics corporation Paradigm Shipping. The exact purpose of \"Boreas\" and the cargo it carries remain unknown. It appears that Paradigm Shipping and TerraGroup made special efforts to minimize any mention of the icebreaker in the press and keep its routes and assignments classified."),
+
+        ("blackdiv_banner Name", "Black Division"),
+        ("blackdiv_banner Description",
+            "From time to time, rumors spread through Tarkov about a special unit that belongs neither to USEC nor BEAR. According to campfire stories, these special operatives conduct night-time operations to clear restricted facilities and extract valuable TerraGroup data. But among PMC operators, very few believe in the existence of this so-called \"Black Division\", because under the current circumstances, freely inserting and extracting entire combat groups through the blockade ring is practically impossible."),
+
+        ("wedge_banner Name", "\"The Wedge’s\" Special Squadron"),
+        ("wedge_banner Description",
+            "Reconnaissance and monitoring reports from the few PMC networks still active in Tarkov have indicated that several combat helicopters are moving toward the Gulf of Finland. Intercepted radio frequencies mention a codename: \"The Wedge\". Accompanied by a squad of operatives from some of the world’s most diverse special forces, such as the SAS and Mossad, Wedge is a senior Black Division operative in charge of a covert operation aboard the ship \"Boreas\". No one has come out alive to reveal their motives there."),
+    };
 
     public async Task OnLoad()
     {
@@ -225,6 +246,11 @@ public class IcebreakerMod(
                 {
                     locale["5714dc342459777137212e0b Name"] = "Icebreaker";
                     locale["Suburbs"] = "Icebreaker";
+                    // the map-select card prints the LOCALE description, not Base
+                    // .Description — so the slot kept advertising suburbs' "commuter
+                    // areas of Tarkov" under our banner. retail's icebreaker ships no
+                    // Description field at all and the card renders bare, so blank it.
+                    locale["5714dc342459777137212e0b Description"] = "";
                     // the extraction panel prints Settings.Name.Localized() for the row
                     // label (ExitTimerPanel), and the "EXFIL01" tag beside it is generated
                     // from the point's index, not from us. with no locale entry the raw
@@ -232,6 +258,9 @@ public class IcebreakerMod(
                     // not an option: the name is the key the panel, the exfil controller
                     // and the raid-end ExitName all match on.
                     locale["Icebreaker_Exit_Heli"] = "Helicopter";
+                    // loading screen banner captions. keyed "<bannerId> Name" /
+                    // "<bannerId> Description", matching the ids in base.json's Banners.
+                    foreach (var (key, text) in BannerLocales) locale[key] = text;
                     return locale;
                 });
             }
@@ -239,6 +268,38 @@ public class IcebreakerMod(
         catch (Exception e)
         {
             logger.Warning($"[Icebreaker] locale rebrand failed (map dot will say Suburbs): {e.Message}");
+        }
+
+        // LOADING SCREEN BANNERS. the client reads the Banners array off the location
+        // base and asks for each pic by its path, but NOTHING serves /files/banners on
+        // its own — ImageRouter has to be told where the file actually lives, the same
+        // way the quest icons are wired. retail shipped its own Banners list here with
+        // MongoId filenames we don't have, so ours replaces it wholesale rather than
+        // appending, otherwise the screen rolls a missing image most of the time.
+        // ImageRouter lowercases the key and strips the extension off the REQUEST, so
+        // the extension in base.json only has to be plausible, not exact.
+        try
+        {
+            var bannerDir = SysPath.Combine(modDir, "db", "banners");
+            int wired = 0;
+            foreach (var banner in newBase.Banners ?? [])
+            {
+                var file = banner?.Picture?.File;
+                if (string.IsNullOrEmpty(file)) continue;
+                var full = SysPath.Combine(bannerDir, file);
+                if (!System.IO.File.Exists(full))
+                {
+                    logger.Warning($"[Icebreaker] banner image missing, that slot will render blank: {full}");
+                    continue;
+                }
+                imageRouter.AddRoute($"/files/banners/{SysPath.GetFileNameWithoutExtension(file)}", full);
+                wired++;
+            }
+            logger.Info($"[Icebreaker] {wired} loading screen banner(s) wired (icebreaker_cover leads the list)");
+        }
+        catch (Exception e)
+        {
+            logger.Warning($"[Icebreaker] banner routing failed (loading screens fall back to the default art): {e.Message}");
         }
 
         logger.Success("[Manimal-Icebreaker] Suburbs slot rebound to Icebreaker — enabled, icon placed, locale rebranded");
@@ -427,6 +488,10 @@ public class IcebreakerFlyerGateRouter(
     // Skier's courier bags. part 2 chains off this one natively, so only the opener
     // needs a crossing gate.
     private const string PackMule = "6a757a2f478c184bd220c458";
+    // Peacekeeper's impounded BD container. same first-crossing gate: he opens by asking
+    // about "that ship in the bay" and offers to sell you the shipment, which only reads
+    // right to someone who has already been out there and seen who is guarding it.
+    private const string ChainOfCustody = "6a7e0916b881de241018539d";
 
     // quests gated on "come back alive from the icebreaker". AfterQuest null means the
     // first crossing ever; otherwise it must be a crossing made AFTER that quest was
@@ -443,6 +508,7 @@ public class IcebreakerFlyerGateRouter(
         new(WarNeverChanges, null),
         new(OilChange, null),
         new(PackMule, null),
+        new(ChainOfCustody, null),
     };
 
     private static ValueTask<string> GateQuests(

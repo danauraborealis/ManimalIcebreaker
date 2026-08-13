@@ -1,0 +1,32 @@
+{
+  "PEACEKEEPER": {
+    "items": [
+      {
+        "_id": "6a7e0923b881de24101853a9",
+        "_tpl": "6a7dfef811aec9601b11cc1c",
+        "parentId": "hideout",
+        "slotId": "hideout",
+        "location": null,
+        "upd": {
+          "UnlimitedCount": false,
+          "StackObjectsCount": 2,
+          "BuyRestrictionMax": 2,
+          "BuyRestrictionCurrent": 0
+        }
+      }
+    ],
+    "barter_scheme": {
+      "6a7e0923b881de24101853a9": [
+        [
+          {
+            "count": 1,
+            "_tpl": "6a461c41ec88c6b9a509fb17"
+          }
+        ]
+      ]
+    },
+    "loyal_level_items": {
+      "6a7e0923b881de24101853a9": 3
+    }
+  }
+}

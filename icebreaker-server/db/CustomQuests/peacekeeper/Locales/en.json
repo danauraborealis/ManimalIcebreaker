@@ -1,0 +1,15 @@
+{
+  "6a7e0916b881de241018539d name": "Chain of Custody",
+  "6a7e0916b881de241018539d description": "Good day, my friend. A word about that ship in the bay, if you have a minute.\n\nSome weeks ago my people impounded a transport container that came off that vessel. Inside, a full kit for a soldier, all of it new, none of it carrying a manufacturer stamp or a unit marking. Officially it is now UN property and it sits in a warehouse under my signature. Unofficially, I would like very much to know who it was addressed to.\n\nThe men on that ship wear the same equipment and answer to no government I am aware of. That is a problem for the Blue Helmets, and problems are expensive. So let us keep this simple. Thin them out, ten will do, and bring me their identification tags. Any variant, I am not particular. My people cannot file a report on a group that does not officially exist, but a handful of tags is a beginning.\n\nDo this, and the container becomes surplus. Surplus can be sold, to you, at a fair price. You understand how these things work.",
+  "6a7e0916b881de241018539d startedMessageText": "Ten of them, my friend, and five tags taken off the bodies yourself. I will know the difference.",
+  "6a7e0916b881de241018539d successMessageText": "Let me see. Yes, these will do. My analysts will have names by the end of the week, or numbers at least.\n\nAs promised, the container is now surplus stock. Come to me when you need equipment, and bring tags. The paperwork is easier that way.",
+  "6a7e0916b881de241018539d failMessageText": "No tags, no report, and the container stays exactly where it is. A pity, my friend. We could both have done well out of this.",
+  "6a7e0916b881de241018539d acceptPlayerMessage": "",
+  "6a7e0916b881de241018539d declinePlayerMessage": "",
+  "6a7e0916b881de241018539d completePlayerMessage": "",
+  "6a7e0916b881de241018539d changeQuestMessageText": "",
+  "6a7e0916b881de241018539d note": "",
+  "6a7e0916b881de24101853a0": "Eliminate Black Division operatives",
+  "6a7e0916b881de241018539e": "Find in raid: Black Division dogtags",
+  "6a7e0916b881de241018539f": "Hand over the dogtags"
+}
