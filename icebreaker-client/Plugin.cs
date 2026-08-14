@@ -61,6 +61,7 @@ namespace Manimal.Icebreaker
         internal static ConfigEntry<int> MaxLodClamp;
         internal static ConfigEntry<float> LodCullFloor;
         internal static ConfigEntry<float> LodCullNearFloor;
+        internal static ConfigEntry<float> LootCullRadius;
         internal static ConfigEntry<float> LodCullNearRadius;
         internal static ConfigEntry<float> LodCullNearRadiusIndoor;
         internal static ConfigEntry<bool> ShadowProxyFix;
@@ -227,7 +228,7 @@ namespace Manimal.Icebreaker
             // Shadow{Distance,Cascades}Clamp RETIRED (08-09): both tested as no-ops —
             // the rip lost the baked lighting, the map barely casts shadows, and the
             // user's game already ran distance 40 / cascades 2. dead knobs don't ship
-            LodBiasClamp = Config.Bind("Icebreaker", "LodBiasClamp", 0.7f,
+            LodBiasClamp = Config.Bind("Icebreaker", "LodBiasClamp", 0.8f,
                 new ConfigDescription("override unity's LOD bias on this map (live). THE dense-view fps fix (08-08 FrameSplit hunt) — but NOT for the reason the name suggests: 97.5% of this map's 82k LODGroups are single-LOD, so bias here scales how far out props CULL, not mesh detail. lower = props cull nearer = fps; the LodCullFloor cap keeps near-cullers (furniture) from popping in plain sight. 0.7 + floor 0.01 is the tested sweet spot; -1 = hands off (the game's 2.0 = retail distances)",
                     new AcceptableValueRange<float>(-1f, 2f), new ConfigurationManagerAttributes { IsAdvanced = false }));
             LodCullFloor = Config.Bind("Icebreaker", "LodCullFloor", 0.1f,
@@ -236,6 +237,9 @@ namespace Manimal.Icebreaker
             LodCullNearFloor = Config.Bind("Icebreaker", "LodCullNearFloor", 0.006f,
                 new ConfigDescription("NEAR-tier cull cap (LIVE): inside LodCullNearRadius, props only vanish below this screen fraction — the anti-dither guarantee for furniture around you. -1 = retail heights near you",
                     new AcceptableValueRange<float>(-1f, 0.05f), new ConfigurationManagerAttributes { IsAdvanced = true }));
+            LootCullRadius = Config.Bind("Icebreaker", "LootCullRadius", 18f,
+                new ConfigDescription("meters at which loose LOOT stops rendering (LIVE). loot is exempted from the LOD cull entirely and culled by this radius instead, so it is visible at EVERY range inside it and simply gone outside — no fading, no dithering, no pop-in as you walk. lower = more fps in loot-dense views, higher = spot loot further out. this is a hard cutoff, so it is CHEAPER than letting hundreds of loot models render to subpixel size. 0 = off (loot follows the global LOD bias again, which at a low LodBiasClamp makes it vanish at about a third of the intended distance)",
+                    new AcceptableValueRange<float>(0f, 250f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             LodCullNearRadius = Config.Bind("Icebreaker", "LodCullNearRadius", 27.1f,
                 new ConfigDescription("meters around the camera that count as the near tier while OUTDOORS (LIVE). cells re-tier when you cross a cell boundary",
                     new AcceptableValueRange<float>(5f, 100f), new ConfigurationManagerAttributes { IsAdvanced = true }));

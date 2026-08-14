@@ -41,10 +41,43 @@ namespace Manimal.Icebreaker
         private int _fixedRenderers, _suspects, _lodFixed;
         private bool _summarised;
 
+        // RADIUS CULLING (user call 08-13, replacing the keys-only carve-out). one entry
+        // per loot item, holding its renderers so the per-frame pass never calls
+        // GetComponentsInChildren. positions are read LIVE from the transform every
+        // check, never cached — the distance culler in RaidFixPatches caches positions
+        // and is why loot is excluded there ("it culled the player's melee out of his
+        // hands"). loot moves: it gets dropped, kicked, and spilled out of containers.
+        private sealed class Tracked
+        {
+            public LootItem Item;
+            public Renderer[] Rends;
+            public bool Hidden;
+        }
+        private readonly List<Tracked> _tracked = new List<Tracked>();
+        private int _cursor;                 // round-robin so the per-frame cost is flat
+        private bool _radiusMode;            // whether the LOD exemption was applied to ALL loot
+        private const int ChecksPerFrame = 64;
+        private const float ShowHysteresis = 1.06f; // hide at R, show again at R*1.06
+
         private void Update()
         {
-            if (!IceGate.On || Time.time < _next) return;
+            if (!IceGate.On) return;
+
+            TickRadiusCull();
+
+            if (Time.time < _next) return;
             _next = Time.time + SweepEvery;
+
+            // a live change of LootCullRadius across the 0 boundary changes which items
+            // need the LOD exemption, so re-walk everything once when the mode flips
+            bool wantRadius = Plugin.LootCullRadius.Value > 0f;
+            if (wantRadius != _radiusMode)
+            {
+                _radiusMode = wantRadius;
+                _done.Clear();
+                if (!wantRadius) UnhideAll(); // radius turned off — nothing may stay hidden
+                Plugin.Log.LogInfo($"[LootVis] loot cull radius {(wantRadius ? Plugin.LootCullRadius.Value.ToString("0") + "m" : "OFF (LOD bias governs loot again)")}");
+            }
 
             var world = Singleton<GameWorld>.Instance;
             var loot = world?.LootItems;
@@ -71,6 +104,63 @@ namespace Manimal.Icebreaker
                     + (_suspects > 0 ? $", {_suspects} renderer(s) with odd bounds" : ""));
             }
         }
+
+        // the per-frame half. flat cost: a fixed slice of the list per frame, a squared
+        // distance each, and a renderer write ONLY on a boundary crossing. forceRenderingOff
+        // rather than .enabled so we never fight whatever else owns the renderer's enabled
+        // flag (ObservedCullingManager drives bodies through the same field).
+        private void TickRadiusCull()
+        {
+            if (!_radiusMode || _tracked.Count == 0) return;
+            var cam = RenderEnvProbe.CameraRef;
+            if (cam == null) return;
+
+            float r = Plugin.LootCullRadius.Value;
+            float hideSq = r * r;
+            float showSq = (r * ShowHysteresis) * (r * ShowHysteresis);
+            var camPos = cam.transform.position;
+
+            int n = Mathf.Min(ChecksPerFrame, _tracked.Count);
+            for (int k = 0; k < n; k++)
+            {
+                if (_cursor >= _tracked.Count) _cursor = 0;
+                var t = _tracked[_cursor];
+
+                // picked up / destroyed — drop it. nothing to restore: the renderers went
+                // with the object, and an item that becomes inventory is no longer a LootItem
+                if (t == null || t.Item == null)
+                {
+                    _tracked.RemoveAt(_cursor);
+                    continue;
+                }
+                _cursor++;
+
+                float d = (t.Item.transform.position - camPos).sqrMagnitude;
+                // hysteresis so an item sitting exactly on the boundary cannot strobe
+                bool hide = t.Hidden ? d > showSq : d > hideSq;
+                if (hide == t.Hidden) continue;
+
+                t.Hidden = hide;
+                var rends = t.Rends;
+                for (int i = 0; i < rends.Length; i++)
+                    if (rends[i] != null) rends[i].forceRenderingOff = hide;
+            }
+        }
+
+        private void UnhideAll()
+        {
+            foreach (var t in _tracked)
+            {
+                if (t?.Rends == null) continue;
+                for (int i = 0; i < t.Rends.Length; i++)
+                    if (t.Rends[i] != null) t.Rends[i].forceRenderingOff = false;
+                t.Hidden = false;
+            }
+            _tracked.Clear();
+            _cursor = 0;
+        }
+
+        private void OnDestroy() { try { UnhideAll(); } catch { } }
 
         // keycards carry KeycardComponent, ordinary keys KeyComponent — cheap template
         // lookups, no name matching to drift out of date as items are added
@@ -103,7 +193,15 @@ namespace Manimal.Icebreaker
             // keycards are a handful of items per raid, they are quest/progress critical,
             // and losing one to a cull is the failure that actually hurts. everything else
             // keeps vanilla-for-this-bias behaviour.
-            if (IsKeyLike(item))
+            // ...and RADIUS CULLING (user call 08-13) supersedes that carve-out. the
+            // keys-only compromise existed because exempting every item meant hundreds of
+            // loot models rendering to subpixel size across the ship. a radius removes
+            // that cost differently and better: exempt EVERYTHING from the LOD cull so
+            // nothing fades or dithers at range, then delete it outright past
+            // LootCullRadius. a hard cutoff draws strictly less than subpixel geometry,
+            // so this is cheaper than the old all-items experiment AND tunable, instead
+            // of a fixed list of item types that has to be curated forever.
+            if (_radiusMode || IsKeyLike(item))
             {
                 foreach (var g in item.GetComponentsInChildren<LODGroup>(true))
                 {
@@ -116,6 +214,13 @@ namespace Manimal.Icebreaker
                     g.SetLODs(lods);
                     _lodFixed++;
                 }
+            }
+
+            if (_radiusMode)
+            {
+                var rends = item.GetComponentsInChildren<Renderer>(true);
+                if (rends != null && rends.Length > 0)
+                    _tracked.Add(new Tracked { Item = item, Rends = rends, Hidden = false });
             }
 
             foreach (var r in item.GetComponentsInChildren<Renderer>(true))

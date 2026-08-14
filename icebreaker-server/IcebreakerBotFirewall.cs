@@ -51,11 +51,16 @@ public class IcebreakerBotFirewall(
 
     private static bool _aliveLogged;
 
+    // read by IcebreakerBotGenDiag so "we lost the DI slot" reports itself instead of
+    // being an ABSENT log line somebody has to know to grep for
+    internal static bool HoldsGeneratorSlot;
+
     public override BotBase PrepareAndGenerateBot(MongoId sessionId, BotGenerationDetails botGenerationDetails)
     {
         // one-time proof-of-life: if a player's server log LACKS this line, our DI
         // override lost the BotGenerator slot to another mod (the 08-09 field log
         // theory for APBS 2.2.0) — that diagnosis becomes a grep instead of a maybe
+        HoldsGeneratorSlot = true;
         if (!_aliveLogged)
         {
             _aliveLogged = true;
@@ -63,7 +68,7 @@ public class IcebreakerBotFirewall(
         }
         IcebreakerPbsMasquerade.Apply(_log);
         var bot = base.PrepareAndGenerateBot(sessionId, botGenerationDetails);
-        TryInjectSpecials(bot, botGenerationDetails);
+        IcebreakerBotSpecials.Apply(bot, botGenerationDetails?.RoleLowercase, _randomUtil, _db, _log);
         return bot;
     }
 
@@ -72,151 +77,9 @@ public class IcebreakerBotFirewall(
     // lives CLIENT-side in IcebreakerCrew.PlaceChargeSweep: zone-squad aware,
     // backpack-preferring — things this server hook can't see.)
 
-    // WEDGE CARRIES EUROS (user call 08-08): the BlackDiv mod gives bossWedge dollar
-    // stacks, but the icebreaker's economy runs on euros (heli fare, quests). tpl
-    // swap at generation, stack counts untouched. ids verified in items.json.
-    private const string DollarsTpl = "5696686a4bdc2da3298b456a";
-    private const string EurosTpl = "569668774bdc2da2298b4568";
-
-    // BD DOGTAG DROP, take two (user call 08-12). take one ADDED a tag via
-    // AddItemWithChildrenToEquipmentSlot and never once worked: SPT clears each bot's
-    // container cache at the END of inventory generation
-    // (BotInventoryGenerator: "Inventory cache isn't needed, clear to save memory"),
-    // and we run after that — so every container reports NO_CONTAINERS and the helper
-    // falls through to a misleading NO_SPACE. the bots' pockets were never full.
-    // (the SZ-1 charge works because it is placed CLIENT-side on a live bot, a
-    // different code path entirely — the C-3 keycard drop had the same latent bug and
-    // moved client-side with it.)
-    //
-    // SWAPPING a template needs no container logic at all, so it always works — and
-    // the BlackDiv loadout hands every blackDivIb a shot at a Labs access keycard
-    // (weight 60 in their pocket pool), an item that has no business on this ship.
-    // so the keycard IS the dogtag: swap it in place, ferrum common and green rare at
-    // a 75/25 split (user call 08-13 — even odds made the two tags feel interchangeable,
-    // and green is the scarcer barter currency). the keycard's own spawn rate becomes
-    // the tag drop rate.
-    private const string BdDogtagGreenTpl = "6a461bf82b2264dbe10d0ee6";
-    private const string BdDogtagFerrumTpl = "6a461aed7391ab085a093760";
-    // wedge is their most formidable fighter and the red tag's own description says
-    // so — he always carries one, and it's the only source of red in the raid. his
-    // loadout has NO keycard to swap, so the guarantee is placed client-side by
-    // IcebreakerCrew (the proven SZ-1 path); this only covers the rare case where he
-    // rolls a keycard anyway.
-    private const string BdDogtagRedTpl = "6a461c41ec88c6b9a509fb17";
-    private const string LabsKeycardTpl = "5c94bbff86f7747ee735c08f";
-
-    // ONE TAG PER BODY (user call 08-12): the pocket pool can hand the same bot more
-    // than one keycard, and a naive swap-them-all turns that into a pile of dogtags —
-    // which would quietly devalue the barter currency. so: the FIRST keycard becomes
-    // the tag, every other keycard is DELETED outright (the whole point was getting
-    // labs cards off this ship), and any duplicate tag that somehow survives is culled
-    // too, whatever its source.
-    private void SwapKeycardForDogtag(BotBase bot, bool isWedge)
-    {
-        var items = bot.Inventory?.Items;
-        if (items is null || !TagsPresent()) return;
-
-        var tagTpls = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-            { BdDogtagGreenTpl, BdDogtagFerrumTpl, BdDogtagRedTpl };
-
-        Item first = null;
-        var doomed = new List<Item>();
-        foreach (var it in items)
-        {
-            if (it is null) continue;
-            var tpl = it.Template.ToString();
-            bool isCard = string.Equals(tpl, LabsKeycardTpl, StringComparison.OrdinalIgnoreCase);
-            bool isTag = tagTpls.Contains(tpl);
-            if (!isCard && !isTag) continue;
-            if (first is null && isCard) first = it; // only a card can become the tag
-            else doomed.Add(it);                     // spare cards + any duplicate tags
-        }
-
-        string what = null;
-        if (first != null)
-        {
-            // 25 = green, the other 75 = ferrum
-            bool green = _randomUtil.GetChance100(25.0);
-            what = isWedge ? "red" : (green ? "green" : "ferrum");
-            first.Template = new MongoId(isWedge ? BdDogtagRedTpl : (green ? BdDogtagGreenTpl : BdDogtagFerrumTpl));
-        }
-        foreach (var d in doomed) items.Remove(d);
-
-        if (first != null || doomed.Count > 0)
-            _log.Info($"[Icebreaker] {(first != null ? $"labs keycard -> BD {what} dogtag" : "no keycard")} on "
-                + $"{(isWedge ? "wedge" : "a black division body")}"
-                + (doomed.Count > 0 ? $"; culled {doomed.Count} spare card/tag(s) — one tag per body" : ""));
-    }
-
-    // icebreaker raids only (raid-context latch); goons + rogues on vanilla maps stay
-    // untouched by construction.
-    private void TryInjectSpecials(BotBase bot, BotGenerationDetails details)
-    {
-        try
-        {
-            if (!IcebreakerRaidContext.OnIcebreaker || bot?.Inventory == null) return;
-
-            // (the C-3 keycard roll MOVED CLIENT-SIDE 08-12 — IcebreakerCrew.C3KeycardSweep.
-            // it was an AddItemWithChildrenToEquipmentSlot call here, which cannot work
-            // after generation returns: SPT frees the bot's container cache at the end of
-            // inventory generation, so the add always failed with a misleading NO_SPACE.
-            // nothing server-side adds items to bots any more — only swaps templates.)
-
-            var role = details?.RoleLowercase;
-            bool isWedge = string.Equals(role, "bosswedge", StringComparison.OrdinalIgnoreCase);
-            if (string.Equals(role, "blackdivib", StringComparison.OrdinalIgnoreCase) || isWedge)
-                SwapKeycardForDogtag(bot, isWedge);
-            if (isWedge && bot.Inventory.Items != null)
-            {
-                int swapped = 0;
-                foreach (var it in bot.Inventory.Items)
-                    if (it != null && string.Equals(it.Template.ToString(), DollarsTpl, StringComparison.OrdinalIgnoreCase))
-                    {
-                        it.Template = new MongoId(EurosTpl);
-                        swapped++;
-                    }
-                if (swapped > 0)
-                    _log.Info($"[Icebreaker] wedge currency fix — {swapped} dollar stack(s) swapped to euros");
-            }
-        }
-        catch (Exception e)
-        {
-            _log.Warning($"[Icebreaker] special-item injection failed: {e.Message}");
-        }
-    }
-
-    // dependency guard for the BD dogtags — resolved once, warned once
     private readonly DatabaseService _db = databaseService;
-    private bool? _tagsPresent;
-
-    private bool TagsPresent()
-    {
-        if (_tagsPresent == null)
-        {
-            // both, not just the one this roll wants — they ship in the same config,
-            // so a half-present set means the dependency is broken either way
-            try
-            {
-                var items = _db.GetItems();
-                _tagsPresent = items.ContainsKey(new MongoId(BdDogtagGreenTpl))
-                            && items.ContainsKey(new MongoId(BdDogtagFerrumTpl));
-            }
-            catch { _tagsPresent = false; }
-            if (_tagsPresent == false)
-                _log.Warning("[Icebreaker] BD dogtag templates not in the item DB (WTT-ContentBackport kordbreach set missing?) "
-                    + "— black division bodies will carry no dogtags, and the ragman/skier barters will be unbuyable");
-        }
-        return _tagsPresent == true;
-    }
-
-    // (InjectItem removed 08-12 — see the C-3 note above. every server-side ADD was
-    // dead on arrival; what remains here only SWAPS existing templates, which needs no
-    // container state and therefore always works.)
 }
 
-// the shared shim: if PBS's static says our map, present it as labs instead. the
-// condition doubles as the gate — only an icebreaker raid ever puts 'Suburbs' there,
-// so no location plumbing is needed and vanilla raids are untouched by construction.
 internal static class IcebreakerPbsMasquerade
 {
     private static bool _logged;
@@ -289,5 +152,137 @@ internal static class IcebreakerPbsMasquerade
         {
             if (!_logged) { _logged = true; log.Warning($"[Icebreaker] PBS masquerade failed: {e.Message}"); }
         }
+    }
+}
+
+// PER-BOT SPECIALS, callable from EITHER owner of the generation path (08-13). this
+// used to be instance methods on IcebreakerBotFirewall, which meant it silently died
+// whenever another mod won the BotGenerator DI slot — APBS 2.2.1 does exactly that, and
+// jagrr's server ran a whole session with no BD dogtags and no wedge euro fix. so the
+// work lives here, static, and BOTH paths call it:
+//   * IcebreakerBotFirewall.PrepareAndGenerateBot, when we hold the slot
+//   * IcebreakerBotGenDiag's response postfix, when we DON'T (harmony can't be evicted)
+//
+// EXACTLY ONE of those may run per bot. running SwapKeycardForDogtag twice would DELETE
+// the tag it just created: on the second pass there is no keycard left, so the tag it
+// made falls into the "spare card or duplicate tag" cull branch. the diag gates its call
+// on IcebreakerBotFirewall.HoldsGeneratorSlot for that reason — do not remove that gate.
+internal static class IcebreakerBotSpecials
+{
+    // WEDGE CARRIES EUROS (user call 08-08): the BlackDiv mod gives bossWedge dollar
+    // stacks, but the icebreaker's economy runs on euros (heli fare, quests). tpl swap
+    // at generation, stack counts untouched.
+    private const string DollarsTpl = "5696686a4bdc2da3298b456a";
+    private const string EurosTpl = "569668774bdc2da2298b4568";
+
+    // the BlackDiv loadout hands every blackDivIb a shot at a Labs access keycard
+    // (weight 60 in their pocket pool), an item with no business on this ship. so the
+    // keycard IS the dogtag: swap it in place, ferrum common and green rare at 75/25
+    // (user call 08-13). the keycard's own spawn rate becomes the tag drop rate.
+    // SWAPPING a template needs no container logic, which is why this works at all —
+    // every server-side ADD is dead on arrival, see the C-3 note in IcebreakerCrew.
+    private const string BdDogtagGreenTpl = "6a461bf82b2264dbe10d0ee6";
+    private const string BdDogtagFerrumTpl = "6a461aed7391ab085a093760";
+    private const string BdDogtagRedTpl = "6a461c41ec88c6b9a509fb17";
+    private const string LabsKeycardTpl = "5c94bbff86f7747ee735c08f";
+
+    private static bool? _tagsPresent;
+    private static bool _tagsWarned;
+
+    // icebreaker raids only (raid-context latch); goons + rogues on vanilla maps stay
+    // untouched by construction.
+    internal static void Apply<T>(BotBase bot, string role, RandomUtil rng, DatabaseService db, ISptLogger<T> log)
+    {
+        try
+        {
+            if (!IcebreakerRaidContext.OnIcebreaker || bot?.Inventory == null) return;
+
+            bool isWedge = string.Equals(role, "bosswedge", StringComparison.OrdinalIgnoreCase);
+            if (string.Equals(role, "blackdivib", StringComparison.OrdinalIgnoreCase) || isWedge)
+                SwapKeycardForDogtag(bot, isWedge, rng, db, log);
+
+            if (isWedge && bot.Inventory.Items != null)
+            {
+                int swapped = 0;
+                foreach (var it in bot.Inventory.Items)
+                    if (it != null && string.Equals(it.Template.ToString(), DollarsTpl, StringComparison.OrdinalIgnoreCase))
+                    {
+                        it.Template = new MongoId(EurosTpl);
+                        swapped++;
+                    }
+                if (swapped > 0)
+                    log.Info($"[Icebreaker] wedge currency fix — {swapped} dollar stack(s) swapped to euros");
+            }
+        }
+        catch (Exception e)
+        {
+            log.Warning($"[Icebreaker] special-item injection failed: {e.Message}");
+        }
+    }
+
+    // ONE TAG PER BODY (user call 08-12): the pocket pool can hand the same bot more
+    // than one keycard, and a naive swap-them-all turns that into a pile of dogtags,
+    // quietly devaluing the barter currency. so the FIRST keycard becomes the tag, every
+    // other keycard is DELETED (getting labs cards off this ship was the whole point),
+    // and any duplicate tag is culled too, whatever its source.
+    private static void SwapKeycardForDogtag<T>(BotBase bot, bool isWedge, RandomUtil rng, DatabaseService db, ISptLogger<T> log)
+    {
+        var items = bot.Inventory?.Items;
+        if (items is null || !TagsPresent(db, log)) return;
+
+        var tagTpls = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            { BdDogtagGreenTpl, BdDogtagFerrumTpl, BdDogtagRedTpl };
+
+        Item first = null;
+        var doomed = new List<Item>();
+        foreach (var it in items)
+        {
+            if (it is null) continue;
+            var tpl = it.Template.ToString();
+            bool isCard = string.Equals(tpl, LabsKeycardTpl, StringComparison.OrdinalIgnoreCase);
+            bool isTag = tagTpls.Contains(tpl);
+            if (!isCard && !isTag) continue;
+            if (first is null && isCard) first = it; // only a card can become the tag
+            else doomed.Add(it);                     // spare cards + any duplicate tags
+        }
+
+        string what = null;
+        if (first != null)
+        {
+            // 25 = green, the other 75 = ferrum
+            bool green = rng.GetChance100(25.0);
+            what = isWedge ? "red" : (green ? "green" : "ferrum");
+            first.Template = new MongoId(isWedge ? BdDogtagRedTpl : (green ? BdDogtagGreenTpl : BdDogtagFerrumTpl));
+        }
+        foreach (var d in doomed) items.Remove(d);
+
+        if (first != null || doomed.Count > 0)
+            log.Info($"[Icebreaker] {(first != null ? $"labs keycard -> BD {what} dogtag" : "no keycard")} on "
+                + $"{(isWedge ? "wedge" : "a black division body")}"
+                + (doomed.Count > 0 ? $"; culled {doomed.Count} spare card/tag(s) — one tag per body" : ""));
+    }
+
+    // dependency guard for the BD dogtags — resolved once, warned once
+    private static bool TagsPresent<T>(DatabaseService db, ISptLogger<T> log)
+    {
+        if (_tagsPresent == null)
+        {
+            // both, not just the one this roll wants — they ship in the same config, so
+            // a half-present set means the dependency is broken either way
+            try
+            {
+                var items = db.GetItems();
+                _tagsPresent = items.ContainsKey(new MongoId(BdDogtagGreenTpl))
+                            && items.ContainsKey(new MongoId(BdDogtagFerrumTpl));
+            }
+            catch { _tagsPresent = false; }
+            if (_tagsPresent == false && !_tagsWarned)
+            {
+                _tagsWarned = true;
+                log.Warning("[Icebreaker] BD dogtag templates not in the item DB (WTT-ContentBackport kordbreach set missing?) "
+                    + "— black division bodies will carry no dogtags, and the barters will be unbuyable");
+            }
+        }
+        return _tagsPresent == true;
     }
 }

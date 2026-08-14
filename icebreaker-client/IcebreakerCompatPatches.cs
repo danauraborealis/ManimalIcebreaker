@@ -21,7 +21,7 @@ namespace Manimal.Icebreaker
         private static void Postfix()
         {
             if (!IceGate.On) return;
-            int ways = 0, built = 0, failed = 0;
+            int ways = 0, built = 0, failed = 0, scrubbed = 0, emptied = 0;
             try
             {
                 foreach (var zone in UnityEngine.Object.FindObjectsOfType<BotZone>(true))
@@ -33,15 +33,62 @@ namespace Manimal.Icebreaker
                         ways++;
                         foreach (var p in way.Points)
                         {
-                            if (p == null || p.SubPointsCount > 0) continue;
-                            try { p.CreateSubPoints(way); built++; }
-                            catch { failed++; }
+                            if (p == null) continue;
+
+                            // SCRUB BEFORE BUILDING — the order is the whole point.
+                            // GetSubPoint is `subPoints[Mathf.Clamp(index, 0, Count-1)]`:
+                            // the index is safe, the CONTENTS are not. a dead entry comes
+                            // straight back, GClass504.method_0 wraps it
+                            // (`new PatrolPointContainer(p.TargetPoint.GetSubPoint(index))`,
+                            // taken whenever index >= 0, which is every follower formation
+                            // slot), and PointSetted reads .Position off a null TargetPoint.
+                            // that was the 34k-NRE storm (22,213 from GClass514.Update plus
+                            // 5,405 as ManualUpdate re-read the bad container every frame).
+                            //
+                            // scrubbing SECOND was a real bug, measured 08-13: a point whose
+                            // entries were all dead still reported SubPointsCount > 0, so the
+                            // build below was skipped and the scrub then emptied it — 546
+                            // dead entries removed and 63 points left with NO formation
+                            // offsets at all. stripping first makes those points read as
+                            // empty, so CreateSubPoints regenerates them properly.
+                            scrubbed += ScrubSubPoints(p);
+
+                            if (p.SubPointsCount == 0)
+                            {
+                                try { p.CreateSubPoints(way); built++; }
+                                catch { failed++; }
+                                scrubbed += ScrubSubPoints(p); // fresh list, cheap insurance
+                            }
+                            if (p.SubPointsCount == 0) emptied++;
                         }
                     }
                 }
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[SubPoints] sweep failed: {e.Message}"); }
-            Plugin.Log.LogWarning($"[SubPoints] generated formation sub-points on {built} patrol points ({ways} ways, {failed} failed)");
+            Plugin.Log.LogWarning($"[SubPoints] generated formation sub-points on {built} patrol points ({ways} ways, {failed} failed)"
+                + $"; scrubbed {scrubbed} dead sub-point(s)"
+                + (emptied > 0 ? $", {emptied} point(s) left with none (GetSubPoint returns the point itself)" : ""));
+        }
+
+        // the private list behind SubPointsCount/GetSubPoint. BSG exposes the count and
+        // the indexer but never the list itself, and the ENTRIES are what rot, so it has
+        // to be reflected. `x == null` is Unity's overload on purpose: it catches both a
+        // real null and a DestroyImmediate'd component still sitting in the list, which
+        // is the case that actually bites here.
+        private static readonly System.Reflection.FieldInfo SubPointsField =
+            AccessTools.Field(typeof(PatrolPoint), "subPoints");
+
+        private static int ScrubSubPoints(PatrolPoint p)
+        {
+            try
+            {
+                if (SubPointsField == null) return 0;
+                if (!(SubPointsField.GetValue(p) is System.Collections.Generic.List<PatrolPoint> list) || list.Count == 0) return 0;
+                int before = list.Count;
+                list.RemoveAll(x => x == null);
+                return before - list.Count;
+            }
+            catch { return 0; }
         }
     }
 

@@ -2017,6 +2017,7 @@ namespace Manimal.Icebreaker
         private class PcVol
         {
             public object Vol;
+            public string Name;                // captured at attach — Vol gets nulled on failure
             public int LastCell = int.MinValue;
             public System.Reflection.MethodInfo GetIndex, GetIndices, QueueAll, QueueOne, Execute;
             public object[] Groups;            // bakeGroups cached — direct toggles, no per-index reflection
@@ -2043,6 +2044,7 @@ namespace Manimal.Icebreaker
                 _pcVols.Add(new PcVol
                 {
                     Vol = v,
+                    Name = (v as UnityEngine.Object)?.name ?? t.Name,
                     // three overloads — the bare name throws AmbiguousMatch, which aborted
                     // the whole culling attach (no driver, no cross-cull) on 07-07's raid
                     GetIndex = AccessTools.Method(t, "GetIndexForWorldPos", new[] { typeof(Vector3), typeof(bool).MakeByRefType() }),
@@ -2128,7 +2130,18 @@ namespace Manimal.Icebreaker
             }
             catch (Exception e)
             {
-                Plugin.Log.LogWarning($"[Culling] driver failed on volume: {e.Message}");
+                // NAME THE CASUALTY (08-13 field log): this used to print the bare
+                // e.Message, which for a reflected call is always the useless wrapper
+                // "Exception has been thrown by the target of an invocation" with no
+                // volume and no cause. that log showed FOUR of our six sidecar volumes
+                // dying every raid (12 across 3) — and these six ARE the occlusion
+                // system, since NativeCulling defaults off and its 231MB bake isn't
+                // shipped, so the driver was left culling through two. nothing in the
+                // line was actionable. unwrap to the real exception and name the volume.
+                var root = e is System.Reflection.TargetInvocationException tie && tie.InnerException != null
+                    ? tie.InnerException : e;
+                Plugin.Log.LogWarning($"[Culling] volume '{pv.Name}' driver threw and is now OFF for this raid "
+                    + $"(its groups stay visible, costing frame time): {root.GetType().Name}: {root.Message}");
                 pv.Vol = null; // don't retry a broken volume every cycle
             }
         }
