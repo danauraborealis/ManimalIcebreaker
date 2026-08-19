@@ -18,12 +18,37 @@ namespace Manimal.Icebreaker
     // the removal is deliberately LOCAL, no network transaction — identical to the
     // labs keycard, whose removal persists through the raid-end inventory sync.
     //
-    // transit arrivals are exempt: the hovercraft already charged the same fare
-    // in-raid at the point of boarding, and one crossing must not bill twice.
+    // the price is a CONST on purpose (user call 08-19, the transit teardown): it used
+    // to read the TransitCost config, which let anyone zero the fare from their
+    // bepinex config. the map screen is now the only way aboard and the fare is part
+    // of the map's economy, so it ships hardcoded like the labs keycard requirement.
+    //
+    // the BTR questline's payoff (user call, same day): finishing Hangover, the end of
+    // the Saving Private Roman chain, HALVES the fare. that replaced the chain's old
+    // reward of unlocking the map screen, which Boreas P3 now grants much earlier.
     internal static class IcebreakerMapFare
     {
         private const string RoubleTpl = "5449016a4bdc2d6f028b456f";
         private const string SuburbsId = "Suburbs";
+        internal const int CrossingCost = 500_000;
+        internal const int CrossingCostDiscounted = 250_000;
+        private const string HangoverQuestId = "3f8d2c5a9b17e04d6ca8f312"; // BTR chain final
+
+        // reads the PROFILE's own quest list, so it works at the menu (ready gate,
+        // Profile_0) and at game creation (the incoming Profile) alike, solo and fika
+        internal static int CostFor(Profile profile)
+        {
+            try
+            {
+                var qs = profile?.QuestsData;
+                if (qs != null)
+                    for (int i = 0; i < qs.Count; i++)
+                        if (qs[i] != null && qs[i].Id == HangoverQuestId && qs[i].Status == EFT.Quests.EQuestStatus.Success)
+                            return CrossingCostDiscounted;
+            }
+            catch (Exception e) { Plugin.Log.LogDebug($"[MapFare] discount check failed (full fare): {e.Message}"); }
+            return CrossingCost;
+        }
 
         [HarmonyPatch(typeof(MainMenuControllerClass), "method_54")]
         internal static class Patch_ReadyGate
@@ -37,8 +62,7 @@ namespace Manimal.Icebreaker
                     var rs = __instance.RaidSettings_0;
                     if (rs == null || rs.IsScav) return;
                     if (rs.SelectedLocation == null || rs.SelectedLocation.Id != SuburbsId) return;
-                    int cost = Plugin.TransitCost.Value;
-                    if (cost <= 0) return;
+                    int cost = CostFor(__instance.Profile_0);
 
                     int carried = __instance.InventoryController.Inventory
                         .GetPlayerItems(EPlayerItems.Equipment)
@@ -83,23 +107,7 @@ namespace Manimal.Icebreaker
             {
                 if (location == null || location.Id != SuburbsId) return;
                 if (profile == null || profile.Side == EPlayerSide.Savage) return;
-                int cost = Plugin.TransitCost.Value;
-                if (cost <= 0) return;
-
-                // arriving by hovercraft: the fare was taken in-raid at boarding.
-                // transitionCount>0 is the ONLY reliable discriminator — the first
-                // version also exempted on transitionType != None, and fresh raids
-                // evidently don't carry None there (they carry Common), so every
-                // crossing rode free with no log line to say why. log the state;
-                // never skip silently again.
-                var tr = raidSettings != null ? raidSettings.transition : null;
-                if (tr != null)
-                    Plugin.Log.LogDebug($"[MapFare] transition state: type={tr.transitionType} count={tr.transitionCount}");
-                if (tr != null && tr.transitionCount > 0)
-                {
-                    Plugin.Log.LogDebug("[MapFare] transit arrival — fare was paid at boarding, not charging");
-                    return;
-                }
+                int cost = CostFor(profile);
 
                 // smallest stacks first, so change stays consolidated in one stack
                 var stacks = profile.Inventory.GetPlayerItems(EPlayerItems.Equipment)

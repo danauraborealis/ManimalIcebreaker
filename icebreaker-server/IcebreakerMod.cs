@@ -129,8 +129,7 @@ public class IcebreakerMod(
                 + $"{botConfig.MaxBotCap.GetValueOrDefault("default", 18)} truncated the late trigger waves)");
         }
         // scavs never cross: DisabledForScav is the exact lever labs uses, and the map
-        // screen natively greys the location out for scav raids on it. the hovercraft
-        // side of the same rule lives in the client's transit access gate.
+        // screen natively greys the location out for scav raids on it.
         newBase.DisabledForScav = true;
 
         // the suburbs stub ships base.json ONLY — no loot data files — so the server's
@@ -453,7 +452,7 @@ public class IcebreakerQuestRegistration(
 // players already expect.
 //
 // what remains here are the CROSSING gates below, which cannot be expressed natively:
-// "come back alive from the icebreaker" is not a condition type SPT evaluates.
+// "you have been to the icebreaker" is not a condition type SPT evaluates.
 [Injectable]
 public class IcebreakerFlyerGateRouter(
     JsonUtil jsonUtil,
@@ -474,13 +473,13 @@ public class IcebreakerFlyerGateRouter(
             ),
         ])
 {
-    private const string StickToIt = "e857e9c34949ecbf1cf5a5b2";  // BTR follow-up, needs a survived icebreaker trip
+    private const string StickToIt = "e857e9c34949ecbf1cf5a5b2";  // BTR follow-up, needs an icebreaker visit (any outcome)
     private const string PrivateRoman = "8b2b4eea617e2be2e54df123";
     private const string BitterVictory = "c7a1f0b93e64d5827ab1cc40";
-    // reserved for the next BTR quest, which isn't authored yet. the gate below is live
-    // regardless: a gate naming an id no quest carries simply filters nothing, so this
-    // costs nothing until the quest exists and needs no second edit when it does.
-    private const string BtrChainNext = "3f8d2c5a9b17e04d6ca8f312";
+    // Hangover, the END of the BTR chain — its reward is the halved 250k map fare
+    // (client-side, IcebreakerMapFare.CostFor). the crossing gate below still applies:
+    // it only appears after a crossing made post-Bitter Victory.
+    private const string Hangover = "3f8d2c5a9b17e04d6ca8f312";
     // Ragman wants Black Division kit, and he can only have heard about the ship once
     // you've actually come back off it — same first-crossing gate as Stick to It, but
     // an entirely separate trader and chain.
@@ -491,7 +490,7 @@ public class IcebreakerFlyerGateRouter(
     private const string WarNeverChanges = "6a753b58478c184bd220c417";
     // Prapor's helicopter upkeep. the callback ("you already know about my little
     // helicopter secret") is satisfied for free by this gate: the hard map lock means
-    // nobody survives a crossing without having finished the Boreas chain first.
+    // nobody makes a crossing without having finished Boreas P3 first (map reveal).
     private const string OilChange = "6a75661b478c184bd220c433";
     // Skier's courier bags. part 2 chains off this one natively, so only the opener
     // needs a crossing gate.
@@ -501,7 +500,8 @@ public class IcebreakerFlyerGateRouter(
     // right to someone who has already been out there and seen who is guarding it.
     private const string ChainOfCustody = "6a7e0916b881de241018539d";
 
-    // quests gated on "come back alive from the icebreaker". AfterQuest null means the
+    // quests gated on "you have been to the icebreaker" (any raid outcome counts,
+    // user call 08-19 — die on the deck, still counts). AfterQuest null means the
     // first crossing ever; otherwise it must be a crossing made AFTER that quest was
     // finished, so trips banked earlier in the chain don't pay for a later gate. adding
     // the next one in the chain is a line here.
@@ -511,7 +511,7 @@ public class IcebreakerFlyerGateRouter(
     {
         new(StickToIt, null),
         new(BitterVictory, PrivateRoman),
-        new(BtrChainNext, BitterVictory),
+        new(Hangover, BitterVictory),
         new(FreshStock, null),
         new(WarNeverChanges, null),
         new(OilChange, null),
@@ -568,7 +568,7 @@ public class IcebreakerFlyerGateRouter(
 // TraderLoyalty as quest START conditions (verified across every vanilla quest), so
 // "extract from the icebreaker once" cannot be expressed as one. instead we watch raid
 // ends: this router reads the END request and passes core's response through untouched,
-// so nothing is processed twice, and records the profile once it survives a raid on our
+// so nothing is processed twice, and records the profile once it ends a raid on our
 // slot. StartLocalRaid builds ServerId as "{location}.{side} {timestamp}", so the map
 // comes back to us on the way out.
 [Injectable]
@@ -655,7 +655,7 @@ public class IcebreakerRaidWatchRouter(
     }
 
     // per-profile crossing ledger. a bare "has been there" bool was enough for one gate,
-    // but "come back ALIVE again, after quest X" needs to tell trips apart, so we count
+    // but "go there AGAIN, after quest X" needs to tell trips apart, so we count
     // them and stamp the count reached when each gating quest was finished. the gate is
     // then just Visits > Marks[questId], which cannot be satisfied by trips the player
     // had already banked before taking the quest.
@@ -680,7 +680,7 @@ public class IcebreakerRaidWatchRouter(
         lock (Gate) return Profiles.TryGetValue(sessionId, out var l) && l.Visits > 0;
     }
 
-    // a crossing survived AFTER afterQuestId was handed in. false while the quest is
+    // a crossing made AFTER afterQuestId was handed in. false while the quest is
     // unfinished (no mark yet), which is what keeps the next quest hidden.
     public static bool HasVisitedSince(string sessionId, string afterQuestId)
     {
@@ -754,8 +754,13 @@ public class IcebreakerRaidWatchRouter(
         {
             EnsureLoaded();
             var location = info?.ServerId?.Split('.').FirstOrDefault();
-            bool survived = info?.Results?.Result == SPTarkov.Server.Core.Models.Enums.ExitStatus.SURVIVED;
-            if (survived && string.Equals(location, SlotId, StringComparison.OrdinalIgnoreCase))
+            // ANY raid end on our slot counts as a visit — survive, die, MIA, whatever
+            // (user call 08-19: "you can live or die, you just have to go there"). the
+            // gated quests are all "you have seen the ship" beats, and a corpse on the
+            // deck has very much seen the ship. the one exclusion left is a raid that
+            // never really started (the client posts an end even when loading aborts,
+            // with no Results block) — no Results = no visit.
+            if (info?.Results != null && string.Equals(location, SlotId, StringComparison.OrdinalIgnoreCase))
             {
                 int total;
                 lock (Gate)
@@ -765,7 +770,7 @@ public class IcebreakerRaidWatchRouter(
                     total = ++l.Visits;
                 }
                 Save(logger);
-                logger.Info($"[Icebreaker] profile survived the icebreaker (crossing #{total})");
+                logger.Info($"[Icebreaker] icebreaker visit recorded, outcome {info.Results.Result} (crossing #{total})");
             }
         }
         catch (Exception e) { logger.Warning($"[Icebreaker] raid watch failed: {e.Message}"); }
@@ -851,9 +856,8 @@ public class IcebreakerLockRouter(
                     if (loc?.IdField.ToString() != "5714dc342459777137212e0b") continue; // the suburbs/icebreaker slot
                     // HIDE, don't grey out: Enabled=false is the dormant state Suburbs
                     // shipped in, so the dot vanishes from the map screen entirely. the
-                    // entry itself stays in the response, which matters because the
-                    // client resolves a transit's TARGET through LocationSettings, so
-                    // deleting it would break the crossing from Shoreline.
+                    // entry itself stays in the response — insurance, scav-timer and
+                    // raid-settings plumbing all resolve the location through it.
                     loc.Enabled = unlocked;
                     loc.Locked = !unlocked;
                     break;

@@ -104,20 +104,8 @@ namespace Manimal.Icebreaker
         internal static ConfigEntry<bool> Blizzard;
         internal static readonly Val<float> SnowIntensity = new Val<float>(1.0f);
         internal static ConfigEntry<bool> TimelineCutscene;
+        internal static ConfigEntry<bool> CutscenePlayerWedge;
         internal static ConfigEntry<bool> Tripwires;
-        internal static ConfigEntry<bool> HovercraftTransit;
-        internal static ConfigEntry<float> TransitX;
-        internal static ConfigEntry<float> TransitY;
-        internal static ConfigEntry<float> TransitZ;
-        internal static ConfigEntry<float> TransitZoneX;
-        internal static ConfigEntry<float> TransitZoneY;
-        internal static ConfigEntry<float> TransitZoneZ;
-        internal static ConfigEntry<float> TransitZoneSizeX;
-        internal static ConfigEntry<float> TransitZoneSizeY;
-        internal static ConfigEntry<float> TransitZoneSizeZ;
-        internal static ConfigEntry<float> TransitZoneRotY;
-        internal static ConfigEntry<int> TransitCost;
-        internal static ConfigEntry<int> TransitActivateAfterSec;
         internal static ConfigEntry<int> HeliExfilCost;
         internal static ConfigEntry<bool> SnowGusts;
         internal static readonly Val<float> SnowGustsDensity = new Val<float>(120f);
@@ -125,9 +113,6 @@ namespace Manimal.Icebreaker
         internal static readonly Val<float> SnowGustsSpeed = new Val<float>(1.6f);
         internal static readonly Val<float> SnowGustsOpacity = new Val<float>(0.25f);
         internal static readonly Val<float> SnowGustsReach = new Val<float>(150f);
-        internal static ConfigEntry<float> TransitRotX;
-        internal static ConfigEntry<float> TransitRotY;
-        internal static ConfigEntry<float> TransitRotZ;
         internal static ConfigEntry<float> TripwireChance;
         internal static ConfigEntry<string> TripwireTpl;
         // cutscene fog PROFILE: twin values for every look-affecting fog value. while
@@ -349,48 +334,13 @@ namespace Manimal.Icebreaker
                 new ConfigDescription("enable the F1-F12 diagnostic hotkey suite (lights toggle, geo hide, batching tests, probes). OFF for normal play — F9 doubles as the fog tuner toggle and MUST not fight the lights toggle (live)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             TimelineCutscene = Config.Bind("Icebreaker", "TimelineCutscene", true,
                 new ConfigDescription("play the in-engine helicopter cutscene at the story trigger (falls back to the video if the cutscene scene/timeline is unavailable)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
-            HovercraftTransit = Config.Bind("Icebreaker", "HovercraftTransit", true,
-                new ConfigDescription("spawn the smugglers' hovercraft transit on the Shoreline coast once the Boreas chain is finished (takes you to the icebreaker)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
-            TransitX = Config.Bind("Icebreaker", "TransitX", -312.0199f,
-                new ConfigDescription("hovercraft transit position X on Shoreline (live)", new AcceptableValueRange<float>(-2000f, 2000f), new ConfigurationManagerAttributes { IsAdvanced = true }));
-            TransitY = Config.Bind("Icebreaker", "TransitY", -65.899f,
-                new ConfigDescription("hovercraft transit position Y on Shoreline (live)", new AcceptableValueRange<float>(-500f, 500f), new ConfigurationManagerAttributes { IsAdvanced = true }));
-            TransitZ = Config.Bind("Icebreaker", "TransitZ", 527.0115f,
-                new ConfigDescription("hovercraft transit position Z on Shoreline (live)", new AcceptableValueRange<float>(-2000f, 2000f), new ConfigurationManagerAttributes { IsAdvanced = true }));
-            // FULL euler, not just heading: the ripped prefab carries the OBJ axis
-            // correction on X (270), so overwriting rotation with yaw alone lays it flat
-            TransitRotX = Config.Bind("Icebreaker", "TransitRotX", 270f,
-                new ConfigDescription("hovercraft rotation X (270 = the OBJ axis correction) (live)", new AcceptableValueRange<float>(0f, 360f), new ConfigurationManagerAttributes { IsAdvanced = true }));
-            TransitRotY = Config.Bind("Icebreaker", "TransitRotY", 40f,
-                new ConfigDescription("hovercraft rotation Y, its heading (live)", new AcceptableValueRange<float>(0f, 360f), new ConfigurationManagerAttributes { IsAdvanced = true }));
-            TransitRotZ = Config.Bind("Icebreaker", "TransitRotZ", 0f,
-                new ConfigDescription("hovercraft rotation Z (live)", new AcceptableValueRange<float>(0f, 360f), new ConfigurationManagerAttributes { IsAdvanced = true }));
-            // the boarding trigger has its own transform: it sits beside the craft rather
-            // than inside it, and is a flattened box aligned to the hull, not a cube
-            TransitZoneX = Config.Bind("Icebreaker", "TransitZoneX", -310.3848f,
-                new ConfigDescription("transit trigger position X (live)", new AcceptableValueRange<float>(-2000f, 2000f), new ConfigurationManagerAttributes { IsAdvanced = true }));
-            TransitZoneY = Config.Bind("Icebreaker", "TransitZoneY", -63.49909f,
-                new ConfigDescription("transit trigger position Y (live)", new AcceptableValueRange<float>(-500f, 500f), new ConfigurationManagerAttributes { IsAdvanced = true }));
-            TransitZoneZ = Config.Bind("Icebreaker", "TransitZoneZ", 531.0692f,
-                new ConfigDescription("transit trigger position Z (live)", new AcceptableValueRange<float>(-2000f, 2000f), new ConfigurationManagerAttributes { IsAdvanced = true }));
-            TransitZoneSizeX = Config.Bind("Icebreaker", "TransitZoneSizeX", 8f,
-                new ConfigDescription("transit trigger box size X in meters (live)", new AcceptableValueRange<float>(0.5f, 60f), new ConfigurationManagerAttributes { IsAdvanced = true }));
-            TransitZoneSizeY = Config.Bind("Icebreaker", "TransitZoneSizeY", 3f,
-                new ConfigDescription("transit trigger box size Y in meters (live)", new AcceptableValueRange<float>(0.5f, 60f), new ConfigurationManagerAttributes { IsAdvanced = true }));
-            TransitZoneSizeZ = Config.Bind("Icebreaker", "TransitZoneSizeZ", 3f,
-                new ConfigDescription("transit trigger box size Z in meters (live)", new AcceptableValueRange<float>(0.5f, 60f), new ConfigurationManagerAttributes { IsAdvanced = true }));
-            TransitCost = Config.Bind("Icebreaker", "TransitCost", 400000,
-                new ConfigDescription("rouble price shown for the hovercraft crossing (live)", new AcceptableValueRange<int>(0, 5000000), new ConfigurationManagerAttributes { IsAdvanced = true }));
-            TransitZoneRotY = Config.Bind("Icebreaker", "TransitZoneRotY", 40f,
-                new ConfigDescription("transit trigger heading, match the craft (live)", new AcceptableValueRange<float>(0f, 360f), new ConfigurationManagerAttributes { IsAdvanced = true }));
+            CutscenePlayerWedge = Config.Bind("Icebreaker", "CutscenePlayerWedge", false,
+                new ConfigDescription("the cutscene's wedge actor wears YOUR character: his head, top and pants are replaced with the player's equipped meshes and all his gear (armor, helmet, nvg, gasmask) is hidden. off = the authored boss actor", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             SnowGusts = Config.Bind("Icebreaker", "SnowGusts", true,
                 new ConfigDescription("wind-driven sheets of blown snow around the player, on top of the native flakes (live)", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             HeliExfilCost = Config.Bind("Icebreaker", "HeliExfilCost", 2400,
                 new ConfigDescription("euros the pilot charges to board the helicopter exfil, 0 for a free ride (read at raid start)",
                     new AcceptableValueRange<int>(0, 1000000), new ConfigurationManagerAttributes { IsAdvanced = true }));
-            TransitActivateAfterSec = Config.Bind("Icebreaker", "TransitActivateAfterSec", 30,
-                new ConfigDescription("seconds before the crossing opens, listed red with a countdown until then (every vanilla transit uses 60)",
-                    new AcceptableValueRange<int>(0, 600), new ConfigurationManagerAttributes { IsAdvanced = true }));
             Tripwires = Config.Bind("Icebreaker", "Tripwires", true,
                 new ConfigDescription("plant the authored grenade tripwires (manimal_tripwire* markers) at raid start", null, new ConfigurationManagerAttributes { IsAdvanced = true }));
             TripwireChance = Config.Bind("Icebreaker", "TripwireChance", 0.5f,
@@ -473,11 +423,19 @@ namespace Manimal.Icebreaker
                 Log.LogError($"PatchAll FAILED — some patches did not apply, the map still loads: {e}");
             }
             IcebreakerFikaCompat.TryApply(harmony); // no-op without fika
+            // QuestingBots per-map mute (ported from terminal): QB's spawn takeover
+            // fights event-driven wave choreography; QB itself has no per-map off
+            // switch. gated on IceGate — QB fully active on every other map.
+            try { IcebreakerQuestingBotsOff.TryPatch(harmony); }
+            catch (System.Exception e) { Log.LogWarning($"questing-bots mute failed: {e}"); }
 
             // bigbrain crew layer (hard dep, so the call is safe) — registration is
             // global and one-time; IceGate keeps the layer inert off-map
             try { IceCrewJobs.Register(); }
             catch (System.Exception e) { Log.LogError($"[CrewLayer] registration failed — crew falls back to vanilla patrol pokes: {e.Message}"); }
+            // wedge boss round 1: taunts + escort push throttling (WedgeBrainLayers.cs)
+            try { WedgeBrains.Register(); }
+            catch (System.Exception e) { Log.LogError($"[WedgeBrain] registration failed — wedge squad runs plain BD AI: {e.Message}"); }
 
             Log.LogInfo($"Manimal-Icebreaker {BuildInfo.Version} loaded");
             LogConfigBanner();

@@ -59,10 +59,18 @@ namespace Manimal.Icebreaker
         private const int ChecksPerFrame = 64;
         private const float ShowHysteresis = 1.06f; // hide at R, show again at R*1.06
 
+        private static readonly System.Diagnostics.Stopwatch _updSw = new System.Diagnostics.Stopwatch();
+
         private void Update()
         {
             if (!IceGate.On) return;
+            _updSw.Restart();
+            try { UpdateInner(); }
+            finally { RenderEnvProbe.AddTick(RenderEnvProbe.TickLootVis, _updSw.Elapsed.TotalMilliseconds); }
+        }
 
+        private void UpdateInner()
+        {
             TickRadiusCull();
 
             if (Time.time < _next) return;

@@ -3196,41 +3196,7 @@
     }
   ],
   "tmp_location_field_remove_me": 0,
-  "transits": [
-    {
-      "activateAfterSec": 60,
-      "active": true,
-      "conditions": "FAC_TRANSIT_12_COND",
-      "description": "FAC_TRANSIT_12_DESC",
-      "id": 12,
-      "location": "Woods",
-      "name": "FAC_TRANSIT_12",
-      "target": "5704e3c2d2720bac5b8b4567",
-      "time": 20
-    },
-    {
-      "activateAfterSec": 60,
-      "active": true,
-      "conditions": "FAC_TRANSIT_13_COND",
-      "description": "FAC_TRANSIT_13_DESC",
-      "id": 13,
-      "location": "bigmap",
-      "name": "FAC_TRANSIT_13",
-      "target": "56f40101d2720b2a4d8b45d6",
-      "time": 20
-    },
-    {
-      "activateAfterSec": 60,
-      "active": true,
-      "conditions": "FAC_TRANSIT_14_COND",
-      "description": "FAC_TRANSIT_14_DESC",
-      "id": 14,
-      "location": "laboratory",
-      "name": "FAC_TRANSIT_14",
-      "target": "5b0fc42d86f7744a585f9105",
-      "time": 20
-    }
-  ],
+  "transits": [],
   "users_gather_seconds": 0,
   "users_spawn_seconds_n": 120,
   "users_spawn_seconds_n2": 180,

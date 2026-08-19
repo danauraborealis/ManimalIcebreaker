@@ -56,7 +56,7 @@
   "3f8d2c5a9b17e04d6ca8f312 name": "Hangover",
   "3f8d2c5a9b17e04d6ca8f312 description": "I went over to the guys, we had a real good talk... When you're ready, just come see me and I'll tell you everything, uh... In person!",
   "3f8d2c5a9b17e04d6ca8f312 startedMessageText": "Come find me when you want to hear it.",
-  "3f8d2c5a9b17e04d6ca8f312 successMessageText": "The smugglers are ready to help you, but not for free. So if you're ready to pay, we can get you to Icebreaker straight from your little basement. Just give me a heads-up in advance, alright?",
+  "3f8d2c5a9b17e04d6ca8f312 successMessageText": "The smugglers are ready to help you, and you did right by them, so they're cutting you a deal. Half price on the crossing, 250 grand instead of the usual 500. Just have the cash on you when you head out, alright?",
   "3f8d2c5a9b17e04d6ca8f312 failMessageText": "Suit yourself. The offer was on the table.",
   "3f8d2c5a9b17e04d6ca8f312 acceptPlayerMessage": "",
   "3f8d2c5a9b17e04d6ca8f312 declinePlayerMessage": "",

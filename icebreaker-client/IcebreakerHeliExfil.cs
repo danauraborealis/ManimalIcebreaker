@@ -207,8 +207,8 @@ namespace Manimal.Icebreaker
         // all three call sites (tip, action count, transfer) agree.
         //
         // scoped hard: icebreaker only, and only for a price exactly equal to our configured
-        // fare. our heli requirement is the map's only TransferItem requirement (the transit
-        // fare takes its money through IcebreakerTransitFare, not this path), so nothing else
+        // fare. our heli requirement is the map's only TransferItem requirement (the map
+        // crossing fare is a pre-raid grid removal, not this path), so nothing else
         // on this map can collide — and every paid extract on every OTHER map keeps its
         // discounts untouched.
         [HarmonyPatch(typeof(Profile), nameof(Profile.GetExfiltrationPrice))]

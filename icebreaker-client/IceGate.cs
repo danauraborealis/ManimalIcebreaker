@@ -52,8 +52,6 @@ namespace Manimal.Icebreaker
                 PendingLocationId = location?.Id;
                 // before any scene (and so any LevelPhysicsSettings.Awake) loads
                 IcebreakerPhysicsRegions.ResetForNewRaid();
-                // the fare is charged once per crossing, and every leg is its own raid
-                IcebreakerTransitFare.ResetForNewRaid();
                 Plugin.Log.LogInfo($"[IceGate] raid location: '{PendingLocationId ?? "<null>"}'");
             }
         }

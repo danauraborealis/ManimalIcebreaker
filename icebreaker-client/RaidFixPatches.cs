@@ -694,6 +694,27 @@ namespace Manimal.Icebreaker
             try { var w = Comfort.Common.Singleton<GameWorld>.Instance; onIce = w != null && string.Equals(w.LocationId, "Suburbs", StringComparison.OrdinalIgnoreCase); } catch { }
             if (!onIce)
             {
+                // GIVE THE ENGINE ITS SETTINGS BACK (08-18 field report: "after i run
+                // icebreaker i have to restart my game to get render distance back").
+                // QualitySettings is GLOBAL engine state — it survives scene unload, and
+                // vanilla only rewrites lodBias at boot or on a graphics-settings apply.
+                // the clamp's only restore path was the config flipping to -1, so leaving
+                // the ship left every other map running our 0.8 bias (a ~3x cut to every
+                // LOD and cull distance = the reported pop-ins). restore the captured
+                // originals the moment we're not on the icebreaker; re-entry recaptures.
+                if (_lodBiasOrig >= 0f)
+                {
+                    QualitySettings.lodBias = _lodBiasOrig;
+                    Plugin.Log.LogInfo($"[LOD] left the icebreaker — lodBias restored to the game's {_lodBiasOrig:F2}");
+                    _lodBiasOrig = -1f;
+                }
+                if (_maxLodOrig >= 0)
+                {
+                    QualitySettings.maximumLODLevel = _maxLodOrig;
+                    _maxLodOrig = -1;
+                }
+                _qsLogged = false; // fresh quality census next icebreaker raid
+
                 _iceFrames = 0; _autoRebindStage = 0; _amandsStateLogged = false; _ieapiLogged = false; _ieapiEmptyStreak = 0; _ieapiNextSweep = 0f; _lamps.Clear(); _lastLamp = -1f; _lastAmbient = -1f; _rendererPosMap = null; _volProbeIdx = 0; _rebindDone.Clear();
                 // ONLY when the map is genuinely gone. the sound scene loads (and gets its
                 // authored volumes cached + muted for the load screen) well before GameWorld
@@ -716,10 +737,10 @@ namespace Manimal.Icebreaker
 
             TickSpikeProbe(); // stutter forensics — logs spiked frames with per-tick attribution
             TickFrameSplit(); // steady-state forensics — 10s main/render/gpu/wait split
-            TickQualityClamps(); // live LOD bias/maxLOD caps + the one-shot quality census
+            TickBegin(); TickQualityClamps(); TickEnd(19); // live LOD bias/maxLOD caps + the one-shot quality census
             var camPos = CameraRef != null ? CameraRef.transform.position : Vector3.zero;
-            IcebreakerLodCullFloor.Tick(camPos); // cell-tiered cull floors
-            TickMixerRoute(); // unrouted ambient sources -> master mixer (volume sliders)
+            TickBegin(); IcebreakerLodCullFloor.Tick(camPos); TickEnd(18); // cell-tiered cull floors
+            TickBegin(); TickMixerRoute(); TickEnd(20); // unrouted ambient sources -> master mixer (volume sliders)
             // every tick is stopwatched into _tickMs so a spiked frame can say WHICH of
             // our systems (if any) ate it — "counters all zero" exonerated only the four
             // counted systems, not this list (08-08 lesson)
@@ -2704,11 +2725,21 @@ namespace Manimal.Icebreaker
             "autopsy", "peeler", "deadFx", "amands", "ieapi", "pcGrpDrain", "pcDrain",
             "distCull", "lightCull", "crossCull", "pcDriver", "alias", "ambKeep",
             "envDrive", "ambBlend", "blizzard", "camPar", "volFog",
+            // 08-15 stutter hunt round 2 (1Hz 60ms UNTRACKED spikes, two field reports):
+            // these six were never stopwatched — the first three run in THIS Update but
+            // outside the timed set, the last three live in their own MonoBehaviours and
+            // report in via AddTick. UNTRACKED must mean "not this mod", not "not counted".
+            "lodFloor", "qualClamp", "mixRoute", "lootVis", "transit", "wedgeVoice",
         };
-        private static readonly double[] _tickMs = new double[18];
+        private static readonly double[] _tickMs = new double[24];
         private static readonly System.Diagnostics.Stopwatch _tickSw = new System.Diagnostics.Stopwatch();
         private static void TickBegin() => _tickSw.Restart();
         private static void TickEnd(int i) => _tickMs[i] += _tickSw.Elapsed.TotalMilliseconds;
+
+        // external components stopwatch their own Update and deposit here (main thread
+        // only, cleared by the probe each frame alongside the in-file ticks)
+        internal const int TickLootVis = 21, TickTransit = 22, TickWedgeVoice = 23;
+        internal static void AddTick(int i, double ms) => _tickMs[i] += ms;
 
         // last-8-frames ring (ms) — a spike log that also shows the run-up separates
         // "one giant frame" from "every frame creeping up" (audit suggestion 08-08)
@@ -2869,20 +2900,26 @@ namespace Manimal.Icebreaker
             try
             {
                 var ba = Comfort.Common.Singleton<BetterAudio>.Instance;
-                var master = ba != null ? ba.MasterMixerGroup : null;
-                if (master == null) return;
+                // ENVIRONMENT bus, not master (user call 08-15): master only obeyed the
+                // volume slider — on Main/Environment/CommonSounds (BSG's own bus for
+                // ambient world sound, the VeryStandartMixerGroup property) the adopted
+                // sources also duck under deafening/earplugs and ride the environment
+                // sub-mix like native map audio. master stays as the fallback so a
+                // missing bus never strands sources outside the sliders entirely.
+                var bus = ba != null ? (ba.VeryStandartMixerGroup ?? ba.MasterMixerGroup) : null;
+                if (bus == null) return;
                 int adopted = 0;
                 foreach (var src in UnityEngine.Object.FindObjectsOfType<AudioSource>())
                     if (src != null && src.outputAudioMixerGroup == null)
                     {
-                        src.outputAudioMixerGroup = master;
+                        src.outputAudioMixerGroup = bus;
                         adopted++;
                     }
                 if (adopted > 0)
                 {
                     _mixAdopted += adopted;
-                    Plugin.Log.LogDebug($"[AudioRoute] {adopted} unrouted AudioSource(s) adopted into the master mixer "
-                        + $"(total {_mixAdopted}) — game volume sliders now apply to them");
+                    Plugin.Log.LogDebug($"[AudioRoute] {adopted} unrouted AudioSource(s) adopted into '{bus.name}' "
+                        + $"(total {_mixAdopted}) — volume sliders + deafening now apply to them");
                 }
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[AudioRoute] sweep failed: {e.Message}"); }

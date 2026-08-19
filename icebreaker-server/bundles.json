@@ -1,12 +1,6 @@
 {
   "manifest": [
     {
-      "key": "manimal/hovercraft.bundle",
-      "dependencyKeys": [
-        "shaders"
-      ]
-    },
-    {
       "key": "manimal/icebreaker_keypad.bundle",
       "dependencyKeys": [
         "shaders"

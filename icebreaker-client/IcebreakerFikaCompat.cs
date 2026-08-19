@@ -11,18 +11,9 @@ namespace Manimal.Icebreaker
     //  - CoopGame : BaseLocalGame replaces LocalGame — the smethod_6 map-fare consume
     //    never fires in coop. re-anchor onto CoopGame.Create, which receives the same
     //    (profile, location, localRaidSettings) triple.
-    //  - FikaHostTransitController overrides InteractWithTransit — the transit charge
-    //    prefix never fires, and clients run a different controller entirely.
-    //    re-anchor onto FikaPlayer.vmethod_3, the transit CONFIRM moment: it runs only
-    //    on the machine of the confirming player (ObservedPlayer's override is empty),
-    //    so the traveler pays locally and no remote inventory is ever touched — the
-    //    desync trap the fika modding wiki warns about.
     //
     // types are resolved by name at runtime — no compile-time fika reference, and the
     // soft BepInDependency on the plugin guarantees fika loads first when installed.
-    // NOTE the method_14/method_15 access+fare GATES need no re-anchoring: they patch
-    // TransitInteractionControllerAbstractClass, the shared base of both fika
-    // controllers, so scav-deny / chain-check / cant-afford already work on every peer.
     internal static class IcebreakerFikaCompat
     {
         internal static void TryApply(Harmony h)
@@ -40,24 +31,10 @@ namespace Manimal.Icebreaker
                 }
                 else Plugin.Log.LogError("[Fika] CoopGame.Create not found — map fare will NOT charge in coop, report this");
 
-                // by name + param shape, not exact types: the 4th param (EDateTime)
-                // stays out of our compile-time surface
-                var fikaPlayer = Type.GetType("Fika.Core.Main.Players.FikaPlayer, Fika.Core");
-                var vm3 = fikaPlayer
-                    ?.GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                    .FirstOrDefault(m => m.Name == "vmethod_3"
-                        && m.GetParameters().Length == 4
-                        && m.GetParameters()[0].ParameterType == typeof(TransitControllerAbstractClass));
-                if (vm3 != null)
-                {
-                    h.Patch(vm3, prefix: new HarmonyMethod(typeof(IcebreakerFikaCompat), nameof(TransitConfirmPrefix)));
-                    applied++;
-                }
-                else Plugin.Log.LogError("[Fika] FikaPlayer.vmethod_3(transit) not found — transit fare will NOT charge in coop, report this");
-
                 // fika's player never passes LocalPlayer.Create, where the icebreaker
                 // EnvironmentManager/weather rebuild is anchored — without this, coop
                 // Player.Init NRE'd on the missing manager and loading froze at 25%
+                var fikaPlayer = Type.GetType("Fika.Core.Main.Players.FikaPlayer, Fika.Core");
                 var playerCreate = fikaPlayer
                     ?.GetMethods(BindingFlags.Public | BindingFlags.Static)
                     .FirstOrDefault(m => m.Name == "Create" && m.DeclaringType == fikaPlayer);
@@ -80,7 +57,7 @@ namespace Manimal.Icebreaker
                 else Plugin.Log.LogWarning("[Fika] CoopGame.Stop not found — blowtorch stays in inventory after coop extracts");
             }
             catch (Exception e) { Plugin.Log.LogError($"[Fika] compat patching failed: {e}"); }
-            Plugin.Log.LogDebug($"[Fika] compat patches applied: {applied}/4");
+            Plugin.Log.LogDebug($"[Fika] compat patches applied: {applied}/3");
         }
 
         private static void PlayerCreatePrefix() => Patch_EnsureEnvironmentManager.EnsureEnvAndWeather();
@@ -97,42 +74,9 @@ namespace Manimal.Icebreaker
             // onto vanilla maps around scene teardown)
             IceGate.PendingLocationId = location?.Id;
             try { IcebreakerPhysicsRegions.ResetForNewRaid(); } catch { }
-            try { IcebreakerTransitFare.ResetForNewRaid(); } catch { }
             Plugin.Log.LogInfo($"[IceGate] raid location (coop): '{IceGate.PendingLocationId ?? "<null>"}'");
             IcebreakerMapFare.Consume(profile, location, localRaidSettings);
         }
 
-        private static bool TransitConfirmPrefix(Player __instance, int transitPointId)
-        {
-            try
-            {
-                if (transitPointId != IcebreakerTransit.PointId) return true;
-                if (__instance == null || !__instance.IsYourPlayer) return true;
-                int cost = Plugin.TransitCost.Value;
-                if (cost <= 0) return true;
-                // repeat confirm — they already paid, let them board without a second bill
-                if (IcebreakerTransitFare.AlreadyPaid(__instance))
-                {
-                    Plugin.Log.LogInfo("[Fare] coop repeat confirm — already paid this raid, boarding free");
-                    return true;
-                }
-                // Info on purpose — a coop transit that executes WITHOUT this line in the
-                // log means fika routed the confirm around vmethod_3 (2.3.9 no-charge
-                // report, 08-05) and the fare anchor needs to move
-                Plugin.Log.LogInfo($"[Fare] coop transit confirm fired (point {transitPointId}, cost {cost:N0}) — charging");
-                // clients charge INLINE: the network transaction loses the race against
-                // the transit teardown (proven 08-05 — validated, then 'Could not find
-                // item'). the host executes transactions locally anyway, keep it there.
-                bool ok = IcebreakerTransitFare.TryTakeFare(__instance, cost, inlineOps: !FikaBridge.BotsAuthority);
-                Plugin.Log.LogInfo($"[Fare] coop charge {(ok ? "SUCCEEDED — boarding" : "FAILED — boarding blocked")}");
-                // false blocks the whole interaction — fail closed, same as solo
-                return ok;
-            }
-            catch (Exception e)
-            {
-                Plugin.Log.LogWarning($"[Fare] fika confirm check failed, boarding blocked: {e.Message}");
-                return false;
-            }
-        }
     }
 }
