@@ -59,12 +59,21 @@ namespace Manimal.Icebreaker
             // HOLD tier (08-07: held engine squads kept walking out early): at 68 the
             // hold lost to PMC combat 70-78 AND AvoidDanger 80 — any grenade, gunfire
             // or heard-footstep danger event upstairs pulled the ambush out with
-            // nobody visible. 95 clears both for the "PMC" brain the BD squads run;
-            // the yield narrows to VISIBLE enemy / actually under fire, same doctrine
-            // as the rush tier. deliberate trade: a grenade landing in the hide room
-            // no longer scatters them (AvoidDanger is outranked) — ambushers hold.
-            BrainManager.AddCustomLayer(typeof(IceHoldLayer), brains, 95);
-            Plugin.Log.LogInfo("[CrewLayer] bigbrain layers registered (ExUsec/PmcBear/PmcUsec/PMC, crew 68 / hold 95 / rush 110)");
+            // nobody visible. the yield narrows to VISIBLE enemy / actually under fire,
+            // same doctrine as the rush tier. deliberate trade: a grenade landing in
+            // the hide room no longer scatters them (AvoidDanger is outranked).
+            //
+            // 95 -> 105 (08-20 field reports: hide squads wandering into the engine
+            // room with SAIN, before the release trigger). 95 was priced against
+            // VANILLA layers on the audit-era finding that SAIN's brain lists didn't
+            // cover the literal "PMC" brain BD runs — but SAIN's own layers go up to
+            // 99, so any SAIN version that DOES cover that brain steals the hold with
+            // a 96-99 layer the moment it decides to investigate a sound. 105 clears
+            // every SAIN layer the same way rush's 110 does, stays below rush, and
+            // the yield conditions above still hand any VISIBLE fight to whatever
+            // combat AI owns the bot — so SAIN keeps the actual gunfights either way.
+            BrainManager.AddCustomLayer(typeof(IceHoldLayer), brains, 105);
+            Plugin.Log.LogInfo("[CrewLayer] bigbrain layers registered (ExUsec/PmcBear/PmcUsec/PMC, crew 68 / hold 105 / rush 110)");
         }
 
         internal static void Assign(BotOwner bot, Job job, Bounds zone = default, float rushSeconds = 0f)
@@ -174,6 +183,13 @@ namespace Manimal.Icebreaker
 
         public override string GetName() => "IceCrewHold";
 
+        // NAME THE THIEF (08-20). "the hide sometimes breaks with SAIN" took a priority
+        // bump on a theory; if anything EVER outbids the hold again, this prints which
+        // layer actually owns the bot instead of leaving the next report to a guess.
+        // cheap: the name lookup runs at most every 3s per held bot, warns once per bot.
+        private float _nextStolenCheck;
+        private bool _stolenLogged;
+
         public override bool IsActive()
         {
             if (!IceGate.On) return false;
@@ -188,6 +204,22 @@ namespace Manimal.Icebreaker
                 if (BotOwner.Memory != null && BotOwner.Memory.IsUnderFire) return false; // shot at — fight
             }
             catch { return false; }
+
+            if (!_stolenLogged && Time.time >= _nextStolenCheck)
+            {
+                _nextStolenCheck = Time.time + 3f;
+                try
+                {
+                    var active = BrainManager.GetActiveLayerName(BotOwner);
+                    if (!string.IsNullOrEmpty(active) && active != "IceCrewHold" && active != "IceCrewRush")
+                    {
+                        _stolenLogged = true;
+                        Plugin.Log.LogWarning($"[Hold] '{BotOwner.name}' wants to hold but layer '{active}' owns him "
+                            + "— it outranks the hold tier, report this line with the mod list");
+                    }
+                }
+                catch { }
+            }
             return true;
         }
 
