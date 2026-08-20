@@ -407,6 +407,12 @@ data, it is always one of these:
 - **Area** -> `Area + " KM2"`.
 - **Banner** -> `location.Banners.First()`. **ONLY the first entry is used here**; an
   empty array falls back to `_defaultImage`. Put the map's own cover art at index 0.
+  **LANDMINE (bit terminal 08-19): a ripped base.json ships RETAIL's Banners array**,
+  MongoId filenames nothing serves. The client fetches `/files/banners/<id>.jpg` when
+  the card renders, the server logs `[UNHANDLED]`, and the player gets an EMPTY error
+  dialog at the menu (classically right after extracting, when the menu reloads).
+  Every backported base.json must either EMPTY the Banners array or replace it with
+  own art + ImageRouter.AddRoute for each file — never leave the retail rows.
 
 **Difficulty is RELATIVE to the player, not a map property.** There is no "difficulty"
 field. The panel computes `num = location.AveragePlayerLevel - selfLevel` and picks:
