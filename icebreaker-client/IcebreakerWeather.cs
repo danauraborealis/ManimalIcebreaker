@@ -127,6 +127,24 @@ namespace Manimal.Icebreaker
                 // pass 3 — wake it all up (unity logs+continues on any individual Awake throw)
                 foreach (var go in reactivate) go.SetActive(true);
 
+                // the sidecar carries retail's MBOIT=true on TOD_Scattering — method_4's
+                // MBOIT branch needs GameDateTime which wont exist for many frames yet.
+                // without this preemptive disarm, method_4 NREs ~7 frames before
+                // TickBlizzard runs, aborting before method_8..14 push weather shader
+                // globals and leaving transparent objects (smoke, rotor blur) black.
+                var earlyWc = EFT.Weather.WeatherController.Instance;
+                if (earlyWc != null)
+                {
+                    earlyWc.MBOITFogRemapDataV2 = null;
+                    earlyWc.MBOITFogRemapData = null;
+                    var earlyScat = AccessTools.Field(typeof(EFT.Weather.WeatherController), "tod_Scattering_0")?.GetValue(earlyWc) as TOD_Scattering;
+                    if (earlyScat != null && earlyScat.MBOIT)
+                    {
+                        earlyScat.MBOIT = false;
+                        Plugin.Log.LogInfo("[Weather] MBOIT pre-disarmed at build time (startup NRE race eliminated)");
+                    }
+                }
+
                 _marker = new GameObject("Icebreaker_WeatherStaged");
                 var scr = SceneManager.GetSceneByName("Icebreaker_Scripts");
                 if (scr.IsValid() && scr.isLoaded) SceneManager.MoveGameObjectToScene(_marker, scr);
