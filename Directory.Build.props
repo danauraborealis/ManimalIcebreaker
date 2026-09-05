@@ -10,6 +10,4 @@
   <!-- Override SPTPath with an installed SPT 4.1.3 root. DeployToGame remains opt-in. -->
   <PropertyGroup><SPTPath Condition="'$(SPTPath)' == ''">$(MSBuildThisFileDirectory)..\..</SPTPath></PropertyGroup>
   <PropertyGroup><FikaPath Condition="'$(FikaPath)' == ''">$(SPTPath)</FikaPath></PropertyGroup>
-  <PropertyGroup><FikaPath Condition="'$(FikaPath)' == ''">$(SPTPath)</FikaPath></PropertyGroup>
-  <PropertyGroup><FikaPath Condition="'$(FikaPath)' == ''">$(SPTPath)</FikaPath></PropertyGroup>
 </Project>
