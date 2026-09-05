@@ -727,6 +727,16 @@ namespace Manimal.Icebreaker
 
         private IEnumerator C3KeycardSweep()
         {
+            // This card is inserted after the bot profile has already been pooled.
+            // Keep its prefab in the raid pool before exposing it as loot: the
+            // door animation creates the key synchronously and cannot load it.
+            var preload = PrewarmC3Keycard();
+            while (!preload.IsCompleted) yield return null;
+            if (preload.IsFaulted || preload.IsCanceled)
+            {
+                Plugin.Log.LogError($"[Crew] C-3 preload failed; card will not be injected: {preload.Exception}");
+                yield break;
+            }
             // rogues are raid-start rows but land staggered, so sweep rather than
             // one-shot; each body is rolled exactly once, tracked by profile id
             float until = Time.time + 300f;
@@ -754,6 +764,17 @@ namespace Manimal.Icebreaker
         }
 
         private static bool StuffCharge(BotOwner b) => StuffItem(b, IcebreakerChainDoor.ChargeTpls[0], "SZ-1 charge");
+
+        private static async Task PrewarmC3Keycard()
+        {
+            var factory = Singleton<EFT.ItemFactory>.Instance;
+            var card = factory.CreateItem(factory.NextId, C3KeycardTpl, null);
+            await Singleton<EFT.ObjectsFactory>.Instance.LoadBundlesAndCreatePools(
+                EFT.ObjectsFactory.PoolsCategory.Raid, EFT.ObjectsFactory.AssemblyType.Local,
+                new[] { card.Prefab }, Diz.Jobs.JobYieldPriority.Low, null,
+                default(System.Threading.CancellationToken));
+            Plugin.Log.LogInfo("[Crew] C-3 keycard prefab loaded into raid pool");
+        }
 
         private static bool StuffItem(BotOwner b, string tpl, string label)
         {
