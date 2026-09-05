@@ -232,7 +232,7 @@ namespace Manimal.Icebreaker
                 new ConfigDescription("near-tier radius while INDOORS (LIVE). corridor sightlines are short — a tighter bubble lets the far tier eat the rest of the deck",
                     new AcceptableValueRange<float>(5f, 100f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             // CellCull config REMOVED pre-release (08-09): the experiment never engaged
-            // in the field — GClass1238 needs a CullingGridPreProcess the shipped bundle
+            // in the field — Koenigz.PerfectCulling.EFT.CullingGridVisibilitySampler needs a CullingGridPreProcess the shipped bundle
             // lacks, plus the 231MB packed bake no player has. a knob that cannot work
             // does not ship; the design notes live in memory if the restore ever lands
             MaxLodClamp = Config.Bind("Icebreaker", "MaxLodClamp", -1,
@@ -509,7 +509,7 @@ namespace Manimal.Icebreaker
     internal static class Patch_RestoreLoot
     {
         [HarmonyPostfix]
-        private static void Postfix(AIPatrolsData __instance, [HarmonyArgument(0)] GClass1404 lootData)
+        private static void Postfix(AIPatrolsData __instance, [HarmonyArgument(0)] JsonType.LootData lootData)
         {
             try
             {

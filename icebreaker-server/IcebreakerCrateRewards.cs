@@ -1,3 +1,8 @@
+using SPTarkov.Common.Models.Logging;
+using SPTarkov.Server.Core.Generators.Loot;
+using SPTarkov.Server.Core.Models.Eft.ItemEvent;
+using SPTarkov.Server.Core.Models.Eft.Match;
+using SPTarkov.Server.Core.Models.Eft.Profile;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,9 +36,9 @@ namespace Manimal.Icebreaker.Server;
 // RewardDetails and nothing else, no tpl. so we keep the exact RewardDetails instance
 // we registered and match it by REFERENCE — the config dictionary hands the same
 // object back to the generator, and no other container can ever be that instance.
-[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 4)]
+[Injectable(TypePriority = OnLoadOrder.Preload + 102)]
 public class IcebreakerCrateRewards(
-    ConfigServer configServer,
+    InventoryConfig inventoryConfig,
     RandomUtil randomUtil,
     ISptLogger<IcebreakerCrateRewards> logger) : IOnLoad
 {
@@ -104,12 +109,12 @@ public class IcebreakerCrateRewards(
     private static RandomUtil _rng;
     private static ISptLogger<IcebreakerCrateRewards> _log;
 
-    public Task OnLoad()
+    public Task OnLoadAsync(CancellationToken cancellationToken)
     {
         _rng = randomUtil;
         _log = logger;
 
-        var inventory = configServer.GetConfig<InventoryConfig>();
+        var inventory = inventoryConfig;
         _details = new RewardDetails
         {
             RewardCount = RewardCount,

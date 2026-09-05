@@ -1,3 +1,15 @@
+using SPTarkov.Server.Core.Services.Server;
+using SPTarkov.Server.Core.Models.Spt.Tables;
+using SPTarkov.Server.Core.Models.Spt.Config;
+using SPTarkov.Common.Models.Logging;
+using SPTarkov.Server.Core.Generators.Loot;
+using SPTarkov.Server.Core.Helpers.InRaid;
+using SPTarkov.Server.Core.Helpers.Items;
+using SPTarkov.Server.Core.Models.Eft.ItemEvent;
+using SPTarkov.Server.Core.Models.Eft.Match;
+using SPTarkov.Server.Core.Models.Eft.Profile;
+using SPTarkov.Server.Core.Services.Items;
+using SPTarkov.Server.Core.Services.Locales;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -9,7 +21,6 @@ using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
-using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
 
@@ -37,33 +48,42 @@ internal static class IcebreakerRaidContext
 // every method of the class is swept, so any hook by any mod at any level is out of
 // the picture for exactly one call.
 //
-// mechanics: DI override (registrator walks base types; mod registrations land after
-// core = last-wins, the CompoundingPerf pattern) makes this subclass THE generator.
-// GenerateLocationLoot is the single entry the raid-start path uses; around its base
-// call we Harmony.GetPatchInfo every declared method, Unpatch each foreign owner's
+// SPT 4.1.3: GenerateLocationLoot is nonvirtual. An IOnLoad service installs a
+// Harmony prefix on the concrete generator. A thread-local guard allows the
+// wrapped call through. Around that call we inspect every declared method and
+// Unpatch each foreign owner's
 // patches, and re-Patch them afterward under their own owner ids with their own
 // priorities/before/after so ownership and ordering survive.
 //
 // the try/catch stays as the last line: if something still throws (a mod hooking a
 // DIFFERENT class entirely), the raid starts lootless with the culprit named — which
 // still beats the fatal-with-no-response infinite loading screen.
-[Injectable]
+[Injectable(TypePriority = SPTarkov.Server.Core.DI.OnLoadOrder.Preload + 90001)]
 public class IcebreakerLootFirewall(
-    ISptLogger<LocationLootGenerator> logger,
-    RandomUtil randomUtil,
-    ItemHelper itemHelper,
-    DatabaseService databaseService,
-    PresetHelper presetHelper,
-    ServerLocalisationService serverLocalisationService,
-    SeasonalEventService seasonalEventService,
-    ItemFilterService itemFilterService,
-    ConfigServer configServer,
-    CounterTrackerHelper counterTrackerHelper,
-    ICloner cloner)
-    : LocationLootGenerator(logger, randomUtil, itemHelper, databaseService, presetHelper,
-        serverLocalisationService, seasonalEventService, itemFilterService, configServer,
-        counterTrackerHelper, cloner)
+    ISptLogger<LocationLootGenerator> logger, LocationTable locationTable)
+    : SPTarkov.Server.Core.DI.IOnLoad
 {
+    private static IcebreakerLootFirewall _instance;
+    [ThreadStatic] private static bool _inside;
+    public Task OnLoadAsync(CancellationToken cancellationToken)
+    {
+        _instance = this;
+        var harmony = new Harmony(OwnPrefix + ".lootisolation");
+        harmony.Patch(AccessTools.Method(typeof(LocationLootGenerator), nameof(LocationLootGenerator.GenerateLocationLoot)),
+            prefix: new HarmonyMethod(typeof(IcebreakerLootFirewall), nameof(Prefix)) { priority = Priority.First });
+        return Task.CompletedTask;
+    }
+    private static bool Prefix(LocationLootGenerator __instance, string locationId, ref List<SpawnpointTemplate> __result)
+    {
+        if (_inside) return true;
+        IcebreakerRaidContext.OnIcebreaker = Ours(locationId);
+        _instance.RestoreKnightChance();
+        if (!Ours(locationId)) return true;
+        _inside = true;
+        try { __result = _instance.GenerateLocationLoot(__instance, locationId); }
+        finally { _inside = false; }
+        return false;
+    }
     private const string OwnPrefix = "com.manimal.icebreaker";
     private readonly ISptLogger<LocationLootGenerator> _log = logger;
     private static readonly object Gate = new();
@@ -85,7 +105,7 @@ public class IcebreakerLootFirewall(
     {
         try
         {
-            var suburbs = databaseService.GetLocations().Suburbs?.Base?.BossLocationSpawn;
+            var suburbs = locationTable.Suburbs?.Base?.BossLocationSpawn;
             if (suburbs is null) return;
             foreach (var row in suburbs)
                 if (row.BossName == "bossKnight" && row.BossChance != 100)
@@ -97,13 +117,13 @@ public class IcebreakerLootFirewall(
         catch (Exception e) { _log.Warning($"[Icebreaker] knight chance restore failed: {e.Message}"); }
     }
 
-    public override List<SpawnpointTemplate> GenerateLocationLoot(string locationId)
+    private List<SpawnpointTemplate> GenerateLocationLoot(LocationLootGenerator generator, string locationId)
     {
         // raid-context latch: loot generates at StartLocalRaid, bots on later requests —
         // this is the only place the server tells us which map the active raid is on
         IcebreakerRaidContext.OnIcebreaker = Ours(locationId);
         RestoreKnightChance();
-        if (!Ours(locationId)) return base.GenerateLocationLoot(locationId);
+        if (!Ours(locationId)) return generator.GenerateLocationLoot(locationId);
 
         lock (Gate) // raid starts are rare; simplest way to keep suspend/restore atomic
         {
@@ -126,7 +146,7 @@ public class IcebreakerLootFirewall(
                     _log.Info($"[Icebreaker] loot isolation: {suspended.Count} third-party patch(es) on "
                         + $"LocationLootGenerator suspended for this raid's generation "
                         + $"({string.Join(", ", OwnersOf(suspended))}) — restored right after");
-                return base.GenerateLocationLoot(locationId);
+                return generator.GenerateLocationLoot(locationId);
             }
             catch (Exception e)
             {

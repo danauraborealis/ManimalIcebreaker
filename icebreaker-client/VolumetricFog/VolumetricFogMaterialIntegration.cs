@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using static VolumetricFogAndMist.VolumetricFog.ShaderParams;
 
 namespace VolumetricFogAndMist {

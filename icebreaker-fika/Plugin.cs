@@ -12,7 +12,7 @@ namespace Manimal.Icebreaker.Fika
     //
     // the fika dependency MUST stay HARD. the 08-03 soft-dep experiment (self-gate in
     // Awake, NoInlining around fika-typed code) hard-hung the game before the main
-    // menu on solo installs: EFT's own GlobalEventHandlerClass.Initialize sweeps every
+    // menu on solo installs: EFT's own EFT.GlobalEvents.GlobalEventsController.Initialize sweeps every
     // LOADED assembly with Assembly.GetTypes(), which throws ReflectionTypeLoadException
     // on an assembly whose types reference the absent Fika.Core — no code of ours has
     // to run to break. only bepinex SKIPPING the load (= hard dep) keeps the assembly

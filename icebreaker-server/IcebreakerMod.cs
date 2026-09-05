@@ -1,3 +1,19 @@
+using SPTarkov.Server.Core.Helpers.Quest;
+using SPTarkov.Server.Core.Models.Eft.Hideout;
+using SPTarkov.Common.Models.Logging;
+using SPTarkov.Server.Core.Controllers;
+using SPTarkov.Server.Core.DI.Routing;
+using SPTarkov.Server.Core.Generators.Loot;
+using SPTarkov.Server.Core.Helpers.Profile;
+using SPTarkov.Server.Core.Models.Eft.Game;
+using SPTarkov.Server.Core.Models.Eft.ItemEvent;
+using SPTarkov.Server.Core.Models.Eft.Match;
+using SPTarkov.Server.Core.Models.Eft.Profile;
+using SPTarkov.Server.Core.Models.Eft.Quests;
+using SPTarkov.Server.Core.Models.Enums;
+using SPTarkov.Server.Core.Models.Spt.Bots;
+using SPTarkov.Server.Core.Models.Spt.Tables;
+using SPTarkov.Server.Core.Services.Modding.Custom;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Common;
@@ -8,7 +24,6 @@ using SPTarkov.Server.Core.Models.Spt.Mod;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Routers;
 using SPTarkov.Server.Core.Servers;
-using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
 using SPTarkov.Server.Core.Utils.Json;
@@ -16,36 +31,37 @@ using SysPath = System.IO.Path;
 
 namespace Manimal.Icebreaker.Server;
 
-public record ModMetadata : AbstractModMetadata
+public record ModMetadata : IModMetadata
 {
-    public override string ModGuid { get; init; } = "com.manimal.icebreaker";
-    public override string Name { get; init; } = "ManimalIcebreaker";
-    public override string Author { get; init; } = "Manimal";
-    public override List<string>? Contributors { get; init; }
+    public string ModGuid { get; init; } = "com.manimal.icebreaker";
+    public string Name { get; init; } = "ManimalIcebreaker";
+    public string Author { get; init; } = "Manimal";
+    public List<string>? Contributors { get; init; }
     // read from the assembly rather than repeated as a literal. forge requires every
     // version a mod declares to match exactly, and the csproj already feeds ModVersion
     // (Directory.Build.props) into <Version> — so this stays correct across a bump
     // instead of silently drifting from the client's BuildInfo.Version.
-    public override SemanticVersioning.Version Version { get; init; } =
+    public SemanticVersioning.Version Version { get; init; } =
         new(typeof(ModMetadata).Assembly.GetName().Version is { } v
             ? $"{v.Major}.{v.Minor}.{v.Build}"
             : "0.1.0");
-    public override SemanticVersioning.Range SptVersion { get; init; } = new("~4.0");
-    public override List<string>? Incompatibilities { get; init; }
-    public override Dictionary<string, SemanticVersioning.Range>? ModDependencies { get; init; } = new()
+    public SemanticVersioning.Range SptVersion { get; init; } = new("~4.1.3");
+    public List<string>? Incompatibilities { get; init; }
+    public Dictionary<string, SemanticVersioning.Range>? ModDependencies { get; init; } = new()
     {
         // blowtorch item registration (custom parent + item clone) goes through
         // WTT CommonLib — already a hard dependency of the icebreaker modpack
-        { "com.wtt.commonlib", new SemanticVersioning.Range("~2.0.20") },
+        { "com.wtt.commonlib", new SemanticVersioning.Range("^3.0.6") },
         // HARD since 0.2.4: the kordbreach set supplies the C-3 keycard AND the
         // black division dogtags — the tags are the currency for the ragman/skier
         // quest-reward barters, so without this the barters are unbuyable and BD
         // bodies drop nothing. 1.1.4 is the release the tags shipped in.
         { "com.wtt.contentbackport", new SemanticVersioning.Range(">=1.1.4") }
     };
-    public override string? Url { get; init; }
-    public override bool? IsBundleMod { get; init; } = true; // ships the scene + preset bundles
-    public override string License { get; init; } = "MIT";
+    public string? Url { get; init; }
+    public bool? IsBundleMod { get; init; } = true; // ships the scene + preset bundles
+    public bool HasPrepatcher { get; init; } = false;
+    public string License { get; init; } = "MIT";
 }
 
 // rebinds the dormant "Suburbs" location slot to the backported Icebreaker map.
@@ -54,10 +70,12 @@ public record ModMetadata : AbstractModMetadata
 // (GetLocation("suburbs"), GetDictionary, GenerateAll) resolves with zero patching.
 // scene loading is data-driven: Base.Scene points at our preset bundle, which lists
 // the scenes inside our scene bundle; both are served by SPT's bundle system.
-[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 90000)]
+[Injectable(TypePriority = OnLoadOrder.Preload + 90000)]
 public class IcebreakerMod(
-    DatabaseService databaseService,
-    ConfigServer configServer,
+    LocationTable locationTable,
+    LocaleTable localeTable,
+    BotConfig injectedBotConfig,
+    LocationConfig injectedLocationConfig,
     ICloner cloner,
     JsonUtil jsonUtil,
     ImageRouter imageRouter,
@@ -93,7 +111,7 @@ public class IcebreakerMod(
             "Reconnaissance and monitoring reports from the few PMC networks still active in Tarkov have indicated that several combat helicopters are moving toward the Gulf of Finland. Intercepted radio frequencies mention a codename: \"The Wedge\". Accompanied by a squad of operatives from some of the world’s most diverse special forces, such as the SAS and Mossad, Wedge is a senior Black Division operative in charge of a covert operation aboard the ship \"Boreas\". No one has come out alive to reveal their motives there."),
     };
 
-    public async Task OnLoad()
+    public async Task OnLoadAsync(CancellationToken cancellationToken)
     {
         var modDir = SysPath.GetDirectoryName(typeof(IcebreakerMod).Assembly.Location)!;
         var basePath = SysPath.Combine(modDir, "db", "base.json");
@@ -104,7 +122,7 @@ public class IcebreakerMod(
             return;
         }
 
-        var suburbs = databaseService.GetLocations().Suburbs;
+        var suburbs = locationTable.Suburbs;
         if (suburbs is null)
         {
             logger.Error("[Icebreaker] Suburbs location slot missing from database — aborting");
@@ -121,7 +139,7 @@ public class IcebreakerMod(
         // squads arriving short, and half-built "invisible gear" bots where a spawn was
         // cut off partway (field report 08-12, T4 delivered 2 of 5 and one was a shell).
         // 40 matches the table's own ceiling; terminal needed the same treatment.
-        var botConfig = configServer.GetConfig<BotConfig>();
+        var botConfig = injectedBotConfig;
         if (botConfig?.MaxBotCap != null)
         {
             botConfig.MaxBotCap["suburbs"] = IcebreakerBotCap;
@@ -139,8 +157,8 @@ public class IcebreakerMod(
         // container instances (Ids + tpls extracted from the 1.0 level bundles) and
         // labs supplies the per-container-type loot pools + ammo, so the ship's PC
         // blocks/duffles/medcases/toolboxes roll labs loot at labs weights.
-        var factory = databaseService.GetLocations().Factory4Day;
-        var labs = databaseService.GetLocations().Laboratory;
+        var factory = locationTable.Factory4Day;
+        var labs = locationTable.Laboratory;
         suburbs.StaticAmmo = labs.StaticAmmo;
         suburbs.AllExtracts = []; // scav extract list — v1 is PMC-only
 
@@ -232,7 +250,7 @@ public class IcebreakerMod(
         }
 
         // scav raid time settings keyed by map id — clone factory's so lookups resolve
-        var locationConfig = configServer.GetConfig<LocationConfig>();
+        var locationConfig = injectedLocationConfig;
         if (locationConfig.ScavRaidTimeSettings.Maps.TryGetValue("factory4_day", out var factorySettings))
         {
             locationConfig.ScavRaidTimeSettings.Maps["suburbs"] = cloner.Clone(factorySettings);
@@ -246,7 +264,7 @@ public class IcebreakerMod(
         // natively — the reason a truly NEW location keeps failing for others).
         try
         {
-            foreach (var kv in databaseService.GetLocales().Global)
+            foreach (var kv in localeTable.Global)
             {
                 kv.Value.AddTransformer(locale =>
                 {
@@ -353,10 +371,10 @@ public class IcebreakerMod(
 // of the BBQ-S43 labyrinth torch (db/CustomItems) via WTT CommonLib. parents BEFORE
 // items — the item references the parent id. the hands behavior (draw/fire/holster
 // on the custom animator) lives in the icebreaker client plugin.
-[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 2)]
+[Injectable(TypePriority = OnLoadOrder.Preload + 100)]
 public class BlowtorchRegistration(WTTServerCommonLib.WTTServerCommonLib wttCommon) : IOnLoad
 {
-    public async Task OnLoad()
+    public async Task OnLoadAsync(CancellationToken cancellationToken)
     {
         var assembly = System.Reflection.Assembly.GetExecutingAssembly();
         await wttCommon.CustomItemServiceExtended.CreateCustomItems(assembly);
@@ -366,10 +384,10 @@ public class BlowtorchRegistration(WTTServerCommonLib.WTTServerCommonLib wttComm
 // the retail-style unlock chain (mechanic, per the official wiki) — quests, locales
 // and zones load from db/CustomQuests + db/CustomQuestZones via WTT CommonLib. the
 // folders may be absent while the chain is being authored; the services no-op then.
-[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 3)]
+[Injectable(TypePriority = OnLoadOrder.Preload + 101)]
 public class IcebreakerQuestRegistration(
     WTTServerCommonLib.WTTServerCommonLib wttCommon,
-    DatabaseService databaseService,
+    LocationTable locationTable,
     ISptLogger<IcebreakerQuestRegistration> logger) : IOnLoad
 {
     // quest-item spawn points that should yield exactly ONE instance per raid, picked
@@ -378,7 +396,7 @@ public class IcebreakerQuestRegistration(
     private const string AmgSpawnPrefix = "boreas_amg";
     private static readonly Random SpawnRng = new();
 
-    public async Task OnLoad()
+    public async Task OnLoadAsync(CancellationToken cancellationToken)
     {
         var assembly = System.Reflection.Assembly.GetExecutingAssembly();
         // quest ITEMS ride the regular custom-item pipeline (db/CustomItems/BoreasItems
@@ -411,7 +429,7 @@ public class IcebreakerQuestRegistration(
     {
         try
         {
-            var locations = databaseService.GetLocations().GetDictionary();
+            var locations = locationTable.GetDictionary();
             if (!locations.TryGetValue(locationId, out var location) || location.LooseLoot is null)
             {
                 logger.Warning($"[Icebreaker] {locationId} has no loose loot to prune '{idPrefix}' spawns from");
@@ -457,8 +475,8 @@ public class IcebreakerQuestRegistration(
 public class IcebreakerFlyerGateRouter(
     JsonUtil jsonUtil,
     SPTarkov.Server.Core.Controllers.QuestController questController,
-    SPTarkov.Server.Core.Helpers.QuestHelper questHelper,
-    SPTarkov.Server.Core.Helpers.ProfileHelper profileHelper,
+    SPTarkov.Server.Core.Helpers.Quest.QuestHelper questHelper,
+    SPTarkov.Server.Core.Helpers.Profile.ProfileHelper profileHelper,
     SPTarkov.Server.Core.Routers.EventOutputHolder eventOutputHolder,
     SPTarkov.Server.Core.Utils.HttpResponseUtil httpResponseUtil,
     ISptLogger<IcebreakerFlyerGateRouter> logger)
@@ -467,7 +485,7 @@ public class IcebreakerFlyerGateRouter(
         [
             new SPTarkov.Server.Core.DI.RouteAction<SPTarkov.Server.Core.Models.Eft.Common.EmptyRequestData>(
                 "/client/quest/list",
-                async (url, info, sessionID, output) =>
+                async (url, info, sessionID, output, cancellationToken) =>
                     await GateQuests(questController, questHelper, profileHelper, eventOutputHolder,
                                      httpResponseUtil, logger, sessionID)
             ),
@@ -521,8 +539,8 @@ public class IcebreakerFlyerGateRouter(
 
     private static ValueTask<string> GateQuests(
         SPTarkov.Server.Core.Controllers.QuestController questController,
-        SPTarkov.Server.Core.Helpers.QuestHelper questHelper,
-        SPTarkov.Server.Core.Helpers.ProfileHelper profileHelper,
+        SPTarkov.Server.Core.Helpers.Quest.QuestHelper questHelper,
+        SPTarkov.Server.Core.Helpers.Profile.ProfileHelper profileHelper,
         SPTarkov.Server.Core.Routers.EventOutputHolder eventOutputHolder,
         SPTarkov.Server.Core.Utils.HttpResponseUtil httpResponseUtil,
         ISptLogger<IcebreakerFlyerGateRouter> logger,
@@ -574,8 +592,8 @@ public class IcebreakerFlyerGateRouter(
 [Injectable]
 public class IcebreakerRaidWatchRouter(
     JsonUtil jsonUtil,
-    SPTarkov.Server.Core.Helpers.QuestHelper questHelper,
-    SPTarkov.Server.Core.Helpers.ProfileHelper profileHelper,
+    SPTarkov.Server.Core.Helpers.Quest.QuestHelper questHelper,
+    SPTarkov.Server.Core.Helpers.Profile.ProfileHelper profileHelper,
     SPTarkov.Server.Core.Routers.EventOutputHolder eventOutputHolder,
     ISptLogger<IcebreakerRaidWatchRouter> logger)
     : SPTarkov.Server.Core.DI.StaticRouter(
@@ -583,7 +601,7 @@ public class IcebreakerRaidWatchRouter(
         [
             new SPTarkov.Server.Core.DI.RouteAction<SPTarkov.Server.Core.Models.Eft.Match.EndLocalRaidRequestData>(
                 "/client/match/local/end",
-                async (url, info, sessionID, output) =>
+                async (url, info, sessionID, output, cancellationToken) =>
                 {
                     var passthrough = await Watch(logger, info, sessionID, output);
                     AutoTurnIn(questHelper, profileHelper, eventOutputHolder, sessionID, logger);
@@ -618,8 +636,8 @@ public class IcebreakerRaidWatchRouter(
     // another raid. doing either mid-raid instead would apply rewards to a profile the
     // raid-end merge is about to overwrite.
     public static void AutoTurnIn(
-        SPTarkov.Server.Core.Helpers.QuestHelper questHelper,
-        SPTarkov.Server.Core.Helpers.ProfileHelper profileHelper,
+        SPTarkov.Server.Core.Helpers.Quest.QuestHelper questHelper,
+        SPTarkov.Server.Core.Helpers.Profile.ProfileHelper profileHelper,
         SPTarkov.Server.Core.Routers.EventOutputHolder eventOutputHolder,
         MongoId sessionID,
         ISptLogger<IcebreakerRaidWatchRouter>? logger = null)
@@ -791,7 +809,7 @@ public class IcebreakerRaidWatchRouter(
 public class IcebreakerLockRouter(
     JsonUtil jsonUtil,
     SPTarkov.Server.Core.Controllers.LocationController locationController,
-    SPTarkov.Server.Core.Helpers.ProfileHelper profileHelper,
+    SPTarkov.Server.Core.Helpers.Profile.ProfileHelper profileHelper,
     SPTarkov.Server.Core.Utils.HttpResponseUtil httpResponseUtil,
     ISptLogger<IcebreakerLockRouter> logger)
     : SPTarkov.Server.Core.DI.StaticRouter(
@@ -799,7 +817,7 @@ public class IcebreakerLockRouter(
         [
             new SPTarkov.Server.Core.DI.RouteAction<SPTarkov.Server.Core.Models.Eft.Common.EmptyRequestData>(
                 "/client/locations",
-                async (url, info, sessionID, output) =>
+                async (url, info, sessionID, output, cancellationToken) =>
                     await LockLocations(locationController, profileHelper, httpResponseUtil, logger, sessionID)
             ),
         ])
@@ -833,7 +851,7 @@ public class IcebreakerLockRouter(
 
     private static ValueTask<string> LockLocations(
         SPTarkov.Server.Core.Controllers.LocationController locationController,
-        SPTarkov.Server.Core.Helpers.ProfileHelper profileHelper,
+        SPTarkov.Server.Core.Helpers.Profile.ProfileHelper profileHelper,
         SPTarkov.Server.Core.Utils.HttpResponseUtil httpResponseUtil,
         ISptLogger<IcebreakerLockRouter> logger,
         MongoId sessionID)

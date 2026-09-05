@@ -1,3 +1,4 @@
+using EFT;
 using System;
 using System.Threading.Tasks;
 using Comfort.Common;
@@ -30,14 +31,14 @@ namespace Manimal.Icebreaker.Keypad
         {
             try
             {
-                if (!Singleton<IEasyAssets>.Instantiated)
+                if (!Singleton<Diz.Resources.IEasyAssets>.Instantiated)
                 {
-                    Plugin.Log?.LogError("[Keypad] IEasyAssets not initialized; cannot load bundles.");
+                    Plugin.Log?.LogError("[Keypad] Diz.Resources.IEasyAssets not initialized; cannot load bundles.");
                     _loadTask = null;
                     return (null, null);
                 }
 
-                var ea = Singleton<IEasyAssets>.Instance;
+                var ea = Singleton<Diz.Resources.IEasyAssets>.Instance;
 
                 Plugin.Log?.LogInfo(
                     $"[Keypad] retaining bundles: {KeypadConstants.KeypadBundleKey}, {KeypadConstants.KeypadUIBundleKey}");
@@ -47,7 +48,7 @@ namespace Manimal.Icebreaker.Keypad
                     KeypadConstants.KeypadBundleKey,
                     KeypadConstants.KeypadUIBundleKey,
                 });
-                await GClass1857.LoadBundles(handle);
+                await EFT.EasyAssetsExtensions.LoadBundles(handle);
 
                 _keypadPrefab   = ResolvePrefab(ea, KeypadConstants.KeypadBundleKey,   KeypadConstants.KeypadAssetNameCandidates,   "keypad");
                 _keypadUIPrefab = ResolvePrefab(ea, KeypadConstants.KeypadUIBundleKey, KeypadConstants.KeypadUIAssetNameCandidates, "keypad_ui");
@@ -62,7 +63,7 @@ namespace Manimal.Icebreaker.Keypad
             }
         }
 
-        private static GameObject ResolvePrefab(IEasyAssets ea, string bundleKey, string[] candidates, string tag)
+        private static GameObject ResolvePrefab(Diz.Resources.IEasyAssets ea, string bundleKey, string[] candidates, string tag)
         {
             if (!ea.IsAssetLoaded(bundleKey))
             {

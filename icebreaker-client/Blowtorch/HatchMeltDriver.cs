@@ -396,23 +396,23 @@ namespace Manimal.Icebreaker.Blowtorch
     // that translated switch use into trigger events is gone, so vanilla interaction
     // would flip switch state and do nothing. unavailable stages are HIDDEN entirely
     // (user call 07-17), not greyed — only the melt hint shows before its time.
-    [HarmonyPatch(typeof(GetActionsClass), "smethod_11")]
+    [HarmonyPatch(typeof(EFT.InteractionContextHelper), nameof(EFT.InteractionContextHelper.GetAvailableActions), new[] { typeof(GamePlayerOwner), typeof(EFT.Interactive.Switch) })]
     internal static class Patch_HatchSwitchActions
     {
-        private static void Replace(ref ActionsReturnClass result, ActionsTypesClass act)
+        private static void Replace(ref EFT.UI.AvailableInteractionState result, EFT.UI.InteractionAction act)
         {
-            if (result == null) result = new ActionsReturnClass { Actions = new List<ActionsTypesClass> { act } };
+            if (result == null) result = new EFT.UI.AvailableInteractionState { Actions = new List<EFT.UI.InteractionAction> { act } };
             else { result.Actions.Clear(); result.Actions.Add(act); }
         }
 
-        private static void Clear(ref ActionsReturnClass result)
+        private static void Clear(ref EFT.UI.AvailableInteractionState result)
         {
             if (result != null) result.Actions.Clear();
             result = null;
         }
 
         [HarmonyPostfix]
-        private static void Postfix(ref ActionsReturnClass __result, GamePlayerOwner owner, EFT.Interactive.Switch interactiveSwitch)
+        private static void Postfix(ref EFT.UI.AvailableInteractionState __result, GamePlayerOwner owner, EFT.Interactive.Switch interactiveSwitch)
         {
             var d = HatchMeltDriver.Instance;
             if (d == null || interactiveSwitch == null) return;
@@ -421,7 +421,7 @@ namespace Manimal.Icebreaker.Blowtorch
                 if (interactiveSwitch == d.MeltSwitch)
                 {
                     if (d.MeltDone) { Clear(ref __result); return; }
-                    Replace(ref __result, new ActionsTypesClass
+                    Replace(ref __result, new EFT.UI.InteractionAction
                     {
                         Name = "Melt the ice (blowtorch)",
                         Disabled = true, // informational — the melt happens by burning it
@@ -430,7 +430,7 @@ namespace Manimal.Icebreaker.Blowtorch
                 else if (interactiveSwitch == d.HandleSwitch)
                 {
                     if (!d.MeltDone || d.HandleTurned) { Clear(ref __result); return; }
-                    Replace(ref __result, new ActionsTypesClass
+                    Replace(ref __result, new EFT.UI.InteractionAction
                     {
                         Name = "Turn handle",
                         // retire the cached prompt the moment the action runs — it lingered
@@ -441,7 +441,7 @@ namespace Manimal.Icebreaker.Blowtorch
                 else if (interactiveSwitch == d.RotateSwitch)
                 {
                     if (!d.RotateReady || d.HatchOpened) { Clear(ref __result); return; }
-                    Replace(ref __result, new ActionsTypesClass
+                    Replace(ref __result, new EFT.UI.InteractionAction
                     {
                         Name = "Open hatch",
                         Action = () => { d.OpenHatch(); try { owner?.ClearInteractionState(); } catch { } },

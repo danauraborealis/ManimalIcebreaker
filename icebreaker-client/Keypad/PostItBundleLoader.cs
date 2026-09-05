@@ -1,3 +1,4 @@
+using EFT;
 using System;
 using System.Threading.Tasks;
 using Comfort.Common;
@@ -25,18 +26,18 @@ namespace Manimal.Icebreaker.Keypad
         {
             try
             {
-                if (!Singleton<IEasyAssets>.Instantiated)
+                if (!Singleton<Diz.Resources.IEasyAssets>.Instantiated)
                 {
-                    Plugin.Log?.LogError("[PostIt] IEasyAssets not initialized; cannot load bundle.");
+                    Plugin.Log?.LogError("[PostIt] Diz.Resources.IEasyAssets not initialized; cannot load bundle.");
                     _loadTask = null;
                     return null;
                 }
 
-                var ea = Singleton<IEasyAssets>.Instance;
+                var ea = Singleton<Diz.Resources.IEasyAssets>.Instance;
 
                 Plugin.Log?.LogInfo($"[PostIt] retaining bundle: {PostItConstants.BundleKey}");
                 var handle = ea.Retain(new[] { PostItConstants.BundleKey });
-                await GClass1857.LoadBundles(handle);
+                await EFT.EasyAssetsExtensions.LoadBundles(handle);
 
                 _prefab = ResolvePrefab(ea);
                 return _prefab;
@@ -49,7 +50,7 @@ namespace Manimal.Icebreaker.Keypad
             }
         }
 
-        private static GameObject ResolvePrefab(IEasyAssets ea)
+        private static GameObject ResolvePrefab(Diz.Resources.IEasyAssets ea)
         {
             if (!ea.IsAssetLoaded(PostItConstants.BundleKey))
             {

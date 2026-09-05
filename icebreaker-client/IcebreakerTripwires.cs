@@ -17,7 +17,7 @@ namespace Manimal.Icebreaker
     // data path anywhere (scene or server db — verified) — the game's ONLY tripwire
     // entry is GameWorld.PlantTripwire (the player-plant API), so we author markers
     // in the SDK scenes and plant through it at raid start. that buys the real
-    // procedural wire mesh, bot awareness (BotEventHandler), spot/defuse interactions
+    // procedural wire mesh, bot awareness (GlobalEventDispatcher), spot/defuse interactions
     // (10s bare / 5s multitool) and the grenade detonation for free.
     //
     // authoring: ManimalTripwireMarker component (or bare empty) named
@@ -87,8 +87,8 @@ namespace Manimal.Icebreaker
                 // let the raid finish waking up — pool + sync processor exist by then
                 yield return new WaitForSeconds(3f);
                 var world = Singleton<GameWorld>.Instance;
-                var factory = Singleton<ItemFactoryClass>.Instance;
-                var pool = Singleton<PoolManagerClass>.Instance;
+                var factory = Singleton<EFT.ItemFactory>.Instance;
+                var pool = Singleton<EFT.ObjectsFactory>.Instance;
                 if (world == null || factory == null || pool == null)
                 {
                     Plugin.Log.LogWarning("[Tripwires] world/factory/pool not ready");
@@ -131,7 +131,7 @@ namespace Manimal.Icebreaker
                 foreach (var donorTpl in DonorTpls)
                     try
                     {
-                        var d = factory.CreateItem(factory.MongoID_0, donorTpl, null);
+                        var d = factory.CreateItem(factory.NextId, donorTpl, null);
                         if (d != null) resources.AddRange(d.Template.AllResources);
                     }
                     catch { }
@@ -139,8 +139,8 @@ namespace Manimal.Icebreaker
                 try
                 {
                     load = pool.LoadBundlesAndCreatePools(
-                        PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online,
-                        resources.ToArray(), JobPriorityClass.Low, null, default);
+                        EFT.ObjectsFactory.PoolsCategory.Raid, EFT.ObjectsFactory.AssemblyType.Online,
+                        resources.ToArray(), Diz.Jobs.JobYieldPriority.Low, null, default);
                 }
                 catch (Exception e) { Plugin.Log.LogWarning($"[Tripwires] bundle preload kickoff failed: {e.Message}"); }
                 if (load != null)
@@ -179,11 +179,11 @@ namespace Manimal.Icebreaker
         private struct Job
         {
             public string name;
-            public ThrowWeapItemClass grenade;
+            public EFT.InventoryLogic.ThrowWeap grenade;
             public Vector3 from, to;
         }
 
-        private static List<Job> CollectJobs(ItemFactoryClass factory)
+        private static List<Job> CollectJobs(EFT.ItemFactory factory)
         {
             var jobs = new List<Job>();
             var markers = new List<Transform>();
@@ -232,9 +232,9 @@ namespace Manimal.Icebreaker
                 if (at >= 0 && m.name.Length > at + 1) tpl = m.name.Substring(at + 1).Trim();
 
                 Item item = null;
-                try { item = factory.CreateItem(factory.MongoID_0, tpl, null); }
+                try { item = factory.CreateItem(factory.NextId, tpl, null); }
                 catch (Exception e) { Plugin.Log.LogWarning($"[Tripwires] item create failed for '{tpl}': {e.Message}"); }
-                var grenade = item as ThrowWeapItemClass;
+                var grenade = item as EFT.InventoryLogic.ThrowWeap;
                 if (grenade == null)
                 {
                     Plugin.Log.LogWarning($"[Tripwires] tpl '{tpl}' is not a throwable — marker '{m.name}' skipped");
@@ -251,10 +251,10 @@ namespace Manimal.Icebreaker
         // tripwire-compatible nades — and SetupGrenade NREs on it (stake-but-no-wire).
         // fix: graft a donor visual onto the LOADED PREFAB ASSET once per tpl; every
         // pooled instance after that carries it.
-        private static bool EnsureTripwireVisual(ItemFactoryClass factory, Item grenade)
+        private static bool EnsureTripwireVisual(EFT.ItemFactory factory, Item grenade)
         {
             if (_patchedTpls.Contains(grenade.TemplateId.ToString())) return true;
-            var pool = Singleton<PoolManagerClass>.Instance;
+            var pool = Singleton<EFT.ObjectsFactory>.Instance;
             if (pool == null) return false;
 
             var inst = pool.CreateItem(grenade, ECameraType.Default, null, false);
@@ -274,7 +274,7 @@ namespace Manimal.Icebreaker
                 {
                     try
                     {
-                        var donor = factory.CreateItem(factory.MongoID_0, donorTpl, null);
+                        var donor = factory.CreateItem(factory.NextId, donorTpl, null);
                         var dInst = donor != null ? pool.CreateItem(donor, ECameraType.Default, null, false) : null;
                         var dgp = dInst != null ? dInst.GetComponent<GrenadePrefab>() : null;
                         _donorVisual = dgp != null ? dgp.TripwireItself : null;

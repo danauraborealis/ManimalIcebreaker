@@ -18,37 +18,37 @@
     <!-- Private=false everywhere: nothing but our own dll ships from this project -->
     <Reference Include="BepInEx">
       <HintPath>$(SPTPath)\BepInEx\core\BepInEx.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
+
+    <Private>false</Private></Reference>
     <Reference Include="0Harmony">
       <HintPath>$(SPTPath)\BepInEx\core\0Harmony.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
+
+    <Private>false</Private></Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
+
+    <Private>false</Private></Reference>
     <Reference Include="Comfort">
       <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
+
+    <Private>false</Private></Reference>
     <Reference Include="UnityEngine">
       <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
+
+    <Private>false</Private></Reference>
     <Reference Include="UnityEngine.AnimationModule">
       <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
+
+    <Private>false</Private></Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
+
+    <Private>false</Private></Reference>
     <!-- the real runtime dll from the fika test install — compile-time only, never shipped -->
     <Reference Include="Fika.Core">
       <HintPath>$(FikaPath)\BepInEx\plugins\Fika\Fika.Core.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
+
+    <Private>false</Private></Reference>
   </ItemGroup>
 
   <ItemGroup>
@@ -82,7 +82,7 @@
   <!-- FIKA INSTALL ONLY (user call 07-30): the solo install stays fika-free, and the
        release ships the addon as its OWN zip (uploaded as an addon) rather than
        riding the main package. -->
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+  <Target Condition="'$(DeployToGame)' == 'true'" Name="PostBuild" AfterTargets="PostBuildEvent">
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(FikaPath)\BepInEx\plugins\ManimalIcebreaker" Condition="Exists('$(FikaPath)')" />
   </Target>
 

@@ -16,7 +16,7 @@ namespace Manimal.Icebreaker
     // black division spawn triggers). recovered from retail level706 by
     // analysis/extract_aiplaces.py — see icebreaker_aiplaces.json. the mechanism (verified
     // in the decompile): AIPlaceInfo trigger box -> AIPlaceInfoLogic child raises
-    // BotEventHandler.AnyEvent(name) on player entry -> BossSpawnScenario fires any
+    // GlobalEventDispatcher.AnyEvent(name) on player entry -> BossSpawnScenario fires any
     // base.json BossLocationSpawn wave with TriggerName=botEvent + TriggerId=name. the
     // waves themselves are authored server-side (vanilla data) — this file only rebuilds
     // the scene trigger side.
@@ -41,7 +41,7 @@ namespace Manimal.Icebreaker
         // raise these and BSG's BossSpawnScenario acts on them, so this line is the only
         // proof of "which wave fired and when" — it turned a player's "guys spawned in
         // the wrong place" report into a five-second grep (08-09).
-        [HarmonyPatch(typeof(BotEventHandler), nameof(BotEventHandler.AnyEvent), new[] { typeof(string) })]
+        [HarmonyPatch(typeof(GlobalEventDispatcher), nameof(GlobalEventDispatcher.AnyEvent), new[] { typeof(string) })]
         internal static class Patch_LogAnyEvent
         {
             [HarmonyPostfix]
@@ -133,7 +133,7 @@ namespace Manimal.Icebreaker
                 var holder = controller.CoversData != null ? controller.CoversData.AIPlaceInfoHolder : null;
                 if (holder == null) holder = UnityEngine.Object.FindObjectOfType<AIPlaceInfoHolder>();
                 // Places is null on a runtime-created holder — AddPlace NREs on it and, worse,
-                // ExUsecBrainClass foreaches it per decision tick (null = silent statue rogues)
+                // ExUsecLayersStrategy foreaches it per decision tick (null = silent statue rogues)
                 if (holder != null && holder.Places == null) holder.Places = new List<AIPlaceInfo>();
                 var doors = UnityEngine.Object.FindObjectsOfType<Door>();
                 int built = 0, evTriggers = 0, gsTriggers = 0;
@@ -197,9 +197,9 @@ namespace Manimal.Icebreaker
                 // subscribe NOW — before any player movement can fire a trigger
                 Bridge = null;
                 PendingEvents.Clear();
-                var handler = Singleton<BotEventHandler>.Instance;
+                var handler = Singleton<GlobalEventDispatcher>.Instance;
                 if (handler != null) handler.OnEvent += OnAnyEvent;
-                else Plugin.Log.LogDebug("[AIPlaces] no BotEventHandler at build time — events may be lost");
+                else Plugin.Log.LogDebug("[AIPlaces] no GlobalEventDispatcher at build time — events may be lost");
 
                 _marker = new GameObject("Icebreaker_AIPlacesStaged");
                 var scn = SceneManager.GetSceneByName("Icebreaker_AI");
@@ -241,13 +241,13 @@ namespace Manimal.Icebreaker
         private void OnEnter(Player p)
         {
             if (EnterRaise && FikaBridge.IsHumanPlayer(p))
-                Singleton<BotEventHandler>.Instance?.AnyEvent(EventName);
+                Singleton<GlobalEventDispatcher>.Instance?.AnyEvent(EventName);
         }
 
         private void OnExit(Player p)
         {
             if (ExitRaise && FikaBridge.IsHumanPlayer(p))
-                Singleton<BotEventHandler>.Instance?.AnyEvent(EventName);
+                Singleton<GlobalEventDispatcher>.Instance?.AnyEvent(EventName);
         }
     }
 
@@ -299,7 +299,7 @@ namespace Manimal.Icebreaker
                 if (size >= min && size <= max)
                 {
                     Plugin.Log.LogDebug($"[AIPlaces] '{gameObject.name}' entered (group={size}) -> event '{name}'");
-                    Singleton<BotEventHandler>.Instance?.AnyEvent(name);
+                    Singleton<GlobalEventDispatcher>.Instance?.AnyEvent(name);
                     return;
                 }
             }

@@ -144,7 +144,7 @@ namespace Manimal.Icebreaker
         }
 
         // ------------------------------------------------------- ambient revival
-        // the raid-start GClass2313.ResetAudioBuffer() does AudioSettings.Reset(), which
+        // the raid-start EFT.AudioUtils.ResetAudioBuffer() does AudioSettings.Reset(), which
         // STOPS every playing AudioSource. our hand-placed ambient beds (Author 8, in the
         // bundled Sound scene) play during load then die at that reset and never restart
         // (playOnAwake already fired). a cheap periodic replay brings them back and keeps
@@ -501,7 +501,7 @@ namespace Manimal.Icebreaker
                         ? $"; MISSING from the bundle: {string.Join(", ", new List<string>(_roomToneMisses).ToArray())}"
                         : ""));
 
-                // the room tracker (GClass1122) enumerates rooms ONLY through
+                // the room tracker (Audio.SpatialSystem.AudioRoomStorage) enumerates rooms ONLY through
                 // SpatialAudioCrossSceneGroup.AllCrossGroups — NOT FindObjectsOfType.
                 // without it the tracker has zero rooms and its spatial index stays null
                 // (the FindActualCurrentRoom NRE storm). the class is fully self-healing

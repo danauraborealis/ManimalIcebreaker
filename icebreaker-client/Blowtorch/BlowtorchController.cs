@@ -54,22 +54,22 @@ namespace Manimal.Icebreaker.Blowtorch
             };
         }
 
-        private Player.BaseAnimationOperationClass method_20() => new TorchDrawOp(this);
-        private Player.BaseAnimationOperationClass method_21() => new TorchIdleOp(this);
-        private Player.BaseAnimationOperationClass method_22() => new TorchHideOp(this);
-        private Player.BaseAnimationOperationClass method_23() => new TorchInteractOp(this);
+        private Player.ObjectInHandsOperation method_20() => new TorchDrawOp(this);
+        private Player.ObjectInHandsOperation method_21() => new TorchIdleOp(this);
+        private Player.ObjectInHandsOperation method_22() => new TorchHideOp(this);
+        private Player.ObjectInHandsOperation method_23() => new TorchInteractOp(this);
 
-        public override void vmethod_1(Action callback)
+        public override void InitiateSpawnOperation(Action callback)
         {
             InitiateOperation<TorchDrawOp>().Start(callback);
         }
 
-        public override void vmethod_0(Player player, WeaponPrefab weaponPrefab)
+        public override void InitializeController(Player player, WeaponPrefab weaponPrefab)
         {
-            base.vmethod_0(player, weaponPrefab);
+            base.InitializeController(player, weaponPrefab);
             player.ProceduralWeaponAnimation.ManualSetVariables(2f, 0f, 0f, 0f);
-            method_6();
-            gclass2086_0.AfterGetFromPoolInit(player.ProceduralWeaponAnimation, null, player.IsYourPlayer);
+            SetUpOverlaping();
+            _objectInHands.AfterGetFromPoolInit(player.ProceduralWeaponAnimation, null, player.IsYourPlayer);
             BaseSoundPlayer soundPlayer = _controllerObject.GetComponent<BaseSoundPlayer>();
             if (soundPlayer != null)
                 soundPlayer.Init(this, player.PlayerBones.WeaponRoot, player);
@@ -162,7 +162,7 @@ namespace Manimal.Icebreaker.Blowtorch
             }
 
             // emit from the burner tip; pooled GO may still carry last session's source
-            Transform mount = TransformHelperClass.FindTransformRecursive(weaponPrefab.transform, "fireport", false)
+            Transform mount = TransformTools.FindTransformRecursive(weaponPrefab.transform, "fireport", false)
                               ?? weaponPrefab.transform;
             _audio = mount.GetComponent<AudioSource>() ?? mount.gameObject.AddComponent<AudioSource>();
             _audio.playOnAwake = false;
@@ -192,7 +192,7 @@ namespace Manimal.Icebreaker.Blowtorch
             }
         }
 
-        public override void vmethod_2(EPlayerState previousstate, EPlayerState nextstate)
+        public override void StateChangedHandler(EPlayerState previousstate, EPlayerState nextstate)
         {
         }
 
@@ -225,7 +225,7 @@ namespace Manimal.Icebreaker.Blowtorch
             _fireCombos = new List<List<KeyCode>>();
             try
             {
-                foreach (var g in Singleton<SharedGameSettingsClass>.Instance.Control.Settings.UserKeyBindings.Value)
+                foreach (var g in Singleton<EFT.Settings.SettingsManager>.Instance.Control.Settings.UserKeyBindings.Value)
                 {
                     if (g == null || g.keyName != EGameKey.Shoot || g.variants == null) continue;
                     foreach (var v in g.variants)
@@ -328,14 +328,14 @@ namespace Manimal.Icebreaker.Blowtorch
 
         // ---- operations: vanilla bases drive Active; we supply completion ----
 
-        public class TorchDrawOp : Player.UsableItemController.Class1305
+        public class TorchDrawOp : Player.UsableItemController.SpawnOperation
         {
             public TorchDrawOp(BlowtorchController controller) : base(controller) { }
 
             public new void Start(Action callback)
             {
                 base.Start(callback); // SetActiveParam(true) -> Off -> draw; RELOAD float -> 1
-                var c = (BlowtorchController)UsableItemController_0;
+                var c = (BlowtorchController)Controller;
                 // dont sit in Off waiting for the transition window (exit-time reads
                 // as equip lag) — the draw starts the moment the prefab is up
                 if (c.TorchAnimator != null)
@@ -352,39 +352,39 @@ namespace Manimal.Icebreaker.Blowtorch
                 });
             }
 
-            public override void vmethod_0()
+            public override void SetIdlingOperation()
             {
-                TorchIdleOp idle = UsableItemController_0.InitiateOperation<TorchIdleOp>();
+                TorchIdleOp idle = Controller.InitiateOperation<TorchIdleOp>();
                 idle.Start();
-                Action_1();
-                if (Action_0 != null)
-                    idle.HideWeapon(Action_0, Bool_0);
+                _onWeaponAppear();
+                if (_hideAction != null)
+                    idle.HideWeapon(_hideAction, _fastDrop);
             }
         }
 
-        public class TorchIdleOp : Player.UsableItemController.Class1299
+        public class TorchIdleOp : Player.UsableItemController.Idling
         {
             public TorchIdleOp(BlowtorchController controller) : base(controller) { }
 
             public override void HideWeapon(Action onHidden, bool fastDrop)
             {
                 State = Player.EOperationState.Finished;
-                UsableItemController_0.InitiateOperation<TorchHideOp>().Start(onHidden, fastDrop);
+                Controller.InitiateOperation<TorchHideOp>().Start(onHidden, fastDrop);
             }
 
-            public override void vmethod_0(GInterface443 oneItemOperation, Callback callback)
+            public override void InitiateDropBackpackOperation(EFT.InventoryLogic.Operations.IOneItemOperation oneItemOperation, Callback callback)
             {
-                UsableItemController_0.InitiateOperation<TorchInteractOp>().Start(oneItemOperation.Item1, callback);
+                Controller.InitiateOperation<TorchInteractOp>().Start(oneItemOperation.Item1, callback);
             }
         }
 
-        public class TorchHideOp : Player.UsableItemController.Class1302
+        public class TorchHideOp : Player.UsableItemController.Remove
         {
             public TorchHideOp(BlowtorchController controller) : base(controller) { }
 
             public override void Start(Action onHidden, bool fastDrop)
             {
-                var c = (BlowtorchController)UsableItemController_0;
+                var c = (BlowtorchController)Controller;
                 c.ForceFiringOff(); // never holster with the burner lit
                 base.Start(onHidden, fastDrop); // SetActiveParam(false) -> idle -> holster
                 // the graph only reaches holster FROM idle — holstering mid-burn
@@ -400,13 +400,13 @@ namespace Manimal.Icebreaker.Blowtorch
             }
         }
 
-        public class TorchInteractOp : Player.UsableItemController.Class1293
+        public class TorchInteractOp : Player.UsableItemController.DropBackpackOperation
         {
             public TorchInteractOp(BlowtorchController controller) : base(controller) { }
 
-            public override void vmethod_0()
+            public override void InitiateIdlingOperation()
             {
-                UsableItemController_0.InitiateOperation<TorchIdleOp>().Start();
+                Controller.InitiateOperation<TorchIdleOp>().Start();
             }
         }
     }

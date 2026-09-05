@@ -159,22 +159,52 @@ namespace Manimal.Icebreaker
         // unregister + ReturnToPool on the GO. no death, no ragdoll, no loot. trims the
         // max-spawned wave crew down to the raid's rolled size. farthest-from-player
         // first, and nobody within 60m — a rogue vanishing in view would look broken.
+        // (08-29 field report: this and C3KeycardSweep below showed up as recurring
+        // stutter spikes — up to ~55ms — on the profiler.) FindObjectsOfType<BotOwner>()
+        // is a full scene scan; GameWorld.AllAlivePlayersList is the SAME list the game
+        // itself already maintains incrementally on spawn/death (WedgeVoice's boss/
+        // squad-death watchers use it for exactly this reason), so walking it instead
+        // costs nothing beyond the alive-player count rather than a scene-wide search.
         private static List<BotOwner> AliveRogues()
         {
             var list = new List<BotOwner>();
-            foreach (var b in UnityEngine.Object.FindObjectsOfType<BotOwner>())
-                if (b != null && b.Profile?.Info?.Settings?.Role == WildSpawnType.exUsec
-                    && b.GetPlayer != null && b.GetPlayer.HealthController != null
-                    && b.GetPlayer.HealthController.IsAlive)
-                    list.Add(b);
+            var all = Singleton<GameWorld>.Instance?.AllAlivePlayersList;
+            if (all == null) return list;
+            foreach (var pl in all)
+            {
+                if (pl == null || !pl.AIData.IsAI) continue;
+                if (pl.Profile?.Info?.Settings?.Role != WildSpawnType.exUsec) continue;
+                if (pl.HealthController == null || !pl.HealthController.IsAlive) continue;
+                var b = pl.AIData.BotOwner;
+                if (b != null) list.Add(b);
+            }
             return list;
+        }
+
+        // shared replacement for UnityEngine.Object.FindObjectsOfType<BotOwner>() on any
+        // path that polls repeatedly (every 0.5-1s, for up to minutes at a time): a full
+        // scene scan on this map's prop count is the same ~55ms-class stutter AliveRogues()
+        // and C3KeycardSweep() were pulled off of on 08-29. HoldEngineSquad/PlaceChargeSweep/
+        // PlaceWedgeTag were missed in that pass (2026-09 profiler run: HoldEngineSquad's
+        // 0.5s poll alone matched the sustained post-trigger stutter almost exactly, and
+        // stopped growing the moment its hold count was satisfied).
+        private static IEnumerable<BotOwner> AllBotOwners()
+        {
+            var all = Singleton<GameWorld>.Instance?.AllAlivePlayersList;
+            if (all == null) yield break;
+            foreach (var pl in all)
+            {
+                if (pl == null || !pl.AIData.IsAI) continue;
+                var b = pl.AIData.BotOwner;
+                if (b != null) yield return b;
+            }
         }
 
         // trim/shaver machinery deleted 08-05 (user call): counting live rogues to
         // decide corrections was a race against the staggered wave spawner, and every
         // flood traced back to it. the deterministic spawn plan above replaced it.
         // if a cull is ever needed again: LeaveData.RemoveFromMap, NEVER raw
-        // BotDespawn — raw despawns leave dangling transforms in BotEventHandler and
+        // BotDespawn — raw despawns leave dangling transforms in GlobalEventDispatcher and
         // every later player sound NREs in PlaySound (08-04: controller flip-out).
 
         private System.Collections.IEnumerator UnstackPatrol()
@@ -392,7 +422,7 @@ namespace Manimal.Icebreaker
             // POST-EVENT JOBS ONLY (2026-08-11 rework). the spawning itself is BSG's now:
             // our trigger ids ARE the retail TriggerIds, base.json carries the retail
             // BossLocationSpawn table (roles remapped to blackDivIb), and BossSpawnScenario
-            // subscribes to BotEventHandler natively — so by the time we get here the squad
+            // subscribes to GlobalEventDispatcher natively — so by the time we get here the squad
             // is already on its way. we do NOT re-raise the event: the trigger box raised it
             // to begin with, and this handler runs BECAUSE of that raise (the old code's
             // second raise was the duplicate seen in the 08-09 logs).
@@ -582,7 +612,7 @@ namespace Manimal.Icebreaker
             while (Time.time < giveUp && !_chargePlaced)
             {
                 cands.Clear();
-                foreach (var b in UnityEngine.Object.FindObjectsOfType<BotOwner>())
+                foreach (var b in AllBotOwners())
                 {
                     if (b == null || b.Profile?.Info?.Settings?.Role != (WildSpawnType)BdIb || IsPenBot(b)) continue;
                     var p = b.GetPlayer;
@@ -638,7 +668,7 @@ namespace Manimal.Icebreaker
             float giveUp = Time.time + 90f; // he generates on the trigger frame; wait him out
             while (Time.time < giveUp && !_wedgeTagPlaced)
             {
-                foreach (var b in UnityEngine.Object.FindObjectsOfType<BotOwner>())
+                foreach (var b in AllBotOwners())
                 {
                     if (b == null || b.Profile?.Info?.Settings?.Role != (WildSpawnType)BdWedge) continue;
                     var p = b.GetPlayer;
@@ -702,16 +732,23 @@ namespace Manimal.Icebreaker
             float until = Time.time + 300f;
             while (Time.time < until)
             {
-                foreach (var b in UnityEngine.Object.FindObjectsOfType<BotOwner>())
-                {
-                    if (b == null || b.Profile?.Info?.Settings?.Role != WildSpawnType.exUsec) continue;
-                    var pid = b.Profile?.Id;
-                    if (string.IsNullOrEmpty(pid) || !_c3Rolled.Add(pid)) continue;
-                    var p = b.GetPlayer;
-                    if (p == null || p.HealthController == null || !p.HealthController.IsAlive) continue;
-                    if (UnityEngine.Random.Range(0f, 100f) < C3ChancePercent && StuffItem(b, C3KeycardTpl, "C-3 keycard"))
-                        Plugin.Log.LogInfo($"[Crew] C-3 keycard placed on rogue '{b.name}' — rare find, go loot him");
-                }
+                // AllAlivePlayersList instead of FindObjectsOfType<BotOwner>() — same
+                // reasoning as AliveRogues() above (08-29: this sweep firing every 5s for
+                // 5 minutes off a full scene scan was a recurring profiler stutter spike)
+                var all = Singleton<GameWorld>.Instance?.AllAlivePlayersList;
+                if (all != null)
+                    foreach (var pl in all)
+                    {
+                        if (pl == null || !pl.AIData.IsAI) continue;
+                        if (pl.Profile?.Info?.Settings?.Role != WildSpawnType.exUsec) continue;
+                        var pid = pl.Profile?.Id;
+                        if (string.IsNullOrEmpty(pid) || !_c3Rolled.Add(pid)) continue;
+                        if (pl.HealthController == null || !pl.HealthController.IsAlive) continue;
+                        var b = pl.AIData.BotOwner;
+                        if (b == null) continue;
+                        if (UnityEngine.Random.Range(0f, 100f) < C3ChancePercent && StuffItem(b, C3KeycardTpl, "C-3 keycard"))
+                            Plugin.Log.LogInfo($"[Crew] C-3 keycard placed on rogue '{b.name}' — rare find, go loot him");
+                    }
                 yield return new WaitForSeconds(5f);
             }
         }
@@ -722,12 +759,12 @@ namespace Manimal.Icebreaker
         {
             try
             {
-                var factory = Singleton<ItemFactoryClass>.Instance;
+                var factory = Singleton<EFT.ItemFactory>.Instance;
                 if (factory == null) return false;
-                var item = factory.CreateItem(factory.MongoID_0, tpl, null);
+                var item = factory.CreateItem(factory.NextId, tpl, null);
                 if (item == null) return false;
 
-                var grids = new List<StashGridClass>();
+                var grids = new List<EFT.InventoryLogic.Grid>();
                 var bag = BackpackOf(b);
                 int bagGrids = 0;
                 if (bag != null && bag.Grids != null) { grids.AddRange(bag.Grids); bagGrids = bag.Grids.Length; }
@@ -807,7 +844,7 @@ namespace Manimal.Icebreaker
                 if (Time.time < nextHeavy) { if (held.Count > 0 && FikaBridge.AnyHumanIn(bounds)) break; yield return null; continue; }
                 nextHeavy = Time.time + 0.5f;
                 if (free.Count + held.Count < expected)
-                    foreach (var b in UnityEngine.Object.FindObjectsOfType<BotOwner>())
+                    foreach (var b in AllBotOwners())
                     {
                         if (free.Count + held.Count >= expected) break; // one sweep used to add 5/4
                         // IsPenBot: a pool bot in pen transit stands at its birth marker
@@ -1003,7 +1040,7 @@ namespace Manimal.Icebreaker
         // (08-05 rental naked-storm hunt): an EMPTY response is the server refusing to
         // produce bots at all (per-raid cap/state — the transit leg is the suspect);
         // unarmed profiles are the generator failing on equipment. the fix differs.
-        internal static string NakedWhy(BotCreationDataClass data)
+        internal static string NakedWhy(BotCreationData data)
         {
             try
             {
@@ -1016,7 +1053,7 @@ namespace Manimal.Icebreaker
             catch (Exception e) { return $"vet failed: {e.Message}"; }
         }
 
-        private static bool IsNakedProfile(BotCreationDataClass data)
+        private static bool IsNakedProfile(BotCreationData data)
         {
             try
             {
@@ -1044,11 +1081,11 @@ namespace Manimal.Icebreaker
 
         // profile creation + the naked-profile vetting, shared by direct spawns and the
         // trigger-squad pre-maker
-        private async Task<BotCreationDataClass> CreateData(WildSpawnType role, int count = 1)
+        private async Task<BotCreationData> CreateData(WildSpawnType role, int count = 1)
         {
             var spawnParams = new BotSpawnParams { ShallBeGroup = new ShallBeGroupParams(false, false, Math.Max(1, count)) };
-            var profileData = new BotProfileDataClass(EPlayerSide.Savage, role, BotDifficulty.normal, 5f, spawnParams, false);
-            var data = await BotCreationDataClass.Create(profileData, _spawner.BotCreator, count, _spawner);
+            var profileData = new GetProfileDataParams(EPlayerSide.Savage, role, BotDifficulty.normal, 5f, spawnParams, false);
+            var data = await BotCreationData.Create(profileData, _spawner._botCreator, count, _spawner);
             if (data == null) { Plugin.Log.LogWarning($"[Crew] profile creation failed for {role}"); return null; }
 
             // naked roll — give the generator a breather and re-request ONCE; if it
@@ -1058,7 +1095,7 @@ namespace Manimal.Icebreaker
             {
                 Plugin.Log.LogWarning($"[Crew] {role} profile arrived NAKED [{why}] — re-requesting in 3s");
                 await Task.Delay(3000);
-                data = await BotCreationDataClass.Create(profileData, _spawner.BotCreator, count, _spawner);
+                data = await BotCreationData.Create(profileData, _spawner._botCreator, count, _spawner);
                 if (data == null || IsNakedProfile(data))
                 {
                     Plugin.Log.LogWarning($"[Crew] {role} re-request also bad [{NakedWhy(data) ?? "ok??"}] — skipping this spawn");
@@ -1151,7 +1188,7 @@ namespace Manimal.Icebreaker
                 count -= fromPen;
                 if (count <= 0) return;
 
-                var ready = new List<BotCreationDataClass>(count);
+                var ready = new List<BotCreationData>(count);
                 if (_preMade.TryGetValue((int)role, out var pq))
                     while (ready.Count < count && pq.Count > 0)
                         ready.Add(pq.Dequeue());
@@ -1161,7 +1198,7 @@ namespace Manimal.Icebreaker
                 {
                     // ALL profile requests concurrently — sequential awaits made a
                     // 4-bot batch cost 4x the server round-trip (plus 3s naked retries)
-                    var creates = new List<Task<BotCreationDataClass>>(need);
+                    var creates = new List<Task<BotCreationData>>(need);
                     for (int i = 0; i < need; i++) creates.Add(CreateAndPrewarm(role));
                     foreach (var d in await Task.WhenAll(creates))
                         if (d != null) ready.Add(d); // naked twice — skip that bot, keep the squad
@@ -1197,7 +1234,7 @@ namespace Manimal.Icebreaker
         // pool). this is BSG's own pre-pool call — async, spread by the job system — so
         // awaiting it first means the spawn instantiates against warm pools.
         // create + prewarm as one awaitable unit so batches can run them all in parallel
-        private async Task<BotCreationDataClass> CreateAndPrewarm(WildSpawnType role)
+        private async Task<BotCreationData> CreateAndPrewarm(WildSpawnType role)
         {
             var d = await CreateData(role);
             if (d == null) return null;
@@ -1205,24 +1242,24 @@ namespace Manimal.Icebreaker
             return d;
         }
 
-        private static async Task Prewarm(BotCreationDataClass data)
+        private static async Task Prewarm(BotCreationData data)
         {
             try
             {
                 var keys = data.Profiles.SelectMany(p => p.GetAllPrefabPaths(false)).ToArray();
                 if (keys.Length > 0)
-                    await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(
-                        PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Local,
+                    await Singleton<EFT.ObjectsFactory>.Instance.LoadBundlesAndCreatePools(
+                        EFT.ObjectsFactory.PoolsCategory.Raid, EFT.ObjectsFactory.AssemblyType.Local,
                         // Low, not General: pool CREATION instantiates templates on the main
                         // thread and General-priority slices burst 176-362ms at premake time
-                        keys, JobPriorityClass.Low, null, default(System.Threading.CancellationToken));
+                        keys, Diz.Jobs.JobYieldPriority.Low, null, default(System.Threading.CancellationToken));
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[Crew] prewarm failed (spawn will cold-load): {e.Message}"); }
         }
 
         // pre-made, pre-warmed bots for the trigger squads — created during the quiet
         // early raid so event spawns are instant and burst-free
-        private readonly Dictionary<int, Queue<BotCreationDataClass>> _preMade = new Dictionary<int, Queue<BotCreationDataClass>>();
+        private readonly Dictionary<int, Queue<BotCreationData>> _preMade = new Dictionary<int, Queue<BotCreationData>>();
 
         private IEnumerator PreMakeTriggerSquads()
         {
@@ -1252,7 +1289,7 @@ namespace Manimal.Icebreaker
                 var data = await CreateData(role);
                 if (data == null) return;
                 await Prewarm(data);
-                if (!_preMade.TryGetValue((int)role, out var q)) _preMade[(int)role] = q = new Queue<BotCreationDataClass>();
+                if (!_preMade.TryGetValue((int)role, out var q)) _preMade[(int)role] = q = new Queue<BotCreationData>();
                 q.Enqueue(data);
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[Crew] premake {role} failed: {e.Message}"); }
@@ -1446,7 +1483,7 @@ namespace Manimal.Icebreaker
             if (DeliverFromPool(role, zone, 1, minPlayerDist) > 0) return;
             try
             {
-                BotCreationDataClass data = null;
+                BotCreationData data = null;
                 if (_preMade.TryGetValue((int)role, out var pq) && pq.Count > 0)
                     data = pq.Dequeue(); // pre-made + already warm
                 else

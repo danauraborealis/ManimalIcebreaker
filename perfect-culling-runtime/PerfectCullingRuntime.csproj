@@ -18,7 +18,7 @@
          version-gated code picks ancient fallbacks — e.g. ToggleRenderer applied culling
          via renderer.enabled instead of forceRenderingOff -->
     <DefineConstants>UNITY_5_3_OR_NEWER;UNITY_2019_1_OR_NEWER;UNITY_2019_3_OR_NEWER;UNITY_2022_1_OR_NEWER;UNITY_2022_3_OR_NEWER</DefineConstants>
-    <ManagedDir>D:\SPTDev\EscapeFromTarkov_Data\Managed</ManagedDir>
+    <ManagedDir>$(SPTPath)\EscapeFromTarkov_Data\Managed</ManagedDir>
     <PcScripts>C:\Users\peard\Desktop\WTT-SDK-2022 Public\Assets\Koenigz\Perfect Culling\Scripts</PcScripts>
   </PropertyGroup>
 
@@ -36,6 +36,6 @@
   </ItemGroup>
 
   <Target Name="DeployToBepInEx" AfterTargets="Build">
-    <Copy SourceFiles="$(TargetPath)" DestinationFiles="D:\SPTDev\BepInEx\plugins\ManimalIcebreaker\PerfectCullingRuntime.dll" ContinueOnError="true" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFiles="$(SPTPath)\BepInEx\plugins\ManimalIcebreaker\PerfectCullingRuntime.dll" ContinueOnError="true" />
   </Target>
 </Project>

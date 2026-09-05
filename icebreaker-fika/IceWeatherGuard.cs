@@ -52,9 +52,9 @@ namespace Manimal.Icebreaker.Fika
 
                 // mirror fika's own SetupCustomWeather default shape: two entries
                 // spanning today so the client's weather curve has ends to blend
-                var day = EFTDateTimeClass.StartOfDay();
-                var w1 = WeatherClass.CreateDefault();
-                var w2 = WeatherClass.CreateDefault();
+                var day = EFT.DateTimeExtensions.StartOfDay();
+                var w1 = EFT.Weather.WeatherNode.CreateDefault();
+                var w2 = EFT.Weather.WeatherNode.CreateDefault();
                 w1.Time = day.Ticks;
                 w2.Time = day.AddDays(1).Ticks;
                 game.GameController.WeatherClasses = new[] { w1, w2 };

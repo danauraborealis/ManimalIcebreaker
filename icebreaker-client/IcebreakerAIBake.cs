@@ -259,7 +259,7 @@ namespace Manimal.Icebreaker
                 covers.AIMinesPositions = UnityEngine.Object.FindObjectOfType<AIMinesPositionsHolder>();
                 covers.AIDangerPlacesHolder = UnityEngine.Object.FindObjectOfType<AIDangerPlacesHolder>();
                 covers.AIPlaceInfoHolder = UnityEngine.Object.FindObjectOfType<AIPlaceInfoHolder>();
-                // Places is a bare public field the engine never null-guards — ExUsecBrainClass
+                // Places is a bare public field the engine never null-guards — ExUsecLayersStrategy
                 // foreaches it in its decision layer, so null = every rogue brain NREs silently
                 // and the whole map stands still. the old exception-finalizer used to heal this;
                 // now that RestoreData succeeds that path never runs, so heal it here.

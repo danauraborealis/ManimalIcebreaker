@@ -161,7 +161,7 @@ namespace Manimal.Icebreaker
                     $"{noObject} missing objects, {noType} unknown types, {notComponent} non-components, {addFailed} add-failed)");
                 if (refused.Count > 0)
                     Plugin.Log.LogWarning($"[Ambient] not attachable: {string.Join(", ", new List<string>(refused).ToArray())}");
-                // List.ToArray, not the LINQ extension — EFT ships a GClass2298.ToArray
+                // List.ToArray, not the LINQ extension — EFT ships a EFT.VectorTools.ToArray
                 // extension that shadows it and only accepts a Vector3
                 if (_missingClips.Count > 0)
                     Plugin.Log.LogWarning($"[Ambient] clips not found in the bundle: {string.Join(", ", new List<string>(_missingClips).ToArray())}");
@@ -593,7 +593,7 @@ namespace Manimal.Icebreaker
         }
 
         // THE ROOM-TONE TRANSITION. binding a clip to all 154 SpatialAudioRooms only gets
-        // you halfway: the thing that actually starts and stops them is GClass1185, which
+        // you halfway: the thing that actually starts and stops them is Audio.AmbientSubsystem.RoomToneController, which
         // subscribes to the spatial system's room-changed event and, on each move,
         //   - fades the previous room's tone out over its FadeOutSeconds
         //   - calls PlayRoomToneSound on the new one (RoomToneVolume, FadeInSeconds)
@@ -618,7 +618,7 @@ namespace Manimal.Icebreaker
                     try { _roomToneHandler.Dispose(); } catch { }
                     _roomToneHandler = null;
                 }
-                var t = ResolveType("GClass1185");
+                var t = ResolveType("Audio.AmbientSubsystem.RoomToneController");
                 if (t == null) { Plugin.Log.LogWarning("[Ambient] room-tone handler type not found — indoor tones stay silent"); return; }
                 _roomToneHandler = Activator.CreateInstance(t) as IDisposable;
                 Plugin.Log.LogDebug(_roomToneHandler != null
@@ -743,7 +743,7 @@ namespace Manimal.Icebreaker
         // and their resting level is muted: one raid of total outdoor silence (07-30,
         // "dead silent when I spawned"). same dead-bus trap as the ripped mixer, one
         // level up. the rule now: NEVER route a source into a fader we don't drive.
-        //   - day/night bed: route ONLY if the mixer param name data (GClass1174) is
+        //   - day/night bed: route ONLY if the mixer param name data (Audio.Data.AudioMixerDataContainer) is
         //     available, and then SET the faders ourselves — exactly what the blender's
         //     method_4 would do — for the pinned time of day. else stay direct.
         //   - wind/precipitation sources -> Rain group: dropped entirely. those blenders
@@ -755,8 +755,8 @@ namespace Manimal.Icebreaker
                 UnityEngine.Audio.AudioMixer master = null;
                 try { var ba = MonoBehaviourSingleton<BetterAudio>.Instance; if (ba != null) master = ba.Master; }
                 catch { }
-                GClass1174 names;
-                if (master == null || !GClass3670.TryGetData<GClass1174>(out names) || names == null)
+                Audio.Data.AudioMixerDataContainer names;
+                if (master == null || !EFT.DataProviding.DataProvider.TryGetData<Audio.Data.AudioMixerDataContainer>(out names) || names == null)
                 {
                     Plugin.Log.LogDebug("[Ambient] master/param-name data unavailable — outdoor bed stays direct (audible either way)");
                     return;
@@ -778,8 +778,8 @@ namespace Manimal.Icebreaker
 
                 // drive the faders BEFORE routing anything into them. blend 0 = day.
                 float blend = 1f;   // icebreaker is pinned night (TodHour 23 vs 5.15-21.15 day range)
-                float dayDb = GClass2313.ConvertNormalizedVolumeToDB(1f - blend);
-                float nightDb = GClass2313.ConvertNormalizedVolumeToDB(blend);
+                float dayDb = EFT.AudioUtils.ConvertNormalizedVolumeToDB(1f - blend);
+                float nightDb = EFT.AudioUtils.ConvertNormalizedVolumeToDB(blend);
                 master.SetFloat(names.AmbientOutDayMixerVolume, dayDb);
                 master.SetFloat(names.AmbientOutNightMixerVolume, nightDb);
                 master.SetFloat(names.AmbientOutDayEffectsVolume, dayDb);

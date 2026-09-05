@@ -82,7 +82,7 @@ namespace Manimal.Icebreaker
 
             BuildDetectorZone(zoneSrc.GetComponent<BoxCollider>());
 
-            _unsubscribe = GlobalEventHandlerClass.Instance.SubscribeOnEvent<GClass3552>(OnZoneEvent);
+            _unsubscribe = EFT.GlobalEvents.GlobalEventsController.Instance.SubscribeOnEvent<EFT.GlobalEvents.FlareShootZoneEvent>(OnZoneEvent);
 
             // rotor wash must not run before the heli exists: if the wind systems shipped
             // active/playOnAwake they'd blow from raid start — silence them until the call
@@ -114,7 +114,7 @@ namespace Manimal.Icebreaker
         // PassageRequirement off.
         //
         // Start() is what makes it a real till: it builds the fake stash and registers a
-        // TraderControllerClass(EOwnerType.ExfilPoint) against the point's TRANSFORM, so
+        // EFT.InventoryLogic.ItemController(EOwnerType.ExfilPoint) against the point's TRANSFORM, so
         // the money box follows the exfil when the flare gate exiles it under the map and
         // brings it back. paying calls OnItemTransferred, which queues the player, and
         // Met() is a QueuedPlayers check from then on.
@@ -227,7 +227,7 @@ namespace Manimal.Icebreaker
 
         // the NATIVE pay prompt. the game already has the whole flow: Proceed sets
         // Player.ExfiltrationPoint, GamePlayerOwner.InteractionsChangedHandler polls its
-        // interaction sources, and GetActionsClass.smethod_4 builds the "EXFIL_Transfer"
+        // interaction sources, and EFT.InteractionContextHelper.GetAvailableActions builds the "EXFIL_Transfer"
         // action whose press calls TransferExitItem — the same discounted, networked
         // transfer a vanilla car extract runs. the catch is the source CHAIN: the exfil
         // point is the LAST fallback in the handler, so any earlier source (a raycast
@@ -253,7 +253,7 @@ namespace Manimal.Icebreaker
 
                     // native builder: returns null when already paid or when no single
                     // stack covers the (discounted) price — same rule as a car extract
-                    var native = GetActionsClass.smethod_4(__instance, point);
+                    var native = EFT.InteractionContextHelper.GetAvailableActions(__instance, point);
                     if (native == null || native.Actions == null || native.Actions.Count == 0) return;
 
                     var state = __instance.AvailableInteractionState.Value;
@@ -270,7 +270,7 @@ namespace Manimal.Icebreaker
 
                     // fresh object on purpose: the bindable only notifies the prompt UI on
                     // a reference change, mutating the current list would redraw nothing
-                    var merged = new ActionsReturnClass { Actions = new List<ActionsTypesClass>() };
+                    var merged = new EFT.UI.AvailableInteractionState { Actions = new List<EFT.UI.InteractionAction>() };
                     merged.Actions.AddRange(native.Actions);
                     merged.Actions.AddRange(state.Actions);
                     merged.InitSelected();
@@ -313,7 +313,7 @@ namespace Manimal.Icebreaker
         // teleport lock supersedes the whole patch pile — a point a kilometer under the
         // ship can't be prompted, toggled or extracted through, whatever any mod does.
 
-        private void OnZoneEvent(GClass3552 ev)
+        private void OnZoneEvent(EFT.GlobalEvents.FlareShootZoneEvent ev)
         {
             try
             {
@@ -325,18 +325,18 @@ namespace Manimal.Icebreaker
                 // ExitActivate). now each enter/exit/shot shows up.
                 Plugin.Log.LogDebug($"[HeliExfil] zone event: {ev.ZoneEventType} (profile {ev.PlayerProfileID})");
 
-                if (ev.ZoneEventType == GClass3552.EZoneEventType.PlayerEnteredZone
+                if (ev.ZoneEventType == EFT.GlobalEvents.FlareShootZoneEvent.EZoneEventType.PlayerEnteredZone
                     && ev.PlayerProfileID == Singleton<GameWorld>.Instance?.MainPlayer?.ProfileId
                     && Time.time - _lastEnterNotify > 60f)
                 {
                     _lastEnterNotify = Time.time;
-                    NotificationManagerClass.DisplayMessageNotification(
+                    EFT.Communications.NotificationManager.DisplayMessageNotification(
                         "Signal the helicopter with a green flare to extract",
                         ENotificationDurationType.Long, ENotificationIconType.Default, Color.white);
                 }
 
-                if (ev.ZoneEventType == GClass3552.EZoneEventType.FiredPlayerAddedInShotList
-                    || ev.ZoneEventType == GClass3552.EZoneEventType.PlayerByPartyAddedInShotList)
+                if (ev.ZoneEventType == EFT.GlobalEvents.FlareShootZoneEvent.EZoneEventType.FiredPlayerAddedInShotList
+                    || ev.ZoneEventType == EFT.GlobalEvents.FlareShootZoneEvent.EZoneEventType.PlayerByPartyAddedInShotList)
                 {
                     CallHeli(remote: false);
                 }
@@ -386,7 +386,7 @@ namespace Manimal.Icebreaker
                     }
                     else
                         Plugin.Log.LogWarning($"[HeliExfil] '{HeliRigName}' rig/animator not found — skipping the flight, unlocking on the timer anyway");
-                    NotificationManagerClass.DisplayMessageNotification(
+                    EFT.Communications.NotificationManager.DisplayMessageNotification(
                         "The helicopter has been signaled — inbound, hold the pad",
                         ENotificationDurationType.Long, ENotificationIconType.Default, Color.green);
                     StartCoroutine(HeliArrival());
@@ -429,7 +429,7 @@ namespace Manimal.Icebreaker
                     if (!broken && sh != null)
                     {
                         Shader reg = null;
-                        try { reg = GClass872.Find(sh.name); } catch { }
+                        try { reg = ShadersFinder.Find(sh.name); } catch { }
                         if (reg != null && reg.isSupported && !ReferenceEquals(reg, sh))
                         {
                             m.shader = reg;
@@ -478,7 +478,7 @@ namespace Manimal.Icebreaker
                         catch (Exception pe) { Plugin.Log.LogWarning($"[HeliExfil]   prop dump failed: {pe.Message}"); }
                     }
                     if (!broken) continue;
-                    // GClass872 = the game's shader registry (what fixed the snow); plain
+                    // ShadersFinder = the game's shader registry (what fixed the snow); plain
                     // Shader.Find can hand back the bundle's own dead copy on a name tie.
                     // SMap variants are the LIGHTMAPPED family — on a dynamic object the
                     // lightmap sample is the default white texture = the supernova heli.
@@ -487,12 +487,12 @@ namespace Manimal.Icebreaker
                     if (sh != null)
                     {
                         var wantName = sh.name.EndsWith(" SMap") ? sh.name.Substring(0, sh.name.Length - 5) : sh.name;
-                        try { native = GClass872.Find(wantName); } catch { }
+                        try { native = ShadersFinder.Find(wantName); } catch { }
                         if (native == null || !native.isSupported) native = Shader.Find(wantName);
                         if ((native == null || !native.isSupported) && wantName != sh.name)
                         {
                             Plugin.Log.LogWarning($"[HeliExfil] no dynamic variant '{wantName}' — falling back to the SMap original");
-                            try { native = GClass872.Find(sh.name); } catch { }
+                            try { native = ShadersFinder.Find(sh.name); } catch { }
                             if (native == null || !native.isSupported) native = Shader.Find(sh.name);
                         }
                     }
@@ -645,7 +645,7 @@ namespace Manimal.Icebreaker
             _exit.transform.position = _exitHome; // bring the point home
             if (_exitCol != null) _exitCol.enabled = true; // trigger back online with the skids
             _exit.Status = EExfiltrationStatus.RegularMode;
-            NotificationManagerClass.DisplayMessageNotification(
+            EFT.Communications.NotificationManager.DisplayMessageNotification(
                 "The helicopter has landed — extraction active",
                 ENotificationDurationType.Long, ENotificationIconType.Default, Color.green);
             Plugin.Log.LogDebug("[HeliExfil] heli arrived — exfil UNLOCKED");

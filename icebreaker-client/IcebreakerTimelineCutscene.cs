@@ -139,7 +139,7 @@ namespace Manimal.Icebreaker
             var lst = _rigCam.GetComponent<AudioListener>();
             if (lst != null) lst.enabled = false;
 
-            _realCam = CameraClass.Instance?.Camera;
+            _realCam = EFT.CameraControl.CameraManager.Instance?.Camera;
             if (_realCam == null) _realCam = Camera.main;
             if (_realCam == null) { Bail("no main camera"); yield break; }
 

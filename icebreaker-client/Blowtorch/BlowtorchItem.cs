@@ -2,7 +2,7 @@ using EFT.InventoryLogic;
 
 namespace Manimal.Icebreaker.Blowtorch
 {
-    // the torch is a GENUINE PortableRangeFinderItemClass (parented straight under the
+    // the torch is a GENUINE EFT.InventoryLogic.PortableRangeFinder (parented straight under the
     // PortableRangeFinder node, no custom class): vanilla item creation keys visual
     // builders off exact types, so a subclass NREs in CreateItemAsync the moment
     // anything inspects or loot-spawns it (komradekid ships a whole CreateItemAsync

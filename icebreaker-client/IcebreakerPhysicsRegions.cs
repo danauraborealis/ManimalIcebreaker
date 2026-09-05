@@ -28,7 +28,7 @@ namespace Manimal.Icebreaker
         internal static class Patch_NewestMapOwnsRegions
         {
             private static readonly FieldInfo Owner =
-                AccessTools.Field(typeof(LevelPhysicsSettings), "levelPhysicsSettings_0");
+                AccessTools.Field(typeof(LevelPhysicsSettings), "_used");
 
             [HarmonyPrefix]
             private static void Prefix(LevelPhysicsSettings __instance)

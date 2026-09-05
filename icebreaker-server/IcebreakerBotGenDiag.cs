@@ -1,3 +1,11 @@
+using SPTarkov.Common.Models.Logging;
+using SPTarkov.Server.Core.Generators.Bot;
+using SPTarkov.Server.Core.Models.Eft.Common;
+using SPTarkov.Server.Core.Models.Eft.ItemEvent;
+using SPTarkov.Server.Core.Models.Eft.Match;
+using SPTarkov.Server.Core.Models.Eft.Profile;
+using SPTarkov.Server.Core.Models.Spt.Tables;
+using SPTarkov.Server.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,12 +29,12 @@ namespace Manimal.Icebreaker.Server;
 // arriving EMPTY (client-side request builder broke) vs never arriving at all
 // (client short-circuited before the wire). BotController.Generate is not virtual,
 // so this is a harmony prefix rather than the usual DI override.
-[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 91000)]
+[Injectable(TypePriority = OnLoadOrder.Preload + 91000)]
 public class IcebreakerBotGenDiag(
     ISptLogger<IcebreakerBotGenDiag> logger,
     SPTarkov.Server.Core.Utils.RandomUtil randomUtil,
-    SPTarkov.Server.Core.Services.DatabaseService databaseService,
-    SPTarkov.Server.Core.Generators.BotGenerator botGenerator) : IOnLoad
+    SPTarkov.Server.Core.Models.Spt.Tables.TemplateTable databaseService,
+    SPTarkov.Server.Core.Generators.Bot.BotGenerator botGenerator) : IOnLoad
 {
     // WHO ACTUALLY OWNS THE SLOT (08-13). twice now a field log has been diagnosed by
     // GUESSING which mod displaced our BotGenerator override, and twice the guess was
@@ -38,7 +46,7 @@ public class IcebreakerBotGenDiag(
         try
         {
             var t = botGenerator.GetType();
-            if (t == typeof(IcebreakerBotFirewall)) return; // the normal, healthy case
+            if (IcebreakerBotFirewall.HoldsGeneratorSlot) return; // the normal, healthy case
             logger.Warning($"[Icebreaker] the BotGenerator DI slot is held by '{t.FullName}' "
                 + $"(assembly '{t.Assembly.GetName().Name}'), NOT our firewall — that mod wins the last-registration "
                 + "race, so our per-bot hooks are bypassed. the APBS masquerade and the BD dogtag/euro injections are "
@@ -49,9 +57,9 @@ public class IcebreakerBotGenDiag(
 
     private static ISptLogger<IcebreakerBotGenDiag>? _log;
     private static SPTarkov.Server.Core.Utils.RandomUtil? _rng;
-    private static SPTarkov.Server.Core.Services.DatabaseService? _db;
+    private static SPTarkov.Server.Core.Models.Spt.Tables.TemplateTable? _db;
 
-    public Task OnLoad()
+    public Task OnLoadAsync(CancellationToken cancellationToken)
     {
         _log = logger;
         _rng = randomUtil;

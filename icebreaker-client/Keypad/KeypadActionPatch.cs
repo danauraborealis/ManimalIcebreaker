@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Manimal.Icebreaker.Keypad
 {
-    // prefix on GetActionsClass.GetAvailableActions(GamePlayerOwner, object) —
+    // prefix on EFT.InteractionContextHelper.GetAvailableActions(GamePlayerOwner, object) —
     // when the player aims at a Keypad, replace the vanilla (empty) result
     // with a single "Enter code" action. all other interactive types fall
     // through via return true, so the chain-door smethod_11 postfix is
@@ -19,7 +19,7 @@ namespace Manimal.Icebreaker.Keypad
     {
         private static MethodBase TargetMethod()
         {
-            return typeof(GetActionsClass)
+            return typeof(EFT.InteractionContextHelper)
                 .GetMethods(BindingFlags.Public | BindingFlags.Static)
                 .FirstOrDefault(m =>
                     m.Name == "GetAvailableActions" &&
@@ -31,7 +31,7 @@ namespace Manimal.Icebreaker.Keypad
         private static bool Prefix(
             GamePlayerOwner owner,
             object interactive,
-            ref ActionsReturnClass __result)
+            ref EFT.UI.AvailableInteractionState __result)
         {
             var keypad = interactive as Keypad;
             if (keypad == null) return true;
@@ -43,14 +43,14 @@ namespace Manimal.Icebreaker.Keypad
             catch (Exception ex)
             {
                 Plugin.Log?.LogError($"[Keypad] action build failed: {ex.GetType().Name}: {ex.Message}");
-                __result = new ActionsReturnClass { Actions = new List<ActionsTypesClass>() };
+                __result = new EFT.UI.AvailableInteractionState { Actions = new List<EFT.UI.InteractionAction>() };
             }
             return false;
         }
 
-        private static ActionsReturnClass BuildActions(GamePlayerOwner owner, Keypad keypad)
+        private static EFT.UI.AvailableInteractionState BuildActions(GamePlayerOwner owner, Keypad keypad)
         {
-            var result = new ActionsReturnClass { Actions = new List<ActionsTypesClass>() };
+            var result = new EFT.UI.AvailableInteractionState { Actions = new List<EFT.UI.InteractionAction>() };
             if (owner?.Player == null || keypad == null) return result;
 
             // our own per-keypad Unlocked flag, NOT door.DoorState — BSG can
@@ -64,7 +64,7 @@ namespace Manimal.Icebreaker.Keypad
             var disabled = alreadyUnlocked || sessionActive;
             var name     = alreadyUnlocked ? "Door unlocked" : "Enter code";
 
-            result.Actions.Add(new ActionsTypesClass
+            result.Actions.Add(new EFT.UI.InteractionAction
             {
                 Name     = name,
                 Disabled = disabled,

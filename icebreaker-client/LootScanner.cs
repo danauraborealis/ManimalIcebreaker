@@ -68,7 +68,7 @@ namespace Manimal.Icebreaker
         // = loose item at a raw position). points get their spawned item attached directly,
         // voxels get stitched via AddLootPoint (RestoreData's voxel pass already ran), and
         // clusters form over the full container+simple set.
-        public static void OnRestoreLoot(AIPatrolsData patrols, List<LootItemPositionClass> lootData)
+        public static void OnRestoreLoot(AIPatrolsData patrols, List<JsonType.JsonLootItem> lootData)
         {
             var covers = s_pendingCovers;
             if (covers == null || patrols == null || lootData == null)
@@ -148,7 +148,7 @@ namespace Manimal.Icebreaker
             p.LookPoint = look;
             p._lootableContainerId = null;
             p._lootSpawnId = spawnId;
-            p.Core = core;
+            p._core = core;
             p._coreId = core != null ? core.Id : 0;
             return p;
         }
@@ -193,14 +193,14 @@ namespace Manimal.Icebreaker
             var assigned = new HashSet<int>();
             foreach (var seed in all)
             {
-                if (assigned.Contains(seed.Id) || seed.Core == null)
+                if (assigned.Contains(seed.Id) || seed._core == null)
                     continue;
                 var members = new List<AILootPoint>();
                 foreach (var p in all)
                 {
-                    if (assigned.Contains(p.Id) || p.Core == null)
+                    if (assigned.Contains(p.Id) || p._core == null)
                         continue;
-                    if (p.Core.ConnectionGroupId != seed.Core.ConnectionGroupId)
+                    if (p._core.ConnectionGroupId != seed._core.ConnectionGroupId)
                         continue;
                     if ((p.Position - seed.Position).sqrMagnitude <= ClusterRadius * ClusterRadius)
                         members.Add(p);

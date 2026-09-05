@@ -54,7 +54,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "T1",
       "TriggerName": "botEvent"
     },
@@ -126,7 +126,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "hides0",
       "TriggerName": "botEvent"
     },
@@ -150,7 +150,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "hides1",
       "TriggerName": "botEvent"
     },
@@ -174,55 +174,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
-      "TriggerId": "hides2",
-      "TriggerName": "botEvent"
-    },
-    {
-      "BossChance": 100,
-      "BossDifficult": "normal",
-      "BossEscortAmount": "2",
-      "BossEscortDifficult": "normal",
-      "BossEscortType": "blackDivIb",
-      "BossName": "blackDivIb",
-      "BossPlayer": false,
-      "BossZone": "BotZoneEngineHide",
-      "Delay": 0,
-      "ForceSpawn": true,
-      "IgnoreMaxBots": true,
-      "RandomTimeSpawn": false,
-      "ShowOnTarkovMap": false,
-      "ShowOnTarkovMapPvE": false,
-      "SpawnMode": [
-        "pve",
-        "regular"
-      ],
-      "Supports": null,
-      "Time": 9999,
-      "TriggerId": "hides1",
-      "TriggerName": "botEvent"
-    },
-    {
-      "BossChance": 100,
-      "BossDifficult": "normal",
-      "BossEscortAmount": "3",
-      "BossEscortDifficult": "normal",
-      "BossEscortType": "blackDivIb",
-      "BossName": "blackDivIb",
-      "BossPlayer": false,
-      "BossZone": "BotZoneEngineHide",
-      "Delay": 0,
-      "ForceSpawn": true,
-      "IgnoreMaxBots": true,
-      "RandomTimeSpawn": false,
-      "ShowOnTarkovMap": false,
-      "ShowOnTarkovMapPvE": false,
-      "SpawnMode": [
-        "pve",
-        "regular"
-      ],
-      "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "hides2",
       "TriggerName": "botEvent"
     },
@@ -246,7 +198,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "stern0",
       "TriggerName": "botEvent"
     },
@@ -270,7 +222,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "stern1",
       "TriggerName": "botEvent"
     },
@@ -294,14 +246,14 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "stern2",
       "TriggerName": "botEvent"
     },
     {
       "BossChance": 100,
       "BossDifficult": "normal",
-      "BossEscortAmount": "2",
+      "BossEscortAmount": "5",
       "BossEscortDifficult": "normal",
       "BossEscortType": "blackDivIb",
       "BossName": "blackDivIb",
@@ -318,7 +270,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "stern0",
       "TriggerName": "botEvent"
     },
@@ -342,7 +294,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "stern1",
       "TriggerName": "botEvent"
     },
@@ -366,79 +318,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
-      "TriggerId": "stern2",
-      "TriggerName": "botEvent"
-    },
-    {
-      "BossChance": 100,
-      "BossDifficult": "normal",
-      "BossEscortAmount": "2",
-      "BossEscortDifficult": "normal",
-      "BossEscortType": "blackDivIb",
-      "BossName": "blackDivIb",
-      "BossPlayer": false,
-      "BossZone": "BotZoneStern",
-      "Delay": 0,
-      "ForceSpawn": true,
-      "IgnoreMaxBots": true,
-      "RandomTimeSpawn": false,
-      "ShowOnTarkovMap": false,
-      "ShowOnTarkovMapPvE": false,
-      "SpawnMode": [
-        "pve",
-        "regular"
-      ],
-      "Supports": null,
-      "Time": 9999,
-      "TriggerId": "stern0",
-      "TriggerName": "botEvent"
-    },
-    {
-      "BossChance": 100,
-      "BossDifficult": "normal",
-      "BossEscortAmount": "3",
-      "BossEscortDifficult": "normal",
-      "BossEscortType": "blackDivIb",
-      "BossName": "blackDivIb",
-      "BossPlayer": false,
-      "BossZone": "BotZoneStern",
-      "Delay": 0,
-      "ForceSpawn": true,
-      "IgnoreMaxBots": true,
-      "RandomTimeSpawn": false,
-      "ShowOnTarkovMap": false,
-      "ShowOnTarkovMapPvE": false,
-      "SpawnMode": [
-        "pve",
-        "regular"
-      ],
-      "Supports": null,
-      "Time": 9999,
-      "TriggerId": "stern1",
-      "TriggerName": "botEvent"
-    },
-    {
-      "BossChance": 100,
-      "BossDifficult": "normal",
-      "BossEscortAmount": "4",
-      "BossEscortDifficult": "normal",
-      "BossEscortType": "blackDivIb",
-      "BossName": "blackDivIb",
-      "BossPlayer": false,
-      "BossZone": "BotZoneStern",
-      "Delay": 0,
-      "ForceSpawn": true,
-      "IgnoreMaxBots": true,
-      "RandomTimeSpawn": false,
-      "ShowOnTarkovMap": false,
-      "ShowOnTarkovMapPvE": false,
-      "SpawnMode": [
-        "pve",
-        "regular"
-      ],
-      "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "stern2",
       "TriggerName": "botEvent"
     },
@@ -462,7 +342,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "stern3",
       "TriggerName": "botEvent"
     },
@@ -486,7 +366,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "T3",
       "TriggerName": "botEvent"
     },
@@ -510,7 +390,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "T4",
       "TriggerName": "botEvent"
     },
@@ -534,7 +414,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "wedges1",
       "TriggerName": "botEvent"
     },
@@ -558,7 +438,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "wedges1",
       "TriggerName": "botEvent"
     },
@@ -582,7 +462,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "wedges1",
       "TriggerName": "botEvent"
     },
@@ -606,7 +486,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "wedges2",
       "TriggerName": "botEvent"
     },
@@ -630,7 +510,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "wedges2",
       "TriggerName": "botEvent"
     },
@@ -654,7 +534,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "wedges2",
       "TriggerName": "botEvent"
     },
@@ -678,7 +558,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "wedges3",
       "TriggerName": "botEvent"
     },
@@ -702,7 +582,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "wedges3",
       "TriggerName": "botEvent"
     },
@@ -726,7 +606,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "wedges3",
       "TriggerName": "botEvent"
     },
@@ -750,7 +630,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "wedges4",
       "TriggerName": "botEvent"
     },
@@ -774,7 +654,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "wedges4",
       "TriggerName": "botEvent"
     },
@@ -798,32 +678,8 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "wedges4",
-      "TriggerName": "botEvent"
-    },
-    {
-      "BossChance": 100,
-      "BossDifficult": "normal",
-      "BossEscortAmount": "4",
-      "BossEscortDifficult": "normal",
-      "BossEscortType": "blackDivIb",
-      "BossName": "blackDivIb",
-      "BossPlayer": false,
-      "BossZone": "BotZoneStern",
-      "Delay": 0,
-      "ForceSpawn": true,
-      "IgnoreMaxBots": true,
-      "RandomTimeSpawn": false,
-      "ShowOnTarkovMap": false,
-      "ShowOnTarkovMapPvE": false,
-      "SpawnMode": [
-        "pve",
-        "regular"
-      ],
-      "Supports": null,
-      "Time": 9999,
-      "TriggerId": "stern3",
       "TriggerName": "botEvent"
     },
     {
@@ -846,7 +702,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "stern3",
       "TriggerName": "botEvent"
     },
@@ -870,31 +726,7 @@
         "regular"
       ],
       "Supports": null,
-      "Time": 9999,
-      "TriggerId": "hides3",
-      "TriggerName": "botEvent"
-    },
-    {
-      "BossChance": 100,
-      "BossDifficult": "normal",
-      "BossEscortAmount": "4",
-      "BossEscortDifficult": "normal",
-      "BossEscortType": "blackDivIb",
-      "BossName": "blackDivIb",
-      "BossPlayer": false,
-      "BossZone": "BotZoneEngineHide",
-      "Delay": 0,
-      "ForceSpawn": true,
-      "IgnoreMaxBots": true,
-      "RandomTimeSpawn": false,
-      "ShowOnTarkovMap": false,
-      "ShowOnTarkovMapPvE": false,
-      "SpawnMode": [
-        "pve",
-        "regular"
-      ],
-      "Supports": null,
-      "Time": 9999,
+      "Time": 39600,
       "TriggerId": "hides3",
       "TriggerName": "botEvent"
     },
@@ -1214,9 +1046,9 @@
   "DisabledScavExits": "Cellars,Gate 0",
   "EnableCoop": true,
   "Enabled": true,
-  "EscapeTimeLimit": 50,
-  "EscapeTimeLimitCoop": 50,
-  "EscapeTimeLimitPVE": 50,
+  "EscapeTimeLimit": 600,
+  "EscapeTimeLimitCoop": 600,
+  "EscapeTimeLimitPVE": 600,
   "Events": {
     "Halloween2024": {
       "CrowdAttackBlockRadius": 100,

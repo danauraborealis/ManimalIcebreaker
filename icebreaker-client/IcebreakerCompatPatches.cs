@@ -38,11 +38,11 @@ namespace Manimal.Icebreaker
                             // SCRUB BEFORE BUILDING — the order is the whole point.
                             // GetSubPoint is `subPoints[Mathf.Clamp(index, 0, Count-1)]`:
                             // the index is safe, the CONTENTS are not. a dead entry comes
-                            // straight back, GClass504.method_0 wraps it
+                            // straight back, BotPointControl.method_0 wraps it
                             // (`new PatrolPointContainer(p.TargetPoint.GetSubPoint(index))`,
                             // taken whenever index >= 0, which is every follower formation
                             // slot), and PointSetted reads .Position off a null TargetPoint.
-                            // that was the 34k-NRE storm (22,213 from GClass514.Update plus
+                            // that was the 34k-NRE storm (22,213 from PatrolMoveRoundBoss.Update plus
                             // 5,405 as ManualUpdate re-read the bad container every frame).
                             //
                             // scrubbing SECOND was a real bug, measured 08-13: a point whose
@@ -151,7 +151,7 @@ namespace Manimal.Icebreaker
     // at the night value, so NVGs flip down and flashlights click on naturally, exactly
     // like vanilla night) — the postfix then lifts the FINAL VisibleDist to day level,
     // weather debuff still applied outdoors. bots act night, see day.
-    [HarmonyPatch(typeof(LookSensor), "method_2")]
+    [HarmonyPatch(typeof(LookSensor), nameof(LookSensor.CalcVisibleDistance))]
     internal static class Patch_DayVisionOnLitShip
     {
         // proof-of-life: fika bots felt blind (07-28 coop) and the first question is
@@ -166,7 +166,7 @@ namespace Manimal.Icebreaker
                 Plugin.Log.LogDebug("[Vision] day-vision lift is live (200 applications this raid)");
             try
             {
-                var bo = __instance.BotOwner;
+                var bo = __instance._botOwner;
                 if (bo == null || bo.Settings == null) return;
                 float baseDist = bo.Settings.Current.CurrentVisibleDistance;
                 var look = bo.Settings.FileSettings.Look;
@@ -200,7 +200,7 @@ namespace Manimal.Icebreaker
     // so this isn't weather the player can wait out — it's a flat, unending tax on every
     // sighting, and the ship is lit end to end. bots act night, see day; that now covers
     // how fast they notice as well as how far they see.
-    [HarmonyPatch(typeof(EnemyInfo), "method_11")]
+    [HarmonyPatch(typeof(EnemyInfo), nameof(EnemyInfo.GetWeatherK))]
     internal static class Patch_NoWeatherSeenDebuff
     {
         private static int _applications;
@@ -241,7 +241,7 @@ namespace Manimal.Icebreaker
                     if (Blowtorch.BlowtorchIds.IsTorch(it)) torches.Add(it);
                 foreach (var it in torches)
                 {
-                    var op = InteractionsHandlerClass.Remove(it, player.InventoryController, true);
+                    var op = EFT.InventoryLogic.ItemManipulator.Remove(it, player.InventoryController, true);
                     if (op.Failed) { Plugin.Log.LogWarning($"[Torch] extract-strip validation failed: {op.Error}"); continue; }
                     player.InventoryController.TryRunNetworkTransaction(op, r =>
                     { if (!r.Succeed) Plugin.Log.LogWarning($"[Torch] extract-strip execution failed: {r.Error}"); });
@@ -255,7 +255,7 @@ namespace Manimal.Icebreaker
 
     // HEARING-CHAIN GUARD + FORENSICS. discovered via the CS gas mod (its grenades
     // never popped on icebreaker): a bot with half-initialized AI state NREs in
-    // BotMemoryClass.Spotted every time it HEARS anything. two blast radii beyond the
+    // EFT.BotMemory.Spotted every time it HEARS anything. two blast radii beyond the
     // NRE spam: Grenade.InvokeBlowUpEvent runs the bot-notification event BEFORE
     // OnExplosion, so one broken bot aborts every grenade on the map — and bot sound
     // notifications fan out through one multicast delegate, so everything subscribed
@@ -267,14 +267,14 @@ namespace Manimal.Icebreaker
     // prime suspect is OUR premake pipeline ("blackDivAssault profile arrived NAKED"),
     // so this one logs the bot's identity + full stack, throttled: one raid names the
     // broken bot and the null field, then the creation path gets fixed for real.
-    [HarmonyPatch(typeof(BotMemoryClass), nameof(BotMemoryClass.Spotted))]
+    [HarmonyPatch(typeof(EFT.BotMemory), nameof(EFT.BotMemory.Spotted))]
     internal static class Patch_SpottedGuardAndForensics
     {
         private static float _nextLog;
         private static int _swallowed;
 
         [HarmonyFinalizer]
-        private static Exception Finalizer(BotMemoryClass __instance, Exception __exception)
+        private static Exception Finalizer(EFT.BotMemory __instance, Exception __exception)
         {
             if (__exception == null) return null;
             _swallowed++;
@@ -284,7 +284,7 @@ namespace Manimal.Icebreaker
                 string who = "<unknown>";
                 try
                 {
-                    var bo = __instance.BotOwner_0;
+                    var bo = __instance._owner;
                     who = bo != null
                         ? $"{bo.name} role={bo.Profile?.Info?.Settings?.Role} profileNick='{bo.Profile?.Info?.Nickname}'"
                         : "<BotOwner_0 null>";
@@ -316,7 +316,7 @@ namespace Manimal.Icebreaker
     // non-AI owners it fires after TripwiresGlobalSettings.InertSeconds (300s) and
     // deactivates the wire. our authored wires have a synthetic owner (no player), so
     // they all died 5 minutes into the raid. authored wires never go stale.
-    [HarmonyPatch(typeof(TripwireSynchronizableObject), "method_3")]
+    [HarmonyPatch(typeof(TripwireSynchronizableObject), nameof(TripwireSynchronizableObject.DisableTripwireByTimer))]
     internal static class Patch_AuthoredTripwireNeverInert
     {
         [HarmonyPrefix]

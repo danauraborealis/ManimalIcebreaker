@@ -44,10 +44,10 @@ namespace Manimal.Icebreaker
 
         // the game hands smethod_6 the authoritative Location object before any other
         // identity exists — capture the id so construction-time patches can gate on it
-        [HarmonyPatch(typeof(LocalGame), "smethod_6")]
+        [HarmonyPatch(typeof(LocalGame), nameof(LocalGame.Create))]
         internal static class Patch_CaptureLocationId
         {
-            private static void Prefix(LocationSettingsClass.Location location)
+            private static void Prefix(JsonType.LocationSettings.Location location)
             {
                 PendingLocationId = location?.Id;
                 // before any scene (and so any LevelPhysicsSettings.Awake) loads
@@ -90,7 +90,7 @@ namespace Manimal.Icebreaker
                     {
                         var pid = __instance?.MainPlayer?.ProfileId;
                         if (!string.IsNullOrEmpty(pid))
-                            viaTransit = TransitControllerAbstractClass.IsTransit(pid, out transitCount);
+                            viaTransit = EFT.TransitController.IsTransit(pid, out transitCount);
                     }
                     catch { }
 

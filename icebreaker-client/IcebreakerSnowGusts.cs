@@ -29,8 +29,17 @@ namespace Manimal.Icebreaker
         private SnowFlakes _snow;
         private bool _failed;
 
+        // (08-29 field report: 90%+ of the frame going to IcebreakerSnowGusts.LateUpdate)
+        // Spawn() creates its OWN standalone GameObject rather than attaching to a caller's,
+        // so unlike every sibling in RaidFixPatches's init chain it never had a
+        // GetComponent<T>()==null guard at the call site - and StageTwoInit (which calls it)
+        // is known to re-run multiple times per raid (12x measured in one session). Every
+        // re-run stacked another full, independently-ticking gust system on top of the
+        // last. Guard here instead, same pattern WedgeVoice already uses for its own
+        // find-or-create.
         internal static void Spawn()
         {
+            if (UnityEngine.Object.FindObjectOfType<IcebreakerSnowGusts>() != null) return;
             var go = new GameObject("Icebreaker_SnowGusts");
             go.AddComponent<IcebreakerSnowGusts>();
         }
