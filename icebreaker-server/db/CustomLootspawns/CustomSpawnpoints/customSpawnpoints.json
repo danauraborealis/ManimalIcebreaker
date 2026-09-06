@@ -1,0 +1,1022 @@
+{
+	"sandbox": [
+        {
+            "locationId": "(42.2461281 24.731472 -55.30857)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_6",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                    "x": 42.2461281,
+                    "y": 24.731472,
+                    "z": -55.30857
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 270.0,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee16a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee16b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee16a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee16a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        },
+		{
+            "locationId": "(153.743759 24.3189888 -58.32195)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_7",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                    "x": 153.743759,
+                    "y": 24.3189888,
+                    "z": -58.32195
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 90.0,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee17a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee17b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee17a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee17a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        },
+		{
+            "locationId": "(-18.542 24.887 -29.004)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_13",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                    "x": -18.542,
+                    "y": 24.887,
+                    "z": -29.004
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 90.0,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee13a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee13b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee13a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee13a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        },
+		{
+            "locationId": "(-24.913105 25.3694382 -28.3779888)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_21",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                    "x": -24.913105,
+                    "y": 25.3694382,
+                    "z": -28.3779888
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee21a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee21b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee21a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee21a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        },
+		{
+            "locationId": "(-33.03988 25.9 20.1740189)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_3",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                   "x": -33.03988,
+                   "y": 25.9,
+                   "z": 20.1740189
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee03a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee03b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee03a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee03a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        },
+		{
+            "locationId": "(-30.26654 26.3 48.3536644)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_5",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                   "x": -30.26654,
+                   "y": 26.3,
+                   "z": 48.3536644
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 180.0,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee05a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee05b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee05a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee05a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        },
+		{
+            "locationId": "(17.6253624 24.5243275 337.3828)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_8",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                   "x": 17.6253624,
+                   "y": 24.5243275,
+                   "z": 337.3828
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 180.0,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee08a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee08b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee08a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee08a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        },
+		{
+            "locationId": "(111.767 24.374 179.338)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_4",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                   "x": 111.767,
+                   "y": 24.374,
+                   "z": 179.338
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee04a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee04b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee04a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee04a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        }
+    ],
+	"sandbox_high": [
+        {
+            "locationId": "(42.2461281 24.731472 -55.30857)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_6",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                    "x": 42.2461281,
+                    "y": 24.731472,
+                    "z": -55.30857
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 270.0,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee16a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee16b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee16a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee16a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        },
+		{
+            "locationId": "(153.743759 24.3189888 -58.32195)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_7",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                    "x": 153.743759,
+                    "y": 24.3189888,
+                    "z": -58.32195
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 90.0,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee17a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee17b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee17a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee17a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        },
+		{
+            "locationId": "(-18.542 24.887 -29.004)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_13",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                    "x": -18.542,
+                    "y": 24.887,
+                    "z": -29.004
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 90.0,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee13a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee13b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee13a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee13a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        },
+		{
+            "locationId": "(-24.913105 25.3694382 -28.3779888)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_21",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                    "x": -24.913105,
+                    "y": 25.3694382,
+                    "z": -28.3779888
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee21a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee21b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee21a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee21a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        },
+		{
+            "locationId": "(-33.03988 25.9 20.1740189)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_3",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                   "x": -33.03988,
+                   "y": 25.9,
+                   "z": 20.1740189
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee03a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee03b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee03a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee03a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        },
+		{
+            "locationId": "(-30.26654 26.3 48.3536644)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_5",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                   "x": -30.26654,
+                   "y": 26.3,
+                   "z": 48.3536644
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 180.0,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee05a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee05b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee05a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee05a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        },
+		{
+            "locationId": "(17.6253624 24.5243275 337.3828)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_8",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                   "x": 17.6253624,
+                   "y": 24.5243275,
+                   "z": 337.3828
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 180.0,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee08a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee08b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee08a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee08a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        },
+		{
+            "locationId": "(111.767 24.374 179.338)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_4",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                   "x": 111.767,
+                   "y": 24.374,
+                   "z": 179.338
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee04a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee04b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee04a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee04a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        }
+    ],
+	"factory4_day": [
+		{
+            "locationId": "(22.345 2.649 40.771)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_11",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                   "x": 22.345,
+                   "y": 2.649,
+                   "z": 40.771
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee11a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee11b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee11a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee11a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        }
+	],
+	"factory4_night": [
+		{
+            "locationId": "(22.345 2.649 40.771)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_11",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                   "x": 22.345,
+                   "y": 2.649,
+                   "z": 40.771
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee11a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee11b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee11a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee11a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        }
+	],
+	"bigmap": [
+		{
+            "locationId": "(499.388 16.659 90.843)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_1",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                   "x": 499.388,
+                   "y": 16.659,
+                   "z": 90.843
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 307.0,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee01a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee01b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee01a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee01a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        },
+		{
+            "locationId": "(178.831 7.472 163.443)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_12",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                   "x": 178.831,
+                   "y": 7.472,
+                   "z": 163.443
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 190.0,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee12a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee12b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee12a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee12a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        },
+		{
+            "locationId": "(77.513 2.860 -154.037)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_10",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                   "x": 77.518,
+                   "y": 2.869,
+                   "z": -154.040
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 348.5,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee10a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee10b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee10a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee10a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        }
+	],
+	"Lighthouse" : [
+		{
+            "locationId": "(-42.912 12.721 -888.517)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_14",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                   "x": -42.912,
+                   "y": 12.721,
+                   "z": -888.517
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 270,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee14a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee14b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee14a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee14a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        },
+		{
+            "locationId": "(46.715 13.831 -874.983)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_2",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                   "x": 46.715,
+                   "y": 13.831,
+                   "z": -874.983
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 180,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee02a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee02b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee02a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee02a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        },
+		{
+            "locationId": "(33.977 13.808 -856.0)",
+            "probability": 0.25,
+            "template": {
+                "Id": "paradigm_shipping_poster_spawn_9",
+                "IsContainer": false,
+                "useGravity": false,
+                "randomRotation": false,
+                "Position": {
+                   "x": 33.977,
+                   "y": 13.808,
+                   "z": -856.0
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 45.0,
+                    "z": 0.0
+                },
+                "IsGroupPosition": false,
+                "GroupPositions": [],
+                "IsAlwaysSpawn": false,
+                "Root": "699f0b877c23862b4b0ee09a",
+                "Items": [
+                    {
+                        "_id": "699f0b877c23862b4b0ee09b",
+                        "_tpl": "699f0b877c23862b4b0ee19c",
+						"upd": {
+						 "StackObjectsCount": 1
+						},
+						"composedKey": "699f0b877c23862b4b0ee09a"
+                    }
+                ]
+            },
+			"itemDistribution": [
+                {
+                    "composedKey": {
+                        "key": "699f0b877c23862b4b0ee09a"
+                    },
+                    "relativeProbability": 1
+                }
+            ]
+        }
+	]
+}
