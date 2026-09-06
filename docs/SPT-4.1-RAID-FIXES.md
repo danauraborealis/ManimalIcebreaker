@@ -53,6 +53,22 @@ all peers, then restore the desired chance afterward.
 
 ### Gameplay checks
 
+The chain-door fuse now invokes SPT 4.1's native `HandlerExplosion` at the SZ-1
+charge, using ManimalTerminal's `terminal_gates.json` blast settings: 5–10m
+damage falloff, three fragments, strength 6, directional multiplier 7 over
+360 degrees, and the authored blindness/contusion/armor settings and `Fire` FX.
+The existing ten-second fuse, particles, audio and door animation remain.
+The blast uses environmental damage without player attribution and runs on
+each peer, as Fika's observed-player bridges reject remote environmental damage.
+Duplicate plant events are ignored and the pending fuse is owned by GameWorld
+so it is removed on raid teardown.
+
+Test the chain door in solo and co-op with players exposed near the charge,
+behind solid cover, and beyond the blast range. Check health, armor, concussion
+and camera shake, including a guest planting the charge and a second raid.
+Look for `[ChainDoor] native Terminal-style blast fired` on each peer. The build
+and 94 Harmony target checks pass; these gameplay checks still require a raid.
+
 1. Outdoors, compare unaimed view, low/high magnification and multiple scopes:
    snow and volumetric fog should remain visible. Check indoor fog exclusions,
    live fog toggles, weapon switching, and a second raid on another map.

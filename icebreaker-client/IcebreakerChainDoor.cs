@@ -5,6 +5,7 @@ using Comfort.Common;
 using HarmonyLib;
 using UnityEngine;
 using EFT;
+using EFT.GameTriggers;
 using EFT.InventoryLogic;
 
 namespace Manimal.Icebreaker
@@ -280,12 +281,13 @@ namespace Manimal.Icebreaker
             return true;
         }
 
-        // planting done: charge consumed -> 10s fuse -> IsExplosion pulse + the VFX burst
+        // planting done: charge consumed -> 10s fuse -> native blast + animation/VFX
         // (Flash/Smoke/Sparks/DistortionWave particle rig authored next to the door)
         internal const float FuseSeconds = 10f;
 
         internal static void OnPlanted()
         {
+            if (Planted) return;
             Planted = true;
             var prop = FindChargeProp();
             if (prop != null) prop.gameObject.SetActive(true); // the charge appears on the door
@@ -293,7 +295,11 @@ namespace Manimal.Icebreaker
             EnsureClips();
             var at = prop != null ? prop.position : (FindAnimator(null)?.transform.position ?? Vector3.zero);
             PlayAt(_sndTimer, at, 30f);
-            new GameObject("Icebreaker_ChainDoorFuse").AddComponent<FuseRunner>();
+            var fuse = new GameObject("Icebreaker_ChainDoorFuse");
+            // Tear down a pending fuse with its raid, including an early extraction.
+            var world = Singleton<GameWorld>.Instance;
+            if (world != null) fuse.transform.SetParent(world.transform, false);
+            fuse.AddComponent<FuseRunner>();
             Plugin.Log.LogInfo($"[Plant] charge set — detonation in {FuseSeconds:0}s");
             RaiseWorld("plant");
         }
@@ -375,8 +381,15 @@ namespace Manimal.Icebreaker
             {
                 yield return new WaitForSeconds(FuseSeconds);
 
+                if (!IceGate.On || !Planted || Exploded) { Destroy(gameObject); yield break; }
                 Exploded = true;
                 var anim = FindAnimator(null);
+                var prop = FindChargeProp();
+                var vfx = FindVfx();
+                // Place the gameplay blast at the charge, not the door rig's pivot.
+                var origin = prop != null ? prop : (vfx != null ? vfx : anim != null ? anim.transform : null);
+                if (origin != null) Detonate(origin);
+                else Plugin.Log.LogError("[ChainDoor] native blast skipped: charge/door origin is missing");
                 if (anim != null)
                 {
                     EnsureClips();
@@ -388,7 +401,6 @@ namespace Manimal.Icebreaker
                     pr.Param = "IsExplosion";
                 }
 
-                var vfx = FindVfx();
                 if (vfx != null)
                 {
                     if (!vfx.gameObject.activeSelf) vfx.gameObject.SetActive(true);
@@ -401,11 +413,54 @@ namespace Manimal.Icebreaker
                 }
 
                 // the charge prop is spent — vanish it with the blast
-                var prop = FindChargeProp();
                 if (prop != null) prop.gameObject.SetActive(false);
-                Destroy(gameObject);
+                // HandlerExplosion runs its damage coroutine on GameWorld after one
+                // frame. Keep its transform alive until that native work completes.
+                Destroy(gameObject, 2f);
+            }
+
+            private void Detonate(Transform origin)
+            {
+                try
+                {
+                    transform.SetPositionAndRotation(origin.position, origin.rotation);
+                    var blast = gameObject.AddComponent<HandlerExplosion>();
+                    // Invoke directly from our fuse; Start would subscribe an unrelated
+                    // native trigger. Its own one-shot guard still applies.
+                    blast.enabled = false;
+                    blast._mineSettings = CreateBlastSettings();
+                    blast._damageType = EDamageType.Environment;
+                    // Environmental damage is local on Fika's human players; observed
+                    // bridges reject it. Run on each peer just like Terminal's handler.
+                    // No player attribution: this is a map hazard, not a thrown grenade.
+                    blast.OnExplosionTriggerEvent(new TriggerEvent { OriginProfileId = string.Empty });
+                    Plugin.Log.LogInfo($"[ChainDoor] native Terminal-style blast fired at {transform.position} (5–10m)");
+                }
+                catch (Exception e) { Plugin.Log.LogError($"[ChainDoor] native blast failed: {e}"); }
             }
         }
+
+        // Terminal's authored HandlerExplosion values from terminal_gates.json.
+        // Native EFT handles cover, fragments, armor, concussion and grenade shake.
+        internal static MineDirectional.MineSettings CreateBlastSettings() => new MineDirectional.MineSettings
+        {
+            _blindness = new Vector3(10f, 10f, 10f),
+            _contusion = new Vector3(10f, 10f, 10f),
+            _armorDistanceDistanceDamage = new Vector3(10f, 10f, 10f),
+            _minExplosionDistance = 5f,
+            _maxExplosionDistance = 10f,
+            _fragmentsCount = 3,
+            _strength = 6f,
+            _tag = "default",
+            _armorDamage = 0.7f,
+            _staminaBurnRate = 5f,
+            _penetrationPower = 32f,
+            _fragmentType = "5996f6d686f77467977ba6cc",
+            _fxName = "Fire",
+            _ignoreRole = 0,
+            _directionalDamageAngle = 360f,
+            _directionalDamageMultiplier = 7f
+        };
 
         // prompt spam played a rattle per press, stacking into a chorus — one try-open
         // at a time, gated by the clip's own length
