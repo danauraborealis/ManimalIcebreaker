@@ -1,10 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using EFT.CameraControl;
+using EFT.AssetsManager;
 using EFT.InventoryLogic;
 using EFT.PrefabSettings;
 using HarmonyLib;
@@ -17,7 +20,7 @@ namespace Manimal.Icebreaker
     // data path anywhere (scene or server db — verified) — the game's ONLY tripwire
     // entry is GameWorld.PlantTripwire (the player-plant API), so we author markers
     // in the SDK scenes and plant through it at raid start. that buys the real
-    // procedural wire mesh, bot awareness (BotEventHandler), spot/defuse interactions
+    // procedural wire mesh, bot awareness (GlobalEventDispatcher), spot/defuse interactions
     // (10s bare / 5s multitool) and the grenade detonation for free.
     //
     // authoring: ManimalTripwireMarker component (or bare empty) named
@@ -40,7 +43,8 @@ namespace Manimal.Icebreaker
             "5710c24ad2720bc3458b45a3", // F-1
         };
         private static TripwireVisual _donorVisual;
-        private static readonly HashSet<string> _patchedTpls = new HashSet<string>();
+        private static GameObject _visualRoot;
+        private static readonly HashSet<string> _visualTpls = new HashSet<string>();
 
         // --- coop seed handshake ---
         // every peer plants its OWN local wires, so a per-marker roll below 1.0 only
@@ -72,7 +76,9 @@ namespace Manimal.Icebreaker
                 SainLocationCompat.TryPatch(new Harmony("com.manimal.icebreaker.saincompat"));
                 if (!Plugin.Tripwires.Value) return;
                 _donorVisual = null;      // per-raid: pooled assets die with the raid
-                _patchedTpls.Clear();
+                if (_visualRoot != null) UnityEngine.Object.Destroy(_visualRoot);
+                _visualRoot = null;
+                _visualTpls.Clear();
                 _seedReady = false;       // a second raid must re-handshake
                 _forceAll = false;
                 var host = new GameObject("Icebreaker_Tripwires");
@@ -82,14 +88,23 @@ namespace Manimal.Icebreaker
 
         private class TripwirePlanter : MonoBehaviour
         {
+            private CancellationTokenSource _loading;
+
+            private void OnDestroy()
+            {
+                _loading?.Cancel();
+                _loading?.Dispose();
+                _loading = null;
+            }
+
             private IEnumerator Start()
             {
                 // let the raid finish waking up — pool + sync processor exist by then
                 yield return new WaitForSeconds(3f);
                 var world = Singleton<GameWorld>.Instance;
-                var factory = Singleton<ItemFactoryClass>.Instance;
-                var pool = Singleton<PoolManagerClass>.Instance;
-                if (world == null || factory == null || pool == null)
+                var factory = Singleton<EFT.ItemFactory>.Instance;
+                var pool = Singleton<EFT.ObjectsFactory>.Instance;
+                if (world == null || factory == null || pool == null || !pool.IsPoolReady(ObjectsFactory.PoolsCategory.Raid))
                 {
                     Plugin.Log.LogWarning("[Tripwires] world/factory/pool not ready");
                     Destroy(gameObject);
@@ -121,6 +136,8 @@ namespace Manimal.Icebreaker
 
                 var jobs = CollectJobs(factory);
                 if (jobs.Count == 0) { Destroy(gameObject); yield break; }
+                foreach (var job in jobs) _visualTpls.Add(job.grenade.TemplateId.ToString());
+                Plugin.Log.LogInfo($"[Tripwires] preparing {jobs.Count} selected wire(s)");
 
                 // the grenade bundles are NOT resident — the game only preloads items
                 // that exist in inventories/loot at raid start, and these are conjured.
@@ -131,36 +148,61 @@ namespace Manimal.Icebreaker
                 foreach (var donorTpl in DonorTpls)
                     try
                     {
-                        var d = factory.CreateItem(factory.MongoID_0, donorTpl, null);
+                        var d = factory.CreateItem(factory.NextId, donorTpl, null);
                         if (d != null) resources.AddRange(d.Template.AllResources);
                     }
                     catch { }
                 Task load = null;
+                _loading = CancellationTokenSource.CreateLinkedTokenSource(pool.PoolsCancellationToken);
                 try
                 {
                     load = pool.LoadBundlesAndCreatePools(
-                        PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online,
-                        resources.ToArray(), JobPriorityClass.Low, null, default);
+                        EFT.ObjectsFactory.PoolsCategory.Raid, EFT.ObjectsFactory.AssemblyType.Local,
+                        // In 4.1 Low does not await InitAndFillPools. General awaits
+                        // real, ready instances rather than returning pool placeholders.
+                        resources.Distinct().ToArray(), Diz.Jobs.JobYieldPriority.General, null, _loading.Token);
                 }
                 catch (Exception e) { Plugin.Log.LogWarning($"[Tripwires] bundle preload kickoff failed: {e.Message}"); }
                 if (load != null)
                 {
-                    float deadline = Time.realtimeSinceStartup + 30f;
-                    while (!load.IsCompleted && Time.realtimeSinceStartup < deadline) yield return null;
-                    if (!load.IsCompleted) Plugin.Log.LogWarning("[Tripwires] bundle preload timed out — planting anyway");
-                    else if (load.IsFaulted) Plugin.Log.LogWarning($"[Tripwires] bundle preload faulted: {load.Exception?.GetBaseException().Message}");
+                    // Observe faults even if raid teardown cancels this coroutine.
+                    _ = load.ContinueWith(t => { _ = t.Exception; }, TaskContinuationOptions.OnlyOnFaulted);
+                    float started = Time.realtimeSinceStartup;
+                    float nextReport = started + 30f;
+                    while (!load.IsCompleted && Time.realtimeSinceStartup - started < 120f)
+                    {
+                        if (!IceGate.On || Singleton<GameWorld>.Instance != world) { Destroy(gameObject); yield break; }
+                        if (Time.realtimeSinceStartup >= nextReport)
+                        {
+                            Plugin.Log.LogWarning("[Tripwires] still preparing grenade assets; waiting for usable pools");
+                            nextReport += 30f;
+                        }
+                        yield return null;
+                    }
                 }
+                if (load == null || !load.IsCompleted || load.IsFaulted || load.IsCanceled)
+                {
+                    Plugin.Log.LogError($"[Tripwires] planted 0/{jobs.Count}: asset preparation failed " +
+                        (load?.Exception?.GetBaseException().Message ?? "(cancelled or timed out)"));
+                    Destroy(gameObject);
+                    yield break;
+                }
+                if (!IceGate.On || Singleton<GameWorld>.Instance != world) { Destroy(gameObject); yield break; }
+
+                // Retain an independent donor clone for the raid. Returning a borrowed
+                // item to its pool must not invalidate the visual used by later wires.
+                PrepareDonorVisual(factory, world);
 
                 int planted = 0;
                 foreach (var j in jobs)
                 {
-                    if (!EnsureTripwireVisual(factory, j.grenade))
-                    {
-                        Plugin.Log.LogWarning($"[Tripwires] no tripwire visual for '{j.grenade.TemplateId}' — '{j.name}' skipped");
-                        continue;
-                    }
                     try
                     {
+                        if (!EnsureTripwireVisual(j.grenade))
+                        {
+                            Plugin.Log.LogWarning($"[Tripwires] no usable tripwire visual for '{j.grenade.TemplateId}' — '{j.name}' skipped");
+                            continue;
+                        }
                         // attribution: the wires belong to the ship, not the player —
                         // absent-owner grenades are a handled path in EFT
                         world.PlantTripwire(j.grenade, OwnerId, j.from, j.to);
@@ -171,7 +213,7 @@ namespace Manimal.Icebreaker
                         Plugin.Log.LogWarning($"[Tripwires] plant failed at '{j.name}' ({j.from}): {e.Message}");
                     }
                 }
-                Plugin.Log.LogDebug($"[Tripwires] planted {planted}/{jobs.Count}");
+                Plugin.Log.LogInfo($"[Tripwires] planted {planted}/{jobs.Count} selected wire(s)");
                 Destroy(gameObject);
             }
         }
@@ -179,11 +221,11 @@ namespace Manimal.Icebreaker
         private struct Job
         {
             public string name;
-            public ThrowWeapItemClass grenade;
+            public EFT.InventoryLogic.ThrowWeap grenade;
             public Vector3 from, to;
         }
 
-        private static List<Job> CollectJobs(ItemFactoryClass factory)
+        private static List<Job> CollectJobs(EFT.ItemFactory factory)
         {
             var jobs = new List<Job>();
             var markers = new List<Transform>();
@@ -232,9 +274,9 @@ namespace Manimal.Icebreaker
                 if (at >= 0 && m.name.Length > at + 1) tpl = m.name.Substring(at + 1).Trim();
 
                 Item item = null;
-                try { item = factory.CreateItem(factory.MongoID_0, tpl, null); }
+                try { item = factory.CreateItem(factory.NextId, tpl, null); }
                 catch (Exception e) { Plugin.Log.LogWarning($"[Tripwires] item create failed for '{tpl}': {e.Message}"); }
-                var grenade = item as ThrowWeapItemClass;
+                var grenade = item as EFT.InventoryLogic.ThrowWeap;
                 if (grenade == null)
                 {
                     Plugin.Log.LogWarning($"[Tripwires] tpl '{tpl}' is not a throwable — marker '{m.name}' skipped");
@@ -246,65 +288,73 @@ namespace Manimal.Icebreaker
             return jobs;
         }
 
-        // modded grenades (CS gas) have no TripwireItself on their GrenadePrefab — the
-        // authored "grenade hanging on the wire" visual only exists on vanilla
-        // tripwire-compatible nades — and SetupGrenade NREs on it (stake-but-no-wire).
-        // fix: graft a donor visual onto the LOADED PREFAB ASSET once per tpl; every
-        // pooled instance after that carries it.
-        private static bool EnsureTripwireVisual(ItemFactoryClass factory, Item grenade)
+        private static bool UsableVisual(TripwireVisual visual) =>
+            visual != null && visual.PivotPosition != null && visual.GrenadeModel != null;
+
+        private static void PrepareDonorVisual(EFT.ItemFactory factory, GameWorld world)
         {
-            if (_patchedTpls.Contains(grenade.TemplateId.ToString())) return true;
-            var pool = Singleton<PoolManagerClass>.Instance;
-            if (pool == null) return false;
-
-            var inst = pool.CreateItem(grenade, ECameraType.Default, null, false);
-            var gp = inst != null ? inst.GetComponent<GrenadePrefab>() : null;
-            bool ok = gp != null && gp.TripwireItself != null;
-            string prefabName = inst != null ? inst.name.Replace("(Clone)", "").Trim() : null;
-            if (inst != null) UnityEngine.Object.Destroy(inst.gameObject);
-            if (ok) { _patchedTpls.Add(grenade.TemplateId.ToString()); return true; }
-            if (gp == null)
+            if (UsableVisual(_donorVisual)) return;
+            var pool = Singleton<ObjectsFactory>.Instance;
+            foreach (var tpl in DonorTpls)
             {
-                Plugin.Log.LogDebug($"[Tripwires] no GrenadePrefab on '{grenade.TemplateId}' — bundle still not loaded?");
-                return false;
-            }
-
-            if (_donorVisual == null)
-                foreach (var donorTpl in DonorTpls)
+                GameObject instance = null;
+                try
                 {
-                    try
+                    var donor = factory.CreateItem(factory.NextId, tpl, null);
+                    instance = pool.CreateItem(donor, ECameraType.Default, null, false);
+                    var source = instance != null ? instance.GetComponent<GrenadePrefab>()?.TripwireItself : null;
+                    if (!UsableVisual(source)) continue;
+                    if (_visualRoot == null)
                     {
-                        var donor = factory.CreateItem(factory.MongoID_0, donorTpl, null);
-                        var dInst = donor != null ? pool.CreateItem(donor, ECameraType.Default, null, false) : null;
-                        var dgp = dInst != null ? dInst.GetComponent<GrenadePrefab>() : null;
-                        _donorVisual = dgp != null ? dgp.TripwireItself : null;
-                        if (dInst != null) UnityEngine.Object.Destroy(dInst.gameObject);
-                        if (_donorVisual != null)
-                        {
-                            Plugin.Log.LogInfo($"[Tripwires] donor visual from '{donorTpl}'");
-                            break;
-                        }
+                        _visualRoot = new GameObject("Icebreaker_TripwireDonor");
+                        _visualRoot.transform.SetParent(world.transform, false);
+                        _visualRoot.SetActive(false);
                     }
-                    catch (Exception e) { Plugin.Log.LogWarning($"[Tripwires] donor '{donorTpl}' fetch failed: {e.Message}"); }
+                    _donorVisual = UnityEngine.Object.Instantiate(source, _visualRoot.transform, false);
+                    // Hidden by the parent here; native SetupStakes clones an active
+                    // visual beneath the actual stake later.
+                    _donorVisual.gameObject.SetActive(true);
+                    Plugin.Log.LogInfo($"[Tripwires] retained donor visual from '{tpl}'");
+                    return;
                 }
-            if (_donorVisual == null || prefabName == null) return false;
-
-            int patched = 0;
-            foreach (var asset in Resources.FindObjectsOfTypeAll<GrenadePrefab>())
-                if (!asset.gameObject.scene.IsValid() && asset.TripwireItself == null
-                    && asset.name == prefabName)
-                {
-                    asset.TripwireItself = _donorVisual;
-                    patched++;
-                }
-            if (patched > 0)
-            {
-                Plugin.Log.LogDebug($"[Tripwires] grafted donor tripwire visual onto '{prefabName}' ({patched} asset)");
-                _patchedTpls.Add(grenade.TemplateId.ToString());
-                return true;
+                catch (Exception e) { Plugin.Log.LogWarning($"[Tripwires] donor '{tpl}' failed: {e.Message}"); }
+                finally { if (instance != null) AssetPoolObject.ReturnToPool(instance); }
             }
-            Plugin.Log.LogWarning($"[Tripwires] prefab asset '{prefabName}' not found to graft");
-            return false;
+            Plugin.Log.LogWarning("[Tripwires] no donor visual available; only grenades with their own valid visual can be planted");
+        }
+
+        // Repair the INSTANCE returned to SetupStakes, including instances already
+        // created in a pool. Scanning prefab assets by name missed these copies.
+        [HarmonyPatch(typeof(ObjectsFactory), nameof(ObjectsFactory.CreateItem),
+            typeof(Item), typeof(ECameraType), typeof(IPlayer), typeof(bool))]
+        private static class Patch_TripwireItemVisual
+        {
+            [HarmonyPostfix]
+            private static void Postfix(Item item, GameObject __result)
+            {
+                if (!IceGate.On || item == null || __result == null ||
+                    !_visualTpls.Contains(item.TemplateId.ToString()) || !UsableVisual(_donorVisual)) return;
+                var prefab = __result.GetComponent<GrenadePrefab>();
+                if (prefab != null && !UsableVisual(prefab.TripwireItself))
+                    prefab.TripwireItself = _donorVisual;
+            }
+        }
+
+        private static bool EnsureTripwireVisual(Item grenade)
+        {
+            GameObject instance = null;
+            try
+            {
+                instance = Singleton<ObjectsFactory>.Instance.CreateItem(grenade, ECameraType.Default, null, false);
+                var prefab = instance != null ? instance.GetComponent<GrenadePrefab>() : null;
+                if (prefab == null)
+                {
+                    Plugin.Log.LogWarning($"[Tripwires] prepared item '{grenade.TemplateId}' returned no GrenadePrefab");
+                    return false;
+                }
+                return UsableVisual(prefab.TripwireItself);
+            }
+            finally { if (instance != null) AssetPoolObject.ReturnToPool(instance); }
         }
     }
 }

@@ -224,7 +224,7 @@ namespace Manimal.Icebreaker
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[Plant] unbind attempt threw (continuing to remove): {e.Message}"); }
 
-            var op = InteractionsHandlerClass.Remove(item, player.InventoryController, true);
+            var op = EFT.InventoryLogic.ItemManipulator.Remove(item, player.InventoryController, true);
             if (op.Failed)
             {
                 Plugin.Log.LogWarning($"[Plant] charge remove validation failed: {op.Error}");
@@ -262,7 +262,7 @@ namespace Manimal.Icebreaker
             }
 
             Plugin.Log.LogInfo("[Plant] charge was IN HANDS — swapping to a weapon before consuming it");
-            player.SetFirstAvailableItem(new Callback<IHandsController>(r =>
+            player.SetFirstAvailableItem(new Callback<EFT.IHandsController>(r =>
             {
                 try
                 {
@@ -575,16 +575,16 @@ namespace Manimal.Icebreaker
     // switch interaction (state flip + prompt death) — replace wholesale:
     //   Try_open        -> "Open" (pulse IsTryOpen; the rattle)
     //   Explosion_Logic -> "Plant" hold session, gated on carrying the charge item
-    [HarmonyPatch(typeof(GetActionsClass), "smethod_11")]
+    [HarmonyPatch(typeof(EFT.InteractionContextHelper), "GetAvailableActions", typeof(EFT.GamePlayerOwner), typeof(EFT.Interactive.Switch))]
     internal static class Patch_ChainDoorSwitches
     {
-        private static void Replace(ref ActionsReturnClass result, ActionsTypesClass act)
+        private static void Replace(ref EFT.UI.AvailableInteractionState result, EFT.UI.InteractionAction act)
         {
-            if (result == null) result = new ActionsReturnClass { Actions = new List<ActionsTypesClass> { act } };
+            if (result == null) result = new EFT.UI.AvailableInteractionState { Actions = new List<EFT.UI.InteractionAction> { act } };
             else { result.Actions.Clear(); result.Actions.Add(act); }
         }
 
-        private static void Postfix(ref ActionsReturnClass __result, GamePlayerOwner owner, EFT.Interactive.Switch interactiveSwitch)
+        private static void Postfix(ref EFT.UI.AvailableInteractionState __result, GamePlayerOwner owner, EFT.Interactive.Switch interactiveSwitch)
         {
             try
             {
@@ -598,7 +598,7 @@ namespace Manimal.Icebreaker
                         __result = null;
                         return;
                     }
-                    Replace(ref __result, new ActionsTypesClass
+                    Replace(ref __result, new EFT.UI.InteractionAction
                     {
                         Name = "Open",
                         Action = () =>
@@ -623,7 +623,7 @@ namespace Manimal.Icebreaker
                     var player = Singleton<GameWorld>.Instance?.MainPlayer;
                     bool hasCharge = player != null && IcebreakerChainDoor.FindCharge(player) != null;
                     var sw = interactiveSwitch;
-                    Replace(ref __result, new ActionsTypesClass
+                    Replace(ref __result, new EFT.UI.InteractionAction
                     {
                         Name = "Plant",
                         Disabled = !hasCharge, // greyed = "theres an interaction here, you lack the item"

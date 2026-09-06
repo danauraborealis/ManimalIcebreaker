@@ -174,7 +174,7 @@ namespace Manimal.Icebreaker
         // decide corrections was a race against the staggered wave spawner, and every
         // flood traced back to it. the deterministic spawn plan above replaced it.
         // if a cull is ever needed again: LeaveData.RemoveFromMap, NEVER raw
-        // BotDespawn — raw despawns leave dangling transforms in BotEventHandler and
+        // BotDespawn — raw despawns leave dangling transforms in GlobalEventDispatcher and
         // every later player sound NREs in PlaySound (08-04: controller flip-out).
 
         private System.Collections.IEnumerator UnstackPatrol()
@@ -392,7 +392,7 @@ namespace Manimal.Icebreaker
             // POST-EVENT JOBS ONLY (2026-08-11 rework). the spawning itself is BSG's now:
             // our trigger ids ARE the retail TriggerIds, base.json carries the retail
             // BossLocationSpawn table (roles remapped to blackDivIb), and BossSpawnScenario
-            // subscribes to BotEventHandler natively — so by the time we get here the squad
+            // subscribes to GlobalEventDispatcher natively — so by the time we get here the squad
             // is already on its way. we do NOT re-raise the event: the trigger box raised it
             // to begin with, and this handler runs BECAUSE of that raise (the old code's
             // second raise was the duplicate seen in the 08-09 logs).
@@ -722,12 +722,12 @@ namespace Manimal.Icebreaker
         {
             try
             {
-                var factory = Singleton<ItemFactoryClass>.Instance;
+                var factory = Singleton<EFT.ItemFactory>.Instance;
                 if (factory == null) return false;
-                var item = factory.CreateItem(factory.MongoID_0, tpl, null);
+                var item = factory.CreateItem(factory.NextId, tpl, null);
                 if (item == null) return false;
 
-                var grids = new List<StashGridClass>();
+                var grids = new List<EFT.InventoryLogic.Grid>();
                 var bag = BackpackOf(b);
                 int bagGrids = 0;
                 if (bag != null && bag.Grids != null) { grids.AddRange(bag.Grids); bagGrids = bag.Grids.Length; }
@@ -1003,7 +1003,7 @@ namespace Manimal.Icebreaker
         // (08-05 rental naked-storm hunt): an EMPTY response is the server refusing to
         // produce bots at all (per-raid cap/state — the transit leg is the suspect);
         // unarmed profiles are the generator failing on equipment. the fix differs.
-        internal static string NakedWhy(BotCreationDataClass data)
+        internal static string NakedWhy(BotCreationData data)
         {
             try
             {
@@ -1016,7 +1016,7 @@ namespace Manimal.Icebreaker
             catch (Exception e) { return $"vet failed: {e.Message}"; }
         }
 
-        private static bool IsNakedProfile(BotCreationDataClass data)
+        private static bool IsNakedProfile(BotCreationData data)
         {
             try
             {
@@ -1044,11 +1044,11 @@ namespace Manimal.Icebreaker
 
         // profile creation + the naked-profile vetting, shared by direct spawns and the
         // trigger-squad pre-maker
-        private async Task<BotCreationDataClass> CreateData(WildSpawnType role, int count = 1)
+        private async Task<BotCreationData> CreateData(WildSpawnType role, int count = 1)
         {
             var spawnParams = new BotSpawnParams { ShallBeGroup = new ShallBeGroupParams(false, false, Math.Max(1, count)) };
-            var profileData = new BotProfileDataClass(EPlayerSide.Savage, role, BotDifficulty.normal, 5f, spawnParams, false);
-            var data = await BotCreationDataClass.Create(profileData, _spawner.BotCreator, count, _spawner);
+            var profileData = new GetProfileDataParams(EPlayerSide.Savage, role, BotDifficulty.normal, 5f, spawnParams, false);
+            var data = await BotCreationData.Create(profileData, _spawner._botCreator, count, _spawner);
             if (data == null) { Plugin.Log.LogWarning($"[Crew] profile creation failed for {role}"); return null; }
 
             // naked roll — give the generator a breather and re-request ONCE; if it
@@ -1058,7 +1058,7 @@ namespace Manimal.Icebreaker
             {
                 Plugin.Log.LogWarning($"[Crew] {role} profile arrived NAKED [{why}] — re-requesting in 3s");
                 await Task.Delay(3000);
-                data = await BotCreationDataClass.Create(profileData, _spawner.BotCreator, count, _spawner);
+                data = await BotCreationData.Create(profileData, _spawner._botCreator, count, _spawner);
                 if (data == null || IsNakedProfile(data))
                 {
                     Plugin.Log.LogWarning($"[Crew] {role} re-request also bad [{NakedWhy(data) ?? "ok??"}] — skipping this spawn");
@@ -1151,7 +1151,7 @@ namespace Manimal.Icebreaker
                 count -= fromPen;
                 if (count <= 0) return;
 
-                var ready = new List<BotCreationDataClass>(count);
+                var ready = new List<BotCreationData>(count);
                 if (_preMade.TryGetValue((int)role, out var pq))
                     while (ready.Count < count && pq.Count > 0)
                         ready.Add(pq.Dequeue());
@@ -1161,7 +1161,7 @@ namespace Manimal.Icebreaker
                 {
                     // ALL profile requests concurrently — sequential awaits made a
                     // 4-bot batch cost 4x the server round-trip (plus 3s naked retries)
-                    var creates = new List<Task<BotCreationDataClass>>(need);
+                    var creates = new List<Task<BotCreationData>>(need);
                     for (int i = 0; i < need; i++) creates.Add(CreateAndPrewarm(role));
                     foreach (var d in await Task.WhenAll(creates))
                         if (d != null) ready.Add(d); // naked twice — skip that bot, keep the squad
@@ -1197,7 +1197,7 @@ namespace Manimal.Icebreaker
         // pool). this is BSG's own pre-pool call — async, spread by the job system — so
         // awaiting it first means the spawn instantiates against warm pools.
         // create + prewarm as one awaitable unit so batches can run them all in parallel
-        private async Task<BotCreationDataClass> CreateAndPrewarm(WildSpawnType role)
+        private async Task<BotCreationData> CreateAndPrewarm(WildSpawnType role)
         {
             var d = await CreateData(role);
             if (d == null) return null;
@@ -1205,24 +1205,24 @@ namespace Manimal.Icebreaker
             return d;
         }
 
-        private static async Task Prewarm(BotCreationDataClass data)
+        private static async Task Prewarm(BotCreationData data)
         {
             try
             {
                 var keys = data.Profiles.SelectMany(p => p.GetAllPrefabPaths(false)).ToArray();
                 if (keys.Length > 0)
-                    await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(
-                        PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Local,
+                    await Singleton<EFT.ObjectsFactory>.Instance.LoadBundlesAndCreatePools(
+                        EFT.ObjectsFactory.PoolsCategory.Raid, EFT.ObjectsFactory.AssemblyType.Local,
                         // Low, not General: pool CREATION instantiates templates on the main
                         // thread and General-priority slices burst 176-362ms at premake time
-                        keys, JobPriorityClass.Low, null, default(System.Threading.CancellationToken));
+                        keys, Diz.Jobs.JobYieldPriority.Low, null, default(System.Threading.CancellationToken));
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[Crew] prewarm failed (spawn will cold-load): {e.Message}"); }
         }
 
         // pre-made, pre-warmed bots for the trigger squads — created during the quiet
         // early raid so event spawns are instant and burst-free
-        private readonly Dictionary<int, Queue<BotCreationDataClass>> _preMade = new Dictionary<int, Queue<BotCreationDataClass>>();
+        private readonly Dictionary<int, Queue<BotCreationData>> _preMade = new Dictionary<int, Queue<BotCreationData>>();
 
         private IEnumerator PreMakeTriggerSquads()
         {
@@ -1252,7 +1252,7 @@ namespace Manimal.Icebreaker
                 var data = await CreateData(role);
                 if (data == null) return;
                 await Prewarm(data);
-                if (!_preMade.TryGetValue((int)role, out var q)) _preMade[(int)role] = q = new Queue<BotCreationDataClass>();
+                if (!_preMade.TryGetValue((int)role, out var q)) _preMade[(int)role] = q = new Queue<BotCreationData>();
                 q.Enqueue(data);
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[Crew] premake {role} failed: {e.Message}"); }
@@ -1446,7 +1446,7 @@ namespace Manimal.Icebreaker
             if (DeliverFromPool(role, zone, 1, minPlayerDist) > 0) return;
             try
             {
-                BotCreationDataClass data = null;
+                BotCreationData data = null;
                 if (_preMade.TryGetValue((int)role, out var pq) && pq.Count > 0)
                     data = pq.Dequeue(); // pre-made + already warm
                 else

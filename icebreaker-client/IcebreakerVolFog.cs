@@ -10,7 +10,7 @@ namespace Manimal.Icebreaker
     // shaders/textures from volumetricfog.bundle. the native MBOIT path is a dead end
     // on this map (no WindowsManager = no volumetric composite, and retail never ran
     // it here either), so the raymarched store asset delivers the look instead.
-    // rides the render camera as an image effect; the optic camera never gets it.
+    // Each render camera needs its own image effect, including magnified optics.
     internal static class IcebreakerVolFog
     {
         // cutscene look profile: while true, Plugin.Fog()/FogColorEntry route every
@@ -19,6 +19,8 @@ namespace Manimal.Icebreaker
         internal static bool CutsceneProfile;
 
         private static VolumetricFogAndMist.VolumetricFog _fog;
+        private static readonly System.Collections.Generic.List<VolumetricFogAndMist.VolumetricFog> _opticFogs
+            = new System.Collections.Generic.List<VolumetricFogAndMist.VolumetricFog>();
         private static bool _dead; // bundle missing/broken — stop retrying this raid
 
         // authored fog AREAS: the SDK scene ships empty marker GOs named
@@ -200,6 +202,9 @@ namespace Manimal.Icebreaker
         {
             _dead = false;
             _fog = null;
+            foreach (var optic in _opticFogs)
+                if (optic != null) UnityEngine.Object.Destroy(optic);
+            _opticFogs.Clear();
             _indoor = false;
             _areasBuilt = false;
             _areas.Clear();
@@ -211,6 +216,8 @@ namespace Manimal.Icebreaker
             if (!Plugin.VolFog.Value)
             {
                 if (_fog != null && _fog.enabled) _fog.enabled = false;
+                foreach (var optic in _opticFogs)
+                    if (optic != null) optic.enabled = false;
                 return;
             }
 
@@ -224,6 +231,7 @@ namespace Manimal.Icebreaker
                 try
                 {
                     _fog = cam.GetComponent<VolumetricFogAndMist.VolumetricFog>() ?? cam.gameObject.AddComponent<VolumetricFogAndMist.VolumetricFog>();
+                    _fog.enableMultipleCameras = true;
                     // sun ref gives the fog its light direction; TOD sun GO if present
                     var sky = MonoBehaviourSingleton<TOD_Sky>.Instance;
                     if (sky != null && sky.Components != null && sky.Components.Sun != null)
@@ -260,6 +268,33 @@ namespace Manimal.Icebreaker
         // renders (no true 3d exclusion in a screen-space raymarcher) but night +
         // deep obscurance keep that subtle.
         private static bool _indoor;
+
+        // Called after OpticComponentUpdater has synchronized the native camera stack.
+        // VFM renders with Camera.current, so the scope uses its own projection/depth
+        // while sharing the authored world-space areas and shader exclusion volumes.
+        internal static void SyncOptic(Camera camera)
+        {
+            if (camera == null || _fog == null || camera == _fog.fogCamera) return;
+            var optic = camera.GetComponent<VolumetricFogAndMist.VolumetricFog>();
+            if (optic == null)
+            {
+                if (_dead || !Plugin.VolFog.Value) return;
+                optic = camera.gameObject.AddComponent<VolumetricFogAndMist.VolumetricFog>();
+                optic.enableMultipleCameras = true;
+                _opticFogs.Add(optic);
+                Plugin.Log.LogInfo("[VolFog] fog attached to optic camera '" + camera.name + "'");
+            }
+            optic.enabled = !_dead && Plugin.VolFog.Value && _fog.enabled;
+            if (!optic.enabled) return;
+            camera.depthTextureMode |= DepthTextureMode.Depth;
+            optic.sun = _fog.sun;
+            ApplyParams(optic);
+            if (_areas.Count > 0) { optic.density = 0f; optic.skyHaze = 0f; }
+            // The main camera already evaluates the indoor fade. Sharing its current
+            // alpha also covers a scope enabled halfway through an indoor transition.
+            optic.alpha = _fog.CurrentFogAlpha;
+            optic.skyAlpha = _fog.CurrentSkyHazeAlpha;
+        }
 
         private static void TickIndoorFade()
         {
@@ -319,7 +354,7 @@ namespace Manimal.Icebreaker
         // shared param push — the camera fog in global mode, or each authored area
         private static void ApplyParams(VolumetricFogAndMist.VolumetricFog f)
         {
-            bool isCamera = f == _fog;
+            bool isCamera = f.hasCamera;
             if (isCamera)
             {
                 // render in the [ImageEffectOpaque] stage (VolumetricFogPreT) — same
@@ -351,7 +386,7 @@ namespace Manimal.Icebreaker
             f.deepObscurance = Plugin.Fog(Plugin.VolFogDeepObscurance).Value;
             f.color = Plugin.FogColorEntry.Value;
             f.skyColor = Plugin.FogColorEntry.Value;
-            f.alpha = Plugin.Fog(Plugin.VolFogAlpha).Value;
+            if (f == _fog || !isCamera) f.alpha = Plugin.Fog(Plugin.VolFogAlpha).Value;
             f.speed = Plugin.Fog(Plugin.VolFogSpeed).Value;
             f.windDirection = new Vector3(-1f, 0f, -0.35f); // blizzard wind heading
             // area instances render the dither pattern way stronger than the global

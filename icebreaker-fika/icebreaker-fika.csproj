@@ -82,7 +82,7 @@
   <!-- FIKA INSTALL ONLY (user call 07-30): the solo install stays fika-free, and the
        release ships the addon as its OWN zip (uploaded as an addon) rather than
        riding the main package. -->
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(DeployToGame)' == 'true'">
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(FikaPath)\BepInEx\plugins\ManimalIcebreaker" Condition="Exists('$(FikaPath)')" />
   </Target>
 

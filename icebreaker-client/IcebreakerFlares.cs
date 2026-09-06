@@ -67,7 +67,7 @@ namespace Manimal.Icebreaker
             Material MakeMat(string shaderName, string matName)
             {
                 Shader sh = null;
-                try { sh = GClass872.Find(shaderName); } catch { }
+                try { sh = ShadersFinder.Find(shaderName); } catch { }
                 if (sh == null || !sh.isSupported) sh = Shader.Find(shaderName);
                 if (sh == null || !sh.isSupported)
                 {
@@ -126,8 +126,8 @@ namespace Manimal.Icebreaker
                     _material = mat,
                     _blindProtectionAlphaFactor = t?.Value<float?>("_blindProtectionAlphaFactor") ?? 1f,
                     _blindProtectionSizeFactor = t?.Value<float?>("_blindProtectionSizeFactor") ?? 1f,
-                    AlphaMultiplier_1 = t?.Value<float?>("AlphaMultiplier_1") ?? 1f,
-                    SizeMultiplier_1 = t?.Value<float?>("SizeMultiplier_1") ?? 1f,
+                    _alphaMultiplier = t?.Value<float?>("_alphaMultiplier") ?? 1f,
+                    _sizeMultiplier = t?.Value<float?>("_sizeMultiplier") ?? 1f,
                 };
                 return b;
             }
@@ -138,8 +138,8 @@ namespace Manimal.Icebreaker
                 _material = overlapMat,
                 _blindProtectionAlphaFactor = overlapT?.Value<float?>("_blindProtectionAlphaFactor") ?? 1f,
                 _blindProtectionSizeFactor = overlapT?.Value<float?>("_blindProtectionSizeFactor") ?? 1f,
-                AlphaMultiplier_1 = overlapT?.Value<float?>("AlphaMultiplier_1") ?? 1f,
-                SizeMultiplier_1 = overlapT?.Value<float?>("SizeMultiplier_1") ?? 1f,
+                _alphaMultiplier = overlapT?.Value<float?>("_alphaMultiplier") ?? 1f,
+                _sizeMultiplier = overlapT?.Value<float?>("_sizeMultiplier") ?? 1f,
                 _maxNeighborCount = overlapT?.Value<int?>("_maxNeighborCount") ?? 5,
                 _searchRange = overlapT?.Value<float?>("_searchRange") ?? 0.5f,
                 _maxScaleMultiplier = overlapT?.Value<float?>("_maxScaleMultiplier") ?? 1f,
@@ -157,12 +157,12 @@ namespace Manimal.Icebreaker
             host.SetActive(false);
             var fss = host.AddComponent<FlareSceneSettings>();
             AccessTools.Field(typeof(FlareSceneSettings), "_settings").SetValue(fss, settings);
-            host.SetActive(true); // Awake -> GClass1023.SetupRenderer(settings)
+            host.SetActive(true); // Awake -> MultiFlare.FlareManager.SetupRenderer(settings)
 
             // ---- the 1300 lights: ordinal-path match into the bundled hierarchy ----
             var index = BuildPathIndex();
             int placed = 0, missing = 0, drifted = 0;
-            var fBool = AccessTools.Field(typeof(FlareLight), "bool_0");
+            var fBool = AccessTools.Field(typeof(FlareLight), "_destroyed");
             var fScale = AccessTools.Field(typeof(FlareLight), "_totalScale");
             var fAlpha = AccessTools.Field(typeof(FlareLight), "_totalAlpha");
             var fFlares = AccessTools.Field(typeof(FlareLight), "_flares");

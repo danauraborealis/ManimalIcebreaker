@@ -79,13 +79,13 @@ namespace Manimal.Icebreaker.Fika
         }
 
         // Camera.main is null in EFT (the FPS camera isn't tagged MainCamera) — the
-        // probe silently sampled NOTHING for two raids because of it. CameraClass is
+        // probe silently sampled NOTHING for two raids because of it. EFT.CameraControl.CameraManager is
         // the real accessor.
         private static Camera GameCam()
         {
             try
             {
-                var cc = CameraClass.Instance;
+                var cc = EFT.CameraControl.CameraManager.Instance;
                 if (cc != null && cc.Camera != null) return cc.Camera;
             }
             catch { }
@@ -138,7 +138,7 @@ namespace Manimal.Icebreaker.Fika
         {
             try
             {
-                NotificationManagerClass.DisplayMessageNotification(
+                EFT.Communications.NotificationManager.DisplayMessageNotification(
                     text, ENotificationDurationType.Default, ENotificationIconType.Default, Color.cyan);
             }
             catch { }

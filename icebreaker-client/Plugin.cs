@@ -26,16 +26,15 @@ namespace Manimal.Icebreaker
     //     build on it, and before we touch bot brains at raid load.
     // guids are the real ones read off the loaded plugins, NOT guessed — a typo here
     // makes bepinex silently refuse to load us at all.
-    [BepInDependency("com.wtt.commonlib", BepInDependency.DependencyFlags.HardDependency)]
-    // version floor since 0.2.4: 1.1.4 is where the black division dogtags (the
-    // ragman/skier barter currency) ship. an older build loads but leaves the
-    // barters unbuyable and BD bodies tagless
-    [BepInDependency("com.wtt.contentbackport", "1.1.4")]
-    [BepInDependency("xyz.drakia.bigbrain", BepInDependency.DependencyFlags.HardDependency)]
-    [BepInDependency("com.morebotsapi.tacticaltoaster", BepInDependency.DependencyFlags.HardDependency)]
-    [BepInDependency("com.blackdiv.tacticaltoaster", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("com.wtt.commonlib", "3.0.6")]
+    // SPT 4.1 dependency floor; includes the dogtags used by quest barters.
+    [BepInDependency("com.wtt.contentbackport", "2.0.1")]
+    [BepInDependency("xyz.drakia.bigbrain", "1.5.0")]
+    [BepInDependency("com.morebotsapi.tacticaltoaster", "2.1.1")]
+    [BepInDependency("com.blackdiv.tacticaltoaster", "1.3.1")]
+    [BepInDependency("me.sol.sain", "4.5.1")]
     [BepInDependency("com.tarkin.ladders", BepInDependency.DependencyFlags.HardDependency)]
-    [BepInDependency("com.manimal.csgas", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("com.manimal.csgas", "2.0.0")]
     //
     // SOFT: integrated with when present, silently skipped when not. none are required.
     //   waypoints  we late-patch its DoorLinkPatch with a finalizer (it NREs on this map)
@@ -232,7 +231,7 @@ namespace Manimal.Icebreaker
                 new ConfigDescription("near-tier radius while INDOORS (LIVE). corridor sightlines are short — a tighter bubble lets the far tier eat the rest of the deck",
                     new AcceptableValueRange<float>(5f, 100f), new ConfigurationManagerAttributes { IsAdvanced = true }));
             // CellCull config REMOVED pre-release (08-09): the experiment never engaged
-            // in the field — GClass1238 needs a CullingGridPreProcess the shipped bundle
+            // in the field — Koenigz.PerfectCulling.EFT.CullingGridVisibilitySampler needs a CullingGridPreProcess the shipped bundle
             // lacks, plus the 231MB packed bake no player has. a knob that cannot work
             // does not ship; the design notes live in memory if the restore ever lands
             MaxLodClamp = Config.Bind("Icebreaker", "MaxLodClamp", -1,
@@ -423,6 +422,7 @@ namespace Manimal.Icebreaker
                 Log.LogError($"PatchAll FAILED — some patches did not apply, the map still loads: {e}");
             }
             IcebreakerFikaCompat.TryApply(harmony); // no-op without fika
+            IcebreakerSplash.RefreshExisting(); // splash Awake can precede plugin loading
             // QuestingBots per-map mute (ported from terminal): QB's spawn takeover
             // fights event-driven wave choreography; QB itself has no per-map off
             // switch. gated on IceGate — QB fully active on every other map.
@@ -509,7 +509,7 @@ namespace Manimal.Icebreaker
     internal static class Patch_RestoreLoot
     {
         [HarmonyPostfix]
-        private static void Postfix(AIPatrolsData __instance, [HarmonyArgument(0)] GClass1404 lootData)
+        private static void Postfix(AIPatrolsData __instance, [HarmonyArgument(0)] JsonType.LootData lootData)
         {
             try
             {

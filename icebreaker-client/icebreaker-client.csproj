@@ -13,97 +13,108 @@
     <LangVersion>latest</LangVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <BigBrainPath Condition="'$(BigBrainPath)' == ''">$(SPTPath)\BepInEx\plugins\DrakiaXYZ-BigBrain.dll</BigBrainPath>
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="Comfort.Unity">
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\Comfort.Unity.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="0Harmony">
-      <HintPath>D:\SPTDev\BepInEx\core\0Harmony.dll</HintPath>
+      <HintPath>$(SPTPath)\BepInEx\core\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="BepInEx">
-      <HintPath>D:\SPTDev\BepInEx\core\BepInEx.dll</HintPath>
+      <HintPath>$(SPTPath)\BepInEx\core\BepInEx.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="ItemComponent.Types">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\ItemComponent.Types.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\ItemComponent.Types.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="WTT-ClientCommonLib">
-      <HintPath>D:\SPTDev\BepInEx\plugins\WTT-ClientCommonLib\WTT-ClientCommonLib.dll</HintPath>
+      <HintPath>$(SPTPath)\BepInEx\plugins\WTT-ClientCommonLib\WTT-ClientCommonLib.dll</HintPath>
     </Reference>
     <Reference Include="DrakiaXYZ-BigBrain">
-      <HintPath>D:\SPTDev\BepInEx\plugins\DrakiaXYZ-BigBrain.dll</HintPath>
+      <HintPath>$(BigBrainPath)</HintPath>
     </Reference>
     <Reference Include="AnimationSystem.Types">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\AnimationSystem.Types.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\AnimationSystem.Types.dll</HintPath>
     </Reference>
     <Reference Include="Comfort">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\Newtonsoft.Json.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TerrainModule">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.TerrainModule.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.TerrainModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.XRModule" Condition="false">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.XRModule.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.XRModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AIModule">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.AIModule.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.AIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AudioModule">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.DirectorModule">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.DirectorModule.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.DirectorModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.VideoModule">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.VideoModule.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.VideoModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ImageConversionModule">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
     </Reference>
     <Reference Include="Sirenix.Serialization">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\Sirenix.Serialization.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\Sirenix.Serialization.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UIModule">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.UIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="DissonanceVoip">
-      <HintPath>D:\SPTDev\EscapeFromTarkov_Data\Managed\DissonanceVoip.dll</HintPath>
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\DissonanceVoip.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Embedded so DLL-only updates and full releases carry the same splash art. -->
+    <EmbeddedResource Include="..\Texture2D\splash_17.png" LogicalName="Manimal.Icebreaker.Splash.splash_17.png" />
+    <EmbeddedResource Include="..\Texture2D\splash_18.png" LogicalName="Manimal.Icebreaker.Splash.splash_18.png" />
   </ItemGroup>
 
   <!--
@@ -132,9 +143,9 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <MakeDir Directories="D:\SPTDev\BepInEx\plugins\ManimalIcebreaker" />
-    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;D:\SPTDev\BepInEx\plugins\ManimalIcebreaker\$(TargetFileName)&quot;" />
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(DeployToGame)' == 'true'">
+    <MakeDir Directories="$(SPTPath)\BepInEx\plugins\ManimalIcebreaker" />
+    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(SPTPath)\BepInEx\plugins\ManimalIcebreaker\$(TargetFileName)&quot;" />
     <!-- keep the fika coop-test install's dll current too (payload/bundles mirrored by hand) -->
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(FikaPath)\BepInEx\plugins\ManimalIcebreaker" Condition="Exists('$(FikaPath)')" />
   </Target>

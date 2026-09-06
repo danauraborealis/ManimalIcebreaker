@@ -291,7 +291,7 @@ namespace Manimal.Icebreaker
         public override void Update(CustomLayer.ActionData data)
         {
             // AMBUSHERS DON'T CHAT (user call 08-07): held bots kept spouting idle
-            // voicelines. BotTalk.CanSay is THE gate — Say/TrySay/the query drain all
+            // voicelines. BotTalk._canSay is THE gate — Say/TrySay/the query drain all
             // early-out on it. (SetSilence/IsSilenced looks like the intended API but
             // is VESTIGIAL in this build: the engine's own quiet logics set it and
             // nothing anywhere reads it back.) re-assert every tick — Activate() and
@@ -300,13 +300,13 @@ namespace Manimal.Icebreaker
             // AND the terminal sink (08-09, "they still say voicelines"): SAIN and
             // other AI mods speak through Player.Speaker directly, never consulting
             // BotTalk — the CanSay mute never touched those lines. the held speaker
-            // set gates PhraseSpeakerClass.Play/Queue at the last hop, so every talk
+            // set gates EFT.BaseSpeaker.Play/Queue at the last hop, so every talk
             // path funnels into the same muzzle.
             try
             {
-                if (BotOwner.BotTalk != null && BotOwner.BotTalk.CanSay)
+                if (BotOwner.BotTalk != null && BotOwner.BotTalk._canSay)
                 {
-                    BotOwner.BotTalk.CanSay = false;
+                    BotOwner.BotTalk._canSay = false;
                     _muted = true;
                 }
                 var spk = BotOwner.GetPlayer?.Speaker;
@@ -353,7 +353,7 @@ namespace Manimal.Icebreaker
             // ones further back cross a refresh tick on the way and open the same door
             // normally — exactly what the DoorProbe showed (same bot, curVoxel False then
             // True). one explicit refresh here closes the window.
-            // ...and REPORT it: SetPosToVoxel routes through GClass588.SetPos, which
+            // ...and REPORT it: SetPosToVoxel routes through AIVoxelChecker.SetPos, which
             // assigns whatever GetVoxelSafe(pos) returns — including null. so a prime can
             // "run" and still leave CurVoxel null if the hide markers sit in an actual
             // voxel grid hole. that is a completely different fix (grid data, not timing),
@@ -370,7 +370,7 @@ namespace Manimal.Icebreaker
             try
             {
                 if (_muted && BotOwner.BotTalk != null)
-                    BotOwner.BotTalk.CanSay = BotOwner.Settings?.FileSettings?.Mind?.CAN_TALK ?? true;
+                    BotOwner.BotTalk._canSay = BotOwner.Settings?.FileSettings?.Mind?.CAN_TALK ?? true;
                 var spk = BotOwner.GetPlayer?.Speaker;
                 if (spk != null) MutedSpeakers.Remove(spk);
             }
@@ -380,13 +380,13 @@ namespace Manimal.Icebreaker
 
         // speakers of currently-held bots — gated at the sink so SAIN's direct
         // Speaker calls are muzzled too, not just vanilla BotTalk
-        internal static readonly HashSet<PhraseSpeakerClass> MutedSpeakers = new HashSet<PhraseSpeakerClass>();
+        internal static readonly HashSet<EFT.BaseSpeaker> MutedSpeakers = new HashSet<EFT.BaseSpeaker>();
 
-        [HarmonyPatch(typeof(PhraseSpeakerClass), nameof(PhraseSpeakerClass.Play))]
+        [HarmonyPatch(typeof(EFT.BaseSpeaker), nameof(EFT.BaseSpeaker.Play))]
         internal static class Patch_MuteHeldSpeakerPlay
         {
             [HarmonyPrefix]
-            private static bool Prefix(PhraseSpeakerClass __instance, ref TagBank __result)
+            private static bool Prefix(EFT.BaseSpeaker __instance, ref TagBank __result)
             {
                 if (!MutedSpeakers.Contains(__instance)) return true;
                 __result = null;
@@ -394,11 +394,11 @@ namespace Manimal.Icebreaker
             }
         }
 
-        [HarmonyPatch(typeof(PhraseSpeakerClass), nameof(PhraseSpeakerClass.Queue))]
+        [HarmonyPatch(typeof(EFT.BaseSpeaker), nameof(EFT.BaseSpeaker.Queue))]
         internal static class Patch_MuteHeldSpeakerQueue
         {
             [HarmonyPrefix]
-            private static bool Prefix(PhraseSpeakerClass __instance) => !MutedSpeakers.Contains(__instance);
+            private static bool Prefix(EFT.BaseSpeaker __instance) => !MutedSpeakers.Contains(__instance);
         }
     }
 

@@ -226,7 +226,7 @@ namespace Manimal.Icebreaker
             mb.SlicesDistributionExponent = 1.27f;
             // SlicesFarDistance: retail 0.006 vs 0.16.9 default 0.02 (3.3x) — the froxel
             // slice distribution knob, prime suspect for the hard fog wall. private field.
-            AccessTools.Field(typeof(MBOIT_Scattering), "float_0")?.SetValue(mb, 0.006f);
+            AccessTools.Field(typeof(MBOIT_Scattering), "_slicesFarDistance")?.SetValue(mb, 0.006f);
 
             // the Scattering Slices compute reads the _StencilShadow global that BSG's
             // AmbientLight command buffer normally provides per-frame — that system isnt
@@ -291,6 +291,8 @@ namespace Manimal.Icebreaker
         private static bool _snowCopiesCached;
         private static List<Material> _snowMats;
         private static SnowFlakes _sf;
+        internal static SnowFlakes SnowSource => _sf;
+        internal static Behaviour GlobalFogSource => _globalFog;
         private static Vector2 _origSizeMin, _origSizeMax;
         private static bool _origSizeCaptured;
         private static readonly int _fvId = Shader.PropertyToID("_FallingVector");
@@ -316,7 +318,7 @@ namespace Manimal.Icebreaker
             // remap ASSETS exist in its files; the code+shaders are all present.
             var scat = AccessTools.Field(typeof(EFT.Weather.WeatherController), "tod_Scattering_0")?.GetValue(wc) as TOD_Scattering;
             bool dateReady = false;
-            try { dateReady = GClass4.Instance?.CurrentTime?.GameDateTime != null; } catch { }
+            try { dateReady = TODSkyProvider.Instance?.CurrentTime?.GameDateTime != null; } catch { }
             if (false) // MBOIT dead end — no WindowsManager on this map; VolumetricFog&Mist2 carries the fog now
             {
                 wc.MBOITFogRemapData = null; // v1 stays dead — only junk ever lived there
@@ -445,7 +447,7 @@ namespace Manimal.Icebreaker
                 _stormRaised = true;
                 try
                 {
-                    GlobalEventHandlerClass.CreateEvent<EFT.GlobalEvents.StormStartedEvent>().Invoke();
+                    EFT.GlobalEvents.GlobalEventsController.CreateEvent<EFT.GlobalEvents.StormStartedEvent>().Invoke();
                     Plugin.Log.LogDebug("[Weather] BLIZZARD: WeatherDebug pinned (snow/wind/fog/hour) + StormStartedEvent raised");
                 }
                 catch (Exception e) { Plugin.Log.LogWarning($"[Weather] storm event raise failed: {e.Message}"); }
@@ -546,7 +548,7 @@ namespace Manimal.Icebreaker
                         t.gameObject.SetActive(true);
                         var wo = t.GetComponent<WeatherObstacle>();
                         if (wo == null) wo = t.gameObject.AddComponent<WeatherObstacle>(); // combines dryCount (maybe 0) + clears children
-                        AccessTools.Field(typeof(WeatherObstacle), "weatherObstacle_0")?.SetValue(null, wo);
+                        AccessTools.Field(typeof(WeatherObstacle), "_instance")?.SetValue(null, wo);
 
                         if (combined != null && (wo.MeshCollider == null || wo.MeshCollider.sharedMesh == null
                             || wo.MeshCollider.sharedMesh.vertexCount == 0))
@@ -563,7 +565,7 @@ namespace Manimal.Icebreaker
                         {
                             var b = wo.MeshCollider.bounds;
                             b.Expand(new Vector3(20f, 10f, 20f));
-                            AccessTools.Field(typeof(DepthPhotograper), "bounds_0")?.SetValue(dp, b);
+                            AccessTools.Field(typeof(DepthPhotograper), "_rainBounds")?.SetValue(dp, b);
                             dp.Render(); // one-time top-down render of JUST the obstacle mesh
                             Plugin.Log.LogDebug($"[Weather] WEATHER OBSTACLE LIVE: '{t.name}' src={(dryCount > 0 ? dryCount + " DryPlanes" : "quad MeshFilters")} -> {wo.MeshCollider.sharedMesh.vertexCount} verts, mask over {b.size.x:0}x{b.size.z:0}m — indoor snow clipped");
                         }
@@ -643,7 +645,7 @@ namespace Manimal.Icebreaker
                 SnowFlakes sf = null;
                 foreach (var cand in Resources.FindObjectsOfTypeAll<SnowFlakes>())
                     if (cand != null && cand.gameObject.scene.IsValid()) { sf = cand; break; }
-                var native = GClass872.Find("Custom/SnowFlakes");
+                var native = ShadersFinder.Find("Custom/SnowFlakes");
                 if (sf == null || native == null || !native.isSupported)
                 {
                     if ((_snowSkipLogs++ % 50) == 0)
@@ -730,7 +732,7 @@ namespace Manimal.Icebreaker
                 try
                 {
                     var gfType = AccessTools.TypeByName("UnityStandardAssets.ImageEffects.GlobalFog");
-                    var gfShader = GClass872.Find("Hidden/GlobalFog");
+                    var gfShader = ShadersFinder.Find("Hidden/GlobalFog");
                     var cam = scat != null ? scat.GetComponent<Camera>() : Camera.main; // scat rides the render camera
                     if (gfType != null && gfShader != null && gfShader.isSupported && cam != null)
                     {
@@ -836,8 +838,8 @@ namespace Manimal.Icebreaker
             else
                 b = new Bounds(new Vector3(0f, 30f, 80f), new Vector3(260f, 120f, 420f)); // eyeballed ship envelope
 
-            AccessTools.Field(typeof(DepthPhotograper), "bounds_0").SetValue(dp, b);
-            dp.method_0(); // (re)creates _depthRT at the photographer's own dimension
+            AccessTools.Field(typeof(DepthPhotograper), "_rainBounds").SetValue(dp, b);
+            dp.CreateDepthRT(); // (re)creates _depthRT at the photographer's own dimension
 
             var dimField = AccessTools.Field(typeof(DepthPhotograper), "_depthTextureDimension");
             int dim = dimField != null ? Convert.ToInt32(dimField.GetValue(dp)) : 1024;
@@ -876,7 +878,7 @@ namespace Manimal.Icebreaker
                 var prev = RenderTexture.active;
                 Graphics.Blit(tmp, depthRt);
                 RenderTexture.active = prev;
-                dp.method_3(); // publish mask origin/inv-size/texture shader globals
+                dp.SetShaderValues(); // publish mask origin/inv-size/texture shader globals
                 Plugin.Log.LogDebug($"[Weather] SCENE DEPTH MASK rendered ({dim}x{dim} over {b.size.x:0}x{b.size.z:0}m) — ship geometry clips indoor snow");
             }
             finally
@@ -1171,6 +1173,9 @@ namespace Manimal.Icebreaker
                 // repaint the scope
                 var mb = _fMboit?.GetValue(__instance) as Behaviour;
                 if (mb != null && mb.enabled) mb.enabled = false;
+                var weather = __instance.GetComponent<IcebreakerOpticWeather>()
+                    ?? __instance.gameObject.AddComponent<IcebreakerOpticWeather>();
+                weather.Sync();
             }
             catch { }
         }

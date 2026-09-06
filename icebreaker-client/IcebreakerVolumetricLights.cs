@@ -97,7 +97,7 @@ namespace Manimal.Icebreaker
             new V("CutsceneRoot/VFX_Icebreaker_Cutscene_Fake_Light/6st_shot_Light/Light/G_spot_Main (1)", 15f, 22.4f, 1f, 0f, false, 0.05f, 1f, 5f),
         };
 
-        private static readonly FieldInfo _cloVol = AccessTools.Field(typeof(CullingLightObject), "volumetricLight_0");
+        private static readonly FieldInfo _cloVol = AccessTools.Field(typeof(CullingLightObject), "_volumetricLight");
         private static readonly FieldInfo _lampVol = AccessTools.Field(typeof(LampController), "list_2");
 
         internal static void Restore()
@@ -217,7 +217,7 @@ namespace Manimal.Icebreaker
         {
             try
             {
-                var s = Singleton<SharedGameSettingsClass>.Instance;
+                var s = Singleton<EFT.Settings.SettingsManager>.Instance;
                 return s == null || s.Graphics.Settings.VolumetricLight.Value;
             }
             catch { return true; }

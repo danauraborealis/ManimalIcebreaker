@@ -12,15 +12,15 @@ namespace Manimal.Icebreaker.Fika
     //
     // the fika dependency MUST stay HARD. the 08-03 soft-dep experiment (self-gate in
     // Awake, NoInlining around fika-typed code) hard-hung the game before the main
-    // menu on solo installs: EFT's own GlobalEventHandlerClass.Initialize sweeps every
+    // menu on solo installs: EFT's own EFT.GlobalEvents.GlobalEventsController.Initialize sweeps every
     // LOADED assembly with Assembly.GetTypes(), which throws ReflectionTypeLoadException
     // on an assembly whose types reference the absent Fika.Core — no code of ours has
     // to run to break. only bepinex SKIPPING the load (= hard dep) keeps the assembly
     // out of the appdomain. the red "1 PLUGIN FAILED TO LOAD" banner on a fika-less
     // install is correct feedback for installing the fika addon without fika.
     [BepInPlugin(BuildInfo.ModGuid, "Manimal-IcebreakerFika", BuildInfo.Version)]
-    [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.HardDependency)]
-    [BepInDependency("com.manimal.icebreaker", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("com.fika.core", "2.4.2")]
+    [BepInDependency("com.manimal.icebreaker", BuildInfo.Version)]
     public class FikaAddonPlugin : BaseUnityPlugin
     {
         internal static ManualLogSource Log;

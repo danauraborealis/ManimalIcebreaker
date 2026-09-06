@@ -2308,6 +2308,8 @@ namespace VolumetricFogAndMist {
         float transitionDuration;
         float transitionStartTime;
         float currentFogAlpha, currentSkyHazeAlpha;
+        internal float CurrentFogAlpha => currentFogAlpha;
+        internal float CurrentSkyHazeAlpha => currentSkyHazeAlpha;
         Color currentFogColor, currentFogSpecularColor, currentLightColor;
         VolumetricFogProfile initialProfile, targetProfile;
 

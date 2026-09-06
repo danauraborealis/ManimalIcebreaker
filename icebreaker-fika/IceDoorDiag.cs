@@ -15,7 +15,7 @@ namespace Manimal.Icebreaker.Fika
     // and the RECEIVE (id + resolved? + position) so one raid shows whether packets
     // flow, resolve, and land on the SAME physical door on both machines. remove
     // once the door bug is fixed.
-    [HarmonyPatch(typeof(FikaPlayer), "vmethod_1", typeof(WorldInteractiveObject), typeof(InteractionResult))]
+    [HarmonyPatch(typeof(FikaPlayer), "ExecuteInteraction", typeof(WorldInteractiveObject), typeof(InteractionResult))]
     internal static class Patch_DoorSendDiag
     {
         [HarmonyPostfix]

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Manimal.Icebreaker.Server</RootNamespace>
     <AssemblyName>icebreaker-server</AssemblyName>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -15,13 +15,13 @@
 
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>$(SPTPath)\SPT\0Harmony.dll</HintPath>
+      <HintPath>$(SPTServerPath)\0Harmony.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <PackageReference Include="SPTarkov.Common" Version="4.0.13" />
-    <PackageReference Include="SPTarkov.DI" Version="4.0.13" />
-    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.13" />
-    <PackageReference Include="WTT-ServerCommonLib" Version="2.0.20" />
+    <PackageReference Include="SPTushonka.Common" Version="4.1.5" />
+    <PackageReference Include="SPTushonka.DI" Version="4.1.5" />
+    <PackageReference Include="SPTushonka.Server.Core" Version="4.1.5" />
+    <PackageReference Include="WTT-ServerCommonLib" Version="3.0.6" />
   </ItemGroup>
 
   <!--
@@ -29,9 +29,9 @@
     (615MB scenes + preset) are NOT copied per-build — stage those once by hand or
     with the deploy script; a rebuild only refreshes dll/json.
   -->
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(DeployToGame)' == 'true'">
     <PropertyGroup>
-      <DevModDir>$(SPTPath)\SPT\user\mods\ManimalIcebreaker</DevModDir>
+      <DevModDir>$(SPTServerPath)\user\mods\ManimalIcebreaker</DevModDir>
     </PropertyGroup>
     <ItemGroup>
       <DbFiles Include="$(ProjectDir)db\**\*.*" />

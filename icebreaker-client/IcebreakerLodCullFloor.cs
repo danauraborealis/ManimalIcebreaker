@@ -10,7 +10,7 @@ namespace Manimal.Icebreaker
     // (user's design, same day). a LODGroup's LAST threshold is not a mesh swap â€”
     // below it unity stops rendering the object (crossfaded, hence the fade-in/out).
     // bsg authored those cull heights assuming lod bias >= 2 (their slider clamps
-    // there, verified in GraphicsSettingsClass), so our sub-2 LodBiasClamp makes
+    // there, verified in EFT.Settings.Graphics.GraphicsSettingsGroup), so our sub-2 LodBiasClamp makes
     // aggressive cullers disappear in plain sight. the tier trick resolves the
     // fps-vs-pop tradeoff instead of splitting it: groups NEAR the camera get a
     // tiny protective floor (nothing ever dithers in your face), everything beyond

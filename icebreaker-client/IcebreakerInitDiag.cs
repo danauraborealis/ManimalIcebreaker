@@ -31,18 +31,18 @@ namespace Manimal.Icebreaker
                 bool hasVoice = false;
                 try { hasVoice = profile != null && profile.Customization != null && profile.Customization.ContainsKey(EBodyModelPart.Voice); } catch { }
                 P("voiceKey", hasVoice);
-                P("custSolver", Singleton<CustomizationSolverClass>.Instantiated);
+                P("custSolver", Singleton<EFT.CustomizationSolver>.Instantiated);
                 try
                 {
-                    if (hasVoice && Singleton<CustomizationSolverClass>.Instantiated)
-                        P("voiceResolved", Singleton<CustomizationSolverClass>.Instance.GetVoice(profile.Customization[EBodyModelPart.Voice]) != null);
+                    if (hasVoice && Singleton<EFT.CustomizationSolver>.Instantiated)
+                        P("voiceResolved", Singleton<EFT.CustomizationSolver>.Instance.GetVoice(profile.Customization[EBodyModelPart.Voice]) != null);
                 }
                 catch (Exception e) { sb.Append($"voiceResolved=THREW({e.GetType().Name}) "); }
                 P("envMgr", EnvironmentManagerBase.Instance != null);
                 var world = Singleton<GameWorld>.Instance;
                 P("gameWorld", world != null);
                 P("speakerMgr", world?.SpeakerManager != null);
-                P("backendCfg", Singleton<BackendConfigSettingsClass>.Instance != null);
+                P("backendCfg", Singleton<EFT.GlobalConfiguration>.Instance != null);
                 P("bones", __instance.PlayerBones != null);
                 P("bones.Animated", __instance.PlayerBones?.AnimatedTransform != null);
                 P("bones.Animated.Orig", __instance.PlayerBones?.AnimatedTransform?.Original != null);

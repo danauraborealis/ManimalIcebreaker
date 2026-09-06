@@ -15,7 +15,7 @@ namespace Manimal.Icebreaker
     // packaging rule (the zip installs nothing into the game folder) but not the spirit of
     // it: the files still landed there on first launch. this does.
     //
-    // how it works, from BundlesManagerClass.Class3524.smethod_0:
+    // how it works, from EFT.AssetsManager.BundlesManager.BundleLoadOperation.smethod_0:
     //
     //     if (manager.Dictionary_0.TryGetValue(bundleName, out c))   // already loaded?
     //     { c.Counter++; return new Class3524 { Result = c.AssetBundle }; }
@@ -29,7 +29,7 @@ namespace Manimal.Icebreaker
     // falls through to a fetch for a file that was never in StreamingAssets.
     //
     // the scene itself is then loaded BY NAME (SceneManager.LoadSceneAsync in
-    // AssetsManagerClass.Class3526), which works for any loaded bundle regardless of where
+    // EFT.AssetsManager.AssetsManager.LoadSceneOperation), which works for any loaded bundle regardless of where
     // it came from — so no manifest entry is needed either. our bundles are not in the
     // game's Windows.json and don't need to be.
     internal static class IcebreakerBundleHost
@@ -59,16 +59,16 @@ namespace Manimal.Icebreaker
                     return;
                 }
 
-                _entryType = AccessTools.Inner(typeof(BundlesManagerClass), "Class3523");
-                _loadedDict = AccessTools.Field(typeof(BundlesManagerClass), "Dictionary_0");
+                _entryType = AccessTools.Inner(typeof(EFT.AssetsManager.BundlesManager), "AssetBundleReference");
+                _loadedDict = AccessTools.Field(typeof(EFT.AssetsManager.BundlesManager), "_bundles");
                 if (_entryType == null || _loadedDict == null)
                 {
-                    Plugin.Log.LogError("[Bundles] BundlesManagerClass layout changed — cannot host bundles from the plugin folder");
+                    Plugin.Log.LogError("[Bundles] EFT.AssetsManager.BundlesManager layout changed — cannot host bundles from the plugin folder");
                     return;
                 }
 
                 harmony.Patch(
-                    AccessTools.Method(typeof(BundlesManagerClass), nameof(BundlesManagerClass.LoadBundleAsync)),
+                    AccessTools.Method(typeof(EFT.AssetsManager.BundlesManager), nameof(EFT.AssetsManager.BundlesManager.LoadBundleAsync)),
                     prefix: new HarmonyMethod(typeof(IcebreakerBundleHost), nameof(BeforeLoadBundle)));
 
                 // FindBundle reads the same dictionary, so anything already served stays
@@ -94,7 +94,7 @@ namespace Manimal.Icebreaker
 
         // every file under streamingassets/Windows becomes a key by its relative path —
         // lowercase with forward slashes, which is the form the game asks for
-        // (AssetsManagerClass.LoadAssetAsync lowercases the bundle name before lookup)
+        // (EFT.AssetsManager.AssetsManager.LoadAssetAsync lowercases the bundle name before lookup)
         private static Dictionary<string, string> ScanPayload()
         {
             var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -111,7 +111,7 @@ namespace Manimal.Icebreaker
             return map;
         }
 
-        // the cache entry (BundlesManagerClass+Class3523) decompiles as a public
+        // the cache entry (EFT.AssetsManager.BundlesManager+Class3523) decompiles as a public
         // .ctor(AssetBundle), but Activator.CreateInstance(type, arg) came back with
         // "Default constructor not found" against the real IL — obfuscated nested types
         // don't always present the signature the decompiler shows. so: bind the ctor
@@ -143,7 +143,7 @@ namespace Manimal.Icebreaker
             }
         }
 
-        private static void BeforeLoadBundle(BundlesManagerClass __instance, string bundleName)
+        private static void BeforeLoadBundle(EFT.AssetsManager.BundlesManager __instance, string bundleName)
         {
             try
             {

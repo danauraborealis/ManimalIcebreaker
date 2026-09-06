@@ -1,3 +1,7 @@
+using SPTarkov.Server.Core.Generators.Loot;
+using SPTarkov.Server.Core.Models.Eft.Inventory;
+using SPTarkov.Server.Core.Models.Spt.Tables;
+using SPTarkov.Server.Core.Models.Spt.Config;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +12,7 @@ using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Common;
-using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Models.Utils;
+using SPTarkov.Common.Models.Logging;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Utils;
 
@@ -31,9 +34,9 @@ namespace Manimal.Icebreaker.Server;
 // RewardDetails and nothing else, no tpl. so we keep the exact RewardDetails instance
 // we registered and match it by REFERENCE — the config dictionary hands the same
 // object back to the generator, and no other container can ever be that instance.
-[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 4)]
+[Injectable(TypePriority = OnLoadOrder.Preload + 12)]
 public class IcebreakerCrateRewards(
-    ConfigServer configServer,
+    InventoryConfig inventory,
     RandomUtil randomUtil,
     ISptLogger<IcebreakerCrateRewards> logger) : IOnLoad
 {
@@ -104,12 +107,12 @@ public class IcebreakerCrateRewards(
     private static RandomUtil _rng;
     private static ISptLogger<IcebreakerCrateRewards> _log;
 
-    public Task OnLoad()
+    public Task OnLoadAsync(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         _rng = randomUtil;
         _log = logger;
 
-        var inventory = configServer.GetConfig<InventoryConfig>();
         _details = new RewardDetails
         {
             RewardCount = RewardCount,

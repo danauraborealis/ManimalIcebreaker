@@ -8,7 +8,7 @@ namespace Manimal.Icebreaker.Keypad
     // marker MonoBehaviour on each live terminal panel. inherits
     // InteractableObject so EFT's player-aim raycast resolves the panel as an
     // interactive target — that's what lets the action patch pick it up in
-    // GetActionsClass.GetAvailableActions. holds the per-instance state the
+    // EFT.InteractionContextHelper.GetAvailableActions. holds the per-instance state the
     // action handler + UI session read: the bound door, the unlock code, the
     // grafted audio sources, and the active-session/unlocked flags.
     internal sealed class Keypad : InteractableObject

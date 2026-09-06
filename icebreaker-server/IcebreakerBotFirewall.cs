@@ -1,3 +1,11 @@
+using SPTarkov.Server.Core.Services.Bot;
+using SPTarkov.Server.Core.Services.Items;
+using SPTarkov.Server.Core.Models.Eft.Inventory;
+using SPTarkov.Server.Core.Helpers.Bot;
+using SPTarkov.Server.Core.Services.Server;
+using SPTarkov.Server.Core.Generators.Bot;
+using SPTarkov.Server.Core.Models.Spt.Tables;
+using SPTarkov.Server.Core.Models.Spt.Config;
 using System;
 using System.Reflection;
 using SPTarkov.DI.Annotations;
@@ -7,7 +15,7 @@ using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Spt.Bots;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Enums;
-using SPTarkov.Server.Core.Models.Utils;
+using SPTarkov.Common.Models.Logging;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
@@ -22,64 +30,43 @@ namespace Manimal.Icebreaker.Server;
 // a LATER request and read the stomped value: every wave bot failed with
 // "Map 'Suburbs' not found" while loot worked fine (measured, 2026-08-03).
 //
-// this DI override of BotGenerator re-applies the masquerade at the top of
-// PrepareAndGenerateBot — per bot, inside the very call that reads the static, with
-// nothing scheduled between. PBS overrides different generator classes
-// (CustomBotWeaponGenerator / CustomBotEquipmentModGenerator), so no DI clash.
-[Injectable]
+// Apply the masquerade before each bot is generated. SPT 4.1 no longer exposes
+// a virtual override, so Harmony wraps the generator directly.
+[Injectable(TypePriority = SPTarkov.Server.Core.DI.OnLoadOrder.Preload + 5)]
 public class IcebreakerBotFirewall(
     ISptLogger<BotGenerator> logger,
-    HashUtil hashUtil,
     RandomUtil randomUtil,
-    DatabaseService databaseService,
-    BotInventoryGenerator botInventoryGenerator,
-    BotLevelGenerator botLevelGenerator,
-    BotEquipmentFilterService botEquipmentFilterService,
-    WeightedRandomHelper weightedRandomHelper,
-    BotHelper botHelper,
-    SeasonalEventService seasonalEventService,
-    ItemFilterService itemFilterService,
-    BotNameService botNameService,
-    ConfigServer configServer,
-    ICloner cloner)
-    : BotGenerator(logger, hashUtil, randomUtil, databaseService, botInventoryGenerator,
-        botLevelGenerator, botEquipmentFilterService, weightedRandomHelper, botHelper,
-        seasonalEventService, itemFilterService, botNameService, configServer, cloner)
+    TemplateTable templateTable) : SPTarkov.Server.Core.DI.IOnLoad
 {
-    private readonly ISptLogger<BotGenerator> _log = logger;
-    private readonly RandomUtil _randomUtil = randomUtil;
-
-    private static bool _aliveLogged;
-
-    // read by IcebreakerBotGenDiag so "we lost the DI slot" reports itself instead of
-    // being an ABSENT log line somebody has to know to grep for
+    private static ISptLogger<BotGenerator> _log = null!;
+    private static RandomUtil _randomUtil = null!;
+    private static TemplateTable _templates = null!;
     internal static bool HoldsGeneratorSlot;
 
-    public override BotBase PrepareAndGenerateBot(MongoId sessionId, BotGenerationDetails botGenerationDetails)
+    public Task OnLoadAsync(CancellationToken cancellationToken)
     {
-        // one-time proof-of-life: if a player's server log LACKS this line, our DI
-        // override lost the BotGenerator slot to another mod (the 08-09 field log
-        // theory for APBS 2.2.0) — that diagnosis becomes a grep instead of a maybe
-        HoldsGeneratorSlot = true;
-        if (!_aliveLogged)
-        {
-            _aliveLogged = true;
-            _log.Info("[Icebreaker] bot firewall generator ACTIVE (DI override holds the BotGenerator slot)");
-        }
-        IcebreakerPbsMasquerade.Apply(_log);
-        var bot = base.PrepareAndGenerateBot(sessionId, botGenerationDetails);
-        IcebreakerBotSpecials.Apply(bot, botGenerationDetails?.RoleLowercase, _randomUtil, _db, _log);
-        return bot;
+        cancellationToken.ThrowIfCancellationRequested();
+        _log = logger;
+        _randomUtil = randomUtil;
+        _templates = templateTable;
+        var harmony = new HarmonyLib.Harmony("com.manimal.icebreaker.botfirewall");
+        harmony.Patch(HarmonyLib.AccessTools.Method(typeof(BotGenerator), nameof(BotGenerator.PrepareAndGenerateBot)),
+            prefix: new HarmonyLib.HarmonyMethod(typeof(IcebreakerBotFirewall), nameof(BeforeGenerate)),
+            postfix: new HarmonyLib.HarmonyMethod(typeof(IcebreakerBotFirewall), nameof(AfterGenerate)));
+        return Task.CompletedTask;
     }
 
-    // (the knight SZ-1 inject that lived here died the same day it shipped — his
-    // pockets are too small for the charge. the one-guaranteed-charge-per-raid now
-    // lives CLIENT-side in IcebreakerCrew.PlaceChargeSweep: zone-squad aware,
-    // backpack-preferring — things this server hook can't see.)
+    private static void BeforeGenerate()
+    {
+        HoldsGeneratorSlot = true;
+        IcebreakerPbsMasquerade.Apply(_log);
+    }
 
-    private readonly DatabaseService _db = databaseService;
+    private static void AfterGenerate(BotBase __result, BotGenerationDetails botGenerationDetails)
+    {
+        IcebreakerBotSpecials.Apply(__result, botGenerationDetails?.RoleLowercase, _randomUtil, _templates, _log);
+    }
 }
-
 internal static class IcebreakerPbsMasquerade
 {
     private static bool _logged;
@@ -191,7 +178,7 @@ internal static class IcebreakerBotSpecials
 
     // icebreaker raids only (raid-context latch); goons + rogues on vanilla maps stay
     // untouched by construction.
-    internal static void Apply<T>(BotBase bot, string role, RandomUtil rng, DatabaseService db, ISptLogger<T> log)
+    internal static void Apply<T>(BotBase bot, string role, RandomUtil rng, TemplateTable db, ISptLogger<T> log)
     {
         try
         {
@@ -225,7 +212,7 @@ internal static class IcebreakerBotSpecials
     // quietly devaluing the barter currency. so the FIRST keycard becomes the tag, every
     // other keycard is DELETED (getting labs cards off this ship was the whole point),
     // and any duplicate tag is culled too, whatever its source.
-    private static void SwapKeycardForDogtag<T>(BotBase bot, bool isWedge, RandomUtil rng, DatabaseService db, ISptLogger<T> log)
+    private static void SwapKeycardForDogtag<T>(BotBase bot, bool isWedge, RandomUtil rng, TemplateTable db, ISptLogger<T> log)
     {
         var items = bot.Inventory?.Items;
         if (items is null || !TagsPresent(db, log)) return;
@@ -263,7 +250,7 @@ internal static class IcebreakerBotSpecials
     }
 
     // dependency guard for the BD dogtags — resolved once, warned once
-    private static bool TagsPresent<T>(DatabaseService db, ISptLogger<T> log)
+    private static bool TagsPresent<T>(TemplateTable db, ISptLogger<T> log)
     {
         if (_tagsPresent == null)
         {
@@ -271,7 +258,7 @@ internal static class IcebreakerBotSpecials
             // a half-present set means the dependency is broken either way
             try
             {
-                var items = db.GetItems();
+                var items = db.Items;
                 _tagsPresent = items.ContainsKey(new MongoId(BdDogtagGreenTpl))
                             && items.ContainsKey(new MongoId(BdDogtagFerrumTpl));
             }

@@ -1,3 +1,7 @@
+using SPTarkov.Server.Core.Models.Eft.Inventory;
+using SPTarkov.Server.Core.Generators.Bot;
+using SPTarkov.Server.Core.Models.Spt.Tables;
+using SPTarkov.Server.Core.Models.Spt.Config;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +12,7 @@ using SPTarkov.Server.Core.Controllers;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Eft.Bot;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
-using SPTarkov.Server.Core.Models.Utils;
+using SPTarkov.Common.Models.Logging;
 
 namespace Manimal.Icebreaker.Server;
 
@@ -21,41 +25,22 @@ namespace Manimal.Icebreaker.Server;
 // arriving EMPTY (client-side request builder broke) vs never arriving at all
 // (client short-circuited before the wire). BotController.Generate is not virtual,
 // so this is a harmony prefix rather than the usual DI override.
-[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 91000)]
+[Injectable(TypePriority = OnLoadOrder.Preload + 91000)]
 public class IcebreakerBotGenDiag(
     ISptLogger<IcebreakerBotGenDiag> logger,
     SPTarkov.Server.Core.Utils.RandomUtil randomUtil,
-    SPTarkov.Server.Core.Services.DatabaseService databaseService,
-    SPTarkov.Server.Core.Generators.BotGenerator botGenerator) : IOnLoad
+    TemplateTable templateTable) : IOnLoad
 {
-    // WHO ACTUALLY OWNS THE SLOT (08-13). twice now a field log has been diagnosed by
-    // GUESSING which mod displaced our BotGenerator override, and twice the guess was
-    // wrong — APBS 2.2.1 turned out not to override it at all. the container knows the
-    // answer, so ask it at startup and print the concrete type plus its assembly. a
-    // one-line answer in the log beats reading somebody's whole modlist.
-    private void ReportGeneratorOwner()
-    {
-        try
-        {
-            var t = botGenerator.GetType();
-            if (t == typeof(IcebreakerBotFirewall)) return; // the normal, healthy case
-            logger.Warning($"[Icebreaker] the BotGenerator DI slot is held by '{t.FullName}' "
-                + $"(assembly '{t.Assembly.GetName().Name}'), NOT our firewall — that mod wins the last-registration "
-                + "race, so our per-bot hooks are bypassed. the APBS masquerade and the BD dogtag/euro injections are "
-                + "running from the bot-generate tap instead, which harmony guarantees. report this line if bots misbehave");
-        }
-        catch (Exception e) { logger.Warning($"[Icebreaker] could not resolve the BotGenerator owner: {e.Message}"); }
-    }
-
     private static ISptLogger<IcebreakerBotGenDiag>? _log;
     private static SPTarkov.Server.Core.Utils.RandomUtil? _rng;
-    private static SPTarkov.Server.Core.Services.DatabaseService? _db;
+    private static TemplateTable? _db;
 
-    public Task OnLoad()
+    public Task OnLoadAsync(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         _log = logger;
         _rng = randomUtil;
-        _db = databaseService;
+        _db = templateTable;
         try
         {
             var h = new Harmony("com.manimal.icebreaker.botgendiag");
@@ -63,7 +48,8 @@ public class IcebreakerBotGenDiag(
                 prefix: new HarmonyMethod(typeof(IcebreakerBotGenDiag), nameof(Prefix)),
                 postfix: new HarmonyMethod(typeof(IcebreakerBotGenDiag), nameof(Postfix)));
             logger.Info("[Icebreaker] bot-generate diagnostic tap armed (request + response count)");
-            ReportGeneratorOwner();
+            if (!Harmony.GetPatchInfo(AccessTools.Method(typeof(BotGenerator), nameof(BotGenerator.PrepareAndGenerateBot))).Owners.Contains("com.manimal.icebreaker.botfirewall"))
+                logger.Warning("[Icebreaker] generator hook missing; special-item fallback remains active");
         }
         catch (Exception e)
         {

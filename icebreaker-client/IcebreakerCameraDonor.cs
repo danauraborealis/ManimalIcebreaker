@@ -15,7 +15,7 @@ namespace Manimal.Icebreaker
     // the bundle route died twice, for reasons now measured: bundle binding needs stubs
     // and exact compiled layouts (stripped typetrees), and the rip's serialized DATA is
     // dead on arrival — shaders/materials null, curves empty — so the shipped components
-    // crashed Awake/Start, and the un-shippable SSAA broke CameraClass.SetSSR inside
+    // crashed Awake/Start, and the un-shippable SSAA broke EFT.CameraControl.CameraManager.SetSSR inside
     // PlayerCameraController.Create: error screen, no spawn.
     //
     // this flips the approach to the mod's own from-live-data pattern (levelsettings,
@@ -27,7 +27,7 @@ namespace Manimal.Icebreaker
     // binding at all, which dissolves the SSAA problem outright — then fills fields from
     // the dump, resolving asset refs BY NAME against the game's loaded assets.
     //
-    // graft timing is the part that must not drift: a prefix on CameraClass.SetCamera,
+    // graft timing is the part that must not drift: a prefix on EFT.CameraControl.CameraManager.SetCamera,
     // which the crash stack proves runs before the settings binding that calls SetSSR —
     // so SSAA exists by the time the game dereferences it. components are added with the
     // GO INACTIVE and fields filled before reactivation (the Awake-ordering trap): Awakes
@@ -57,7 +57,7 @@ namespace Manimal.Icebreaker
         //   RainScreenDrops        _dropMaterial unresolved — the rain prize stays lost
         //                          until its material is findable on this map
         //   ContactShadows         _noiseTextures is a ref ARRAY the dump can't encode
-        //   PerfectCullingCrossSceneSampler  Start() NREs (GClass1238) — sidecar culling
+        //   PerfectCullingCrossSceneSampler  Start() NREs (Koenigz.PerfectCulling.EFT.CullingGridVisibilitySampler) — sidecar culling
         //                          already owns cross-scene
         //   StreamingController    factory's streaming manager; not a camera effect and
         //                          has no business on another map's camera
@@ -121,16 +121,16 @@ namespace Manimal.Icebreaker
                     // deferred — by OnGameStarted the stack is built, so try once more
                     if (IceGate.On)
                     {
-                        var live = CameraClass.Instance?.Camera;
+                        var live = EFT.CameraControl.CameraManager.Instance?.Camera;
                         if (live != null) TryGraft(live.gameObject, "OnGameStarted");
                     }
                     // vanilla maps only — dumping our own grafted camera would feed the
                     // graft its own output next raid
                     if (IceGate.On || !Plugin.DevMode.Value) return;
                     if (System.IO.File.Exists(DonorPath)) return; // one blessed donor, dump once
-                    var cc = CameraClass.Instance;
+                    var cc = EFT.CameraControl.CameraManager.Instance;
                     var cam = cc != null ? cc.Camera : null;
-                    if (cam == null) { Plugin.Log.LogWarning("[CamDonor] no CameraClass.Camera to dump"); return; }
+                    if (cam == null) { Plugin.Log.LogWarning("[CamDonor] no EFT.CameraControl.CameraManager.Camera to dump"); return; }
                     Dump(cam.gameObject);
                 }
                 catch (Exception e) { Plugin.Log.LogWarning($"[CamDonor] dump failed: {e.Message}"); }
@@ -178,7 +178,7 @@ namespace Manimal.Icebreaker
 
         // ------------------------------------------------------------------ graft side
 
-        [HarmonyPatch(typeof(CameraClass), "SetCamera", typeof(Camera))]
+        [HarmonyPatch(typeof(EFT.CameraControl.CameraManager), "SetCamera", typeof(Camera))]
         internal static class Patch_GraftDonorCamera
         {
             [HarmonyPrefix]
@@ -189,7 +189,7 @@ namespace Manimal.Icebreaker
             }
         }
 
-        // the camera GO we already grafted — per-GO, because CameraClass persists across
+        // the camera GO we already grafted — per-GO, because EFT.CameraControl.CameraManager persists across
         // raids but its camera object does not
         private static GameObject _graftedGo;
 

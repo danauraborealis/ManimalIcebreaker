@@ -13,7 +13,7 @@ namespace Manimal.Icebreaker
     //
     // parity anchors with BSG's pipeline:
     //  - defence scoring calls the game's own CoverPointDefenceInfo(Vector3) ctor
-    //  - raycasts use LayerMaskClass.HighPolyWithTerrainMask like GClass369 does
+    //  - raycasts use LayersMaskController.HighPolyWithTerrainMask like AIUtility does
     //  - dedup uses the leaked CoverPointCreatorPreset cluster constants
     //    (CLUSTER_NEAR_DIST 0.4 / CLUSTER_LARGE_DIST 0.8 / CLUSTER_LARGE_ANGLE 50)
     //  - ground truth from dumps: wallDirection horizontal+unit, firePos = pos+1.272up,
@@ -229,8 +229,8 @@ namespace Manimal.Icebreaker
                 p.NeighbourhoodsWaysIds = g.WayIds.Where(keptWayIds.Contains).Select(i => i + idOffset).ToList();
                 p.CalcDefenceLevel();
                 try { p.InitLightBorders(); } catch { }
-                try { p.method_0(); } catch { }
-                try { p.method_2(); } catch { }
+                try { p.InitLookSides(); } catch { }
+                try { p.InitTilt(); } catch { }
                 points.Add(p);
                 byId[g.Id] = p;
             }
@@ -343,7 +343,7 @@ namespace Manimal.Icebreaker
                 }
                 // FIRE POSITION — was Vector3.zero, which is not "unset" as far as the AI is
                 // concerned. CustomNavigationPoint guards with (FirePosition != zero), but
-                // GClass236 does NOT: it tests SqrDistHorizontal(FirePosition, Position) > 0.1
+                // TaclicalMoveNode does NOT: it tests SqrDistHorizontal(FirePosition, Position) > 0.1
                 // and then walks to Vector3.Lerp(FirePosition, Position, 0.3f). with zero that
                 // distance is the point's whole distance from world origin, so every generated
                 // cover point told the bot its firing spot was 70% of the way to (0,0,0).
@@ -365,7 +365,7 @@ namespace Manimal.Icebreaker
 
                 // let BSG fill the rest rather than approximating it. every one of these
                 // fields has a real calculator on GroupPoint, and method_0 in particular does
-                // actual raycasts (GClass369.TestDir) — guessing from geometry would be
+                // actual raycasts (AIUtility.TestDir) — guessing from geometry would be
                 // strictly worse than calling the thing that ships with the game.
                 //   InitLightBorders -> BordersLightHave + Left/RightBorderLight
                 //                       (WallDirection rotated +-57deg = LIGHT_WALL_ANG)
@@ -374,8 +374,8 @@ namespace Manimal.Icebreaker
                 // order matters: method_0 and method_2 both read FirePosition, so they have to
                 // run after it is set, and method_2 needs CoverLevel too.
                 try { p.InitLightBorders(); } catch { }
-                try { p.method_0(); } catch { }
-                try { p.method_2(); } catch { }
+                try { p.InitLookSides(); } catch { }
+                try { p.InitTilt(); } catch { }
                 newPoints.Add(p);
                 byId[g.Id] = p;
             }
@@ -548,7 +548,7 @@ namespace Manimal.Icebreaker
         {
             var accepted = new List<GenPoint>();
             var hash = new SpatialHash<GenPoint>(2f);
-            int mask = LayerMaskClass.HighPolyWithTerrainMask;
+            int mask = LayersMaskController.HighPolyWithTerrainMask;
             // stage counters — when output stats look wrong these say where candidates died
             long samples = 0, rayHits = 0, smallEdge = 0, offNav = 0, recheckFail = 0, clustered = 0;
 

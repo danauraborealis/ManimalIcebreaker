@@ -50,19 +50,19 @@ namespace Manimal.Icebreaker
             return CrossingCost;
         }
 
-        [HarmonyPatch(typeof(MainMenuControllerClass), "method_54")]
+        [HarmonyPatch(typeof(EFT.MainMenuShowOperation), "method_54")]
         internal static class Patch_ReadyGate
         {
             [HarmonyPostfix]
-            private static void Postfix(MainMenuControllerClass __instance, ref bool __result)
+            private static void Postfix(EFT.MainMenuShowOperation __instance, ref bool __result)
             {
                 try
                 {
                     if (!__result) return;
-                    var rs = __instance.RaidSettings_0;
+                    var rs = __instance.raidSettings_0;
                     if (rs == null || rs.IsScav) return;
                     if (rs.SelectedLocation == null || rs.SelectedLocation.Id != SuburbsId) return;
-                    int cost = CostFor(__instance.Profile_0);
+                    int cost = CostFor(__instance.profile_0);
 
                     int carried = __instance.InventoryController.Inventory
                         .GetPlayerItems(EPlayerItems.Equipment)
@@ -70,7 +70,7 @@ namespace Manimal.Icebreaker
                         .Sum(i => i.StackObjectsCount);
                     if (carried >= cost) return;
 
-                    NotificationManagerClass.DisplayWarningNotification(
+                    EFT.Communications.NotificationManager.DisplayWarningNotification(
                         $"The smugglers want {cost:N0} roubles for the crossing ({carried:N0} carried)",
                         ENotificationDurationType.Long);
                     __result = false;
@@ -81,11 +81,11 @@ namespace Manimal.Icebreaker
             }
         }
 
-        [HarmonyPatch(typeof(LocalGame), "smethod_6")]
+        [HarmonyPatch(typeof(LocalGame), "Create")]
         internal static class Patch_ConsumeFare
         {
             [HarmonyPrefix]
-            private static void Prefix(Profile profile, LocationSettingsClass.Location location, LocalRaidSettings raidSettings)
+            private static void Prefix(Profile profile, JsonType.LocationSettings.Location location, LocalRaidSettings raidSettings)
                 => Consume(profile, location, raidSettings);
         }
 
@@ -101,7 +101,7 @@ namespace Manimal.Icebreaker
         // own labs flow removes the spent keycard with a bare grid removal, which is
         // the mechanism mirrored here. nothing to replicate either: the raid hasn't
         // started, and the deduction persists through each player's own raid-end sync.
-        internal static void Consume(Profile profile, LocationSettingsClass.Location location, LocalRaidSettings raidSettings)
+        internal static void Consume(Profile profile, JsonType.LocationSettings.Location location, LocalRaidSettings raidSettings)
         {
             try
             {
@@ -134,7 +134,7 @@ namespace Manimal.Icebreaker
                     {
                         // whole stack spent — off the grid, the exact mechanism the
                         // labs flow uses on a spent keycard
-                        var grid = s.Parent != null ? s.Parent.Container as StashGridClass : null;
+                        var grid = s.Parent != null ? s.Parent.Container as EFT.InventoryLogic.Grid : null;
                         if (grid == null)
                         {
                             Plugin.Log.LogWarning($"[MapFare] rouble stack not in a grid ('{s.Parent?.Container?.GetType().Name}'), skipping it");

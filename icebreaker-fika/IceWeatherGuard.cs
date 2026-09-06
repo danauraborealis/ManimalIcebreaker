@@ -25,6 +25,7 @@ namespace Manimal.Icebreaker.Fika
         [HarmonyPrefix]
         private static void Prefix()
         {
+            if (!IceGate.On) return;
             // 07-29 headless run proved the root cause: the headless flow generates
             // weather BEFORE its player exists, so the Player.Init weather-stack anchor
             // hasn't fired yet and GenerateWeathers silently skips on the null
@@ -36,14 +37,14 @@ namespace Manimal.Icebreaker.Fika
         }
     }
 
-    // NOTE: in the shipped 2.3.9 dll the packet classes are NESTED inside a
-    // RequestSubPackets class (the master source has them namespace-level)
+    // Fika 2.4.2 keeps this packet nested inside RequestSubPackets.
     [HarmonyPatch(typeof(RequestSubPackets.WeatherRequest), nameof(RequestSubPackets.WeatherRequest.HandleRequest))]
     internal static class Patch_WeatherRequestGuard
     {
         [HarmonyPrefix]
         private static void Prefix(NetPeer peer, FikaServer server)
         {
+            if (!IceGate.On) return;
             try
             {
                 var game = Singleton<IFikaGame>.Instance;
@@ -52,9 +53,9 @@ namespace Manimal.Icebreaker.Fika
 
                 // mirror fika's own SetupCustomWeather default shape: two entries
                 // spanning today so the client's weather curve has ends to blend
-                var day = EFTDateTimeClass.StartOfDay();
-                var w1 = WeatherClass.CreateDefault();
-                var w2 = WeatherClass.CreateDefault();
+                var day = EFT.DateTimeExtensions.StartOfDay();
+                var w1 = EFT.Weather.WeatherNode.CreateDefault();
+                var w2 = EFT.Weather.WeatherNode.CreateDefault();
                 w1.Time = day.Ticks;
                 w2.Time = day.AddDays(1).Ticks;
                 game.GameController.WeatherClasses = new[] { w1, w2 };

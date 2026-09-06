@@ -101,7 +101,7 @@ namespace Manimal.Icebreaker
 
             int enabled = 0, active = 0, withCollider = 0, bound = 0, interactiveLayer = 0;
             int shown = 0;
-            // ItemOwner is a FIELD (TraderControllerClass) — set when the game binds
+            // ItemOwner is a FIELD (EFT.InventoryLogic.ItemController) — set when the game binds
             // the server-generated container item to this LC
             var itemOwnerField = AccessTools.Field(typeof(LootableContainer), "ItemOwner");
             foreach (var lc in all)

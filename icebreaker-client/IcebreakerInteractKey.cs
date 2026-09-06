@@ -15,7 +15,7 @@ namespace Manimal.Icebreaker
     // game's own) but the very next frame saw F unheld and cancelled it. from the
     // player's side: the prompt appears, nothing ever happens, no notifier, ten attempts.
     //
-    // resolved from ControlSettingsClass.UserKeyBindings, which is the same table the
+    // resolved from EFT.Settings.Control.ControlSettingsGroup.UserKeyBindings, which is the same table the
     // settings screen writes: find the KeyGroup for EGameKey.Interact and take the key
     // codes off its variants. re-read whenever the binding changes so a mid-session
     // rebind is picked up, and fall back to F if the lookup ever drifts.
@@ -47,7 +47,7 @@ namespace Manimal.Icebreaker
             _nextRefresh = Time.unscaledTime + 5f; // cheap, and catches a mid-raid rebind
             try
             {
-                var bindings = Singleton<SharedGameSettingsClass>.Instance?.Control?.Settings?.UserKeyBindings?.Value;
+                var bindings = Singleton<EFT.Settings.SettingsManager>.Instance?.Control?.Settings?.UserKeyBindings?.Value;
                 if (bindings != null)
                 {
                     foreach (var group in bindings)

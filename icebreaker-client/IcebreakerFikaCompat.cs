@@ -65,7 +65,7 @@ namespace Manimal.Icebreaker
         private static void CoopStopPrefix(string profileId, ExitStatus exitStatus)
             => Patch_StripTorchOnExtract.Strip(profileId, exitStatus);
 
-        private static void CoopGameCreatePrefix(Profile profile, LocationSettingsClass.Location location, LocalRaidSettings localRaidSettings)
+        private static void CoopGameCreatePrefix(Profile profile, JsonType.LocationSettings.Location location, LocalRaidSettings localRaidSettings)
         {
             // the solo capture (LocalGame.smethod_6) is inert in coop — without this,
             // PendingLocationId stays stale/null on every fika peer and IceGate falls

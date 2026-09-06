@@ -9,7 +9,7 @@ using UnityEngine;
 namespace Manimal.Icebreaker.Blowtorch
 {
     // KNOWN-GOOD configuration (hackermod pattern): the torch clones the vanilla BBQ
-    // torch and stays a plain KeyItemClass — keys skip the weapon branch in item
+    // torch and stays a plain EFT.InventoryLogic.Key — keys skip the weapon branch in item
     // creation, so the retail loot model in Prefab spawns/inspects/icons cleanly.
     // the container bundle rides only in UsePrefab for OUR controller. cost: keys get
     // no native usable plumbing, so every entry point below is patched by TEMPLATE ID.
@@ -17,10 +17,10 @@ namespace Manimal.Icebreaker.Blowtorch
     // torch out (same as the hacker device — the body-pose pipeline has more
     // key-class checks than the two we patch here).
 
-    public class BlowtorchInterfaceClass : GInterface323
+    public class BlowtorchInterfaceClass : EFT.NextObservedPlayer.IObservedUsableItem
     {
         public void Initialize(GameObject gameObject) { }
-        public void UpdateData(GStruct337 observedUsableItemUpdatedData) { }
+        public void UpdateData(EFT.NextObservedPlayer.ObservedUsableItemUpdatedData observedUsableItemUpdatedData) { }
         public void Disable() { }
     }
 
@@ -54,13 +54,13 @@ namespace Manimal.Icebreaker.Blowtorch
                 var controller = Player.ItemHandsController.smethod_1<BlowtorchController>(
                     player, item,
                     new Player.ItemHandsController.Delegate8(
-                        Singleton<PoolManagerClass>.Instance.CreateItemUsablePrefab));
+                        Singleton<EFT.ObjectsFactory>.Instance.CreateItemUsablePrefab));
                 if (controller == null)
                 {
                     Plugin.Log.LogDebug("[Blowtorch] controller factory returned null");
                     return;
                 }
-                Player.UsableItemController.smethod_8<BlowtorchController>(controller, player);
+                Player.UsableItemController.Setup<BlowtorchController>(controller, player);
                 player.SpawnController(controller, () => { });
             }
             catch (Exception e)
@@ -97,7 +97,7 @@ namespace Manimal.Icebreaker.Blowtorch
 
     // async controller factory during hand swaps only recognizes the rangefinder —
     // for our item it builds a controller with a null item and breaks the swap
-    [HarmonyPatch(typeof(ClientUsableItemController), "smethod_11")]
+    [HarmonyPatch(typeof(ClientUsableItemController), "CreateAsync")]
     internal static class Patch_TorchSmethod11
     {
         [HarmonyPrefix]
@@ -107,17 +107,17 @@ namespace Manimal.Icebreaker.Blowtorch
             if (string.IsNullOrEmpty(itemId)) return true;
             var item = player.InventoryController.FindItem<Item>(itemId);
             if (!BlowtorchIds.IsTorch(item)) return true;
-            __result = Player.UsableItemController.smethod_7<ClientUsableItemController>(player, item);
+            __result = Player.UsableItemController.CreateControllerAsync<ClientUsableItemController>(player, item);
             return false;
         }
     }
 
-    // GInterface323 dispatcher returns null for unknown types — null breaks the chain
-    [HarmonyPatch(typeof(GClass2970), "smethod_0")]
+    // EFT.NextObservedPlayer.IObservedUsableItem dispatcher returns null for unknown types — null breaks the chain
+    [HarmonyPatch(typeof(EFT.NextObservedPlayer.ObservedPlayerUsableItemController), "GetObservedUsableItem")]
     internal static class Patch_TorchInterfaceDispatch
     {
         [HarmonyPrefix]
-        private static bool Prefix(ref GInterface323 __result, Item item)
+        private static bool Prefix(ref EFT.NextObservedPlayer.IObservedUsableItem __result, Item item)
         {
             if (!BlowtorchIds.IsTorch(item)) return true;
             __result = new BlowtorchInterfaceClass();
@@ -127,11 +127,11 @@ namespace Manimal.Icebreaker.Blowtorch
 
     // full-body animation type — Pistol is the one-handed held-in-front fit. two call
     // sites; known-insufficient for a perfect third-person pose (accepted).
-    [HarmonyPatch(typeof(HandsControllerClass), "method_49")]
+    [HarmonyPatch(typeof(EFT.NextObservedPlayer.ObservedPlayerHandsController), "GetWeaponAnimationType")]
     internal static class Patch_TorchAnimationType
     {
         [HarmonyPrefix]
-        private static bool Prefix(ref PlayerAnimator.EWeaponAnimationType __result, HandsControllerClass __instance)
+        private static bool Prefix(ref PlayerAnimator.EWeaponAnimationType __result, EFT.NextObservedPlayer.ObservedPlayerHandsController __instance)
         {
             if (!BlowtorchIds.IsTorch(__instance.ItemInHands)) return true;
             __result = PlayerAnimator.EWeaponAnimationType.Pistol;
@@ -195,7 +195,7 @@ namespace Manimal.Icebreaker.Blowtorch
     }
 
     // safety net: a torch spawn/preview failure must never abort raid load
-    [HarmonyPatch(typeof(PoolManagerClass), nameof(PoolManagerClass.CreateCleanLootPrefab))]
+    [HarmonyPatch(typeof(EFT.ObjectsFactory), nameof(EFT.ObjectsFactory.CreateCleanLootPrefab))]
     internal static class Patch_LootPrefabGuard
     {
         [HarmonyFinalizer]

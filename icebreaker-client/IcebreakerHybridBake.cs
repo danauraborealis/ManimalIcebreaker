@@ -163,7 +163,7 @@ namespace Manimal.Icebreaker
                 try { p.InitForGame(covers.AICorePointsHolder); } catch { }
 
             RebucketVoxels(covers);
-            AccessTools.Field(typeof(AICoversData), "_cache").SetValue(covers, new GClass411(covers));
+            AccessTools.Field(typeof(AICoversData), "_cache").SetValue(covers, new AICoversDataCache(covers));
             AccessTools.Field(typeof(AICoversData), "_lastId")?.SetValue(covers, covers.Points.Max(p => p.Id) + 1);
 
             RegeneratePatrols(synth, covers);
