@@ -37,5 +37,33 @@
   "82c33ef9da1054dac7e059bd": "准备前往破冰船的交通工具",
   "6caf3eb17fdc63f4ffc3554f": "规划从破冰船安全撤离的路线",
   "ddddc8217a1f742fdae9bddd": "Mechanic信任度达到3级",
-    "a1c4f0e2b7d3946815ef2c60": "上交一张Paradigm Shipping海报"
+
+  "a1c4f0e2b7d3946815ef2c60": "上交一张Paradigm Shipping海报",
+
+  "ScavRole/BlackDiv": "黑色军团",
+  "Suburbs": "破冰船",
+  "Icebreaker_Exit_Heli": "直升机",
+
+  "6a5d6a5f4ed8c025a0a2cff0 Name": "Model 8230 CS 催泪弹",
+  "6a5d6a5f4ed8c025a0a2cff0 ShortName": "催泪弹",
+  "6a5d6a5f4ed8c025a0a2cff0 Description": "装有刺激性气体的非致命催泪弹，能在 20-40 秒内不断释放出催泪气体，具体作用范围与消散时间取决于周边环境。",
+  "6a7dfef811aec9601b11cc1c Name": "黑色军团装备箱",
+  "6a7dfef811aec9601b11cc1c ShortName": "黑色军团",
+  "6a7dfef811aec9601b11cc1c Description": "一个沉重的运输箱，外部没有任何标识。箱内装有一整套黑色军团的专用装备，头盔、防弹衣、胸挂、背包以及各类防护装备一应俱全。\n\n从箱内物品来看，这批装备显然是为一支需要在远离任何安全区的环境中执行任务的小队准备的。",
+  "9a449693dff5334122ed7388 Name": "BBQ-S43 喷枪",
+  "9a449693dff5334122ed7388 ShortName": "BBQ-S43",
+  "9a449693dff5334122ed7388 Description": "便携式喷枪，只不过燃料有限。显然这个小家伙没法直接在墙上熔出一个大洞来让你进入舰长室，但用它融化积雪和结冰还是没问题的。将它绑定快捷键后拿在手上即可使用。",
+  "6a63fa5726a91c3479b6c575 Name": "Paradigm 航运指示",
+  "6a63fa5726a91c3479b6c575 ShortName": "指示",
+  "6a63fa5726a91c3479b6c575 Description": "这份 Paradigm 航运文件夹装有 #3 货运站点相关动向的最新指示。",
+  
+  "5714dc342459777137212e0b Name": "破冰船",
+  "5714dc342459777137212e0b Description": "在芬兰湾里，隶属于物流公司 Paradigm Shipping 的核动力破冰船“北风之神”号深陷诺文斯克的封锁当中。“北风之神”号的确切用途及其运载的货物仍然未知。Paradigm Shipping 和 TerraGroup 做了特别努力，尽量让媒体对这艘破冰船避而不谈，并对其航线和任务严格保密。",
+  
+  "icebreaker_cover Name": "破冰船",
+  "icebreaker_cover Description": "在芬兰湾里，隶属于物流公司 Paradigm Shipping 的核动力破冰船“北风之神”号深陷诺文斯克的封锁当中。“北风之神”号的确切用途及其运载的货物仍然未知。Paradigm Shipping 和 TerraGroup 做了特别努力，尽量让媒体对这艘破冰船避而不谈，并对其航线和任务严格保密。",
+  "blackdiv_banner Name": "黑色军团",
+  "blackdiv_banner Description": "时不时地，塔科夫就会流传关于一个既不属于 USEC 也不属于 BEAR 的秘密部队的传言。坊间传闻，这些特殊行动人员会在夜间行动，肃清相关区域，回收宝贵的 TerraGroup 数据。但在 PMC 行动人员中，几乎没有人相信这个所谓的“Black Division”真的存在，因为在当前形势下，让成建制的整支作战小组自由出入封锁区根本不可能。\n……吗？",
+  "wedge_banner Name": "“Wedge”特别行动队",
+  "wedge_banner Description": "来自少数仍在塔科夫活动的PMC的情报和特殊渠道的监控记录显示，有多架武装直升机正在向芬兰湾移动。我们截获的无线电片段提到了一个代号——“Wedge”。其成员来自世界各地——比如 前SAS 和前摩萨德。Wedge同时也是其指挥官的呼号，他是 Black Division 的精英行动人员，负责在“北风之神”号上的秘密行动，以及对一切可能的无关知情人员的“清理”工作。"
 }
