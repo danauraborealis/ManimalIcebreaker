@@ -331,7 +331,7 @@ namespace Manimal.Icebreaker
                 {
                     _lastEnterNotify = Time.time;
                     EFT.Communications.NotificationManager.DisplayMessageNotification(
-                        "Signal the helicopter with a green flare to extract",
+                        IcebreakerText.Get("Icebreaker_UI_Heli_Signal", "Signal the helicopter with a green flare to extract"),
                         ENotificationDurationType.Long, ENotificationIconType.Default, Color.white);
                 }
 
@@ -387,7 +387,7 @@ namespace Manimal.Icebreaker
                     else
                         Plugin.Log.LogWarning($"[HeliExfil] '{HeliRigName}' rig/animator not found — skipping the flight, unlocking on the timer anyway");
                     EFT.Communications.NotificationManager.DisplayMessageNotification(
-                        "The helicopter has been signaled — inbound, hold the pad",
+                        IcebreakerText.Get("Icebreaker_UI_Heli_Inbound", "The helicopter has been signaled — inbound, hold the pad"),
                         ENotificationDurationType.Long, ENotificationIconType.Default, Color.green);
                     StartCoroutine(HeliArrival());
             }
@@ -646,7 +646,7 @@ namespace Manimal.Icebreaker
             if (_exitCol != null) _exitCol.enabled = true; // trigger back online with the skids
             _exit.Status = EExfiltrationStatus.RegularMode;
             EFT.Communications.NotificationManager.DisplayMessageNotification(
-                "The helicopter has landed — extraction active",
+                IcebreakerText.Get("Icebreaker_UI_Heli_Landed", "The helicopter has landed — extraction active"),
                 ENotificationDurationType.Long, ENotificationIconType.Default, Color.green);
             Plugin.Log.LogDebug("[HeliExfil] heli arrived — exfil UNLOCKED");
         }

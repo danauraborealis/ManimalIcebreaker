@@ -22,6 +22,11 @@
         "name": "Paradigm Shipping directive",
         "shortName": "Directive",
         "description": "This Paradigm Shipping folder contains one of the latest directives regarding operations at cargo terminal #3."
+      },
+      "ru": {
+        "name": "Распоряжение Paradigm Shipping",
+        "shortName": "Распоряжение",
+        "description": "В этой папке Paradigm Shipping находится одно из последних распоряжений, касающихся работ на грузовом терминале №3."
       }
     },
     "addtoItemBlacklist": true,
