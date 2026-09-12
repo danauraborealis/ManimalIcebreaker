@@ -60,6 +60,7 @@ namespace Manimal.Icebreaker
 
         public static bool TryBuild()
         {
+            if (!FikaBridge.CanRender) return false;
             if (_marker != null) return true;
             var sc = Sidecar();
             var comps = sc?["components"] as JObject;
@@ -303,6 +304,7 @@ namespace Manimal.Icebreaker
 
         public static void TickBlizzard()
         {
+            if (!FikaBridge.CanRender) return;
             var wc = EFT.Weather.WeatherController.Instance;
             if (wc == null || wc.WeatherDebug == null) return;
             IcebreakerSky.TryApply(); // retail atmosphere — one-shot once the sky singleton exists
@@ -1158,6 +1160,7 @@ namespace Manimal.Icebreaker
         [HarmonyPostfix]
         private static void Postfix(EFT.CameraControl.OpticComponentUpdater __instance)
         {
+            if (!FikaBridge.CanRender) return;
             if (!IceGate.On) return; // vanilla maps keep their scattering
             try
             {

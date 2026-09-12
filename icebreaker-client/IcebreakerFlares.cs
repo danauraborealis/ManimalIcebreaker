@@ -27,6 +27,7 @@ namespace Manimal.Icebreaker
 
         internal static void TryBuild()
         {
+            if (!FikaBridge.CanRender) return;
             if (_built) return;
             if (!Plugin.LensFlares.Value)
             {

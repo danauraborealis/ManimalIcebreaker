@@ -102,6 +102,7 @@ namespace Manimal.Icebreaker
 
         internal static void Restore()
         {
+            if (!FikaBridge.CanRender) return;
             if (!IceGate.On) return;
             // the component destroys itself in Awake when the graphics setting is off, so
             // adding 49 of them would just be churn

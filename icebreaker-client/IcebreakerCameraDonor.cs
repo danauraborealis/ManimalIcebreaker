@@ -115,6 +115,7 @@ namespace Manimal.Icebreaker
             [HarmonyPostfix]
             private static void Postfix()
             {
+                if (!FikaBridge.CanRender) return;
                 try
                 {
                     // late graft: on a menu load SetCamera ran too early (bare camera) and
@@ -211,6 +212,7 @@ namespace Manimal.Icebreaker
         // hollow (the doctrine that got the allowlist here in the first place).
         internal static void TryGraft(GameObject go, string site)
         {
+            if (!FikaBridge.CanRender) return;
             if (go == null || _graftedGo == go) return;
             if (go.GetComponent<EffectsController>() == null)
             {

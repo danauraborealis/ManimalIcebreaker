@@ -71,6 +71,7 @@ namespace Manimal.Icebreaker
         // Update that live panel once, retaining its existing canvas, fades and timing.
         internal static void RefreshExisting()
         {
+            if (!FikaBridge.CanRender) return;
             try
             {
                 LoadSprites();
@@ -93,6 +94,7 @@ namespace Manimal.Icebreaker
             [HarmonyPrefix]
             private static bool Prefix(SplashScreenPanel __instance, ref Sprite __result)
             {
+                if (!FikaBridge.CanRender) return true;
                 try
                 {
                     LoadSprites();

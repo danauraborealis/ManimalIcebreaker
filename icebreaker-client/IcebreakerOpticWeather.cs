@@ -22,6 +22,7 @@ namespace Manimal.Icebreaker
 
         internal void Sync()
         {
+            if (!FikaBridge.CanRender) return;
             if (_failed) return;
             try
             {

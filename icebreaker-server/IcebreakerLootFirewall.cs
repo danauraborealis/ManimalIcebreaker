@@ -159,9 +159,9 @@ public class IcebreakerLootFirewall(
             }
             catch (Exception e)
             {
-                _log.Error("[Icebreaker] a mod threw inside loot generation for the icebreaker — "
+                _log.Error("[Icebreaker] loot generation failed for the icebreaker — "
                     + "starting the raid WITHOUT generated loot rather than hanging the client. "
-                    + $"culprit: {Culprit(e)} — report it upstream. inner error: {e.Message}");
+                    + $"stack component: {Culprit(e)} (may be processing invalid map data). Exception: {e}");
                 return new List<SpawnpointTemplate>();
             }
             finally

@@ -133,6 +133,8 @@ $serverDst = "$stage\SPT_Runtime\user\mods\ManimalIcebreaker"
 New-Item -ItemType Directory -Force $serverDst | Out-Null
 Copy-Item "$root\icebreaker-server\db" "$serverDst\db" -Recurse -Force
 Get-ChildItem "$serverDst\db" -Recurse -File -Filter '*.bak*' | Remove-Item -Force
+# Per-profile progression belongs to the installed server, never an update archive.
+Get-ChildItem "$serverDst\db" -File -Filter 'icebreaker_visits.json*' | Remove-Item -Force
 Copy-Item "$root\icebreaker-server\bundles.json" $serverDst -Force
 Copy-Item "$assetServerPath\user\mods\ManimalIcebreaker\bundles" "$serverDst\bundles" -Recurse -Force
 Copy-Item "$root\icebreaker-server\bin\Release\icebreaker-server.dll" $serverDst -Force
@@ -141,9 +143,12 @@ Copy-Item "$root\icebreaker-server\bin\Release\icebreaker-server.dll" $serverDst
 # the plugin folder's streamingassets/ payload (harvested above with the rest of the
 # plugin dir) and the plugin loads them directly from that folder.
 
-Copy-Item "$root\docs\RELEASE-README.txt" "$stage\README.txt" -Force
-# forge requires the license file INSIDE the archive, not merely in the repo
-Copy-Item "$root\LICENSE" "$stage\LICENSE" -Force
+# Install archives contain runtime files only; development/release documents
+# remain in the repository. Also filter extras inherited from a live asset source.
+Get-ChildItem $stage -Recurse -File | Where-Object {
+    $_.Extension -in '.md', '.xml', '.cs', '.csproj', '.pdb' -or
+    $_.Name -match '^(README|LICENSE|CHANGELOG|RELEASE[-_ ]?INFO|VERSIONING)(\.|$|[-_ ])'
+} | Remove-Item -Force
 
 # Record the binaries in the package itself before the staging tree is removed. This
 # makes the VirusTotal backstop compare against the actual release rather than a live
@@ -178,8 +183,6 @@ if (Test-Path $fikaStage) { Remove-Item -Recurse -Force $fikaStage }
 $fikaDst = "$fikaStage\BepInEx\plugins\ManimalIcebreaker"
 New-Item -ItemType Directory -Force $fikaDst | Out-Null
 Copy-Item "$root\icebreaker-fika\bin\Release\netstandard2.1\ManimalIcebreakerFika.dll" $fikaDst -Force
-# the addon is uploaded as its own forge entry, so it needs its own copy of the license
-Copy-Item "$root\LICENSE" "$fikaStage\LICENSE" -Force
 $fikaZip = "$OutputDirectory\Manimal-IcebreakerFika-$ver.zip"
 if (Test-Path $fikaZip) { Remove-Item $fikaZip -Force }
 $fa = [System.IO.Compression.ZipFile]::Open($fikaZip, 'Create')

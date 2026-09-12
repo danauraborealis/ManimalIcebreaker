@@ -17,6 +17,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="spt-reflection">
+      <HintPath>$(SPTPath)\BepInEx\plugins\spt\spt-reflection.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="Comfort.Unity">
       <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\Comfort.Unity.dll</HintPath>
       <Private>false</Private>

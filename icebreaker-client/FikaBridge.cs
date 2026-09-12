@@ -23,9 +23,23 @@ namespace Manimal.Icebreaker
         private static bool _resolved;
         private static bool _present;
         private static PropertyInfo _isServer;
+        private static PropertyInfo _isHeadless;
         private static bool _warnedBroken;
 
         internal static bool Present { get { Resolve(); return _present; } }
+
+        // IsHeadless describes THIS process; IsHeadlessGame/IsHeadlessRequester
+        // also describe normal players connected to a dedicated host.
+        internal static bool CanRender
+        {
+            get
+            {
+                if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null) return false;
+                Resolve();
+                try { return _isHeadless == null || !(bool)_isHeadless.GetValue(null); }
+                catch { return false; }
+            }
+        }
 
         // true when this instance runs the real bots: solo SPT always, Fika host yes,
         // Fika client no. read PER CALL — IsServer is only meaningful once matchmaking
@@ -83,6 +97,7 @@ namespace Manimal.Icebreaker
                         if (t.Name == "FikaBackendUtils")
                         {
                             _isServer = t.GetProperty("IsServer", BindingFlags.Public | BindingFlags.Static);
+                            _isHeadless = t.GetProperty("IsHeadless", BindingFlags.Public | BindingFlags.Static);
                             _raidCode = t.GetProperty("RaidCode", BindingFlags.Public | BindingFlags.Static);
                             _serverGuid = t.GetProperty("ServerGuid", BindingFlags.Public | BindingFlags.Static);
                         }

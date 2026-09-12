@@ -3,11 +3,34 @@ using System.Reflection.Emit;
 using HarmonyLib;
 using Manimal.Icebreaker.Server;
 using Mono.Cecil;
+using System.Text.Json;
 using SPTarkov.Server.Core.Generators.Loot;
 using SPTarkov.Server.Core.Models.Spt.Tables;
 
 // Run without launching EFT or reading/writing any player profiles.
 if (args.Length != 2 && args.Length != 4) throw new ArgumentException("Usage: verification <SPT install> <built client DLL> [Fika install] [built addon DLL]");
+// Reproduce the dictionary contract used by loot mods. Duplicate candidates or
+// distribution keys must fail here instead of dropping all loot at raid load.
+using (var loot = JsonDocument.Parse(File.ReadAllText("icebreaker-server/db/looseLoot.json")))
+{
+    int checkedPools = 0;
+    foreach (var point in loot.RootElement.GetProperty("spawnpoints").EnumerateArray())
+    {
+        var candidates = new Dictionary<string, string>();
+        foreach (var item in point.GetProperty("template").GetProperty("Items").EnumerateArray())
+            candidates.Add(item.GetProperty("composedKey").GetString()!, item.GetProperty("_tpl").GetString()!);
+        var weights = new HashSet<string>();
+        foreach (var weight in point.GetProperty("itemDistribution").EnumerateArray())
+        {
+            var key = weight.GetProperty("composedKey").GetProperty("key").GetString()!;
+            if (!weights.Add(key) || !candidates.ContainsKey(key))
+                throw new Exception("Invalid loose-loot distribution key: " + key);
+        }
+        if (weights.Count != candidates.Count) throw new Exception("Unreferenced loose-loot candidate");
+        checkedPools++;
+    }
+    Check(checkedPools > 0, $"{checkedPools} loose-loot pools have unique candidates and matching weights");
+}
 var metadata = new ModMetadata();
 Check(metadata.SptVersion.IsSatisfied("4.1.5"), "SPT 4.1.5 accepted");
 Check(!metadata.SptVersion.IsSatisfied("4.0.13") && !metadata.SptVersion.IsSatisfied("4.2.0"), "Other SPT minor versions rejected");
@@ -21,11 +44,7 @@ foreach (var (guid, current, previous) in new[] {
     var range = metadata.ModDependencies![guid];
     Check(range.IsSatisfied(current) && !range.IsSatisfied(previous), guid + " version floor");
 }
-var mapLockAttribute = typeof(IcebreakerLockRouter).GetCustomAttributesData()
-    .Single(attribute => attribute.AttributeType.Name == "Injectable");
-var mapLockPriority = (int)mapLockAttribute.NamedArguments
-    .Single(argument => argument.MemberName == "TypePriority").TypedValue.Value!;
-Check(mapLockPriority == SPTarkov.Server.Core.DI.OnLoadOrder.Routers - 1, "Boreas map-lock route priority");
+await ProgressionChecks.Run();
 
 // Exercise the real Harmony transpiler against SPT 4.1.5's method body. This
 // catches a missing/changed call target and invalid emitted IL without a raid.
@@ -86,17 +105,29 @@ foreach (var attr in patch.CustomAttributes.Where(a => a.AttributeType.FullName 
     }
     checkedTargets++;
 }
-Check(checkedTargets > 30, $"{checkedTargets} client/addon Harmony targets resolve uniquely");
+var cameraSafety = AllTypes(client.MainModule.Types).Single(t => t.Name == "Patch_RejectShellCameraPrefab");
+Check(cameraSafety.BaseType.FullName == "SPT.Reflection.Patching.ModulePatch" &&
+      !cameraSafety.CustomAttributes.Any(a => a.AttributeType.FullName == "HarmonyLib.HarmonyPatch"), "Camera safety uses SPT ModulePatch without duplicate Harmony registration");
+var safetyPrefix = cameraSafety.Methods.Single(m => m.Name == "Prefix");
+Check(safetyPrefix.CustomAttributes.Any(a => a.AttributeType.Name == "PatchPrefixAttribute") &&
+      !safetyPrefix.Body.Instructions.Any(i => i.Operand is MethodReference m && m.DeclaringType.Name == "FikaBridge" && m.Name == "get_CanRender"),
+      "Camera safety stays active during headless cleanup");
+var cameraTarget = gameTypes["EFT.CameraControl.CameraManager"].Methods.Single(m => m.Name == "SetCameraFromSettings");
+Check(cameraTarget.Parameters.Count == 1 && cameraTarget.Parameters[0].Name == safetyPrefix.Parameters[0].Name &&
+      safetyPrefix.Parameters[0].ParameterType is ByReferenceType byRef && byRef.ElementType.FullName == cameraTarget.Parameters[0].ParameterType.FullName,
+      "Camera safety prefix binds the SPT 4.1 settings parameter");
+checkedTargets++;
+Check(checkedTargets > 30, $"{checkedTargets} client/addon patch targets resolve uniquely");
 
 Check(parameterErrors.Count == 0, "Harmony parameter bindings: " + string.Join("; ", parameterErrors));
-if (fika != null && addon != null) VerifyFika(fika, args[2], args[3]);
+if (fika != null && addon != null) VerifyFika(fika, args[2], args[3], args[1]);
 Console.WriteLine("SPT 4.1 migration verification passed.");
 
-static void VerifyFika(AssemblyDefinition fika, string install, string addonPath)
+static void VerifyFika(AssemblyDefinition fika, string install, string addonPath, string clientPath)
 {
     var types = AllTypes(fika.MainModule.Types).ToArray();
     var backend = types.Single(t => t.Name == "FikaBackendUtils");
-    foreach (var name in new[] { "IsServer", "RaidCode", "ServerGuid" })
+    foreach (var name in new[] { "IsServer", "IsHeadless", "RaidCode", "ServerGuid" })
         Check(backend.Properties.Any(p => p.Name == name && p.GetMethod is { IsPublic: true, IsStatic: true }), "Fika host/seed property " + name);
     var coop = types.Single(t => t.Name == "CoopHandler");
     Check(coop.Methods.Count(m => m.Name == "TryGetCoopHandler" && m.IsPublic && m.IsStatic && m.Parameters.Count == 1 && m.Parameters[0].ParameterType.IsByReference) == 1,
@@ -111,7 +142,7 @@ static void VerifyFika(AssemblyDefinition fika, string install, string addonPath
     context.Resolving += (_, name) =>
     {
         foreach (var directory in new[] { Path.GetDirectoryName(Path.GetFullPath(addonPath))!,
-            Path.Combine(install, "BepInEx", "plugins", "Fika"), Path.Combine(install, "BepInEx", "core"),
+            Path.Combine(install, "BepInEx", "plugins", "Fika"), Path.Combine(install, "BepInEx", "plugins", "spt"), Path.Combine(install, "BepInEx", "core"),
             Path.Combine(install, "EscapeFromTarkov_Data", "Managed") })
         {
             var path = Path.Combine(directory, name.Name + ".dll");
@@ -121,6 +152,29 @@ static void VerifyFika(AssemblyDefinition fika, string install, string addonPath
     };
     try
     {
+        var builtClient = context.LoadFromAssemblyPath(Path.GetFullPath(clientPath));
+        var cameraPatchType = builtClient.GetType("Manimal.Icebreaker.Patch_RejectShellCameraPrefab", true)!;
+        var cameraPatch = Activator.CreateInstance(cameraPatchType, nonPublic: true)!;
+        var cameraMethod = (MethodBase)cameraPatchType.GetMethod("GetTargetMethod", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(cameraPatch, null)!;
+        Check(cameraMethod.Name == "SetCameraFromSettings" && cameraMethod.DeclaringType!.FullName == "EFT.CameraControl.CameraManager", "SPT camera wrapper resolves the live target");
+        var refresh = builtClient.GetType("Manimal.Icebreaker.IcebreakerMapUnlock", true)!
+            .GetMethod("RefreshLocation", BindingFlags.Static | BindingFlags.NonPublic)!;
+        var locationType = refresh.GetParameters()[0].ParameterType;
+        foreach (var (id, enabled, locked, completed, expectedEnabled, expectedLocked) in new[] {
+            ("Suburbs", true, false, false, true, false), // disabled gate from server
+            ("Suburbs", false, true, false, false, true), // prerequisite not earned
+            ("Suburbs", false, true, true, true, false), // completed since login
+            ("bigmap", false, true, true, false, true) })
+        {
+            var location = System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(locationType);
+            locationType.GetField("Id")!.SetValue(location, id);
+            locationType.GetField("Enabled")!.SetValue(location, enabled);
+            locationType.GetField("Locked")!.SetValue(location, locked);
+            refresh.Invoke(null, new object[] { location, completed });
+            Check((bool)locationType.GetField("Enabled")!.GetValue(location)! == expectedEnabled &&
+                  (bool)locationType.GetField("Locked")!.GetValue(location)! == expectedLocked,
+                  $"Built client map refresh: {id}, server enabled={enabled}, completed={completed}");
+        }
         var core = context.LoadFromAssemblyPath(Path.GetFullPath(Path.Combine(install, "BepInEx", "plugins", "Fika", "Fika.Core.dll")));
         var packetType = context.LoadFromAssemblyPath(Path.GetFullPath(addonPath)).GetType("Manimal.Icebreaker.Fika.IceWorldPacket", throwOnError: true)!;
         var writerType = core.GetType("Fika.Core.Networking.LiteNetLib.Utils.NetDataWriter", true)!;

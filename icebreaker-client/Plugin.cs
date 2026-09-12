@@ -371,7 +371,7 @@ namespace Manimal.Icebreaker
                 {
                     if (scene.name != null && scene.name.StartsWith("Icebreaker", System.StringComparison.OrdinalIgnoreCase))
                     {
-                        RenderEnvProbe.CaptureSceneMaterials(scene);
+                        if (FikaBridge.CanRender) RenderEnvProbe.CaptureSceneMaterials(scene);
                         // SAIN masquerade (user-approved special case, 2026-08-03) — was
                         // wired to the tripwire hook, which never fires at default config;
                         // scene load always does, and every plugin is loaded by now
@@ -415,6 +415,8 @@ namespace Manimal.Icebreaker
             IcebreakerBundleHost.Init(harmony);
             IcebreakerBundleHost.CleanLegacyStreamingAssets();
 
+            try { new Patch_RejectShellCameraPrefab().Enable(); }
+            catch (System.Exception e) { Log.LogError($"Camera prefab safety patch failed: {e}"); }
             try { harmony.PatchAll(); }
             catch (System.Exception e)
             {

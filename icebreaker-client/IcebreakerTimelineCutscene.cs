@@ -48,6 +48,7 @@ namespace Manimal.Icebreaker
 
         public static void Play()
         {
+            if (!FikaBridge.CanRender) return;
             var go = new GameObject("Icebreaker_TimelineCutscene");
             go.AddComponent<IcebreakerTimelineCutscene>();
         }

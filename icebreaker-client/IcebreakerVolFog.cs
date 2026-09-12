@@ -212,6 +212,7 @@ namespace Manimal.Icebreaker
 
         internal static void Tick()
         {
+            if (!FikaBridge.CanRender) return;
             if (_dead) return;
             if (!Plugin.VolFog.Value)
             {

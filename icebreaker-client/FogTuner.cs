@@ -18,6 +18,7 @@ namespace Manimal.Icebreaker
             [HarmonyPostfix]
             private static void Postfix()
             {
+                if (!FikaBridge.CanRender) return;
                 IcebreakerVolFog.ResetForRaid(); // statics reset is safe/needed everywhere
                 if (!IceGate.On || !Plugin.DevMode.Value) return; // the tuner and its F9 key are dev-only
                 new GameObject("Icebreaker_FogTuner").AddComponent<FogTuner>();

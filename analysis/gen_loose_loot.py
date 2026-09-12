@@ -469,8 +469,17 @@ def main():
             continue
         total_prob += prob
         items, item_dist = [], []
-        for j, entry in enumerate(dist):
-            key = str(hash((i, entry["tpl"])) & 0x7FFFFFFF)
+        # Pool extensions can repeat a template already present in the base pool.
+        # Preserve its combined weight with ONE candidate/key, not duplicate IDs.
+        merged = {}
+        for entry in dist:
+            tpl = entry["tpl"]
+            merged[tpl] = merged.get(tpl, 0) + entry["relativeProbability"]
+        assert len(merged) < 10000
+        for j, (tpl, weight) in enumerate(merged.items()):
+            entry = {"tpl": tpl, "relativeProbability": weight}
+            # Stable and collision-free across this export (Python hash is salted).
+            key = str(i * 10000 + j)
             iid = mongo_from(f"iceloose_{i}_{j}_{entry['tpl']}")
             items.append({
                 "composedKey": key,

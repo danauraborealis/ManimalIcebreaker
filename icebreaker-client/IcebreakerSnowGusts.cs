@@ -31,6 +31,7 @@ namespace Manimal.Icebreaker
 
         internal static void Spawn()
         {
+            if (!FikaBridge.CanRender) return;
             var go = new GameObject("Icebreaker_SnowGusts");
             go.AddComponent<IcebreakerSnowGusts>();
         }

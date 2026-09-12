@@ -401,7 +401,7 @@ namespace Manimal.Icebreaker
                     pr.Param = "IsExplosion";
                 }
 
-                if (vfx != null)
+                if (vfx != null && FikaBridge.CanRender)
                 {
                     if (!vfx.gameObject.activeSelf) vfx.gameObject.SetActive(true);
                     var ps = vfx.GetComponent<ParticleSystem>();
@@ -429,6 +429,7 @@ namespace Manimal.Icebreaker
                     // native trigger. Its own one-shot guard still applies.
                     blast.enabled = false;
                     blast._mineSettings = CreateBlastSettings();
+                    if (!FikaBridge.CanRender) blast._mineSettings._fxName = string.Empty;
                     blast._damageType = EDamageType.Environment;
                     // Environmental damage is local on Fika's human players; observed
                     // bridges reject it. Run on each peer just like Terminal's handler.

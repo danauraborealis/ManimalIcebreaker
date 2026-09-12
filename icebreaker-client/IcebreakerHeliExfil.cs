@@ -400,6 +400,7 @@ namespace Manimal.Icebreaker
         // NAME to the native copy. unresolvable names get logged for manual mapping.
         private static void HealHeliMaterials(GameObject rig)
         {
+            if (!FikaBridge.CanRender) return;
             int rebound = 0, dead = 0, shadowFixed = 0;
             var seen = new System.Collections.Generic.HashSet<Material>();
             foreach (var r in rig.GetComponentsInChildren<Renderer>(true))
