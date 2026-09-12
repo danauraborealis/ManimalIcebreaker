@@ -20,6 +20,11 @@
         "name": "BBQ-S43 gas torch",
         "shortName": "BBQ-S43",
         "description": "A portable gas torch with a functioning burner. Bind it to a quick slot, draw it out, and hold fire to blow the torch. This bad boy is unlikely to burn a hole in the wall, but it'll keep your hands warm on the ice."
+      },
+      "ru": {
+        "name": "Газовая горелка BBQ-S43",
+        "shortName": "BBQ-S43",
+        "description": "Переносная газовая горелка в рабочем состоянии. Назначьте её на клавишу быстрого доступа, возьмите в руки и зажмите кнопку огня, чтобы пустить пламя. Дыру в стене эта штука вряд ли прожжёт, но руки на льду согреет."
       }
     },
     "fleaPriceRoubles": 60000,

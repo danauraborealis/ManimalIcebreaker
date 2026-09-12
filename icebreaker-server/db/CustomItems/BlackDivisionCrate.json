@@ -18,6 +18,11 @@
         "name": "Black Division gear crate",
         "shortName": "BD",
         "description": "A heavy transport crate with no identifying markings. Inside is a full set of Black Division equipment: helmets, body armor, chest rigs, backpacks, and protective gear.\n\nJudging by its contents, this crate was prepared for a team expected to operate far from any safe zone."
+      },
+      "ru": {
+        "name": "Ящик с экипировкой Black Division",
+        "shortName": "BD",
+        "description": "Тяжёлый транспортный ящик без каких-либо опознавательных знаков. Внутри — полный комплект экипировки Black Division: шлемы, бронежилеты, разгрузочные системы, рюкзаки и защитное снаряжение.\n\nСудя по содержимому, этот ящик подготовили для группы, которой предстояло действовать вдали от любых безопасных зон."
       }
     },
     "handbookPriceRoubles": 150000,

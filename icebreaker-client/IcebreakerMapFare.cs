@@ -73,7 +73,7 @@ namespace Manimal.Icebreaker
                     if (carried >= cost) return;
 
                     EFT.Communications.NotificationManager.DisplayWarningNotification(
-                        $"The smugglers want {cost:N0} roubles for the crossing ({carried:N0} carried)",
+                        string.Format(IcebreakerText.Get("Icebreaker_UI_Fare_NotEnough", "The smugglers want {0:N0} roubles for the crossing ({1:N0} carried)"), cost, carried),
                         ENotificationDurationType.Long);
                     __result = false;
                 }

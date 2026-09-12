@@ -423,7 +423,7 @@ namespace Manimal.Icebreaker.Blowtorch
                     if (d.MeltDone) { Clear(ref __result); return; }
                     Replace(ref __result, new EFT.UI.InteractionAction
                     {
-                        Name = "Melt the ice (blowtorch)",
+                        Name = IcebreakerText.Get("Icebreaker_UI_Hatch_Melt", "Melt the ice (blowtorch)"),
                         Disabled = true, // informational — the melt happens by burning it
                     });
                 }
@@ -432,7 +432,7 @@ namespace Manimal.Icebreaker.Blowtorch
                     if (!d.MeltDone || d.HandleTurned) { Clear(ref __result); return; }
                     Replace(ref __result, new EFT.UI.InteractionAction
                     {
-                        Name = "Turn handle",
+                        Name = IcebreakerText.Get("Icebreaker_UI_Hatch_TurnHandle", "Turn handle"),
                         // retire the cached prompt the moment the action runs — it lingered
                         // until the aim left the collider otherwise
                         Action = () => { d.TurnHandle(); try { owner?.ClearInteractionState(); } catch { } },
@@ -443,7 +443,7 @@ namespace Manimal.Icebreaker.Blowtorch
                     if (!d.RotateReady || d.HatchOpened) { Clear(ref __result); return; }
                     Replace(ref __result, new EFT.UI.InteractionAction
                     {
-                        Name = "Open hatch",
+                        Name = IcebreakerText.Get("Icebreaker_UI_Hatch_Open", "Open hatch"),
                         Action = () => { d.OpenHatch(); try { owner?.ClearInteractionState(); } catch { } },
                     });
                 }

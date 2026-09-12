@@ -62,7 +62,9 @@ namespace Manimal.Icebreaker.Keypad
             var sessionActive = keypad.ActiveSession != null;
 
             var disabled = alreadyUnlocked || sessionActive;
-            var name     = alreadyUnlocked ? "Door unlocked" : "Enter code";
+            var name     = alreadyUnlocked
+                ? IcebreakerText.Get("Icebreaker_UI_Keypad_Unlocked", "Door unlocked")
+                : IcebreakerText.Get("Icebreaker_UI_Keypad_EnterCode", "Enter code");
 
             result.Actions.Add(new EFT.UI.InteractionAction
             {

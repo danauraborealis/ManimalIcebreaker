@@ -553,7 +553,7 @@ namespace Manimal.Icebreaker
                     _start = Time.time;
                     if (Owner != null)
                     {
-                        Owner.ShowObjectivesPanel("Planting charge {0:F1}", IcebreakerChainDoor.PlantSeconds);
+                        Owner.ShowObjectivesPanel(IcebreakerText.Get("Icebreaker_UI_ChainDoor_Planting", "Planting charge") + " {0:F1}", IcebreakerChainDoor.PlantSeconds);
                         _panelShown = true;
                     }
                     var mc = player.MovementContext;
@@ -656,7 +656,7 @@ namespace Manimal.Icebreaker
                     }
                     Replace(ref __result, new EFT.UI.InteractionAction
                     {
-                        Name = "Open",
+                        Name = IcebreakerText.Get("Icebreaker_UI_ChainDoor_Open", "Open"),
                         Action = () =>
                         {
                             IcebreakerChainDoor.TryOpen();
@@ -681,7 +681,7 @@ namespace Manimal.Icebreaker
                     var sw = interactiveSwitch;
                     Replace(ref __result, new EFT.UI.InteractionAction
                     {
-                        Name = "Plant",
+                        Name = IcebreakerText.Get("Icebreaker_UI_ChainDoor_Plant", "Plant"),
                         Disabled = !hasCharge, // greyed = "theres an interaction here, you lack the item"
                         Action = () =>
                         {

@@ -150,7 +150,9 @@ namespace Manimal.Icebreaker
                         _start = Time.time;
                         if (Owner != null)
                         {
-                            Owner.ShowObjectivesPanel((Sealing ? "Sealing Door" : "Unsealing Door") + " {0:F1}", HoldSeconds);
+                            Owner.ShowObjectivesPanel((Sealing
+                                ? IcebreakerText.Get("Icebreaker_UI_SealedDoor_Sealing", "Sealing Door")
+                                : IcebreakerText.Get("Icebreaker_UI_SealedDoor_Unsealing", "Unsealing Door")) + " {0:F1}", HoldSeconds);
                             _panelShown = true;
                         }
                         var mc = player.MovementContext;
@@ -235,13 +237,13 @@ namespace Manimal.Icebreaker
                 if (IcebreakerSealedDoors.IsSealed(door))
                     __result.Actions.Add(new EFT.UI.InteractionAction
                     {
-                        Name = "Unseal Door",
+                        Name = IcebreakerText.Get("Icebreaker_UI_SealedDoor_Unseal", "Unseal Door"),
                         Action = () => IcebreakerSealedDoors.StartSession(owner, door, false),
                     });
                 else if (IcebreakerSealedDoors.CanReseal(door))
                     __result.Actions.Add(new EFT.UI.InteractionAction
                     {
-                        Name = "Reseal Door",
+                        Name = IcebreakerText.Get("Icebreaker_UI_SealedDoor_Reseal", "Reseal Door"),
                         Action = () => IcebreakerSealedDoors.StartSession(owner, door, true),
                     });
             }
