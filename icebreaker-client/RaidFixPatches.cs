@@ -316,11 +316,11 @@ namespace Manimal.Icebreaker
             // Headless still instantiates a camera during its memory cleanup.
             // Rejecting broken scene settings is required there too, even though
             // our optional rendering effects must remain disabled.
-            // gate on GameWorld.LocationId (authoritative; "Suburbs" is our hijacked
+            // gate on GameWorld.LocationId (authoritative; IcebreakerLocation.Key is our hijacked
             // slot). vanilla maps: not even a log line — this mod stays silent off-map.
             var world = Comfort.Common.Singleton<GameWorld>.Instance;
             var loc = world != null ? world.LocationId : null;
-            if (!string.Equals(loc, "Suburbs", StringComparison.OrdinalIgnoreCase)) return;
+            if (!string.Equals(loc, IcebreakerLocation.Key, StringComparison.OrdinalIgnoreCase)) return;
 
             var prefab = settings != null && settings.CameraPrefab != null ? settings.CameraPrefab.name : "<null>";
             Plugin.Log.LogDebug($"[RaidFix] SetCameraFromSettings on icebreaker: prefab={prefab}");
@@ -701,7 +701,7 @@ namespace Manimal.Icebreaker
             }
 
             var onIce = false;
-            try { var w = Comfort.Common.Singleton<GameWorld>.Instance; onIce = w != null && string.Equals(w.LocationId, "Suburbs", StringComparison.OrdinalIgnoreCase); } catch { }
+            try { var w = Comfort.Common.Singleton<GameWorld>.Instance; onIce = w != null && string.Equals(w.LocationId, IcebreakerLocation.Key, StringComparison.OrdinalIgnoreCase); } catch { }
             if (!onIce)
             {
                 // GIVE THE ENGINE ITS SETTINGS BACK (08-18 field report: "after i run

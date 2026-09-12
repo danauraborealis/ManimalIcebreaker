@@ -1,10 +1,15 @@
 <Project>
   <!-- single source of truth for version + identity, per manimal mod conventions -->
   <PropertyGroup>
-    <ModVersion>1.0.1</ModVersion>
+    <ModVersion>1.1.0</ModVersion>
     <ModGuid>com.manimal.icebreaker</ModGuid>
     <ModUsername>Manimal</ModUsername>
     <ModDisplayName>Icebreaker</ModDisplayName>
+    <ModSourceUrl>https://github.com/danauraborealis/ManimalIcebreaker</ModSourceUrl>
+    <ModLocationKey>icebreaker</ModLocationKey>
+    <ModLocationId>882b2fa04bbd616567022938</ModLocationId>
+    <Authors>$(ModUsername)</Authors>
+    <RepositoryUrl>$(ModSourceUrl)</RepositoryUrl>
     <SPTPath Condition="'$(SPTPath)' == ''">D:\SPT41Dev</SPTPath>
     <SPTServerPath Condition="'$(SPTServerPath)' == ''">$(SPTPath)\SPT_Runtime</SPTServerPath>
     <FikaPath Condition="'$(FikaPath)' == ''">D:\SPT41DevFika</FikaPath>

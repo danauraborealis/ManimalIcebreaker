@@ -1,0 +1,27 @@
+<Project>
+  <Target Name="GenerateModBuildInfo" BeforeTargets="CoreCompile" Condition="'$(GenerateModIdentity)' == 'true'">
+    <PropertyGroup>
+      <BuildInfoFile>$(IntermediateOutputPath)BuildInfo.g.cs</BuildInfoFile>
+    </PropertyGroup>
+    <ItemGroup>
+      <_ModInfoLines Remove="@(_ModInfoLines)" />
+      <_ModInfoLines Include="// Generated from Directory.Build.props." />
+      <_ModInfoLines Include="namespace $(RootNamespace) { internal static class BuildInfo {" />
+      <_ModInfoLines Include="public const string Version = %22$(ModVersion)%22%3B" />
+      <_ModInfoLines Include="public const string BaseGuid = %22$(ModGuid)%22%3B" />
+      <_ModInfoLines Include="public const string ModGuid = BaseGuid + %22$(ModGuidSuffix)%22%3B" />
+      <_ModInfoLines Include="public const string Username = %22$(ModUsername)%22%3B" />
+      <_ModInfoLines Include="public const string DisplayName = %22$(ModDisplayName)$(ModNameSuffix)%22%3B" />
+      <_ModInfoLines Include="public const string ClientName = Username + %22-%22 + DisplayName%3B" />
+      <_ModInfoLines Include="public const string ServerName = Username + DisplayName%3B" />
+      <_ModInfoLines Include="public const string SourceUrl = %22$(ModSourceUrl)%22%3B" />
+      <_ModInfoLines Include="public const string LocationKey = %22$(ModLocationKey)%22%3B" />
+      <_ModInfoLines Include="public const string LocationId = %22$(ModLocationId)%22%3B" />
+      <_ModInfoLines Include="} }" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(BuildInfoFile)" Lines="@(_ModInfoLines)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <Compile Include="$(BuildInfoFile)" />
+    </ItemGroup>
+  </Target>
+</Project>

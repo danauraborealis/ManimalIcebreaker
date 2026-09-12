@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="..\icebreaker-server\db\**\*" Link="db\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <ProjectReference Include="..\icebreaker-server\icebreaker-server.csproj" />
     <Reference Include="Mono.Cecil"><HintPath>$(SPTServerPath)\Mono.Cecil.dll</HintPath></Reference>
     <Reference Include="0Harmony"><HintPath>$(SPTServerPath)\0Harmony.dll</HintPath></Reference>

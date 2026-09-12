@@ -18,9 +18,9 @@ namespace Manimal.Icebreaker.Fika
     // to run to break. only bepinex SKIPPING the load (= hard dep) keeps the assembly
     // out of the appdomain. the red "1 PLUGIN FAILED TO LOAD" banner on a fika-less
     // install is correct feedback for installing the fika addon without fika.
-    [BepInPlugin(BuildInfo.ModGuid, "Manimal-IcebreakerFika", BuildInfo.Version)]
+    [BepInPlugin(BuildInfo.ModGuid, BuildInfo.ClientName, BuildInfo.Version)]
     [BepInDependency("com.fika.core", "2.4.2")]
-    [BepInDependency("com.manimal.icebreaker", BuildInfo.Version)]
+    [BepInDependency(BuildInfo.BaseGuid, BuildInfo.Version)]
     public class FikaAddonPlugin : BaseUnityPlugin
     {
         internal static ManualLogSource Log;

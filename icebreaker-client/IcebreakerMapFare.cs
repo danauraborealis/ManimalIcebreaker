@@ -1,5 +1,7 @@
 using System;
-using System.Linq;
+using System.Collections.Generic;
+using System.Reflection;
+using SPT.Reflection.Patching;
 using EFT;
 using EFT.Communications;
 using EFT.InventoryLogic;
@@ -29,7 +31,6 @@ namespace Manimal.Icebreaker
     internal static class IcebreakerMapFare
     {
         private const string RoubleTpl = "5449016a4bdc2d6f028b456f";
-        private const string SuburbsId = "Suburbs";
         internal const int CrossingCost = 500_000;
         internal const int CrossingCostDiscounted = 250_000;
         private const string HangoverQuestId = "3f8d2c5a9b17e04d6ca8f312"; // BTR chain final
@@ -50,10 +51,12 @@ namespace Manimal.Icebreaker
             return CrossingCost;
         }
 
-        [HarmonyPatch(typeof(EFT.MainMenuShowOperation), "method_54")]
-        internal static class Patch_ReadyGate
+        internal sealed class Patch_ReadyGate : ModulePatch
         {
-            [HarmonyPostfix]
+            protected override MethodBase GetTargetMethod()
+                => AccessTools.Method(typeof(EFT.MainMenuShowOperation), "method_54");
+
+            [PatchPostfix]
             private static void Postfix(EFT.MainMenuShowOperation __instance, ref bool __result)
             {
                 try
@@ -61,13 +64,12 @@ namespace Manimal.Icebreaker
                     if (!__result) return;
                     var rs = __instance.raidSettings_0;
                     if (rs == null || rs.IsScav) return;
-                    if (rs.SelectedLocation == null || rs.SelectedLocation.Id != SuburbsId) return;
+                    if (rs.SelectedLocation == null || !IcebreakerLocation.Matches(rs.SelectedLocation.Id)) return;
                     int cost = CostFor(__instance.profile_0);
 
-                    int carried = __instance.InventoryController.Inventory
-                        .GetPlayerItems(EPlayerItems.Equipment)
-                        .Where(i => i != null && i.TemplateId == RoubleTpl)
-                        .Sum(i => i.StackObjectsCount);
+                    int carried = 0;
+                    foreach (var item in __instance.InventoryController.Inventory.GetPlayerItems(EPlayerItems.Equipment))
+                        if (item != null && item.TemplateId == RoubleTpl) carried += item.StackObjectsCount;
                     if (carried >= cost) return;
 
                     EFT.Communications.NotificationManager.DisplayWarningNotification(
@@ -81,10 +83,11 @@ namespace Manimal.Icebreaker
             }
         }
 
-        [HarmonyPatch(typeof(LocalGame), "Create")]
-        internal static class Patch_ConsumeFare
+        internal sealed class Patch_ConsumeFare : ModulePatch
         {
-            [HarmonyPrefix]
+            protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(LocalGame), "Create");
+
+            [PatchPrefix]
             private static void Prefix(Profile profile, JsonType.LocationSettings.Location location, LocalRaidSettings raidSettings)
                 => Consume(profile, location, raidSettings);
         }
@@ -105,21 +108,25 @@ namespace Manimal.Icebreaker
         {
             try
             {
-                if (location == null || location.Id != SuburbsId) return;
+                if (location == null || !IcebreakerLocation.Matches(location.Id)) return;
                 if (profile == null || profile.Side == EPlayerSide.Savage) return;
                 int cost = CostFor(profile);
 
                 // smallest stacks first, so change stays consolidated in one stack
-                var stacks = profile.Inventory.GetPlayerItems(EPlayerItems.Equipment)
-                    .Where(i => i != null && i.TemplateId == RoubleTpl)
-                    .OrderBy(i => i.StackObjectsCount)
-                    .ToList();
+                var stacks = new List<Item>();
+                int carried = 0;
+                foreach (var item in profile.Inventory.GetPlayerItems(EPlayerItems.Equipment))
+                    if (item != null && item.TemplateId == RoubleTpl)
+                    {
+                        stacks.Add(item);
+                        carried += item.StackObjectsCount;
+                    }
+                stacks.Sort((a, b) => a.StackObjectsCount.CompareTo(b.StackObjectsCount));
 
                 // ALL OR NOTHING: a fika client joins through fika's own lobby, which
                 // may bypass the method_54 ready gate — without this check a short
                 // player would get partially drained and still load in. a free ride
                 // with a loud log beats eating someone's last 100k.
-                int carried = stacks.Sum(s => s.StackObjectsCount);
                 if (carried < cost)
                 {
                     Plugin.Log.LogDebug($"[MapFare] only {carried}/{cost} carried and the ready gate didn't refuse — NOT charging (free crossing, check the gate)");

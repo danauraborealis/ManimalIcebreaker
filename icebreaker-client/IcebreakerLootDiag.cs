@@ -4,6 +4,8 @@ using EFT;
 using EFT.Interactive;
 using HarmonyLib;
 using UnityEngine;
+using System.Reflection;
+using SPT.Reflection.Patching;
 
 namespace Manimal.Icebreaker
 {
@@ -11,16 +13,17 @@ namespace Manimal.Icebreaker
     // actually sees — do the rebaked LootableContainer components exist, are they
     // enabled/active, on what layer, with colliders, and did the server's generated
     // loot bind an item to them. removable once container loot proves out.
-    [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
-    internal static class Patch_IcebreakerLootDiag
+    internal sealed class Patch_IcebreakerLootDiag : ModulePatch
     {
-        [HarmonyPostfix]
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GameWorld), nameof(GameWorld.OnGameStarted));
+
+        [PatchPostfix]
         private static void Postfix(GameWorld __instance)
         {
             try
             {
                 if (!Plugin.DevMode.Value) return;
-                if (!string.Equals(__instance?.LocationId, "Suburbs", StringComparison.OrdinalIgnoreCase)) return;
+                if (!string.Equals(__instance?.LocationId, IcebreakerLocation.Key, StringComparison.OrdinalIgnoreCase)) return;
                 var host = new GameObject("IcebreakerLootDiag");
                 UnityEngine.Object.DontDestroyOnLoad(host);
                 host.AddComponent<LootDiagRunner>();

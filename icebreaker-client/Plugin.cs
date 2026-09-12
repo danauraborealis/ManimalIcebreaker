@@ -12,7 +12,7 @@ namespace Manimal.Icebreaker
     // dumps the fully-restored AICoversData (cover graph, core points, voxel grid,
     // patrol/loot/exfil points, bot zones) to json at raid load. ground truth for
     // reverse-engineering BSG's ai point baker so we can build one for custom maps.
-    [BepInPlugin(BuildInfo.ModGuid, "Manimal-Icebreaker", BuildInfo.Version)]
+    [BepInPlugin(BuildInfo.ModGuid, BuildInfo.ClientName, BuildInfo.Version)]
     // soft: loads AFTER fika when fika is installed (so the runtime compat patches can
     // resolve its types at Awake), changes nothing when it isn't
     [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)]
@@ -417,13 +417,24 @@ namespace Manimal.Icebreaker
 
             try { new Patch_RejectShellCameraPrefab().Enable(); }
             catch (System.Exception e) { Log.LogError($"Camera prefab safety patch failed: {e}"); }
+            foreach (var patch in new SPT.Reflection.Patching.ModulePatch[] {
+                new IceGate.Patch_CaptureLocationId(), new IceGate.Patch_PhysicsAudit(),
+                new IcebreakerMapUnlock.Patch_Show(), new IcebreakerMapFare.Patch_ReadyGate(),
+                new IcebreakerMapFare.Patch_ConsumeFare(), new Keypad.Patch_IcebreakerPasscodes(),
+                new IcebreakerFlyerUnlock.Patch_BackendCount(), new IcebreakerFlyerUnlock.Patch_GameCount(),
+                new IcebreakerFlyerUnlock.Patch_Visibility(),
+                new Patch_IcebreakerLootDiag() })
+            {
+                try { patch.Enable(); }
+                catch (System.Exception e) { Log.LogError($"{patch.GetType().Name} failed: {e}"); }
+            }
             try { harmony.PatchAll(); }
             catch (System.Exception e)
             {
                 // a partial patch set is survivable and obvious in play; a dead mod is not
                 Log.LogError($"PatchAll FAILED — some patches did not apply, the map still loads: {e}");
             }
-            IcebreakerFikaCompat.TryApply(harmony); // no-op without fika
+            IcebreakerFikaCompat.TryApply(); // no-op without fika
             IcebreakerSplash.RefreshExisting(); // splash Awake can precede plugin loading
             // QuestingBots per-map mute (ported from terminal): QB's spawn takeover
             // fights event-driven wave choreography; QB itself has no per-map off

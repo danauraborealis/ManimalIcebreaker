@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <GenerateModIdentity>true</GenerateModIdentity>
+    <DefineConstants>$(DefineConstants);ICEBREAKER_SERVER</DefineConstants>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Manimal.Icebreaker.Server</RootNamespace>
     <AssemblyName>icebreaker-server</AssemblyName>
@@ -14,6 +16,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="SPTarkov.Reflection">
+      <HintPath>$(SPTServerPath)\SPTarkov.Reflection.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="0Harmony">
       <HintPath>$(SPTServerPath)\0Harmony.dll</HintPath>
       <Private>false</Private>
@@ -45,4 +51,8 @@
   <!-- the FULL release (single zip, BepInEx + SPT + EscapeFromTarkov_Data trees) is
        built by package-release.ps1 at the repo root -->
 
+  <ItemGroup>
+    <Compile Include="..\shared\IcebreakerLocation.cs" Link="IcebreakerLocation.cs" />
+    <Compile Include="..\shared\IcebreakerBoreas.cs" Link="IcebreakerBoreas.cs" />
+  </ItemGroup>
 </Project>

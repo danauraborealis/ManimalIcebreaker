@@ -9,6 +9,7 @@ using HarmonyLib;
 using Newtonsoft.Json.Linq;
 using TMPro;
 using UnityEngine;
+using SPT.Reflection.Patching;
 
 namespace Manimal.Icebreaker.Keypad
 {
@@ -27,16 +28,15 @@ namespace Manimal.Icebreaker.Keypad
     //  3. TWO note spots are picked at random from the authored pool and a
     //     post-it spawns at each carrying one 3-digit half.
     //
-    // icebreaker rides the Suburbs location id (SPT's Locations record is
-    // closed to new ids) — that's the map gate.
-    [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
-    internal static class Patch_IcebreakerPasscodes
+    // The location gate shares its identity with the server's independent entry.
+    internal sealed class Patch_IcebreakerPasscodes : ModulePatch
     {
-        private const string IcebreakerLocationId = "Suburbs";
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GameWorld), nameof(GameWorld.OnGameStarted));
+        private const string IcebreakerLocationId = IcebreakerLocation.Key;
         private const string SidecarName = "icebreaker_passcodes.json";
         private const string InteractiveLayerName = "Interactive";
 
-        [HarmonyPostfix]
+        [PatchPostfix]
         private static void Postfix(GameWorld __instance)
         {
             try

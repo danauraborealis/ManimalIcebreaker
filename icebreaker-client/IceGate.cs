@@ -5,21 +5,22 @@ using EFT;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Reflection;
+using SPT.Reflection.Patching;
 
 namespace Manimal.Icebreaker
 {
     // THE map gate (audit P0): one authoritative answer to "are we on the icebreaker",
     // used by every patch that would otherwise leak behavior onto vanilla maps.
     // resolution order:
-    //   1. GameWorld.LocationId — authoritative once the raid is up ("Suburbs" is our
-    //      hijacked slot)
+    //   1. GameWorld.LocationId — authoritative once the raid is up
     //   2. the location id captured at LocalGame creation — covers game-construction
     //      patches (wave slots) that run before GameWorld carries an id
     //   3. loaded-scene check — covers early load-time patches
     // default is FALSE: when nothing is resolvable, vanilla behavior wins.
     internal static class IceGate
     {
-        internal const string LocationId = "Suburbs";
+        internal const string LocationId = IcebreakerLocation.Key;
 
         // set by Patch_CaptureLocationId below at raid creation, before GameWorld
         internal static string PendingLocationId;
@@ -44,9 +45,11 @@ namespace Manimal.Icebreaker
 
         // the game hands smethod_6 the authoritative Location object before any other
         // identity exists — capture the id so construction-time patches can gate on it
-        [HarmonyPatch(typeof(LocalGame), "Create")]
-        internal static class Patch_CaptureLocationId
+        internal sealed class Patch_CaptureLocationId : ModulePatch
         {
+            protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(LocalGame), "Create");
+
+            [PatchPrefix]
             private static void Prefix(JsonType.LocationSettings.Location location)
             {
                 PendingLocationId = location?.Id;
@@ -63,10 +66,11 @@ namespace Manimal.Icebreaker
         // measures the map BEFORE loot spawns, so the two can be compared directly.
         // if the collider count matches but only the transit run overflows, the regions
         // themselves are stale from the previous map rather than the map being too big.
-        [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
-        internal static class Patch_PhysicsAudit
+        internal sealed class Patch_PhysicsAudit : ModulePatch
         {
-            [HarmonyPostfix]
+            protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GameWorld), nameof(GameWorld.OnGameStarted));
+
+            [PatchPostfix]
             private static void Postfix(GameWorld __instance)
             {
                 try

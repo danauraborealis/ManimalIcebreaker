@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
-# generates the icebreaker location base.json for the SPT server mod by cloning
-# factory4_day's base and patching it. the location HIJACKS the dormant "Suburbs"
-# slot (SPT's Locations record is closed; suburbs is a shipped stub) — Id stays
-# "Suburbs" so every native server lookup resolves; the display name comes from a
-# locale entry the server mod adds. v1 = walkable milestone: bots fully disabled.
+# Generates the independent Icebreaker base using the shared project identity.
 import json, os, re, glob
+import pathlib, xml.etree.ElementTree as ET
 
 FACTORY = r"D:/SPTDev/SPT/SPT_Data/database/locations/factory4_day/base.json"
-SUBURBS = r"D:/SPTDev/SPT/SPT_Data/database/locations/suburbs/base.json"
 OUT = r"C:/Users/peard/Desktop/IcebreakerBundleOut/base.json"
 SCENES = r"C:/Users/peard/Desktop/WTT-SDK-2022 Public/Assets/Icebreaker_Import/Content/Locations/Icebreaker/*.unity"
 
@@ -88,11 +84,11 @@ def manifest_bot_params():
     return params, zones
 
 base = json.load(open(FACTORY, encoding="utf-8"))
-stub = json.load(open(SUBURBS, encoding="utf-8"))
+identity = ET.parse(pathlib.Path(__file__).resolve().parents[1] / "Directory.Build.props").getroot().find("PropertyGroup")
 
-# identity: keep the suburbs slot's ids so server lookups + locale keys line up
-base["_Id"] = stub["_Id"]
-base["Id"] = "Suburbs"
+# Identity is shared with the compiled client and server.
+base["_Id"] = identity.findtext("ModLocationId")
+base["Id"] = identity.findtext("ModLocationKey")
 base["Name"] = "Icebreaker"
 base["Description"] = "The nuclear icebreaker BOREY, locked in arctic ice."
 base["Enabled"] = True
@@ -102,8 +98,8 @@ base["DisabledForScav"] = True          # v1: PMC only
 base["ForceOnlineRaidInPVE"] = False
 base["AccessKeys"] = []
 base["AccessKeysPvE"] = []
-base["IconX"] = 350
-base["IconY"] = 550
+base["IconX"] = 91
+base["IconY"] = 747
 
 # scene loading: our patched retail preset, served by SPT's bundle system
 base["Scene"] = {"path": "maps/icebreaker.bundle", "rcid": "icebreaker.scenespreset.asset"}

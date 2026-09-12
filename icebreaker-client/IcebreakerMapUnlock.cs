@@ -3,6 +3,8 @@ using EFT.Quests;
 using EFT.UI.Matchmaker;
 using HarmonyLib;
 using JsonType;
+using System.Reflection;
+using SPT.Reflection.Patching;
 
 namespace Manimal.Icebreaker
 {
@@ -23,18 +25,20 @@ namespace Manimal.Icebreaker
         internal static void RefreshLocation(LocationSettings.Location location, bool requirementMet)
         {
             if (!requirementMet || location == null ||
-                !string.Equals(location.Id, "Suburbs", System.StringComparison.OrdinalIgnoreCase)) return;
+                !string.Equals(location.Id, IcebreakerLocation.Key, System.StringComparison.OrdinalIgnoreCase)) return;
             location.Enabled = true;
             location.Locked = false;
         }
 
         // The menu caches /client/locations at login. Refresh our slot from the
         // current PMC quest state before it builds buttons or restores selection.
-        [HarmonyPatch(typeof(MatchMakerSelectionLocationScreen), nameof(MatchMakerSelectionLocationScreen.Show),
-            new[] { typeof(IEftSession), typeof(RaidSettings), typeof(MatchmakerPlayersController) })]
-        internal static class Patch_Show
+        internal sealed class Patch_Show : ModulePatch
         {
-            [HarmonyPrefix]
+            protected override MethodBase GetTargetMethod()
+                => AccessTools.Method(typeof(MatchMakerSelectionLocationScreen), nameof(MatchMakerSelectionLocationScreen.Show),
+                    new[] { typeof(IEftSession), typeof(RaidSettings), typeof(MatchmakerPlayersController) });
+
+            [PatchPrefix]
             private static void Prefix(IEftSession session)
             {
                 var locations = session?.LocationSettings?.locations;

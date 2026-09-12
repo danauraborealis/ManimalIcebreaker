@@ -22,6 +22,7 @@ using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
+using SPTarkov.Reflection.Patching;
 
 namespace Manimal.Icebreaker.Server;
 
@@ -64,10 +65,18 @@ public class IcebreakerLootFirewall(
     {
         cancellationToken.ThrowIfCancellationRequested();
         _instance = this;
-        var harmony = new Harmony(OwnPrefix + ".lootfirewall");
-        harmony.Patch(AccessTools.Method(typeof(SPTarkov.Server.Core.Services.InRaid.LocationLifecycleService), "GenerateLocationAndLoot"),
-            transpiler: new HarmonyMethod(typeof(IcebreakerLootFirewall), nameof(WrapLootGeneration)));
+        new LootGenerationPatch().Enable();
         return Task.CompletedTask;
+    }
+
+    private sealed class LootGenerationPatch() : AbstractPatch(OwnPrefix + ".lootfirewall")
+    {
+        protected override MethodBase GetTargetMethod()
+            => AccessTools.Method(typeof(SPTarkov.Server.Core.Services.InRaid.LocationLifecycleService), "GenerateLocationAndLoot");
+
+        [PatchTranspiler]
+        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            => WrapLootGeneration(instructions);
     }
 
     // Wrap the caller's generator call so foreign prefixes/postfixes on the generator
@@ -93,13 +102,13 @@ public class IcebreakerLootFirewall(
 
     private static List<SpawnpointTemplate> GenerateIsolated(LocationLootGenerator generator, string locationId)
         => _instance.GenerateLocationLoot(locationId, () => generator.GenerateLocationLoot(locationId));
-    private const string OwnPrefix = "com.manimal.icebreaker";
+    private const string OwnPrefix = BuildInfo.ModGuid;
     private readonly ISptLogger<LocationLootGenerator> _log = logger;
     private static readonly object Gate = new();
 
     private sealed record Suspended(MethodBase Target, HarmonyLib.Patch Patch, HarmonyPatchType Kind);
 
-    private static bool Ours(string id) => string.Equals(id, "suburbs", StringComparison.OrdinalIgnoreCase);
+    private static bool Ours(string id) => IcebreakerLocation.Matches(id);
 
     // GOON-SYSTEM GUARD (2026-08-11, found while moving spawns onto BSG's wave generator).
     // SPT relocates the goons daily by zeroing BossChance on EVERY bossKnight row on EVERY
@@ -114,9 +123,9 @@ public class IcebreakerLootFirewall(
     {
         try
         {
-            var suburbs = locationTable.Suburbs?.Base?.BossLocationSpawn;
-            if (suburbs is null) return;
-            foreach (var row in suburbs)
+            var spawns = locationTable.GetLocation(IcebreakerLocation.Key)?.Base?.BossLocationSpawn;
+            if (spawns is null) return;
+            foreach (var row in spawns)
                 if (row.BossName == "bossKnight" && row.BossChance != 100)
                 {
                     row.BossChance = 100;

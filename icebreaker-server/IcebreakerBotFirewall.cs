@@ -20,6 +20,7 @@ using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
+using SPTarkov.Reflection.Patching;
 
 namespace Manimal.Icebreaker.Server;
 
@@ -49,11 +50,21 @@ public class IcebreakerBotFirewall(
         _log = logger;
         _randomUtil = randomUtil;
         _templates = templateTable;
-        var harmony = new HarmonyLib.Harmony("com.manimal.icebreaker.botfirewall");
-        harmony.Patch(HarmonyLib.AccessTools.Method(typeof(BotGenerator), nameof(BotGenerator.PrepareAndGenerateBot)),
-            prefix: new HarmonyLib.HarmonyMethod(typeof(IcebreakerBotFirewall), nameof(BeforeGenerate)),
-            postfix: new HarmonyLib.HarmonyMethod(typeof(IcebreakerBotFirewall), nameof(AfterGenerate)));
+        new BotGenerationPatch().Enable();
         return Task.CompletedTask;
+    }
+
+    private sealed class BotGenerationPatch() : AbstractPatch(BuildInfo.ModGuid + ".botfirewall")
+    {
+        protected override MethodBase GetTargetMethod()
+            => HarmonyLib.AccessTools.Method(typeof(BotGenerator), nameof(BotGenerator.PrepareAndGenerateBot));
+
+        [PatchPrefix]
+        private static void Prefix() => BeforeGenerate();
+
+        [PatchPostfix]
+        private static void Postfix(BotBase __result, BotGenerationDetails botGenerationDetails)
+            => AfterGenerate(__result, botGenerationDetails);
     }
 
     private static void BeforeGenerate()
@@ -123,7 +134,7 @@ internal static class IcebreakerPbsMasquerade
             }
             if (_prop == null || _prop.PropertyType != typeof(string)) return; // PBS absent or drifted
 
-            if (string.Equals(_prop.GetValue(null) as string, "Suburbs", StringComparison.OrdinalIgnoreCase))
+            if (IcebreakerLocation.Matches(_prop.GetValue(null) as string))
             {
                 _prop.SetValue(null, "laboratory"); // exact key casing from their map switch
                 if (!_logged)

@@ -1,11 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <GenerateModIdentity>true</GenerateModIdentity>
     <TargetFramework>netstandard2.1</TargetFramework>
     <RootNamespace>Manimal.Icebreaker</RootNamespace>
     <AssemblyName>ManimalIcebreakerClient</AssemblyName>
     <Nullable>disable</Nullable>
-    <Authors>Manimal</Authors>
+    <Authors>$(ModUsername)</Authors>
     <AssemblyVersion>$(ModVersion).0</AssemblyVersion>
     <FileVersion>$(AssemblyVersion)</FileVersion>
     <Configurations>Debug;Release</Configurations>
@@ -121,32 +122,7 @@
     <EmbeddedResource Include="..\Texture2D\splash_18.png" LogicalName="Manimal.Icebreaker.Splash.splash_18.png" />
   </ItemGroup>
 
-  <!--
-    generate BuildInfo.g.cs from Directory.Build.props so [BepInPlugin] can use
-    BuildInfo.Version / BuildInfo.ModGuid as compile-time constants.
-  -->
-  <Target Name="GenerateBuildInfo" BeforeTargets="CoreCompile">
-    <PropertyGroup>
-      <BuildInfoFile>$(IntermediateOutputPath)BuildInfo.g.cs</BuildInfoFile>
-    </PropertyGroup>
-    <ItemGroup>
-      <_BuildInfoLines Remove="@(_BuildInfoLines)" />
-      <_BuildInfoLines Include="// auto-generated from Directory.Build.props — do not edit" />
-      <_BuildInfoLines Include="namespace $(RootNamespace)" />
-      <_BuildInfoLines Include="{" />
-      <_BuildInfoLines Include="    internal static class BuildInfo" />
-      <_BuildInfoLines Include="    {" />
-      <_BuildInfoLines Include="        public const string Version = %22$(ModVersion)%22%3B" />
-      <_BuildInfoLines Include="        public const string ModGuid = %22$(ModGuid)%22%3B" />
-      <_BuildInfoLines Include="    }" />
-      <_BuildInfoLines Include="}" />
-    </ItemGroup>
-    <WriteLinesToFile File="$(BuildInfoFile)" Lines="@(_BuildInfoLines)" Overwrite="true" WriteOnlyWhenDifferent="true" />
-    <ItemGroup>
-      <Compile Include="$(BuildInfoFile)" />
-    </ItemGroup>
-  </Target>
-
+  <!-- BuildInfo is generated centrally by Directory.Build.targets. -->
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(DeployToGame)' == 'true'">
     <MakeDir Directories="$(SPTPath)\BepInEx\plugins\ManimalIcebreaker" />
     <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(SPTPath)\BepInEx\plugins\ManimalIcebreaker\$(TargetFileName)&quot;" />
@@ -175,4 +151,8 @@
        built by package-release.ps1 at the repo root — it needs both projects' DLLs,
        so it doesn't live in either csproj -->
 
+  <ItemGroup>
+    <Compile Include="..\shared\IcebreakerLocation.cs" Link="IcebreakerLocation.cs" />
+    <Compile Include="..\shared\IcebreakerBoreas.cs" Link="IcebreakerBoreas.cs" />
+  </ItemGroup>
 </Project>

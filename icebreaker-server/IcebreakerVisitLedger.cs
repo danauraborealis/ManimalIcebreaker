@@ -64,7 +64,7 @@ public sealed class IcebreakerVisitLedger(string path)
         // including death/MIA; an aborted load without Results does not.
         if (request?.Results == null || string.IsNullOrEmpty(request.ServerId)) return null;
         int separator = request.ServerId.IndexOf('.');
-        if (separator < 0 || !string.Equals(request.ServerId[..separator], "suburbs", StringComparison.OrdinalIgnoreCase)) return null;
+        if (separator < 0 || !IcebreakerLocation.Matches(request.ServerId[..separator])) return null;
         return Record(profileId, request.ServerId);
     }
 

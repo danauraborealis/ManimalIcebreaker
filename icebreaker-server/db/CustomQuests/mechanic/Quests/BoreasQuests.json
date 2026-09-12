@@ -72,25 +72,19 @@
       "AvailableForStart": [
         {
           "compareMethod": ">=",
-          "conditionType": "TraderLoyalty",
+          "conditionType": "FindItem",
+          "countInRaid": false,
+          "onlyFoundInRaid": false,
+          "dogtagLevel": 0,
+          "minDurability": 0,
+          "maxDurability": 100,
           "dynamicLocale": false,
           "globalQuestCounterId": "",
-          "id": "ddddc8217a1f742fdae9bddd",
+          "id": "d9e685a0b6b54ccaa39ef120",
           "index": 0,
           "parentId": "",
-          "target": "5a7c2eca46aef81a7ca2145d",
-          "value": 2,
-          "visibilityConditions": []
-        },
-        {
-          "compareMethod": ">=",
-          "conditionType": "Level",
-          "dynamicLocale": false,
-          "globalQuestCounterId": "",
-          "id": "6a8617466059e7bbc1a847d8",
-          "index": 1,
-          "parentId": "",
-          "value": 20,
+          "target": [ "699f0b877c23862b4b0ee19c" ],
+          "value": 1,
           "visibilityConditions": []
         }
       ],

@@ -1,4 +1,6 @@
 using HarmonyLib;
+using System.Reflection;
+using SPTarkov.Reflection.Patching;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Helpers.Profile;
@@ -20,13 +22,39 @@ public class IcebreakerProgression(ProfileHelper profileHelper) : IOnLoad
     {
         cancellationToken.ThrowIfCancellationRequested();
         profiles = profileHelper;
-        var harmony = new Harmony("com.manimal.icebreaker.progression");
-        foreach (string name in new[] { nameof(QuestHelper.GetClientQuests), nameof(QuestHelper.GetNewlyAccessibleQuestsWhenStartingQuest) })
-            harmony.Patch(AccessTools.Method(typeof(QuestHelper), name),
-                postfix: new HarmonyMethod(typeof(IcebreakerProgression), nameof(Filter)));
-        harmony.Patch(AccessTools.Method(typeof(LocationLifecycleService), nameof(LocationLifecycleService.StartLocalRaidAsync)),
-            prefix: new HarmonyMethod(typeof(IcebreakerProgression), nameof(BeforeRaid)));
+        new QuestListPatch().Enable();
+        new QuestStartDeltaPatch().Enable();
+        new QuestFailDeltaPatch().Enable();
+        new BeforeRaidPatch().Enable();
         return Task.CompletedTask;
+    }
+
+    private sealed class QuestListPatch() : AbstractPatch(BuildInfo.ModGuid + ".progression")
+    {
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(QuestHelper), nameof(QuestHelper.GetClientQuests));
+        [PatchPostfix]
+        private static void Postfix(MongoId sessionId, List<Quest> __result) => Filter(sessionId, __result);
+    }
+
+    private sealed class QuestStartDeltaPatch() : AbstractPatch(BuildInfo.ModGuid + ".progression")
+    {
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(QuestHelper), nameof(QuestHelper.GetNewlyAccessibleQuestsWhenStartingQuest));
+        [PatchPostfix]
+        private static void Postfix(MongoId sessionId, List<Quest> __result) => Filter(sessionId, __result);
+    }
+
+    private sealed class QuestFailDeltaPatch() : AbstractPatch(BuildInfo.ModGuid + ".progression")
+    {
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(QuestHelper), nameof(QuestHelper.FailedUnlocked));
+        [PatchPostfix]
+        private static void Postfix(MongoId sessionId, List<Quest> __result) => Filter(sessionId, __result);
+    }
+
+    private sealed class BeforeRaidPatch() : AbstractPatch(BuildInfo.ModGuid + ".progression")
+    {
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(LocationLifecycleService), nameof(LocationLifecycleService.StartLocalRaidAsync));
+        [PatchPrefix]
+        private static void Prefix(MongoId sessionId) => BeforeRaid(sessionId);
     }
 
     private static void Filter(MongoId sessionId, List<Quest> __result)
