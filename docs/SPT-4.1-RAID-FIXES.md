@@ -34,6 +34,42 @@ the split: non-start waves wait for the leader before creating escorts, pass
 
 ## Raid checks still required
 
+### September 7: headless loading and duplicate loot candidates
+
+Visual setup now checks the local process's `FikaBackendUtils.IsHeadless` flag
+and Unity's null graphics device. It does not use `IsHeadlessGame` or
+`IsHeadlessRequester`, which would also disable graphics for ordinary players.
+Weather reconstruction, camera grafting/repair, the render probe, fog, flares,
+volumetric lights, snow gusts, splash images and cutscene playback are skipped
+on a dedicated host. A GameWorld-owned startup path still initializes crew,
+helicopter exfiltration, the door registry and removal of fog-marker colliders.
+The existing Fika weather-request fallback supplies weather nodes without
+requiring a graphics WeatherController on the host.
+
+Review of the community `Icebreaker headless crash fix.zip` identified an
+additional visual entry point: helicopter material repairs run from the exfil
+service even without RenderEnvProbe. That routine now also checks CanRender.
+The community DLL was inspected as metadata/decompiled code, not installed.
+
+The exact key reported by Lots of Loot, `504411994`, was duplicated in our
+loose-loot data. The audit found 1,005 duplicate candidates overall. Equivalent
+candidates are consolidated and their distribution weights summed. All 505
+spawnpoints, forced loot, poses, total spawn counts and per-item probabilities
+are preserved. The export generator now merges repeated pool templates and
+uses stable unique keys. The failure log includes the exception/stack and no
+longer assumes the mod appearing in the stack caused the invalid data.
+
+Client/addon builds and 95 Harmony target checks pass. The verifier checks all
+505 loot pools for duplicate candidates, duplicate weights and missing
+references, and verifies the installed Fika IsHeadless property. A comparison
+against the previous data confirms all per-item weights and spawn settings.
+
+Still required: a dedicated-host loading test and a raid using Lots of Loot.
+The separately reported 2x supersampling ghosting/overexposure is unresolved:
+no affected-client render capture or full log has been supplied. Do not treat
+these headless/loot changes as a supersampling fix. Capture the affected client's
+full BepInEx log, GPU/graphics settings, and a same-view 1x/2x comparison.
+
 ### Tripwire follow-up
 
 The same initial raid log shows seven markers: four were skipped by the 50% roll,
@@ -83,3 +119,77 @@ and 94 Harmony target checks pass; these gameplay checks still require a raid.
 Compilation and Harmony target checks can verify integration contracts, but
 rendering, NavMesh placement and combat require these in-game checks. Co-op is
 also unverified; spawning/voice changes are gated to the bot authority.
+
+### Quest progression and Boreas map unlock (September 7)
+
+SPT 4.1 executes static routers in ascending priority and retains the last
+response. The crossing filter ran before the core quest handler, which replaced
+its filtered list. Both quest and map routes now run after core. Crossing gates
+also filter QuestHelper results used by item-event quest deltas. Unaccepted
+profile entries no longer bypass visit requirements; accepted/finished quests
+are preserved so this update does not erase player progress.
+
+The map response now clones the shared location data before applying a profile's
+lock. The client refreshes the cached Icebreaker location flags when map selection
+opens, using Boreas Part 3 (`9d5e3f7d6320a7fd139a2772`) with status Success. Having
+the quest active or ready to hand in does not unlock the map.
+
+The visit ledger retains the existing `db/icebreaker_visits.json` formats, writes
+atomically and deduplicates raid ends per profile. Death, MIA and the other raid
+outcomes count; aborted loads without Results and other maps do not. Completed
+prerequisites are stamped before departure and during quest-list generation, so
+old trips cannot satisfy a later BTR crossing. Runtime visit files are excluded
+from release archives and Git. Keep the installed ledger when updating.
+
+Regression verification uses synthetic profiles and the real SPT HTTP router,
+serialization and Harmony bindings. It covers all eight gated quests, the six
+first-visit openers, later BTR crossings, persistence, legacy data, retries,
+per-profile isolation, quest deltas and Boreas quest states. Client/Fika builds
+and all 96 client/addon patch targets pass. No live profiles were edited.
+
+In-game acceptance check: use a fresh profile to confirm the entry and trader
+openers are hidden; hand in Boreas Part 3 and reopen map selection without a
+restart; end an Icebreaker raid (survival not required) and check trader offers.
+Repeat for a Fika participant and verify subsequent BTR crossing gates. Already
+accepted quests intentionally remain available after installing the update.
+
+### Disabled map-lock regression
+
+The initial progression update's menu refresh hid the map again for profiles
+without Boreas Part 3, even when the server configuration disabled the lock.
+The refresh now only grants a newly earned unlock and preserves access already
+granted by the server. A missing `maplock.json`, a missing `finalQuestId` key, or
+a null/blank value disables the server gate again. The shipped configuration
+still requires Boreas Part 3. Malformed JSON logs a warning and falls back to
+Boreas; restart the server and game after changing the configuration.
+
+Regression checks cover all disabled-config forms, the actual server map response,
+and execution of the built client refresh with server-unlocked, quest-locked,
+newly-completed and unrelated-map inputs. All pass alongside the existing 96
+patch-target checks. The map-lock hotfix contains only the client/server DLLs;
+it deliberately preserves the installed configuration. No Fika addon change.
+
+### Headless camera cleanup regression (September 10)
+
+The supplied `log_2026.09.09_3-22-55_0.16.9.5.40743.zip` captures a headless
+attempt, unlike the previously supplied guest log from a player-hosted attempt.
+At 01:21:24 -04:00, `HeadlessGame.InitializeCameraAndUnloadAssets` calls
+`CameraManager.SetCameraFromSettings`. Instantiating the camera throws empty
+animation-curve errors in NightVision/ThermalVision and null-shader errors in
+DistortCameraFX/GradingPostFX. Later errors include an already-completed async
+task and missing visor assets. This archive does not contain BepInEx LogOutput
+or Player.log, so it cannot establish the installed plugin versions or the
+complete Fika initialization sequence.
+
+Our earlier CanRender guard incorrectly disabled the scene-camera rejection
+patch on headless. Rejection must run there too: it substitutes the native Cam2
+prefab during Fika's camera cleanup, which still instantiates a camera despite
+headless rendering being disabled. Removed this guard; optional camera grafts
+and visual effects remain guarded. This patch now uses SPT's ModulePatch,
+PatchPrefix and Enable lifecycle, with a non-bundled spt-reflection reference.
+
+Build and regression verification pass, including all 96 patch targets and
+construction/target resolution of the SPT wrapper. The client-only test hotfix
+must be retested on headless; it fixes a demonstrated regression but does not
+prove that the later task-completion error or the separate player-hosted hang
+is resolved. No Fika addon code was changed.
