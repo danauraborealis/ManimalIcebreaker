@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using ZLinq;
 using SysIoPath = System.IO.Path;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -63,7 +63,7 @@ namespace Manimal.Icebreaker
         private static IEnumerable<MethodBase> TargetMethods()
         {
             return typeof(SpatialAudioSystem).GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                .Where(m => m.Name == "ProcessSourceOcclusion");
+                .AsValueEnumerable().Where(m => m.Name == "ProcessSourceOcclusion").ToArray();
         }
 
         private static bool Prefix(ref int __result)
@@ -138,7 +138,7 @@ namespace Manimal.Icebreaker
         private static IEnumerable<MethodBase> TargetMethods()
         {
             return typeof(SpatialAudioSystem).GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                .Where(m => m.Name == "ProcessSourceOcclusion");
+                .AsValueEnumerable().Where(m => m.Name == "ProcessSourceOcclusion").ToArray();
         }
 
         private static Exception Finalizer(Exception __exception, ref int __result)
@@ -163,13 +163,13 @@ namespace Manimal.Icebreaker
         private static IEnumerable<MethodBase> TargetMethods()
         {
             return typeof(BetterAudio).GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                .Where(m =>
+                .AsValueEnumerable().Where(m =>
                 {
                     if (m.Name != "PlayAtPoint") return false;
                     var ps = m.GetParameters();
                     return ps.Length >= 5 && ps[1].ParameterType == typeof(AudioClip)
                         && ps[4].ParameterType == typeof(float);
-                });
+                }).ToArray();
         }
 
         private static void Prefix(AudioClip __1, ref float __4)
@@ -455,7 +455,7 @@ namespace Manimal.Icebreaker
                 if (res != null) { Plugin.Log.LogDebug("[RaidFix] PostProcessLayer resources already present — no heal needed"); return; }
 
                 var resType = AccessTools.TypeByName("UnityEngine.Rendering.PostProcessing.PostProcessResources");
-                var found = resType != null ? Resources.FindObjectsOfTypeAll(resType).FirstOrDefault() : null;
+                var found = resType != null ? Resources.FindObjectsOfTypeAll(resType).AsValueEnumerable().FirstOrDefault() : null;
                 if (found == null)
                 {
                     Plugin.Log.LogWarning("[RaidFix] PostProcessLayer has NO resources and none found in memory — layer stays dead (DLSS/FSR upscale will not run)");
@@ -1031,10 +1031,10 @@ namespace Manimal.Icebreaker
                     byRoot.TryGetValue(key, out var c2); byRoot[key] = c2 + 1;
                 }
                 Plugin.Log.LogDebug($"[Census] {unbaked} UNBAKED renderers. by scene:");
-                foreach (var kv in byScene.OrderByDescending(k => k.Value))
+                foreach (var kv in byScene.AsValueEnumerable().OrderByDescending(k => k.Value))
                     Plugin.Log.LogDebug($"[Census]   {kv.Value,7}  {kv.Key}");
                 Plugin.Log.LogDebug("[Census] top roots:");
-                foreach (var kv in byRoot.OrderByDescending(k => k.Value).Take(15))
+                foreach (var kv in byRoot.AsValueEnumerable().OrderByDescending(k => k.Value).Take(15))
                     Plugin.Log.LogDebug($"[Census]   {kv.Value,7}  {kv.Key}");
             }
 
@@ -2548,7 +2548,7 @@ namespace Manimal.Icebreaker
                                     + "their layout changed and the icebreaker retirement is NOT active. their prompts will run on this map; report this.");
                             else
                                 Plugin.Log.LogWarning($"[IEAPI] exact type name drifted — resolved by scan instead: "
-                                    + string.Join(", ", _ieapiTriggerTypes.Select(t => t.FullName)));
+                                    + string.Join(", ", _ieapiTriggerTypes.AsValueEnumerable().Select(t => t.FullName)));
                         }
                 }
                 if (_ieapiTriggerTypes.Count == 0) return; // not installed (or loudly unresolvable, above)

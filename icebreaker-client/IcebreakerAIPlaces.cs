@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using SysIoPath = System.IO.Path;
 using EFT;
 using EFT.Interactive;

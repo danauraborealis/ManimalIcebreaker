@@ -42,6 +42,13 @@ internal static class ClientAudioChecks
         Check(plugin.CustomAttributes.Any(a => a.AttributeType.FullName == "BepInEx.BepInDependency" &&
             (string)a.ConstructorArguments[0].Value == "com.arys.unitytoolkit"), "UnityToolkit dependency declared");
         Check(client.MainModule.AssemblyReferences.Any(a => a.Name == "ZLinq"), "installed ZLinq API referenced");
+        // client collection queries go through ZLinq (EFT extensions shadow System.Linq, and
+        // its enumerators allocate). IGrouping is the interface ZLinq's own GroupBy returns.
+        var linqCalls = client.MainModule.GetTypes().SelectMany(t => t.Methods).Where(m => m.HasBody)
+            .SelectMany(m => m.Body.Instructions.Select(i => (m, r: i.Operand as MethodReference)))
+            .Where(x => x.r != null && x.r.DeclaringType.Namespace == "System.Linq" && !x.r.DeclaringType.Name.StartsWith("IGrouping"))
+            .Select(x => x.m.DeclaringType.Name + "." + x.m.Name + " -> " + x.r.DeclaringType.Name + "." + x.r.Name).Distinct().ToList();
+        Check(linqCalls.Count == 0, "client makes no System.Linq calls: " + string.Join(", ", linqCalls));
         var fog = client.MainModule.Types.Single(t => t.FullName == "Manimal.Icebreaker.RetailFogRemap");
         var key = fog.Methods.Single(m => m.Name == "Key");
         Check(key.Body.Instructions.Any(i => i.Operand is MethodReference m && m.Name == "set_weightedMode"),

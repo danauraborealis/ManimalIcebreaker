@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using ZLinq;
 using EFT;
 using HarmonyLib;
 using UnityEngine;
@@ -85,7 +85,7 @@ namespace Manimal.Icebreaker
 
             var wanted = (Plugin.SynthZones?.Value ?? "")
                 .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(s => s.Trim()).Where(s => s.Length > 0).ToList();
+                .AsValueEnumerable().Select(s => s.Trim()).Where(s => s.Length > 0).ToList();
             if (wanted.Count == 0) return;                       // pure retail — the default
             if (covers?.Points == null || covers.Points.Count == 0) return;
             if (covers.AICorePointsHolder?.CorePoints == null || covers.AICorePointsHolder.CorePoints.Count == 0)
@@ -97,7 +97,7 @@ namespace Manimal.Icebreaker
             // EVERY zone goes in, not just the named ones — the unnamed ones are what bound
             // the named ones' territory. that is the whole point of the nearest-zone rule.
             var all = BuildRegions(wanted);
-            var synth = all.Where(r => r.Synth).ToList();
+            var synth = all.AsValueEnumerable().Where(r => r.Synth).ToList();
             if (synth.Count == 0)
             {
                 Plugin.Log.LogDebug($"[Hybrid] none of [{string.Join(", ", wanted)}] matched a BotZone in the scene — "
@@ -118,8 +118,8 @@ namespace Manimal.Icebreaker
 
             // ids must clear everything retail owns, INCLUDING the manual points holder —
             // _lastId is the game's own high-water mark, so start above it
-            int idOffset = Math.Max(covers.Points.Max(p => p.Id),
-                                    covers.Ways?.Count > 0 ? covers.Ways.Max(w => w.Id) : 0) + 1000;
+            int idOffset = Math.Max(covers.Points.AsValueEnumerable().Max(p => p.Id),
+                                    covers.Ways?.Count > 0 ? covers.Ways.AsValueEnumerable().Max(w => w.Id) : 0) + 1000;
 
             List<GroupPoint> genPoints;
             List<GroupPointWay> genWays;
@@ -144,14 +144,15 @@ namespace Manimal.Icebreaker
             int before = covers.Points.Count;
             var doomed = new HashSet<int>();
             foreach (var p in covers.Points) if (inRegion(p.Position)) doomed.Add(p.Id);
-            covers.Points = covers.Points.Where(p => !doomed.Contains(p.Id)).ToList();
+            covers.Points = covers.Points.AsValueEnumerable().Where(p => !doomed.Contains(p.Id)).ToList();
             if (covers.Ways != null)
-                covers.Ways = covers.Ways.Where(w => w.Target == null || !doomed.Contains(w.Target.Id)).ToList();
+                covers.Ways = covers.Ways.AsValueEnumerable().Where(w => w.Target == null || !doomed.Contains(w.Target.Id)).ToList();
             // and scrub the dropped way ids out of the surviving retail points' neighbour lists
-            var liveWays = new HashSet<int>(covers.Ways?.Select(w => w.Id) ?? Enumerable.Empty<int>());
+            var liveWays = new HashSet<int>();
+            if (covers.Ways != null) foreach (var w in covers.Ways) liveWays.Add(w.Id);
             foreach (var p in covers.Points)
                 if (p.NeighbourhoodsWaysIds != null)
-                    p.NeighbourhoodsWaysIds = p.NeighbourhoodsWaysIds.Where(liveWays.Contains).ToList();
+                    p.NeighbourhoodsWaysIds = p.NeighbourhoodsWaysIds.AsValueEnumerable().Where(liveWays.Contains).ToList();
 
             covers.Points.AddRange(genPoints);
             if (covers.Ways == null) covers.Ways = new List<GroupPointWay>();
@@ -164,11 +165,11 @@ namespace Manimal.Icebreaker
 
             RebucketVoxels(covers);
             AccessTools.Field(typeof(AICoversData), "_cache").SetValue(covers, new AICoversDataCache(covers));
-            AccessTools.Field(typeof(AICoversData), "_lastId")?.SetValue(covers, covers.Points.Max(p => p.Id) + 1);
+            AccessTools.Field(typeof(AICoversData), "_lastId")?.SetValue(covers, covers.Points.AsValueEnumerable().Max(p => p.Id) + 1);
 
             RegeneratePatrols(synth, covers);
 
-            Plugin.Log.LogDebug($"[Hybrid] {synth.Count} synth zone(s) of {all.Count} [{string.Join(", ", synth.Select(r => r.Zone.NameZone))}]: "
+            Plugin.Log.LogDebug($"[Hybrid] {synth.Count} synth zone(s) of {all.Count} [{string.Join(", ", synth.AsValueEnumerable().Select(r => r.Zone.NameZone))}]: "
                 + $"dropped {doomed.Count} retail point(s), added {genPoints.Count} generated; "
                 + $"map total {before} -> {covers.Points.Count}");
         }
@@ -178,7 +179,7 @@ namespace Manimal.Icebreaker
             try
             {
                 var zones = UnityEngine.Object.FindObjectsOfType<BotZone>()
-                    .Where(z => z != null).OrderBy(z => z.NameZone).ToList();
+                    .AsValueEnumerable().Where(z => z != null).OrderBy(z => z.NameZone).ToList();
                 Plugin.Log.LogDebug($"[Hybrid] {zones.Count} BotZone(s) on this map — SynthZones takes these names:");
                 foreach (var z in zones)
                 {
@@ -210,7 +211,7 @@ namespace Manimal.Icebreaker
                 if (n == 0) continue;
                 centre /= n;
 
-                bool synth = wanted.Any(w => string.Equals(w, zone.NameZone, StringComparison.OrdinalIgnoreCase));
+                bool synth = wanted.AsValueEnumerable().Any(w => string.Equals(w, zone.NameZone, StringComparison.OrdinalIgnoreCase));
                 regions.Add(new ZoneRegion { Zone = zone, Centre = centre, Synth = synth });
                 if (synth)
                     Plugin.Log.LogDebug($"[Hybrid] synth region '{zone.NameZone}' centre "
@@ -243,9 +244,9 @@ namespace Manimal.Icebreaker
                 cell.PointStartSearch = null;
                 if (!byCell.TryGetValue(idx, out var inside)) continue;
                 var centre = cell.Position + new Vector3(5f, 2.5f, 5f);
-                cell.PointsIds = inside.Select(p => p.Id).ToList();
-                cell.Points = inside.ToList();
-                var closest = inside.OrderBy(p => (p.Position - centre).sqrMagnitude).First();
+                cell.PointsIds = inside.AsValueEnumerable().Select(p => p.Id).ToList();
+                cell.Points = inside.AsValueEnumerable().ToList();
+                var closest = inside.AsValueEnumerable().OrderBy(p => (p.Position - centre).sqrMagnitude).First();
                 cell._closetsPointId = closest.Id;
                 cell.PointStartSearch = closest;
                 // loot / door / exfil id lists are deliberately untouched: those are retail's

@@ -237,7 +237,7 @@ namespace Manimal.Icebreaker
                 if (player == null || player.ProfileId != profileId) return;
                 var torches = new System.Collections.Generic.List<EFT.InventoryLogic.Item>();
                 foreach (var it in player.Profile?.Inventory?.AllRealPlayerItems
-                                   ?? System.Linq.Enumerable.Empty<EFT.InventoryLogic.Item>())
+                                   ?? System.Array.Empty<EFT.InventoryLogic.Item>())
                     if (Blowtorch.BlowtorchIds.IsTorch(it)) torches.Add(it);
                 foreach (var it in torches)
                 {

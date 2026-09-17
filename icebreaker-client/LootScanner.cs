@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using ZLinq;
 using EFT.Interactive;
 using UnityEngine;
 using UnityEngine.AI;
@@ -95,7 +95,7 @@ namespace Manimal.Icebreaker
             }
             patrols.SimpleLootPoints = simple;
 
-            var all = (patrols.ContainerLootPoints ?? new List<AILootPoint>()).Concat(simple).ToList();
+            var all = (patrols.ContainerLootPoints ?? new List<AILootPoint>()).AsValueEnumerable().Concat(simple).ToList();
             var clusters = BuildClusters(all);
             foreach (var cluster in clusters)
                 cluster.CollectActualSpawnedLoot(lootData);

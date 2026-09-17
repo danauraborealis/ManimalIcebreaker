@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using ZLinq;
 using System.Reflection;
 using EFT;
 using HarmonyLib;
@@ -21,7 +21,7 @@ namespace Manimal.Icebreaker.Keypad
         {
             return typeof(EFT.InteractionContextHelper)
                 .GetMethods(BindingFlags.Public | BindingFlags.Static)
-                .FirstOrDefault(m =>
+                .AsValueEnumerable().FirstOrDefault(m =>
                     m.Name == "GetAvailableActions" &&
                     m.GetParameters().Length == 2 &&
                     m.GetParameters()[0].ParameterType == typeof(GamePlayerOwner));

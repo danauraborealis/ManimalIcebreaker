@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using ZLinq;
 using SysIoPath = System.IO.Path;
 using System.Reflection;
 using Audio.AmbientSubsystem;
@@ -127,7 +127,7 @@ namespace Manimal.Icebreaker
                 // OutdoorFadeTime etc. into its working floats during Awake).
                 root.SetActive(false);
                 var em = root.AddComponent<EnvironmentManager>();
-                var emRow = (sc["scenes"]?["Icebreaker_Scripts"]?["EnvironmentManager"] as JArray)?.FirstOrDefault();
+                var emRow = (sc["scenes"]?["Icebreaker_Scripts"]?["EnvironmentManager"] as JArray)?.AsValueEnumerable().FirstOrDefault();
                 if (emRow?["fields"] is JObject emFields)
                     FillFields(em, emFields, name => name != "Bounds");
                 root.SetActive(true);
@@ -507,7 +507,7 @@ namespace Manimal.Icebreaker
                 // (the FindActualCurrentRoom NRE storm). the class is fully self-healing
                 // (Awake collects children rooms/portals), it just must exist on the
                 // room-tree root AFTER our components do.
-                var rootPath = Rows(sound, "SpatialAudioCrossSceneGroup").FirstOrDefault()?.Value<string>("go")
+                var rootPath = Rows(sound, "SpatialAudioCrossSceneGroup").AsValueEnumerable().FirstOrDefault()?.Value<string>("go")
                                ?? "SpatialAudioSystem";
                 if (goIndex.TryGetValue(rootPath, out var roots) && roots.Count > 0)
                 {
@@ -535,7 +535,7 @@ namespace Manimal.Icebreaker
                 if (system.poolsConfig == null)
                 {
                     system.poolsConfig = new SpatialAudioPoolsConfig();
-                    if (sound["SpatialAudioSystem"] is JArray sysRows && sysRows.FirstOrDefault()?["fields"]?["poolsConfig"] is JObject pc)
+                    if (sound["SpatialAudioSystem"] is JArray sysRows && sysRows.AsValueEnumerable().FirstOrDefault()?["fields"]?["poolsConfig"] is JObject pc)
                         FillFields(system.poolsConfig, pc, null);
                 }
 
@@ -620,7 +620,7 @@ namespace Manimal.Icebreaker
         }
 
         private static IEnumerable<JToken> Rows(JObject scene, string cls)
-            => (scene[cls] as JArray) ?? Enumerable.Empty<JToken>();
+            => (IEnumerable<JToken>)(scene[cls] as JArray) ?? Array.Empty<JToken>();
 
         private static void CreateAll<T>(JObject scene, string cls, Dictionary<string, List<Transform>> goIndex,
             Dictionary<long, Component> comps, List<GameObject> reactivate) where T : Component

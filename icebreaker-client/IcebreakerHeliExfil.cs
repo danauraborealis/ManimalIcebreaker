@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using ZLinq;
 using Comfort.Common;
 using EFT;
 using EFT.Communications;
@@ -41,7 +41,7 @@ namespace Manimal.Icebreaker
         private void Start()
         {
             _exit = FindObjectsOfType<ExfiltrationPoint>()
-                .FirstOrDefault(e => e.Settings != null && e.Settings.Name == ExitName);
+                .AsValueEnumerable().FirstOrDefault(e => e.Settings != null && e.Settings.Name == ExitName);
             if (_exit == null)
             {
                 Plugin.Log.LogWarning($"[HeliExfil] no '{ExitName}' exfil in scene — flare gating skipped");
@@ -134,7 +134,7 @@ namespace Manimal.Icebreaker
             {
                 int fare = Plugin.HeliExfilCost.Value;
                 if (fare <= 0 || _exit == null) return;
-                if (_exit.Requirements != null && _exit.Requirements.OfType<TransferItemRequirement>().Any()) return;
+                if (_exit.Requirements != null && _exit.Requirements.AsValueEnumerable().OfType<TransferItemRequirement>().Any()) return;
 
                 var req = ExfiltrationRequirement.CreateRequirement(ERequirementState.TransferItem) as ExfiltrationRequirement;
                 if (req == null) { Plugin.Log.LogWarning("[HeliExfil] could not build the transfer requirement"); return; }
@@ -189,7 +189,7 @@ namespace Manimal.Icebreaker
                     if (!IceGate.On || __instance?.Settings == null || __instance.Settings.Name != ExitName) return;
                     if (player == null || !player.IsYourPlayer) return;
                     int reqs = __instance.Requirements?.Length ?? 0;
-                    int unmet = __instance.UnmetRequirements(player).Count();
+                    int unmet = __instance.UnmetRequirements(player).AsValueEnumerable().Count();
                     bool queued = __instance.QueuedPlayers.Contains(player.ProfileId);
                     Plugin.Log.LogWarning($"[HeliExfil] Proceed: requirements={reqs} unmet={unmet} queued={queued} "
                         + $"status={__instance.Status} met={__instance.HasMetRequirements(player.ProfileId)}");

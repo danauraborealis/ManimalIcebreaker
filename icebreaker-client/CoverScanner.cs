@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
+using ZLinq;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -226,7 +226,7 @@ namespace Manimal.Icebreaker
                     false, g.WallDir, firePos, PointWithNeighborType.cover);
                 p.CoverType = CoverType.Wall;
                 p.EnvironmentType = g.Environment == "Indoor" ? EnvironmentType.Indoor : EnvironmentType.Outdoor;
-                p.NeighbourhoodsWaysIds = g.WayIds.Where(keptWayIds.Contains).Select(i => i + idOffset).ToList();
+                p.NeighbourhoodsWaysIds = g.WayIds.AsValueEnumerable().Where(keptWayIds.Contains).Select(i => i + idOffset).ToList();
                 p.CalcDefenceLevel();
                 try { p.InitLightBorders(); } catch { }
                 try { p.InitLookSides(); } catch { }
@@ -482,9 +482,9 @@ namespace Manimal.Icebreaker
                 if (byCell.TryGetValue(idx, out var inside))
                 {
                     var centre = cell.Position + new Vector3(5f, 2.5f, 5f);
-                    cell.PointsIds = inside.Select(p => p.Id).ToList();
-                    cell.Points = inside.ToList();
-                    var closest = inside.OrderBy(p => (p.Position - centre).sqrMagnitude).First();
+                    cell.PointsIds = inside.AsValueEnumerable().Select(p => p.Id).ToList();
+                    cell.Points = inside.AsValueEnumerable().ToList();
+                    var closest = inside.AsValueEnumerable().OrderBy(p => (p.Position - centre).sqrMagnitude).First();
                     cell._closetsPointId = closest.Id;
                     // normally voxel.RestoreData resolves this from _closetsPointId — we
                     // set it directly (bots deref CurVoxel.PointStartSearch.CorePointInGame
@@ -509,7 +509,7 @@ namespace Manimal.Icebreaker
                     // only enables Carver_Opened, and only while the door is OPEN), so the
                     // doorway stays walkable navmesh and they just stroll through it.
                     cell.DoorLinks = cell.DoorLinksIds
-                        .Select(i => linkById.TryGetValue(i, out var l) ? l : null)
+                        .AsValueEnumerable().Select(i => linkById.TryGetValue(i, out var l) ? l : null)
                         .Where(l => l != null).ToList();
                 }
                 if (exfils != null)
@@ -674,7 +674,7 @@ namespace Manimal.Icebreaker
                 if (p.WayIds.Count >= MaxDegree)
                     continue;
                 var neighbors = hash.Near(p.Pos)
-                    .Where(q => q.Id != p.Id && !linked.Contains((p.Id, q.Id)))
+                    .AsValueEnumerable().Where(q => q.Id != p.Id && !linked.Contains((p.Id, q.Id)))
                     .OrderBy(q => (q.Pos - p.Pos).sqrMagnitude)
                     .ToList();
                 foreach (var q in neighbors)
@@ -715,8 +715,8 @@ namespace Manimal.Icebreaker
 
         private static void BridgeAndPrune(ref List<GenPoint> points, List<(int id, int from, int to, float dist)> ways)
         {
-            var byId = points.ToDictionary(p => p.Id);
-            int nextWayId = ways.Count > 0 ? ways.Max(w => w.id) + 1 : 1;
+            var byId = points.AsValueEnumerable().ToDictionary(p => p.Id);
+            int nextWayId = ways.Count > 0 ? ways.AsValueEnumerable().Max(w => w.id) + 1 : 1;
             var path = new NavMeshPath();
 
             for (int round = 0; round < 6; round++)
@@ -724,7 +724,7 @@ namespace Manimal.Icebreaker
                 var comps = Components(points, ways);
                 if (comps.Count <= 1)
                     break;
-                var main = comps.OrderByDescending(c => c.Count).First();
+                var main = comps.AsValueEnumerable().OrderByDescending(c => c.Count).First();
 
                 var hash = new SpatialHash<GenPoint>(BridgeRadius / 2f);
                 foreach (var p in points)
@@ -741,9 +741,9 @@ namespace Manimal.Icebreaker
                         continue;
                     // closest foreign candidates first, few attempts — this is CalculatePath-heavy
                     var tried = 0;
-                    var pairs = comps[ci].Select(pid => byId[pid])
+                    var pairs = comps[ci].AsValueEnumerable().Select(pid => byId[pid])
                         .SelectMany(p => hash.Near(p.Pos)
-                            .Where(q => compOf[q.Id] != ci)
+                            .AsValueEnumerable().Where(q => compOf[q.Id] != ci)
                             .Select(q => (p, q, d: (p.Pos - q.Pos).sqrMagnitude)))
                         .Where(t => t.d < BridgeRadius * BridgeRadius)
                         .OrderBy(t => t.d);
@@ -770,11 +770,11 @@ namespace Manimal.Icebreaker
 
             // prune leftover micro-fragments and their ways
             var final = Components(points, ways);
-            var keepIds = new HashSet<int>(final.Where(c => c.Count >= MinComponentSize).SelectMany(c => c));
+            var keepIds = new HashSet<int>(final.AsValueEnumerable().Where(c => c.Count >= MinComponentSize).SelectMany(c => c).ToArray());
             if (keepIds.Count < points.Count)
             {
-                points = points.Where(p => keepIds.Contains(p.Id)).ToList();
-                var deadWays = new HashSet<int>(ways.Where(w => !keepIds.Contains(w.from) || !keepIds.Contains(w.to)).Select(w => w.id));
+                points = points.AsValueEnumerable().Where(p => keepIds.Contains(p.Id)).ToList();
+                var deadWays = new HashSet<int>(ways.AsValueEnumerable().Where(w => !keepIds.Contains(w.from) || !keepIds.Contains(w.to)).Select(w => w.id).ToArray());
                 ways.RemoveAll(w => deadWays.Contains(w.id));
                 foreach (var p in points)
                     p.WayIds.RemoveAll(id => deadWays.Contains(id));
@@ -783,7 +783,7 @@ namespace Manimal.Icebreaker
 
         private static List<List<int>> Components(List<GenPoint> points, List<(int id, int from, int to, float dist)> ways)
         {
-            var parent = points.ToDictionary(p => p.Id, p => p.Id);
+            var parent = points.AsValueEnumerable().ToDictionary(p => p.Id, p => p.Id);
             int Find(int a)
             {
                 while (parent[a] != a) { parent[a] = parent[parent[a]]; a = parent[a]; }
@@ -792,7 +792,7 @@ namespace Manimal.Icebreaker
             foreach (var w in ways)
                 if (parent.ContainsKey(w.from) && parent.ContainsKey(w.to))
                     parent[Find(w.from)] = Find(w.to);
-            return points.GroupBy(p => Find(p.Id)).Select(g => g.Select(p => p.Id).ToList()).ToList();
+            return points.AsValueEnumerable().GroupBy(p => Find(p.Id)).Select(g => g.AsValueEnumerable().Select(p => p.Id).ToList()).ToList();
         }
 
         private static float PathLength(NavMeshPath path)
@@ -810,7 +810,7 @@ namespace Manimal.Icebreaker
             List<(int id, int from, int to, float dist)> ways,
             out List<(int id, int group, Vector3 pos, List<int> connections)> cores)
         {
-            var byId = points.ToDictionary(p => p.Id);
+            var byId = points.AsValueEnumerable().ToDictionary(p => p.Id);
             var parent = new Dictionary<int, int>();
             int Find(int a)
             {
@@ -851,7 +851,7 @@ namespace Manimal.Icebreaker
             // link each core to its 2 nearest same-group cores; assign every point its nearest core
             foreach (var c in cores)
             {
-                var near = cores.Where(o => o.id != c.id && o.group == c.group)
+                var near = cores.AsValueEnumerable().Where(o => o.id != c.id && o.group == c.group)
                     .OrderBy(o => (o.pos - c.pos).sqrMagnitude).Take(2);
                 foreach (var o in near)
                     if (!c.connections.Contains(o.id))
@@ -859,7 +859,7 @@ namespace Manimal.Icebreaker
             }
             foreach (var p in points)
             {
-                var best = cores.Where(c => c.group == p.Group)
+                var best = cores.AsValueEnumerable().Where(c => c.group == p.Group)
                     .OrderBy(c => (c.pos - p.Pos).sqrMagnitude).FirstOrDefault();
                 p.CoreId = best.id;
             }
@@ -917,7 +917,7 @@ namespace Manimal.Icebreaker
                         var centre = pos + new Vector3(5f, 2.5f, 5f);
                         int closest = 0;
                         if (inside != null && inside.Count > 0)
-                            closest = inside.OrderBy(p => (p.Pos - centre).sqrMagnitude).First().Id;
+                            closest = inside.AsValueEnumerable().OrderBy(p => (p.Pos - centre).sqrMagnitude).First().Id;
                         NavMeshHit nh;
                         bool haveNav = NavMesh.SamplePosition(centre, out nh, 4f, -1)
                             && nh.position.x >= pos.x && nh.position.x < pos.x + 10f
@@ -931,7 +931,7 @@ namespace Manimal.Icebreaker
                             position = new { x = pos.x, y = pos.y, z = pos.z },
                             haveNavMesh = haveNav,
                             closestPointId = closest,
-                            pointsIds = (object)(inside != null ? inside.Select(p => p.Id).ToList() : new List<int>()),
+                            pointsIds = (object)(inside != null ? inside.AsValueEnumerable().Select(p => p.Id).ToList() : new List<int>()),
                             entrancesIds = new List<int>(),
                             doorLinksIds = new List<int>(),
                             lootPointsIds = new List<int>(),
@@ -960,14 +960,14 @@ namespace Manimal.Icebreaker
                     groupPointCount = points.Count,
                     voxelCount = grid.cells.Count,
                 },
-                corePoints = cores.Select(c => new
+                corePoints = cores.AsValueEnumerable().Select(c => new
                 {
                     id = c.id,
                     connectionGroupId = c.group,
                     position = new { x = c.pos.x, y = c.pos.y, z = c.pos.z },
                     connections = c.connections,
                 }),
-                groupPoints = points.Select(p => new
+                groupPoints = points.AsValueEnumerable().Select(p => new
                 {
                     id = p.Id,
                     position = new { x = p.Pos.x, y = p.Pos.y, z = p.Pos.z },
@@ -990,7 +990,7 @@ namespace Manimal.Icebreaker
                     waysIds = p.WayIds,
                 }),
                 manualPoints = new object[0],
-                ways = ways.Select(w => new { id = w.id, idTarget = w.to, dist = w.dist }),
+                ways = ways.AsValueEnumerable().Select(w => new { id = w.id, idTarget = w.to, dist = w.dist }),
                 pathes = new object[0],
                 voxelGrid = new
                 {

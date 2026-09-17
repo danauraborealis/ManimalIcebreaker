@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using ZLinq;
 using SysIoPath = System.IO.Path;
 using System.Runtime.Serialization;
 using EFT.Interactive;
@@ -185,7 +185,7 @@ namespace Manimal.Icebreaker
 
                 // --- voxels ---
                 var voxData = UnityEngine.Object.FindObjectOfType<AIVoxelesData>();
-                var vrow = Rows(comps, "AIVoxelesData").FirstOrDefault();
+                var vrow = Rows(comps, "AIVoxelesData").AsValueEnumerable().FirstOrDefault();
                 if (voxData != null && vrow?["fields"] is JObject vf)
                 {
                     var cells = new List<NavGraphVoxelSimple>();
@@ -214,7 +214,7 @@ namespace Manimal.Icebreaker
 
                 // --- patrols (loot/exfil points; container refs unresolvable -> null) ---
                 var patData = UnityEngine.Object.FindObjectOfType<AIPatrolsData>();
-                var prow = Rows(comps, "AIPatrolsData").FirstOrDefault();
+                var prow = Rows(comps, "AIPatrolsData").AsValueEnumerable().FirstOrDefault();
                 if (patData != null && prow?["fields"] is JObject pf)
                     FillFields(patData, pf, null);
 
@@ -225,7 +225,7 @@ namespace Manimal.Icebreaker
                 FillSingle<BotZoneEntranceInfo>(comps, "BotZoneEntranceInfo");
 
                 // --- the cover bake itself ---
-                var crow = Rows(comps, "AICoversData").FirstOrDefault();
+                var crow = Rows(comps, "AICoversData").AsValueEnumerable().FirstOrDefault();
                 if (crow?["fields"] is JObject cf)
                 {
                     var points = new List<GroupPoint>();
@@ -369,7 +369,7 @@ namespace Manimal.Icebreaker
         }
 
         private static IEnumerable<JToken> Rows(JObject comps, string cls)
-            => (comps?[cls] as JArray) ?? Enumerable.Empty<JToken>();
+            => (IEnumerable<JToken>)(comps?[cls] as JArray) ?? Array.Empty<JToken>();
 
         private static T Comp<T>(JToken row) where T : Component
             => _comps.TryGetValue(row.Value<long>("path_id"), out var c) ? c as T : null;
@@ -396,7 +396,7 @@ namespace Manimal.Icebreaker
 
         private static void FillSingle<T>(JObject comps, string cls) where T : Component
         {
-            var row = Rows(comps, cls).FirstOrDefault();
+            var row = Rows(comps, cls).AsValueEnumerable().FirstOrDefault();
             var target = UnityEngine.Object.FindObjectOfType<T>();
             if (row?["fields"] is JObject f && target != null)
             {

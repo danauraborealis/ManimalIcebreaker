@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using ZLinq;
 using System.Reflection;
 using Comfort.Common;
 using EFT;
@@ -245,7 +245,7 @@ namespace Manimal.Icebreaker
             // an OnRenderImage owner into a non-blitting state. Cam2's own components
             // already work; the graft's whole job is only what Cam2 LACKS.
             var skip = new HashSet<string>((Plugin.CamDonorSkip?.Value ?? "")
-                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()),
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).AsValueEnumerable().Select(x => x.Trim()).ToArray(),
                 StringComparer.OrdinalIgnoreCase);
 
             int filled = 0, missingType = 0, refMiss = 0, existing = 0, skipped = 0;
@@ -260,7 +260,7 @@ namespace Manimal.Icebreaker
             go.SetActive(false);
             try
             {
-                foreach (var row in comps.OfType<JObject>())
+                foreach (var row in comps.AsValueEnumerable().OfType<JObject>())
                 {
                     var typeName = (string)row["type"];
                     var type = AccessTools.TypeByName(typeName);
@@ -303,7 +303,7 @@ namespace Manimal.Icebreaker
                         {
                             // the dust texture never resolves here and HG supplies its own
                             if (hgBloom && kv.Key == "m_DustTexture") continue;
-                            var f = SerializedFields(type).FirstOrDefault(x => x.Name == kv.Key);
+                            var f = SerializedFields(type).AsValueEnumerable().FirstOrDefault(x => x.Name == kv.Key);
                             if (f == null) continue;
                             try
                             {
@@ -325,7 +325,7 @@ namespace Manimal.Icebreaker
                     {
                         try
                         {
-                            var lensDust = SerializedFields(type).FirstOrDefault(x => x.Name == "m_UseLensDust");
+                            var lensDust = SerializedFields(type).AsValueEnumerable().FirstOrDefault(x => x.Name == "m_UseLensDust");
                             if (lensDust != null) lensDust.SetValue(c, false);
                         }
                         catch { }
@@ -433,7 +433,7 @@ namespace Manimal.Icebreaker
             if (want == typeof(AnimationCurve))
             {
                 var ac = new AnimationCurve(((JArray)tok["curve"])
-                    .Select(k => new Keyframe((float)k["t"], (float)k["v"], (float)k["i"], (float)k["o"])).ToArray());
+                    .AsValueEnumerable().Select(k => new Keyframe((float)k["t"], (float)k["v"], (float)k["i"], (float)k["o"])).ToArray());
                 ac.preWrapMode = (WrapMode)(int)tok["pre"];
                 ac.postWrapMode = (WrapMode)(int)tok["post"];
                 return ac;
@@ -454,7 +454,7 @@ namespace Manimal.Icebreaker
                     var sh = Shader.Find(name);
                     if (sh != null) return sh;
                 }
-                var found = Resources.FindObjectsOfTypeAll(want).FirstOrDefault(o => o.name == name);
+                var found = Resources.FindObjectsOfTypeAll(want).AsValueEnumerable().FirstOrDefault(o => o.name == name);
                 if (found == null) { refMiss++; return null; }
                 // carried materials come from the rip, whose shader is decompiled garbage —
                 // swap in the game's own same-name shader (the RebindShaders lesson)

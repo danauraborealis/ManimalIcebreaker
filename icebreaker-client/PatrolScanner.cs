@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using ZLinq;
 using EFT;
 using UnityEngine;
 using UnityEngine.AI;
@@ -72,7 +72,7 @@ namespace Manimal.Icebreaker
         internal static int GenerateForZones(AICoversData covers)
         {
             var zones = UnityEngine.Object.FindObjectsOfType<BotZone>()
-                .Where(z => z != null && z.SpawnPointMarkers != null && z.SpawnPointMarkers.Count > 0)
+                .AsValueEnumerable().Where(z => z != null && z.SpawnPointMarkers != null && z.SpawnPointMarkers.Count > 0)
                 .ToList();
             if (zones.Count == 0)
             {
@@ -191,7 +191,7 @@ namespace Manimal.Icebreaker
             // snap + dedupe, nearest to the zone centre first, then cap: path queries are the
             // expensive part and an unbounded pool on a 2135-point library would crawl
             var snapped = new List<Vector3>();
-            foreach (var c in pool.OrderBy(p => (p - centre).sqrMagnitude))
+            foreach (var c in pool.AsValueEnumerable().OrderBy(p => (p - centre).sqrMagnitude))
             {
                 if (snapped.Count >= MaxCandidates) break;
                 NavMeshHit hit;

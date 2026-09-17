@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using ZLinq;
 using System.Threading;
 using System.Threading.Tasks;
 using Comfort.Common;
@@ -160,7 +160,7 @@ namespace Manimal.Icebreaker
                         EFT.ObjectsFactory.PoolsCategory.Raid, EFT.ObjectsFactory.AssemblyType.Local,
                         // In 4.1 Low does not await InitAndFillPools. General awaits
                         // real, ready instances rather than returning pool placeholders.
-                        resources.Distinct().ToArray(), Diz.Jobs.JobYieldPriority.General, null, _loading.Token);
+                        resources.AsValueEnumerable().Distinct().ToArray(), Diz.Jobs.JobYieldPriority.General, null, _loading.Token);
                 }
                 catch (Exception e) { Plugin.Log.LogWarning($"[Tripwires] bundle preload kickoff failed: {e.Message}"); }
                 if (load != null)

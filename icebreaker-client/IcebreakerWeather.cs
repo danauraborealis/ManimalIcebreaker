@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using ZLinq;
 using SysIoPath = System.IO.Path;
 using HarmonyLib;
 using Newtonsoft.Json.Linq;
@@ -103,7 +103,7 @@ namespace Manimal.Icebreaker
                 var rows = new List<(JToken row, Component comp)>();
                 var deferred = new[] { "TOD_Sky", "EFT.Weather.WeatherController" };
                 var ordered = comps.Properties()
-                    .SelectMany(p => ((p.Value as JArray) ?? new JArray()).Cast<JToken>())
+                    .AsValueEnumerable().SelectMany(p => ((p.Value as JArray) ?? new JArray()).AsValueEnumerable().Cast<JToken>())
                     .OrderBy(r => Array.IndexOf(deferred, r.Value<string>("class")) >= 0 ? 1 : 0)
                     .ToList();
                 foreach (var row in ordered)
@@ -151,7 +151,7 @@ namespace Manimal.Icebreaker
                 if (scr.IsValid() && scr.isLoaded) SceneManager.MoveGameObjectToScene(_marker, scr);
 
                 if (_missingAssets.Count > 0)
-                    Plugin.Log.LogWarning($"[Weather] MISSING ASSETS ({_missingAssets.Count}) — add via editor carrier pass: {string.Join(", ", _missingAssets.Distinct())}");
+                    Plugin.Log.LogWarning($"[Weather] MISSING ASSETS ({_missingAssets.Count}) — add via editor carrier pass: {string.Join(", ", _missingAssets.AsValueEnumerable().Distinct())}");
                 WarmSnowEarly(); // shader+settings onto Close/Far NOW, during load — Start()'s
                                  // runtime copies inherit them, so flakes are valid from their
                                  // first visible frame (was: pop-in seconds into the raid)

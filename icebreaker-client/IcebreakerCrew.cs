@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using ZLinq;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
@@ -496,7 +496,7 @@ namespace Manimal.Icebreaker
         {
             var byName = new HashSet<string>(zoneNames);
             var zones = AllBotZones()
-                .Where(z => byName.Contains(z.name) && z.SpawnPointMarkers != null && z.SpawnPointMarkers.Count > 0)
+                .AsValueEnumerable().Where(z => byName.Contains(z.name) && z.SpawnPointMarkers != null && z.SpawnPointMarkers.Count > 0)
                 .ToList();
             if (zones.Count == 0)
             {
@@ -541,7 +541,7 @@ namespace Manimal.Icebreaker
         {
             Plugin.Log.LogDebug("[Crew] T1 — the knight arrives (Mash_t1 + 2 rogue escorts)");
             var zone = AllBotZones()
-                .FirstOrDefault(z => z.name == "BotZoneMash_t1" && z.SpawnPointMarkers != null && z.SpawnPointMarkers.Count > 0);
+                .AsValueEnumerable().FirstOrDefault(z => z.name == "BotZoneMash_t1" && z.SpawnPointMarkers != null && z.SpawnPointMarkers.Count > 0);
             if (zone == null) { Plugin.Log.LogWarning("[Crew] no BotZoneMash_t1 — knight detail skipped"); yield break; }
             _squadSpawnBusy = true;
             var t = ForceSpawn(WildSpawnType.bossKnight, zone);
@@ -600,7 +600,7 @@ namespace Manimal.Icebreaker
             // timeout leaves _chargePlaced false so a LATER qualifying squad still takes it.
             var anchors = new List<Vector3>();
             foreach (var z in AllBotZones())
-                if (zoneNames.Contains(z.name) && z.SpawnPointMarkers != null)
+                if (zoneNames.AsValueEnumerable().Contains(z.name) && z.SpawnPointMarkers != null)
                     foreach (var m in z.SpawnPointMarkers)
                         if (m != null) anchors.Add(m.transform.position);
             if (anchors.Count == 0) yield break;
@@ -630,7 +630,7 @@ namespace Manimal.Icebreaker
 
             // shuffle, then stable-sort backpack carriers to the front — random pick
             // within each tier, bag carriers always tried first
-            foreach (var b in cands.OrderBy(_ => UnityEngine.Random.value).OrderByDescending(b => BackpackOf(b) != null).ToList())
+            foreach (var b in cands.AsValueEnumerable().OrderBy(_ => UnityEngine.Random.value).OrderByDescending(b => BackpackOf(b) != null).ToList())
             {
                 if (StuffCharge(b))
                 {
@@ -813,7 +813,7 @@ namespace Manimal.Icebreaker
             Plugin.Log.LogWarning($"[Crew] engine squad hold armed — release box {bounds.center} size {bounds.size} ({(trigCol != null ? "bundle trigger" : "glowstick fallback")})");
 
             var hideZone = AllBotZones()
-                .FirstOrDefault(z => z.name == "BotZoneEngineHide" && z.SpawnPointMarkers != null && z.SpawnPointMarkers.Count > 0);
+                .AsValueEnumerable().FirstOrDefault(z => z.name == "BotZoneEngineHide" && z.SpawnPointMarkers != null && z.SpawnPointMarkers.Count > 0);
             var anchor = hideZone != null ? hideZone.SpawnPointMarkers[0].transform.position : EngineLandmarkFallback;
 
 
@@ -942,7 +942,7 @@ namespace Manimal.Icebreaker
             // who actually owns each bot 8s in — the tell for a priority fight (SAIN
             // layer name = we lost) or an uncovered brain (vanilla layer name = the
             // ExUsec/Pmc* registration missed this bot's brain entirely)
-            StartCoroutine(LogCrewBrains(new List<BotOwner>(held.Concat(free)), "post-release"));
+            StartCoroutine(LogCrewBrains(held.AsValueEnumerable().Concat(free).ToList(), "post-release"));
 
             // reinforcement wave (user call 07-28): the other half of the squad stayed in
             // the pen and pushes in the moment the trigger blows. 12m hard player
@@ -1010,7 +1010,7 @@ namespace Manimal.Icebreaker
         {
             var byName = new HashSet<string>(RogueZones);
             return AllBotZones()
-                .Where(z => byName.Contains(z.name) && z.SpawnPointMarkers != null && z.SpawnPointMarkers.Count > 0)
+                .AsValueEnumerable().Where(z => byName.Contains(z.name) && z.SpawnPointMarkers != null && z.SpawnPointMarkers.Count > 0)
                 .ToList();
         }
 
@@ -1237,7 +1237,7 @@ namespace Manimal.Icebreaker
         {
             try
             {
-                var keys = data.Profiles.SelectMany(p => p.GetAllPrefabPaths(false)).ToArray();
+                var keys = data.Profiles.AsValueEnumerable().SelectMany(p => p.GetAllPrefabPaths(false)).ToArray();
                 if (keys.Length > 0)
                     await Singleton<EFT.ObjectsFactory>.Instance.LoadBundlesAndCreatePools(
                         EFT.ObjectsFactory.PoolsCategory.Raid, EFT.ObjectsFactory.AssemblyType.Local,
@@ -1338,8 +1338,8 @@ namespace Manimal.Icebreaker
             Add(3, (WildSpawnType)BdIb, "BotZoneOutside_t3");  // T3 deployment
 
             var zonesByName = AllBotZones()
-                .Where(z => z.SpawnPointMarkers != null && z.SpawnPointMarkers.Count > 0)
-                .GroupBy(z => z.name).ToDictionary(g => g.Key, g => g.First());
+                .AsValueEnumerable().Where(z => z.SpawnPointMarkers != null && z.SpawnPointMarkers.Count > 0)
+                .GroupBy(z => z.name).ToDictionary(g => g.Key, g => g.AsValueEnumerable().First());
 
             foreach (var (role, zoneName) in plan)
             {

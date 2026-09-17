@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using ZLinq;
 using BepInEx;
 using Comfort.Common;
 using EFT;
@@ -62,17 +62,17 @@ namespace Manimal.Icebreaker
                     voxelCount = voxels?.Count ?? 0,
                 },
                 corePoints = DumpCorePoints(covers),
-                groupPoints = points.Select(DumpGroupPoint),
+                groupPoints = points.AsValueEnumerable().Select(DumpGroupPoint),
                 manualPoints = (covers.AIManualPointsHolder != null && covers.AIManualPointsHolder.ManualPoints != null
                     ? covers.AIManualPointsHolder.ManualPoints
-                    : new List<GroupPoint>()).Select(DumpGroupPoint),
-                ways = (covers.Ways ?? new List<GroupPointWay>()).Select(w => new
+                    : new List<GroupPoint>()).AsValueEnumerable().Select(DumpGroupPoint),
+                ways = (covers.Ways ?? new List<GroupPointWay>()).AsValueEnumerable().Select(w => new
                 {
                     id = w.Id,
                     idTarget = w.IdTarget,
                     dist = w.Dist,
                 }),
-                pathes = (covers.Pathes ?? new List<GroupPointPath>()).Select(p => new
+                pathes = (covers.Pathes ?? new List<GroupPointPath>()).AsValueEnumerable().Select(p => new
                 {
                     idPath = p.IdPath,
                     idA = p.IdA,
@@ -130,13 +130,13 @@ namespace Manimal.Icebreaker
             var holder = covers.AICorePointsHolder;
             if (holder == null || holder.CorePoints == null)
                 return new object[0];
-            return holder.CorePoints.Where(cp => cp != null).Select(cp => new
+            return holder.CorePoints.AsValueEnumerable().Where(cp => cp != null).Select(cp => new
             {
                 id = cp.Id,
                 connectionGroupId = cp.ConnectionGroupId,
                 position = V3(cp.Position),
                 connections = cp.ConnectionsAtNet != null
-                    ? cp.ConnectionsAtNet.Where(c => c != null).Select(c => c.Id).ToList()
+                    ? cp.ConnectionsAtNet.AsValueEnumerable().Where(c => c != null).Select(c => c.Id).ToList()
                     : new List<int>(),
             });
         }
@@ -175,7 +175,7 @@ namespace Manimal.Icebreaker
             {
                 min = V3(v.MinVoxelesValues),
                 max = V3(v.MaxVoxelesValues),
-                cells = (v.VoxelsList ?? new List<NavGraphVoxelSimple>()).Where(c => c != null).Select(c => new
+                cells = (v.VoxelsList ?? new List<NavGraphVoxelSimple>()).AsValueEnumerable().Where(c => c != null).Select(c => new
                 {
                     id = (int)c.Id,
                     ix = (int)c.IndexX,
@@ -202,7 +202,7 @@ namespace Manimal.Icebreaker
                 containerLootPoints = DumpLootPoints(patrols.ContainerLootPoints),
                 simpleLootPoints = DumpLootPoints(patrols.SimpleLootPoints),
                 exfiltrationPoints = (patrols.ExfiltrationPoints ?? new List<AIExfiltrationPoint>())
-                    .Where(e => e != null).Select(e => new
+                    .AsValueEnumerable().Where(e => e != null).Select(e => new
                     {
                         id = e.Id,
                         position = V3(e.Position),
@@ -214,7 +214,7 @@ namespace Manimal.Icebreaker
 
         private static object DumpLootPoints(List<AILootPoint> list)
         {
-            return (list ?? new List<AILootPoint>()).Where(l => l != null).Select(l => new
+            return (list ?? new List<AILootPoint>()).AsValueEnumerable().Where(l => l != null).Select(l => new
             {
                 id = l.Id,
                 position = V3(l._pos),
@@ -227,7 +227,7 @@ namespace Manimal.Icebreaker
 
         private static object DumpBotZones()
         {
-            return UnityEngine.Object.FindObjectsOfType<BotZone>().Select(z => new
+            return UnityEngine.Object.FindObjectsOfType<BotZone>().AsValueEnumerable().Select(z => new
             {
                 nameZone = z.NameZone,
                 id = z.Id,
@@ -236,7 +236,7 @@ namespace Manimal.Icebreaker
                 distanceCoef = z.DistanceCoef,
                 maxPersons = z.MaxPersons,
                 spawnPoints = (z.SpawnPointMarkers ?? new List<EFT.Game.Spawning.SpawnPointMarker>())
-                    .Where(m => m != null).Select(m => new
+                    .AsValueEnumerable().Where(m => m != null).Select(m => new
                     {
                         id = m.Id,
                         position = V3(m.Position),
@@ -244,13 +244,13 @@ namespace Manimal.Icebreaker
                         categories = m.SpawnPoint?.Categories.ToString(),
                         infiltration = m.SpawnPoint?.Infiltration,
                     }),
-                patrolWays = (z.PatrolWays ?? new PatrolWay[0]).Where(w => w != null).Select(w => new
+                patrolWays = (z.PatrolWays ?? new PatrolWay[0]).AsValueEnumerable().Where(w => w != null).Select(w => new
                 {
                     name = w.name,
                     patrolType = w.PatrolType.ToString(),
                     maxPersons = w.MaxPersons,
                     coefSubPoints = w.CoefSubPoints,
-                    points = (w.Points ?? new List<PatrolPoint>()).Where(pt => pt != null).Select(pt => new
+                    points = (w.Points ?? new List<PatrolPoint>()).AsValueEnumerable().Where(pt => pt != null).Select(pt => new
                     {
                         id = pt.Id,
                         position = V3(pt.transform.position),
@@ -267,7 +267,7 @@ namespace Manimal.Icebreaker
         // five authored points per door, everything else derived by TryCreateCrave
         private static object DumpDoorLinks()
         {
-            return UnityEngine.Object.FindObjectsOfType<NavMeshDoorLink>().Select(l => new
+            return UnityEngine.Object.FindObjectsOfType<NavMeshDoorLink>().AsValueEnumerable().Select(l => new
             {
                 id = l.Id,
                 doorId = l.DoorId,
@@ -287,7 +287,7 @@ namespace Manimal.Icebreaker
         // offline (join by DoorId): five authored points vs hinge transform + angles
         private static object DumpDoors()
         {
-            return UnityEngine.Object.FindObjectsOfType<EFT.Interactive.Door>().Select(d => new
+            return UnityEngine.Object.FindObjectsOfType<EFT.Interactive.Door>().AsValueEnumerable().Select(d => new
             {
                 id = d.Id,
                 name = d.name,
@@ -305,7 +305,7 @@ namespace Manimal.Icebreaker
 
         private static object DumpPlaceInfos()
         {
-            return UnityEngine.Object.FindObjectsOfType<AIPlaceInfo>().Select(p => new
+            return UnityEngine.Object.FindObjectsOfType<AIPlaceInfo>().AsValueEnumerable().Select(p => new
             {
                 name = p.name,
                 id = p.Id,

@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using ZLinq;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
@@ -57,17 +57,17 @@ namespace Manimal.Icebreaker
                             ready.Add(request.Result);
                 }
                 token.ThrowIfCancellationRequested();
-                if (ready.Count != 5 || ready.Any(d => d.Count != 1 || d.Profiles[0] == null || d.SpawnStopped))
+                if (ready.Count != 5 || ready.AsValueEnumerable().Any(d => d.Count != 1 || d.Profiles[0] == null || d.SpawnStopped))
                     throw new InvalidOperationException("T4 profile preparation did not produce five ready bots");
-                if (ready.Select(d => d.Profiles[0].Id).Distinct().Count() != 5)
+                if (ready.AsValueEnumerable().Select(d => d.Profiles[0].Id).Distinct().Count() != 5)
                     throw new InvalidOperationException("T4 profile preparation returned duplicate IDs");
 
-                var paths = ready.SelectMany(d => d.Profiles[0].GetAllPrefabPaths(false)).ToArray();
+                var paths = ready.AsValueEnumerable().SelectMany(d => d.Profiles[0].GetAllPrefabPaths(false)).ToArray();
                 await Singleton<ObjectsFactory>.Instance.LoadBundlesAndCreatePools(
                     ObjectsFactory.PoolsCategory.Raid, ObjectsFactory.AssemblyType.Local,
                     paths, Diz.Jobs.JobYieldPriority.Low, null, token);
                 token.ThrowIfCancellationRequested();
-                if (!IceGate.On || !FikaBridge.BotsAuthority || ready.Any(d => d.SpawnStopped)) return;
+                if (!IceGate.On || !FikaBridge.BotsAuthority || ready.AsValueEnumerable().Any(d => d.SpawnStopped)) return;
 
                 // Resolve immediately before activation: the player can move upstairs
                 // while the backend is preparing profiles. Never release a partial team.
@@ -105,7 +105,7 @@ namespace Manimal.Icebreaker
             finally
             {
                 if (!submitted)
-                    foreach (var data in ready.Skip(1)) data.StopSpawn();
+                    foreach (var data in ready.AsValueEnumerable().Skip(1)) data.StopSpawn();
             }
         }
 
@@ -113,7 +113,7 @@ namespace Manimal.Icebreaker
         {
             var result = new List<ISpawnPoint>();
             if (zone.SpawnPoints == null) return result;
-            var seeds = zone.SpawnPoints.Where(p => p != null)
+            var seeds = zone.SpawnPoints.AsValueEnumerable().Where(p => p != null)
                 .OrderByDescending(p => FikaBridge.NearestHumanSqr(p.Position)).ToArray();
             var humans = new List<Player>();
             FikaBridge.CollectHumans(humans);
@@ -132,9 +132,9 @@ namespace Manimal.Icebreaker
                 var position = hit.position;
                 if (Mathf.Abs(position.y - seed.Position.y) > 0.75f ||
                     NavMesh.Raycast(anchor.position, position, out _, NavMesh.AllAreas)) continue;
-                if (result.Any(p => (p.Position - position).sqrMagnitude < 2.25f)) continue;
-                if (living.Any(b => b != null && !b.IsDead && (b.Position - position).sqrMagnitude < 2.25f)) continue;
-                bool exposed = humans.Any(h => (h.Position - position).sqrMagnitude < 9f ||
+                if (result.AsValueEnumerable().Any(p => (p.Position - position).sqrMagnitude < 2.25f)) continue;
+                if (living.AsValueEnumerable().Any(b => b != null && !b.IsDead && (b.Position - position).sqrMagnitude < 2.25f)) continue;
+                bool exposed = humans.AsValueEnumerable().Any(h => (h.Position - position).sqrMagnitude < 9f ||
                     !Physics.Linecast(h.Position + Vector3.up * 1.5f, position + Vector3.up * 1.5f,
                         sightMask, QueryTriggerInteraction.Ignore));
                 if (exposed) continue;
