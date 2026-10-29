@@ -30,11 +30,15 @@ namespace Manimal.Icebreaker.Fika
         }
     }
 
+    // fika 2.4.6 made WorldInteractionPacket a STRUCT — __instance must be taken by ref.
+    // a by-value class-shaped signature here threw BadImageFormatException ("Expected
+    // reference type but got type kind 17") inside PatchAll and aborted the whole addon,
+    // taking the weather deadlock guard down with it (headless 80% "Generating weather").
     [HarmonyPatch(typeof(WorldInteractionPacket), nameof(WorldInteractionPacket.Execute))]
     internal static class Patch_DoorRecvDiag
     {
         [HarmonyPrefix]
-        private static void Prefix(WorldInteractionPacket __instance, FikaPlayer player)
+        private static void Prefix(ref WorldInteractionPacket __instance, FikaPlayer player)
         {
             try
             {

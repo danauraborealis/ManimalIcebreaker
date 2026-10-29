@@ -36,12 +36,31 @@ namespace Manimal.Icebreaker.Fika
                 new BepInEx.Configuration.KeyboardShortcut(UnityEngine.KeyCode.F7),
                 "dump the renderer state of the observed player you're LOOKING AT to the log (invisible-bot hunt)");
             _handler = new IceSyncHandler();
-            new Harmony(BuildInfo.ModGuid).PatchAll(); // door-sync diagnostics etc.
+            PatchEachClass(new Harmony(BuildInfo.ModGuid)); // weather guard, door-sync diagnostics etc.
             // observed-body probe (temporary, self-gates to icebreaker raids)
             var diagGo = new UnityEngine.GameObject("Icebreaker_FikaDiag");
             UnityEngine.Object.DontDestroyOnLoad(diagGo);
             diagGo.AddComponent<IceBodyDiag>();
             Log.LogInfo($"Manimal-IcebreakerFika {BuildInfo.Version} loaded — chain/seal/keypad world events will sync");
+        }
+
+        // PatchAll is all-or-nothing: one patch class gone stale against a newer fika
+        // (a packet turned struct, a renamed method) throws and skips every class after
+        // it — including the raid-critical weather guard. patch class by class instead.
+        private static void PatchEachClass(Harmony harmony)
+        {
+            foreach (var type in AccessTools.GetTypesFromAssembly(typeof(FikaAddonPlugin).Assembly))
+            {
+                try
+                {
+                    if (type.GetCustomAttributes(typeof(HarmonyPatch), false).Length == 0) continue;
+                    harmony.CreateClassProcessor(type).Patch();
+                }
+                catch (System.Exception e)
+                {
+                    Log.LogError($"patch class {type.Name} failed (skipped, others still applied): {e.GetType().Name}: {e.Message}");
+                }
+            }
         }
 
         private void OnDestroy()
