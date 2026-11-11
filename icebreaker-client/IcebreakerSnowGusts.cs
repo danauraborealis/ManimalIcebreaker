@@ -4,6 +4,7 @@ using EFT;
 using EFT.EnvironmentEffect;
 using EFT.Weather;
 using UnityEngine;
+using ZLinq;
 
 namespace Manimal.Icebreaker
 {
@@ -27,21 +28,52 @@ namespace Manimal.Icebreaker
         private Transform _tf;
         private SnowFlakes _snow;
         private bool _failed;
+        private bool _released;
+        private Material _ownedMaterial;
+        private Texture2D _ownedTexture;
+        private static IcebreakerSnowGusts _active;
 
         internal static void Spawn()
         {
             if (!FikaBridge.CanRender) return;
+            if (_active != null && !_active._released) return;
+
+            // Covers a static reset/domain-reload path where the generated object
+            // survived but the static handle did not. Keep one emitter per raid.
+            var existing = UnityEngine.Object.FindObjectsOfType<IcebreakerSnowGusts>(true)
+                .AsValueEnumerable()
+                .FirstOrDefault(g => g != null && !g._released);
+            if (existing != null)
+            {
+                _active = existing;
+                return;
+            }
+
             var go = new GameObject("Icebreaker_SnowGusts");
-            go.AddComponent<IcebreakerSnowGusts>();
+            _active = go.AddComponent<IcebreakerSnowGusts>();
         }
+
+        internal static void ReleaseRaid()
+        {
+            var active = _active;
+            _active = null;
+            if (active == null) return;
+            active._released = true;
+            try { UnityEngine.Object.DestroyImmediate(active.gameObject); }
+            catch { UnityEngine.Object.Destroy(active.gameObject); }
+        }
+
+        internal static void ResetForRaid() => ReleaseRaid();
 
         private void Start()
         {
+            if (_released) return;
             try
             {
                 if (!Build())
                 {
                     Plugin.Log.LogWarning("[Gusts] could not build the gust system, skipping");
+                    ReleaseOwnedVisuals();
                     Destroy(gameObject);
                     return;
                 }
@@ -50,6 +82,7 @@ namespace Manimal.Icebreaker
             catch (Exception e)
             {
                 Plugin.Log.LogWarning($"[Gusts] build failed: {e.Message}");
+                ReleaseOwnedVisuals();
                 Destroy(gameObject);
             }
         }
@@ -122,6 +155,7 @@ namespace Manimal.Icebreaker
                 if (donor != null)
                 {
                     var m = new Material(donor) { name = "manimal_snowgusts" };
+                    _ownedMaterial = m;
                     Plugin.Log.LogDebug($"[Gusts] grafted donor material '{donor.name}' (shader '{donor.shader?.name}')");
                     return m;
                 }
@@ -139,7 +173,11 @@ namespace Manimal.Icebreaker
             {
                 var sh = Shader.Find(name);
                 if (sh == null) continue;
-                var m = new Material(sh) { name = "manimal_snowgusts", mainTexture = SoftDisc() };
+                var texture = SoftDisc();
+                _ownedTexture = texture;
+                var m = new Material(sh) { name = "manimal_snowgusts" };
+                _ownedMaterial = m;
+                m.mainTexture = texture;
                 Plugin.Log.LogDebug($"[Gusts] no donor found, fell back to shader '{name}'");
                 return m;
             }
@@ -149,19 +187,22 @@ namespace Manimal.Icebreaker
 
         private static Material FindDonor()
         {
-            ParticleSystemRenderer best = null;
-            int bestScore = 0;
-            foreach (var r in UnityEngine.Object.FindObjectsOfType<ParticleSystemRenderer>(true))
-            {
-                if (r == null || r.sharedMaterial == null || r.sharedMaterial.shader == null) continue;
-                var n = (r.name + " " + r.sharedMaterial.name).ToLowerInvariant();
-                int score = 1;
-                if (n.Contains("snow")) score += 4;
-                if (n.Contains("wind") || n.Contains("blow") || n.Contains("dust")) score += 3;
-                if (n.Contains("smoke") || n.Contains("mist") || n.Contains("fog")) score += 2;
-                if (score > bestScore) { bestScore = score; best = r; }
-            }
+            var best = UnityEngine.Object.FindObjectsOfType<ParticleSystemRenderer>(true)
+                .AsValueEnumerable()
+                .Where(r => r != null && r.sharedMaterial != null && r.sharedMaterial.shader != null)
+                .OrderByDescending(r => DonorScore(r))
+                .FirstOrDefault();
             return best != null ? best.sharedMaterial : null;
+        }
+
+        private static int DonorScore(ParticleSystemRenderer renderer)
+        {
+            var n = (renderer.name + " " + renderer.sharedMaterial.name).ToLowerInvariant();
+            int score = 1;
+            if (n.Contains("snow")) score += 4;
+            if (n.Contains("wind") || n.Contains("blow") || n.Contains("dust")) score += 3;
+            if (n.Contains("smoke") || n.Contains("mist") || n.Contains("fog")) score += 2;
+            return score;
         }
 
         private static Texture2D SoftDisc()
@@ -262,6 +303,28 @@ namespace Manimal.Icebreaker
         {
             var em = _ps.emission;
             em.rateOverTime = new ParticleSystem.MinMaxCurve(Mathf.Max(0f, r));
+        }
+
+        private void OnDestroy()
+        {
+            if (_active == this) _active = null;
+            ReleaseOwnedVisuals();
+        }
+
+        private void ReleaseOwnedVisuals()
+        {
+            if (_ownedMaterial != null)
+            {
+                try { UnityEngine.Object.DestroyImmediate(_ownedMaterial); }
+                catch { UnityEngine.Object.Destroy(_ownedMaterial); }
+            }
+            _ownedMaterial = null;
+            if (_ownedTexture != null)
+            {
+                try { UnityEngine.Object.DestroyImmediate(_ownedTexture); }
+                catch { UnityEngine.Object.Destroy(_ownedTexture); }
+            }
+            _ownedTexture = null;
         }
     }
 }

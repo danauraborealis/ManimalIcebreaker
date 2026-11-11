@@ -2,6 +2,7 @@ using System.Text;
 using Comfort.Common;
 using EFT;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using UnityEngine;
 
 namespace Manimal.Icebreaker
@@ -12,10 +13,10 @@ namespace Manimal.Icebreaker
     // vanilla map (working atmosphere, same build) — the diff names the broken piece.
     public class SkyProbe : MonoBehaviour
     {
-        [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
-        private static class Patch_SpawnSkyProbe
+        [IcebreakerPatchTarget(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
+        private sealed class Patch_SpawnSkyProbe : IcebreakerModulePatch<Patch_SpawnSkyProbe>
         {
-            [HarmonyPostfix]
+            [PatchPostfix]
             private static void Postfix()
             {
                 if (!IceGate.On || !Plugin.DevMode.Value) return; // dev-only probe

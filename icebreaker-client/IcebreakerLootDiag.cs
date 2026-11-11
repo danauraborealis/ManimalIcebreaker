@@ -13,7 +13,7 @@ namespace Manimal.Icebreaker
     // actually sees — do the rebaked LootableContainer components exist, are they
     // enabled/active, on what layer, with colliders, and did the server's generated
     // loot bind an item to them. removable once container loot proves out.
-    internal sealed class Patch_IcebreakerLootDiag : ModulePatch
+    internal sealed class Patch_IcebreakerLootDiag : IcebreakerModulePatch<Patch_IcebreakerLootDiag>
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GameWorld), nameof(GameWorld.OnGameStarted));
 

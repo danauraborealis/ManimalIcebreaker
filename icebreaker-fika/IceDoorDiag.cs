@@ -3,7 +3,8 @@ using EFT;
 using EFT.Interactive;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
-using HarmonyLib;
+using Manimal.Icebreaker;
+using SPT.Reflection.Patching;
 using UnityEngine;
 
 namespace Manimal.Icebreaker.Fika
@@ -15,10 +16,10 @@ namespace Manimal.Icebreaker.Fika
     // and the RECEIVE (id + resolved? + position) so one raid shows whether packets
     // flow, resolve, and land on the SAME physical door on both machines. remove
     // once the door bug is fixed.
-    [HarmonyPatch(typeof(FikaPlayer), "ExecuteInteraction", typeof(WorldInteractiveObject), typeof(InteractionResult))]
-    internal static class Patch_DoorSendDiag
+    [IcebreakerPatchTarget(typeof(FikaPlayer), "ExecuteInteraction", typeof(WorldInteractiveObject), typeof(InteractionResult))]
+    internal sealed class Patch_DoorSendDiag : IcebreakerModulePatch<Patch_DoorSendDiag>
     {
-        [HarmonyPostfix]
+        [PatchPostfix]
         private static void Postfix(FikaPlayer __instance, WorldInteractiveObject door)
         {
             try
@@ -30,11 +31,11 @@ namespace Manimal.Icebreaker.Fika
         }
     }
 
-    [HarmonyPatch(typeof(WorldInteractionPacket), nameof(WorldInteractionPacket.Execute))]
-    internal static class Patch_DoorRecvDiag
+    [IcebreakerPatchTarget(typeof(WorldInteractionPacket), nameof(WorldInteractionPacket.Execute))]
+    internal sealed class Patch_DoorRecvDiag : IcebreakerModulePatch<Patch_DoorRecvDiag>
     {
-        [HarmonyPrefix]
-        private static void Prefix(WorldInteractionPacket __instance, FikaPlayer player)
+        [PatchPrefix]
+        private static void Prefix(ref WorldInteractionPacket __instance, FikaPlayer player)
         {
             try
             {

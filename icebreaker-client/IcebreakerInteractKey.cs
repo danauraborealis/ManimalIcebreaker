@@ -4,6 +4,7 @@ using Comfort.Common;
 using EFT;
 using EFT.InputSystem;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using UnityEngine;
 
 namespace Manimal.Icebreaker
@@ -97,10 +98,10 @@ namespace Manimal.Icebreaker
 
         internal static void ResetForRaid() => _holds = 0;
 
-        [HarmonyPatch(typeof(Player), nameof(Player.Move))]
-        internal static class Patch_FreezeDuringHold
+        [IcebreakerPatchTarget(typeof(Player), nameof(Player.Move))]
+        internal sealed class Patch_FreezeDuringHold : IcebreakerModulePatch<Patch_FreezeDuringHold>
         {
-            [HarmonyPrefix]
+            [PatchPrefix]
             private static void Prefix(Player __instance, ref Vector2 direction)
             {
                 if (_holds > 0 && __instance != null && __instance.IsYourPlayer)

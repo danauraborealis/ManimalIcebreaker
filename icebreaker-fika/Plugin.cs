@@ -1,6 +1,6 @@
 using BepInEx;
 using BepInEx.Logging;
-using HarmonyLib;
+using System;
 
 namespace Manimal.Icebreaker.Fika
 {
@@ -19,7 +19,7 @@ namespace Manimal.Icebreaker.Fika
     // out of the appdomain. the red "1 PLUGIN FAILED TO LOAD" banner on a fika-less
     // install is correct feedback for installing the fika addon without fika.
     [BepInPlugin(BuildInfo.ModGuid, BuildInfo.ClientName, BuildInfo.Version)]
-    [BepInDependency("com.fika.core", "2.4.2")]
+    [BepInDependency("com.fika.core", "2.4.6")]
     [BepInDependency(BuildInfo.BaseGuid, BuildInfo.Version)]
     public class FikaAddonPlugin : BaseUnityPlugin
     {
@@ -35,8 +35,10 @@ namespace Manimal.Icebreaker.Fika
             ProbeKey = Config.Bind("Diagnostics", "BodyProbeKey",
                 new BepInEx.Configuration.KeyboardShortcut(UnityEngine.KeyCode.F7),
                 "dump the renderer state of the observed player you're LOOKING AT to the log (invisible-bot hunt)");
+            // Install each Fika patch independently. In particular, weather must still
+            // be guarded when a diagnostic target has changed in a newer Fika build.
+            FikaAddonPatchRegistry.EnableAll();
             _handler = new IceSyncHandler();
-            new Harmony(BuildInfo.ModGuid).PatchAll(); // door-sync diagnostics etc.
             // observed-body probe (temporary, self-gates to icebreaker raids)
             var diagGo = new UnityEngine.GameObject("Icebreaker_FikaDiag");
             UnityEngine.Object.DontDestroyOnLoad(diagGo);
@@ -46,8 +48,13 @@ namespace Manimal.Icebreaker.Fika
 
         private void OnDestroy()
         {
-            _handler?.Dispose();
-            _handler = null;
+            try { _handler?.Dispose(); }
+            catch (Exception e) { Log?.LogWarning($"[Fika] sync handler cleanup failed: {e.Message}"); }
+            finally
+            {
+                _handler = null;
+                FikaAddonPatchRegistry.DisableAll();
+            }
         }
     }
 }

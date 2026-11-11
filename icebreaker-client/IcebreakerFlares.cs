@@ -19,11 +19,36 @@ namespace Manimal.Icebreaker
     internal static class IcebreakerFlares
     {
         private static bool _built;
+        private static GameObject _host;
+        private static Texture2D _atlasTex;
+        private static Texture2D _shitTex;
+        private static ProFlareAtlas _atlas;
+        private static readonly List<Material> _ownedMaterials = new List<Material>();
+        private static readonly List<FlareLight> _ownedLights = new List<FlareLight>();
 
         private static string Dir =>
             SysIoPath.Combine(SysIoPath.GetDirectoryName(typeof(Plugin).Assembly.Location) ?? ".", "flares");
 
-        internal static void ResetForRaid() => _built = false;
+        internal static void ReleaseRaid()
+        {
+            // FlareLight.OnDestroy removes each light from the native LightStorage.
+            // Do not call FlareManager.Dispose(): its storage is game-global and is
+            // shared with other maps/mods; FlareSceneSettings.OnDestroy only disposes
+            // the renderer created for this host, which is exactly what we own.
+            ReleaseOwnedResources();
+            _built = false;
+        }
+
+        // Existing callers reset this at the beginning of the next raid. Releasing
+        // first also handles a persistent camera/scene object reused by Unity.
+        internal static void ResetForRaid() => ReleaseRaid();
+
+        private static void DestroyOwned(UnityEngine.Object obj)
+        {
+            if (obj == null) return;
+            try { UnityEngine.Object.DestroyImmediate(obj); }
+            catch { UnityEngine.Object.Destroy(obj); }
+        }
 
         internal static void TryBuild()
         {
@@ -39,15 +64,34 @@ namespace Manimal.Icebreaker
             if (!File.Exists(jsonPath)) { Plugin.Log.LogWarning("[Flares] no flares.json sidecar — lens flares skipped"); return; }
             _built = true;
 
+            try
+            {
+                BuildFromSidecar(jsonPath);
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogWarning($"[Flares] build failed: {e.Message}");
+                ReleaseOwnedResources();
+            }
+        }
+
+        private static void BuildFromSidecar(string jsonPath)
+        {
             var root = JObject.Parse(File.ReadAllText(jsonPath));
 
             // ---- textures (PNG -> Texture2D) ----
-            var atlasTex = LoadPng(SysIoPath.Combine(Dir, "flare_atlas.png"));
-            var shitTex = LoadPng(SysIoPath.Combine(Dir, "flare_shit.png"));
-            if (atlasTex == null) { Plugin.Log.LogWarning("[Flares] atlas png missing/unreadable — skipped"); return; }
+            _atlasTex = LoadPng(SysIoPath.Combine(Dir, "flare_atlas.png"));
+            _shitTex = LoadPng(SysIoPath.Combine(Dir, "flare_shit.png"));
+            if (_atlasTex == null)
+            {
+                Plugin.Log.LogWarning("[Flares] atlas png missing/unreadable — skipped");
+                ReleaseOwnedResources();
+                return;
+            }
 
             // ---- atlas SO: private nested Container[] via reflection ----
-            var atlas = ScriptableObject.CreateInstance<ProFlareAtlas>();
+            _atlas = ScriptableObject.CreateInstance<ProFlareAtlas>();
+            var atlas = _atlas;
             atlas.name = "FlareAtlas";
             var contType = typeof(ProFlareAtlas).GetNestedType("Container", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public);
             var conts = root["atlas"]?["containers"] as JArray ?? new JArray();
@@ -75,7 +119,9 @@ namespace Manimal.Icebreaker
                     Plugin.Log.LogWarning($"[Flares] shader '{shaderName}' not found — flares degraded");
                     return null;
                 }
-                var m = new Material(sh) { name = matName, mainTexture = atlasTex };
+                var m = new Material(sh) { name = matName };
+                _ownedMaterials.Add(m);
+                m.mainTexture = _atlasTex;
                 return m;
             }
             // retail's tuned property sets ride the sidecar — critically _DepthOffset=0.1
@@ -102,8 +148,12 @@ namespace Manimal.Icebreaker
             var normalMat = MakeSlot("normal", "Custom/multiFlare", "MultiFlare");
             var shitMat = MakeSlot("shit", "Custom/ShitOnScreen", "ShitOnScreen");
             var overlapMat = MakeSlot("overlap", "Custom/multiFlare", "FlashLightFlares");
-            if (shitMat != null && shitTex != null) shitMat.SetTexture("_ShitTex", shitTex);
-            if (normalMat == null) return; // no flare shader = nothing to render
+            if (shitMat != null && _shitTex != null) shitMat.SetTexture("_ShitTex", _shitTex);
+            if (normalMat == null)
+            {
+                ReleaseOwnedResources();
+                return; // no flare shader = nothing to render
+            }
 
             // name the shader's knobs once — if Custom/multiFlare exposes a depth bias,
             // that's the clean fix for surface z-fighting and we want to know it exists
@@ -155,6 +205,7 @@ namespace Manimal.Icebreaker
 
             // ---- FlareSceneSettings: fields must land BEFORE Awake (inactive-GO trick) ----
             var host = new GameObject("Icebreaker_FlareSettings");
+            _host = host;
             host.SetActive(false);
             var fss = host.AddComponent<FlareSceneSettings>();
             AccessTools.Field(typeof(FlareSceneSettings), "_settings").SetValue(fss, settings);
@@ -204,6 +255,7 @@ namespace Manimal.Icebreaker
                 bool wasActive = go.activeSelf;
                 if (wasActive) go.SetActive(false);
                 var light = go.AddComponent<FlareLight>();
+                _ownedLights.Add(light);
                 fBool?.SetValue(light, f?.Value<bool?>("bool_0") ?? true);
                 fScale?.SetValue(light, f?.Value<float?>("_totalScale") ?? 1f);
                 fAlpha?.SetValue(light, f?.Value<float?>("_totalAlpha") ?? 1f);
@@ -226,11 +278,41 @@ namespace Manimal.Icebreaker
             Plugin.Log.LogWarning($"[Flares] LENS FLARES LIVE: {placed} placed, {missing} paths unmatched, {drifted} position-drifted (skipped)");
         }
 
+        private static void ReleaseOwnedResources()
+        {
+            for (int i = 0; i < _ownedLights.Count; i++)
+            {
+                var light = _ownedLights[i];
+                if (light != null) DestroyOwned(light);
+            }
+            _ownedLights.Clear();
+            if (_host != null) DestroyOwned(_host);
+            _host = null;
+            for (int i = 0; i < _ownedMaterials.Count; i++)
+            {
+                var material = _ownedMaterials[i];
+                if (material != null) DestroyOwned(material);
+            }
+            _ownedMaterials.Clear();
+            if (_atlas != null) DestroyOwned(_atlas);
+            _atlas = null;
+            if (_atlasTex != null) DestroyOwned(_atlasTex);
+            _atlasTex = null;
+            if (_shitTex != null) DestroyOwned(_shitTex);
+            _shitTex = null;
+        }
+
         private static Texture2D LoadPng(string path)
         {
             if (!File.Exists(path)) return null;
             var tex = new Texture2D(2, 2, TextureFormat.RGBA32, true);
-            return ImageConversion.LoadImage(tex, File.ReadAllBytes(path)) ? tex : null;
+            try
+            {
+                if (ImageConversion.LoadImage(tex, File.ReadAllBytes(path))) return tex;
+            }
+            catch { }
+            DestroyOwned(tex);
+            return null;
         }
 
         // ordinal-path index over EVERY loaded scene ('name~k' disambiguator, same

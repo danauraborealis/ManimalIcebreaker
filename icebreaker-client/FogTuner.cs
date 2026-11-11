@@ -1,6 +1,7 @@
 using System.Text;
 using EFT;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using UnityEngine;
 
 namespace Manimal.Icebreaker
@@ -12,10 +13,10 @@ namespace Manimal.Icebreaker
     // NOT persist; 'DUMP to log' is the way to capture values for hardcoding.
     public class FogTuner : MonoBehaviour
     {
-        [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
-        private static class Patch_SpawnFogTuner
+        [IcebreakerPatchTarget(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
+        private sealed class Patch_SpawnFogTuner : IcebreakerModulePatch<Patch_SpawnFogTuner>
         {
-            [HarmonyPostfix]
+            [PatchPostfix]
             private static void Postfix()
             {
                 if (!FikaBridge.CanRender) return;

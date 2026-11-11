@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Comfort.Common;
+using EFT;
 using EFT.Interactive;
 using TMPro;
 using UnityEngine;
@@ -16,7 +18,15 @@ namespace Manimal.Icebreaker.Keypad
     // paths from KeypadConstants — prefab reorganisation means updating there.
     internal sealed class KeypadSession : MonoBehaviour
     {
+        private static readonly HashSet<KeypadSession> LiveSessions = new HashSet<KeypadSession>();
+        private static readonly HashSet<KeypadSession> FallbackEventSystemUsers = new HashSet<KeypadSession>();
+        private static EventSystem _fallbackEventSystem;
+
         private Keypad _keypad;
+        private GameWorld _ownerWorld;
+        private Player _ownerPlayer;
+        private bool _ending;
+        private bool _usesFallbackEventSystem;
 
         // UI references resolved once at Begin time
         private GameObject  _uiInstance;
@@ -94,15 +104,29 @@ namespace Manimal.Icebreaker.Keypad
         }
 
         public void Begin(Keypad keypad)
+            => Begin(keypad, null);
+
+        public void Begin(Keypad keypad, Player ownerPlayer)
         {
             if (keypad == null)
             {
                 Plugin.Log?.LogError("[Keypad] session Begin called with null Keypad.");
-                Destroy(gameObject);
+                EndSession();
                 return;
             }
 
             _keypad = keypad;
+            try { _ownerWorld = Singleton<GameWorld>.Instance; }
+            catch { _ownerWorld = null; }
+            _ownerPlayer = ownerPlayer ?? _ownerWorld?.MainPlayer;
+            if (_ownerPlayer == null)
+            {
+                Plugin.Log?.LogWarning("[Keypad] session owner player is unavailable; aborting.");
+                EndSession();
+                return;
+            }
+
+            LiveSessions.Add(this);
             _keypad.ActiveSession = this;
 
             // block ONLY the digit-bound game commands while typing — otherwise digit
@@ -445,17 +469,96 @@ namespace Manimal.Icebreaker.Keypad
         {
             // canvas buttons need an EventSystem to receive pointer events —
             // most EFT scenes ship one, bail-safe add if missing
-            if (EventSystem.current == null)
+            var current = EventSystem.current;
+            if (current == null)
             {
-                var es = new GameObject("EventSystem");
-                es.AddComponent<EventSystem>();
-                es.AddComponent<StandaloneInputModule>();
-                DontDestroyOnLoad(es);
+                if (_fallbackEventSystem == null)
+                {
+                    var es = new GameObject("Icebreaker_KeypadEventSystem");
+                    _fallbackEventSystem = es.AddComponent<EventSystem>();
+                    es.AddComponent<StandaloneInputModule>();
+                    DontDestroyOnLoad(es);
+                }
+
+                current = _fallbackEventSystem;
             }
+
+            // Track only the EventSystem we created. Existing EFT/Fika systems are
+            // borrowed and must never be destroyed when this session ends.
+            if (current != null && current == _fallbackEventSystem)
+            {
+                _usesFallbackEventSystem = true;
+                FallbackEventSystemUsers.Add(this);
+            }
+        }
+
+        private void ReleaseFallbackEventSystem()
+        {
+            if (!_usesFallbackEventSystem) return;
+            _usesFallbackEventSystem = false;
+            FallbackEventSystemUsers.Remove(this);
+            if (FallbackEventSystemUsers.Count != 0) return;
+
+            var fallback = _fallbackEventSystem;
+            _fallbackEventSystem = null;
+            if (fallback != null)
+            {
+                try { UnityEngine.Object.Destroy(fallback.gameObject); }
+                catch (Exception ex) { Plugin.Log?.LogWarning($"[Keypad] fallback EventSystem cleanup failed: {ex.Message}"); }
+            }
+        }
+
+        internal static void ReleaseRaid()
+        {
+            var sessions = new List<KeypadSession>(LiveSessions);
+            foreach (var session in sessions)
+            {
+                if (session == null) continue;
+                session.EndSession();
+            }
+
+            // OnDestroy normally removes every entry. Clear defensively for a
+            // host that was already destroyed by Unity before this call.
+            LiveSessions.Clear();
+            FallbackEventSystemUsers.Clear();
+            if (_fallbackEventSystem != null)
+            {
+                var fallback = _fallbackEventSystem;
+                _fallbackEventSystem = null;
+                try { UnityEngine.Object.Destroy(fallback.gameObject); }
+                catch (Exception ex) { Plugin.Log?.LogWarning($"[Keypad] fallback EventSystem cleanup failed: {ex.Message}"); }
+            }
+        }
+
+        private bool IsSessionValid()
+        {
+            if (_ending || _keypad == null || _keypad.gameObject == null) return false;
+
+            var keypadObject = _keypad.gameObject;
+            if (!keypadObject.activeInHierarchy || !keypadObject.scene.IsValid() || !keypadObject.scene.isLoaded)
+                return false;
+
+            GameWorld world;
+            try { world = Singleton<GameWorld>.Instance; }
+            catch { return false; }
+            if (world == null || world.MainPlayer == null || _ownerPlayer == null) return false;
+            if (world.MainPlayer.HealthController == null || !world.MainPlayer.HealthController.IsAlive)
+                return false;
+            if (_ownerWorld != null && world != _ownerWorld) return false;
+            if (world.MainPlayer != _ownerPlayer) return false;
+
+            try { return IceGate.On; }
+            catch { return false; }
         }
 
         private void Update()
         {
+            if (!IsSessionValid())
+            {
+                AbortSession("owning keypad/player/raid is no longer valid");
+                return;
+            }
+
             if (_state != SessionState.Entering) return;
 
             // keyboard input — on key DOWN fire the action and synthesize the
@@ -678,17 +781,33 @@ namespace Manimal.Icebreaker.Keypad
 
         private void EndSession()
         {
+            if (_ending) return;
+            _ending = true;
+            LiveSessions.Remove(this);
+            CleanupOwnedState();
+            Destroy(gameObject);
+        }
+
+        private void CleanupOwnedState()
+        {
+            try { ResetAllButtonVisuals(); }
+            catch { }
+            try { ReleaseDigitLock(); }
+            catch { }
             try
             {
-                ReleaseDigitLock();
                 if (_keypad != null && _keypad.ActiveSession == this)
                     _keypad.ActiveSession = null;
-                if (_uiInstance != null) Destroy(_uiInstance);
             }
-            finally
+            catch { }
+            try
             {
-                Destroy(gameObject);
+                if (_uiInstance != null) Destroy(_uiInstance);
+                _uiInstance = null;
             }
+            catch { }
+            try { ReleaseFallbackEventSystem(); }
+            catch { }
         }
 
         private void AbortSession(string reason)
@@ -701,7 +820,16 @@ namespace Manimal.Icebreaker.Keypad
         // death mid-typing), the input lock must not outlive it
         private void OnDestroy()
         {
-            ReleaseDigitLock();
+            if (!_ending)
+            {
+                _ending = true;
+                LiveSessions.Remove(this);
+            }
+            // Unity can invoke OnDestroy after a direct host destroy, or after
+            // EndSession has already scheduled destruction. Cleanup is idempotent
+            // and must run in both cases so a partial teardown cannot retain UI or
+            // an input lock.
+            CleanupOwnedState();
         }
 
         private enum SessionState

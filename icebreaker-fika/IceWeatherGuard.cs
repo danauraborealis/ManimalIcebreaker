@@ -6,7 +6,8 @@ using Fika.Core.Main.GameMode;
 using Fika.Core.Networking;
 using Fika.Core.Networking.LiteNetLib;
 using Fika.Core.Networking.Packets.World;
-using HarmonyLib;
+using Manimal.Icebreaker;
+using SPT.Reflection.Patching;
 
 namespace Manimal.Icebreaker.Fika
 {
@@ -19,10 +20,10 @@ namespace Manimal.Icebreaker.Fika
     //  1. a diagnostic on the host's GenerateWeathers naming the controller state
     //  2. a guard on the request handler: no weather? synthesize defaults and answer
     //     anyway — a raid must never hang on missing weather data
-    [HarmonyPatch(typeof(HostGameController), nameof(HostGameController.GenerateWeathers))]
-    internal static class Patch_HostWeatherDiag
+    [IcebreakerPatchTarget(typeof(HostGameController), nameof(HostGameController.GenerateWeathers))]
+    internal sealed class Patch_HostWeatherDiag : IcebreakerModulePatch<Patch_HostWeatherDiag>
     {
-        [HarmonyPrefix]
+        [PatchPrefix]
         private static void Prefix()
         {
             if (!IceGate.On) return;
@@ -37,11 +38,11 @@ namespace Manimal.Icebreaker.Fika
         }
     }
 
-    // Fika 2.4.2 keeps this packet nested inside RequestSubPackets.
-    [HarmonyPatch(typeof(RequestSubPackets.WeatherRequest), nameof(RequestSubPackets.WeatherRequest.HandleRequest))]
-    internal static class Patch_WeatherRequestGuard
+    // Fika 2.4.6 keeps this packet nested inside RequestSubPackets.
+    [IcebreakerPatchTarget(typeof(RequestSubPackets.WeatherRequest), nameof(RequestSubPackets.WeatherRequest.HandleRequest))]
+    internal sealed class Patch_WeatherRequestGuard : IcebreakerModulePatch<Patch_WeatherRequestGuard>
     {
-        [HarmonyPrefix]
+        [PatchPrefix]
         private static void Prefix(NetPeer peer, FikaServer server)
         {
             if (!IceGate.On) return;

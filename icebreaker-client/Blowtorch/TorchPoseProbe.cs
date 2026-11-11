@@ -3,6 +3,7 @@ using System.Text;
 using Comfort.Common;
 using EFT;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using UnityEngine;
 
 namespace Manimal.Icebreaker.Blowtorch
@@ -13,10 +14,10 @@ namespace Manimal.Icebreaker.Blowtorch
     // the diff names the layer/param that actually differs, ending the guesswork.
     public class TorchPoseProbe : MonoBehaviour
     {
-        [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
-        private static class Patch_SpawnProbe
+        [IcebreakerPatchTarget(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
+        private sealed class Patch_SpawnProbe : IcebreakerModulePatch<Patch_SpawnProbe>
         {
-            [HarmonyPostfix]
+            [PatchPostfix]
             private static void Postfix()
             {
                 if (!IceGate.On || !Plugin.DevMode.Value) return; // dev-only probe

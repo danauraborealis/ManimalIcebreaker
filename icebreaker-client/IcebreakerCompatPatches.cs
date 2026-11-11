@@ -1,7 +1,9 @@
 using System;
+using System.Reflection;
 using EFT;
 using EFT.SynchronizableObjects;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using UnityEngine;
 
 namespace Manimal.Icebreaker
@@ -14,10 +16,10 @@ namespace Manimal.Icebreaker
     // activation try{} swallows it -> statue. two-part fix: build the missing
     // sub-points at raid start via the game's OWN generator (navmesh-sampled,
     // the non-SubManual path of CreateSubPoints), plus a hard guard on GetSubPoint.
-    [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
-    internal static class Patch_BuildMissingSubPoints
+    [IcebreakerPatchTarget(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
+    internal sealed class Patch_BuildMissingSubPoints : IcebreakerModulePatch<Patch_BuildMissingSubPoints>
     {
-        [HarmonyPostfix]
+        [PatchPostfix]
         private static void Postfix()
         {
             if (!IceGate.On) return;
@@ -105,8 +107,8 @@ namespace Manimal.Icebreaker
     // damage stays real (sprays can still down a squadmate) — only the GRUDGE is
     // voided. the player is never protected (IsAI gate), and BD-vs-rogue stays a
     // real fight (different faction, not allied).
-    [HarmonyPatch(typeof(BotsGroup), nameof(BotsGroup.AddEnemy))]
-    internal static class Patch_RogueForgiveness
+    [IcebreakerPatchTarget(typeof(BotsGroup), nameof(BotsGroup.AddEnemy))]
+    internal sealed class Patch_RogueForgiveness : IcebreakerModulePatch<Patch_RogueForgiveness>
     {
         private static bool _logged;
 
@@ -115,7 +117,7 @@ namespace Manimal.Icebreaker
                || (a == WildSpawnType.exUsec && b == WildSpawnType.bossKnight)
                || (a == WildSpawnType.bossKnight && b == WildSpawnType.exUsec);
 
-        [HarmonyPrefix]
+        [PatchPrefix]
         private static bool Prefix(BotsGroup __instance, IPlayer person, ref bool __result)
         {
             if (!IceGate.On) return true;
@@ -151,14 +153,14 @@ namespace Manimal.Icebreaker
     // at the night value, so NVGs flip down and flashlights click on naturally, exactly
     // like vanilla night) — the postfix then lifts the FINAL VisibleDist to day level,
     // weather debuff still applied outdoors. bots act night, see day.
-    [HarmonyPatch(typeof(LookSensor), "CalcVisibleDistance")]
-    internal static class Patch_DayVisionOnLitShip
+    [IcebreakerPatchTarget(typeof(LookSensor), "CalcVisibleDistance")]
+    internal sealed class Patch_DayVisionOnLitShip : IcebreakerModulePatch<Patch_DayVisionOnLitShip>
     {
         // proof-of-life: fika bots felt blind (07-28 coop) and the first question is
         // whether this postfix even runs there — one line per raid answers it
         private static int _applications;
 
-        [HarmonyPostfix]
+        [PatchPostfix]
         private static void Postfix(LookSensor __instance)
         {
             if (!IceGate.On) return;
@@ -200,12 +202,12 @@ namespace Manimal.Icebreaker
     // so this isn't weather the player can wait out — it's a flat, unending tax on every
     // sighting, and the ship is lit end to end. bots act night, see day; that now covers
     // how fast they notice as well as how far they see.
-    [HarmonyPatch(typeof(EnemyInfo), "GetWeatherK")]
-    internal static class Patch_NoWeatherSeenDebuff
+    [IcebreakerPatchTarget(typeof(EnemyInfo), "GetWeatherK")]
+    internal sealed class Patch_NoWeatherSeenDebuff : IcebreakerModulePatch<Patch_NoWeatherSeenDebuff>
     {
         private static int _applications;
 
-        [HarmonyPostfix]
+        [PatchPostfix]
         private static void Postfix(ref float __result, ref float rainK, ref float fogK)
         {
             if (!IceGate.On) return;
@@ -221,11 +223,16 @@ namespace Manimal.Icebreaker
     // remove-transaction the chain-door charge uses, so fika peers replicate it.
     // Killed is skipped: that inventory is already forfeit, don't race the death path.
     // fika's CoopGame overrides Stop, so IcebreakerFikaCompat re-anchors this there.
-    [HarmonyPatch(typeof(LocalGame), nameof(LocalGame.Stop))]
-    internal static class Patch_StripTorchOnExtract
+    [IcebreakerPatchTarget(typeof(LocalGame), nameof(LocalGame.Stop))]
+    [IcebreakerPatchScope(IcebreakerPatchScope.Bootstrap)]
+    internal sealed class Patch_StripTorchOnExtract : IcebreakerModulePatch<Patch_StripTorchOnExtract>
     {
-        [HarmonyPrefix]
-        private static void Prefix(string profileId, ExitStatus exitStatus) => Strip(profileId, exitStatus);
+        [PatchPrefix]
+        private static void Prefix(string profileId, ExitStatus exitStatus)
+        {
+            try { Strip(profileId, exitStatus); }
+            finally { IcebreakerPatchLifecycle.DisableRaid("LocalGame.Stop"); }
+        }
 
         internal static void Strip(string profileId, ExitStatus exitStatus)
         {
@@ -267,13 +274,13 @@ namespace Manimal.Icebreaker
     // prime suspect is OUR premake pipeline ("blackDivAssault profile arrived NAKED"),
     // so this one logs the bot's identity + full stack, throttled: one raid names the
     // broken bot and the null field, then the creation path gets fixed for real.
-    [HarmonyPatch(typeof(EFT.BotMemory), nameof(EFT.BotMemory.Spotted))]
-    internal static class Patch_SpottedGuardAndForensics
+    [IcebreakerPatchTarget(typeof(EFT.BotMemory), nameof(EFT.BotMemory.Spotted))]
+    internal sealed class Patch_SpottedGuardAndForensics : IcebreakerModulePatch<Patch_SpottedGuardAndForensics>
     {
         private static float _nextLog;
         private static int _swallowed;
 
-        [HarmonyFinalizer]
+        [PatchFinalizer]
         private static Exception Finalizer(EFT.BotMemory __instance, Exception __exception)
         {
             if (__exception == null) return null;
@@ -300,10 +307,10 @@ namespace Manimal.Icebreaker
     // backstop for any point the generator couldn't fix (bad navmesh spot): an empty
     // sub-point list returns the point ITSELF instead of indexing [-1] — the follower
     // stands on the point, formation degenerates gracefully, activation survives
-    [HarmonyPatch(typeof(PatrolPoint), nameof(PatrolPoint.GetSubPoint))]
-    internal static class Patch_GetSubPointEmptyGuard
+    [IcebreakerPatchTarget(typeof(PatrolPoint), nameof(PatrolPoint.GetSubPoint))]
+    internal sealed class Patch_GetSubPointEmptyGuard : IcebreakerModulePatch<Patch_GetSubPointEmptyGuard>
     {
-        [HarmonyPrefix]
+        [PatchPrefix]
         private static bool Prefix(PatrolPoint __instance, ref PatrolPoint __result)
         {
             if (__instance.SubPointsCount > 0) return true;
@@ -316,10 +323,10 @@ namespace Manimal.Icebreaker
     // non-AI owners it fires after TripwiresGlobalSettings.InertSeconds (300s) and
     // deactivates the wire. our authored wires have a synthetic owner (no player), so
     // they all died 5 minutes into the raid. authored wires never go stale.
-    [HarmonyPatch(typeof(TripwireSynchronizableObject), "DisableTripwireByTimer")]
-    internal static class Patch_AuthoredTripwireNeverInert
+    [IcebreakerPatchTarget(typeof(TripwireSynchronizableObject), "DisableTripwireByTimer")]
+    internal sealed class Patch_AuthoredTripwireNeverInert : IcebreakerModulePatch<Patch_AuthoredTripwireNeverInert>
     {
-        [HarmonyPrefix]
+        [PatchPrefix]
         private static bool Prefix(TripwireSynchronizableObject __instance)
         {
             if (!IceGate.On) return true;
@@ -330,10 +337,10 @@ namespace Manimal.Icebreaker
     // bots roll Mind.CHACE_TO_DEACTIVATE (default 100!) when they spot a wire and then
     // walk over and defuse it — SAIN raids cleared every authored wire before the
     // player arrived. on the ship, bots don't defuse wires at all.
-    [HarmonyPatch(typeof(BotBewarePlantedMine), nameof(BotBewarePlantedMine.SetMineToDeactivate))]
-    internal static class Patch_NoBotTripwireDefuse
+    [IcebreakerPatchTarget(typeof(BotBewarePlantedMine), nameof(BotBewarePlantedMine.SetMineToDeactivate))]
+    internal sealed class Patch_NoBotTripwireDefuse : IcebreakerModulePatch<Patch_NoBotTripwireDefuse>
     {
-        [HarmonyPrefix]
+        [PatchPrefix]
         private static bool Prefix(PlantedMineAIInfo toDeactivate)
         {
             if (!IceGate.On) return true;
@@ -345,13 +352,13 @@ namespace Manimal.Icebreaker
     // Register() -> UpdateSphere() -> get_Position() NREs on every one at Start.
     // heal the field to the component's own transform before the game touches it —
     // same fix the SDK gizmo needed, now for the runtime class.
-    [HarmonyPatch(typeof(CullingObject), "Start")]
-    internal static class Patch_CullingObjectNullTransform
+    [IcebreakerPatchTarget(typeof(CullingObject), "Start")]
+    internal sealed class Patch_CullingObjectNullTransform : IcebreakerModulePatch<Patch_CullingObjectNullTransform>
     {
         private static readonly System.Reflection.FieldInfo TransformField =
             AccessTools.Field(typeof(CullingObject), "_transform");
 
-        [HarmonyPrefix]
+        [PatchPrefix]
         private static void Prefix(CullingObject __instance)
         {
             try
@@ -374,7 +381,7 @@ namespace Manimal.Icebreaker
 
         // called from the tripwire raid-start hook — SAIN's assembly is certainly
         // loaded by then regardless of plugin init order
-        internal static void TryPatch(Harmony harmony)
+        internal static void TryPatch()
         {
             if (_attempted) return;
             _attempted = true;
@@ -384,10 +391,19 @@ namespace Manimal.Icebreaker
                 if (locClass == null) return; // SAIN not installed
                 var target = AccessTools.Method(locClass, "parseLocation");
                 if (target == null) { Plugin.Log.LogWarning("[SainCompat] parseLocation not found — SAIN updated?"); return; }
-                harmony.Patch(target, prefix: new HarmonyMethod(typeof(SainLocationCompat), nameof(ParseLocationPrefix)));
+                IcebreakerPatchLifecycle.RegisterRaid(new SainLocationPatch(target));
                 Plugin.Log.LogInfo("[SainCompat] SAIN location parse patched (Suburbs -> Labyrinth profile)");
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[SainCompat] patch failed: {e.Message}"); }
+        }
+
+        private sealed class SainLocationPatch : IcebreakerModulePatch<SainLocationPatch>
+        {
+            internal SainLocationPatch(MethodBase target) : base(target) { }
+
+            [PatchPrefix]
+            private static bool Prefix(object __instance, ref object __result)
+                => ParseLocationPrefix(__instance, ref __result);
         }
 
         private static bool ParseLocationPrefix(object __instance, ref object __result)

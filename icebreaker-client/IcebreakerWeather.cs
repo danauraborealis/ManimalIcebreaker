@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ZLinq;
 using SysIoPath = System.IO.Path;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -32,6 +33,48 @@ namespace Manimal.Icebreaker
         private static readonly Dictionary<string, UnityEngine.Object> _assetCache = new Dictionary<string, UnityEngine.Object>();
         private static readonly Dictionary<string, UnityEngine.Object> _settingsCache = new Dictionary<string, UnityEngine.Object>();
         private static readonly List<string> _missingAssets = new List<string>();
+        private static readonly List<UnityEngine.Object> _ownedResources = new List<UnityEngine.Object>();
+        private static readonly List<MBOIT_Scattering> _ownedMboit = new List<MBOIT_Scattering>();
+        private static Texture2D _stencilShadow;
+
+        internal static void ReleaseRaid()
+        {
+            // The currently retired MBOIT path can create an effect on a
+            // persistent camera. Stop that consumer before releasing its inputs.
+            foreach (var effect in _ownedMboit)
+            {
+                if (effect == null) continue;
+                effect.enabled = false;
+                UnityEngine.Object.Destroy(effect);
+            }
+            _ownedMboit.Clear();
+            if (_stencilShadow != null && Shader.GetGlobalTexture("_StencilShadow") == _stencilShadow)
+                Shader.SetGlobalTexture("_StencilShadow", null);
+            _stencilShadow = null;
+            // Borrowed scene/bundle assets are only dereferenced. Generated
+            // settings and meshes are ours and require explicit destruction.
+            foreach (var resource in _ownedResources)
+                if (resource != null) UnityEngine.Object.Destroy(resource);
+            _ownedResources.Clear();
+            _comps.Clear();
+            _pathIndex.Clear();
+            _assetCache.Clear();
+            _settingsCache.Clear();
+            _missingAssets.Clear();
+            if (_marker != null) UnityEngine.Object.Destroy(_marker);
+            _marker = null;
+            _snowMats = null;
+            _sf = null;
+            _tonemap = null;
+            _globalFog = null;
+            _opticCam = null;
+            _camParamsCam = null;
+            if (_camParamsBuf != null) { _camParamsBuf.Release(); _camParamsBuf = null; }
+            _origSizeCaptured = _tonemapSearched = _fogSearched = false;
+            _snowShaderFixed = _snowCopiesCached = _obstacleFixed = false;
+            _stormRaised = _mboitChecked = _snowDiag = _opticLogged = false;
+            _blizzardTicks = _snowRebindTries = _snowRebindTick = _snowSearchTick = _snowSkipLogs = _fogDiagTick = 0;
+        }
 
         private static string DataDir =>
             SysIoPath.Combine(SysIoPath.GetDirectoryName(typeof(Plugin).Assembly.Location) ?? ".", "weather");
@@ -202,6 +245,7 @@ namespace Manimal.Icebreaker
                 if (t != null && t.name == "bayer_matrix") { dither = t; break; }
 
             var mb = cam.gameObject.AddComponent<MBOIT_Scattering>();
+            _ownedMboit.Add(mb);
             mb.ScatteringSlicesComputeShader = slices;
             mb.ScatteringMBOITComputeShader = moments;
             mb.ScatteringMBOITRCPComputeShader = momentsRcp;
@@ -236,6 +280,8 @@ namespace Manimal.Icebreaker
             // output). bind a 1x1 no-shadow texture (AmbientLight clears its RT to
             // 0,0,0,0) so the kernel runs unshadowed.
             var noShadow = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+            _ownedResources.Add(noShadow);
+            _stencilShadow = noShadow;
             noShadow.SetPixel(0, 0, new Color(0f, 0f, 0f, 0f));
             noShadow.Apply();
             Shader.SetGlobalTexture("_StencilShadow", noShadow);
@@ -542,6 +588,7 @@ namespace Manimal.Icebreaker
                             if (cis.Count > 0)
                             {
                                 combined = new Mesh { name = "IcebreakerDryPlanes Combined" };
+                                _ownedResources.Add(combined);
                                 combined.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
                                 combined.CombineMeshes(cis.ToArray(), true, true);
                             }
@@ -996,6 +1043,7 @@ namespace Manimal.Icebreaker
                 if (type != null && typeof(ScriptableObject).IsAssignableFrom(type))
                 {
                     var so = ScriptableObject.CreateInstance(type);
+                    _ownedResources.Add(so); // retain ownership even if field restoration fails
                     so.name = name;
                     if (entry["fields"] is JObject f) FillFields(so, f);
                     // a null cloud map NREs EVERY camera pre-render (8500+/raid, real fps
@@ -1152,12 +1200,12 @@ namespace Manimal.Icebreaker
     // was always racing it — which is exactly why the report said "sometimes". patch the
     // sync itself and the race is gone: whatever the updater just copied, we re-clear on
     // the same frame, before anything renders.
-    [HarmonyPatch(typeof(EFT.CameraControl.OpticComponentUpdater), nameof(EFT.CameraControl.OpticComponentUpdater.LateUpdate))]
-    internal static class Patch_OpticScatteringOff
+    [IcebreakerPatchTarget(typeof(EFT.CameraControl.OpticComponentUpdater), nameof(EFT.CameraControl.OpticComponentUpdater.LateUpdate))]
+    internal sealed class Patch_OpticScatteringOff : IcebreakerModulePatch<Patch_OpticScatteringOff>
     {
         private static System.Reflection.FieldInfo _fScat, _fMboit;
 
-        [HarmonyPostfix]
+        [PatchPostfix]
         private static void Postfix(EFT.CameraControl.OpticComponentUpdater __instance)
         {
             if (!FikaBridge.CanRender) return;

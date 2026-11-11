@@ -36,6 +36,13 @@ namespace Manimal.Icebreaker
         private static List<AICorePoint> s_cores;
         private static int s_nextId;
 
+        internal static void ReleaseRaid()
+        {
+            s_pendingCovers = null;
+            s_cores = null;
+            s_nextId = 0;
+        }
+
         public static List<AILootPoint> GenerateContainers(AICoversData covers, List<AICorePoint> cores)
         {
             var containerPoints = new List<AILootPoint>();

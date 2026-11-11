@@ -29,7 +29,7 @@ namespace Manimal.Icebreaker.Keypad
     //     post-it spawns at each carrying one 3-digit half.
     //
     // The location gate shares its identity with the server's independent entry.
-    internal sealed class Patch_IcebreakerPasscodes : ModulePatch
+    internal sealed class Patch_IcebreakerPasscodes : IcebreakerModulePatch<Patch_IcebreakerPasscodes>
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GameWorld), nameof(GameWorld.OnGameStarted));
         private const string IcebreakerLocationId = IcebreakerLocation.Key;

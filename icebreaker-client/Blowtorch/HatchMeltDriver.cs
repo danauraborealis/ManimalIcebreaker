@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using UnityEngine;
 
 namespace Manimal.Icebreaker.Blowtorch
@@ -48,10 +49,10 @@ namespace Manimal.Icebreaker.Blowtorch
         private readonly List<Transform> _meltTransforms = new List<Transform>();
         private Vector3 _meltBaseScale = Vector3.one;
 
-        [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
-        private static class Patch_SpawnDriver
+        [IcebreakerPatchTarget(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
+        private sealed class Patch_SpawnDriver : IcebreakerModulePatch<Patch_SpawnDriver>
         {
-            [HarmonyPostfix]
+            [PatchPostfix]
             private static void Postfix()
             {
                 if (!IceGate.On) return; // hatch rig only exists on the icebreaker
@@ -396,8 +397,8 @@ namespace Manimal.Icebreaker.Blowtorch
     // that translated switch use into trigger events is gone, so vanilla interaction
     // would flip switch state and do nothing. unavailable stages are HIDDEN entirely
     // (user call 07-17), not greyed — only the melt hint shows before its time.
-    [HarmonyPatch(typeof(EFT.InteractionContextHelper), "GetAvailableActions", typeof(EFT.GamePlayerOwner), typeof(EFT.Interactive.Switch))]
-    internal static class Patch_HatchSwitchActions
+    [IcebreakerPatchTarget(typeof(EFT.InteractionContextHelper), "GetAvailableActions", typeof(EFT.GamePlayerOwner), typeof(EFT.Interactive.Switch))]
+    internal sealed class Patch_HatchSwitchActions : IcebreakerModulePatch<Patch_HatchSwitchActions>
     {
         private static void Replace(ref EFT.UI.AvailableInteractionState result, EFT.UI.InteractionAction act)
         {
@@ -411,7 +412,7 @@ namespace Manimal.Icebreaker.Blowtorch
             result = null;
         }
 
-        [HarmonyPostfix]
+        [PatchPostfix]
         private static void Postfix(ref EFT.UI.AvailableInteractionState __result, GamePlayerOwner owner, EFT.Interactive.Switch interactiveSwitch)
         {
             var d = HatchMeltDriver.Instance;

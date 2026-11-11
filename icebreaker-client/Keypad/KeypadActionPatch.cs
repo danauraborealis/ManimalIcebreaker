@@ -4,6 +4,7 @@ using ZLinq;
 using System.Reflection;
 using EFT;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using UnityEngine;
 
 namespace Manimal.Icebreaker.Keypad
@@ -14,9 +15,11 @@ namespace Manimal.Icebreaker.Keypad
     // through via return true, so the chain-door smethod_11 postfix is
     // unaffected. target resolved reflectively: GetAvailableActions has 2
     // overloads and only the (GamePlayerOwner, object) dispatcher is ours.
-    [HarmonyPatch]
-    internal static class Patch_KeypadActions
+    [IcebreakerPatchTarget]
+    internal sealed class Patch_KeypadActions : IcebreakerModulePatch<Patch_KeypadActions>
     {
+        internal Patch_KeypadActions(MethodBase target) : base(target) { }
+
         private static MethodBase TargetMethod()
         {
             return typeof(EFT.InteractionContextHelper)
@@ -27,7 +30,7 @@ namespace Manimal.Icebreaker.Keypad
                     m.GetParameters()[0].ParameterType == typeof(GamePlayerOwner));
         }
 
-        [HarmonyPrefix]
+        [PatchPrefix]
         private static bool Prefix(
             GamePlayerOwner owner,
             object interactive,
@@ -70,12 +73,12 @@ namespace Manimal.Icebreaker.Keypad
             {
                 Name     = name,
                 Disabled = disabled,
-                Action   = disabled ? (Action)null : (() => OnEnterCodeClicked(keypad)),
+                Action   = disabled ? (Action)null : (() => OnEnterCodeClicked(owner, keypad)),
             });
             return result;
         }
 
-        private static void OnEnterCodeClicked(Keypad keypad)
+        private static void OnEnterCodeClicked(GamePlayerOwner owner, Keypad keypad)
         {
             try
             {
@@ -87,7 +90,7 @@ namespace Manimal.Icebreaker.Keypad
                 var sessionHost = new GameObject("KeypadSession");
                 UnityEngine.Object.DontDestroyOnLoad(sessionHost);
                 var session = sessionHost.AddComponent<KeypadSession>();
-                session.Begin(keypad);
+                session.Begin(keypad, owner?.Player);
             }
             catch (Exception ex)
             {

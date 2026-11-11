@@ -39,6 +39,8 @@ namespace Manimal.Icebreaker
         // makes the != null check do the staleness detection for free)
         private static GameObject _envRoot;
         private static GameObject _spatialMarker;
+        private static SpatialAudioLocationInfo _ownedLocationInfo;
+        private static AudioOcclusionSettings _ownedOcclusionSettings;
 
         private static string DataDir =>
             SysIoPath.Combine(SysIoPath.GetDirectoryName(typeof(Plugin).Assembly.Location) ?? ".", "acoustics");
@@ -170,6 +172,47 @@ namespace Manimal.Icebreaker
             _toneAnchor.Clear();
             _activeTone = null;
             _lastToneLogged = null;
+        }
+
+        internal static void ReleaseRaid()
+        {
+            ResetAmbientCache();
+            _lastEnv = (EnvironmentType)(-1);
+            _driveTick = 0;
+
+            if (_envRoot != null)
+            {
+                UnityEngine.Object.Destroy(_envRoot);
+                _envRoot = null;
+            }
+            if (_spatialMarker != null)
+            {
+                UnityEngine.Object.Destroy(_spatialMarker);
+                _spatialMarker = null;
+            }
+
+            // Detach only assets this class created. Existing game-owned location and
+            // occlusion settings must remain untouched.
+            try
+            {
+                var system = UnityEngine.Object.FindObjectOfType<SpatialAudioSystem>();
+                if (system != null)
+                {
+                    var locationField = AccessTools.Field(typeof(SpatialAudioSystem), "_locationInfo");
+                    if (locationField != null && ReferenceEquals(locationField.GetValue(system), _ownedLocationInfo))
+                        locationField.SetValue(system, null);
+                    if (_ownedOcclusionSettings != null && ReferenceEquals(system.OcclusionSettings, _ownedOcclusionSettings))
+                        system.OcclusionSettings = null;
+                }
+            }
+            catch { }
+
+            var locationInfo = _ownedLocationInfo;
+            var occlusionSettings = _ownedOcclusionSettings;
+            _ownedLocationInfo = null;
+            _ownedOcclusionSettings = null;
+            if (locationInfo != null) UnityEngine.Object.Destroy(locationInfo);
+            if (occlusionSettings != null) UnityEngine.Object.Destroy(occlusionSettings);
         }
 
         // NEVER index _ambientBaseVol directly from the blend tick. a missing key threw
@@ -522,12 +565,14 @@ namespace Manimal.Icebreaker
                 // hand the system the real per-location assets, rebuilt from recovered values
                 var infoFields = sc["assets"]?["location_info"]?["fields"] as JObject;
                 var info = ScriptableObject.CreateInstance<SpatialAudioLocationInfo>();
+                _ownedLocationInfo = info;
                 if (infoFields != null) FillFields(info, infoFields, null);
                 AccessTools.Field(typeof(SpatialAudioSystem), "_locationInfo").SetValue(system, info);
 
                 if (system.OcclusionSettings == null)
                 {
                     var occ = ScriptableObject.CreateInstance<AudioOcclusionSettings>();
+                    _ownedOcclusionSettings = occ;
                     if (sc["assets"]?["occlusion_settings"]?["fields"] is JObject occFields)
                         FillFields(occ, occFields, null);
                     system.OcclusionSettings = occ;

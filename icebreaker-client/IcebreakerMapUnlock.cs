@@ -32,7 +32,8 @@ namespace Manimal.Icebreaker
 
         // The menu caches /client/locations at login. Refresh our slot from the
         // current PMC quest state before it builds buttons or restores selection.
-        internal sealed class Patch_Show : ModulePatch
+        [IcebreakerPatchScope(IcebreakerPatchScope.Bootstrap)]
+        internal sealed class Patch_Show : IcebreakerModulePatch<Patch_Show>
         {
             protected override MethodBase GetTargetMethod()
                 => AccessTools.Method(typeof(MatchMakerSelectionLocationScreen), nameof(MatchMakerSelectionLocationScreen.Show),

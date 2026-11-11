@@ -7,6 +7,7 @@ using EFT.Communications;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using UnityEngine;
 
 namespace Manimal.Icebreaker
@@ -158,10 +159,10 @@ namespace Manimal.Icebreaker
         // a LoadSettings that lands AFTER our attach rebuilds Requirements from the
         // server exits row (PassageRequirement None = EMPTY) — the one engine path that
         // silently deletes the fare. re-assert immediately and say so.
-        [HarmonyPatch(typeof(ExfiltrationPoint), nameof(ExfiltrationPoint.LoadSettings))]
-        internal static class Patch_FareSurvivesLoadSettings
+        [IcebreakerPatchTarget(typeof(ExfiltrationPoint), nameof(ExfiltrationPoint.LoadSettings))]
+        internal sealed class Patch_FareSurvivesLoadSettings : IcebreakerModulePatch<Patch_FareSurvivesLoadSettings>
         {
-            [HarmonyPostfix]
+            [PatchPostfix]
             private static void Postfix(ExfiltrationPoint __instance)
             {
                 try
@@ -178,10 +179,10 @@ namespace Manimal.Icebreaker
         // forensics for the free-ride report: every Proceed on the heli logs what the
         // requirement check actually saw. one line per entry, cheap, and it turns the
         // next "it was free" into an immediate diagnosis instead of a deduction chain.
-        [HarmonyPatch(typeof(ExfiltrationPoint), nameof(ExfiltrationPoint.Proceed))]
-        internal static class Patch_ProceedDiag
+        [IcebreakerPatchTarget(typeof(ExfiltrationPoint), nameof(ExfiltrationPoint.Proceed))]
+        internal sealed class Patch_ProceedDiag : IcebreakerModulePatch<Patch_ProceedDiag>
         {
-            [HarmonyPostfix]
+            [PatchPostfix]
             private static void Postfix(ExfiltrationPoint __instance, Player player)
             {
                 try
@@ -211,10 +212,10 @@ namespace Manimal.Icebreaker
         // crossing fare is a pre-raid grid removal, not this path), so nothing else
         // on this map can collide — and every paid extract on every OTHER map keeps its
         // discounts untouched.
-        [HarmonyPatch(typeof(Profile), nameof(Profile.GetExfiltrationPrice))]
-        internal static class Patch_FlatHeliFare
+        [IcebreakerPatchTarget(typeof(Profile), nameof(Profile.GetExfiltrationPrice))]
+        internal sealed class Patch_FlatHeliFare : IcebreakerModulePatch<Patch_FlatHeliFare>
         {
-            [HarmonyPostfix]
+            [PatchPostfix]
             private static void Postfix(int price, ref int __result)
             {
                 if (!IceGate.On) return;
@@ -235,10 +236,10 @@ namespace Manimal.Icebreaker
         // never surfaces. so after the native handler settles the slot, merge the pay
         // action in instead of letting first-wins eat it. no charge without a prompt:
         // paying is the player pressing this action, exactly like a car extract.
-        [HarmonyPatch(typeof(GamePlayerOwner), nameof(GamePlayerOwner.InteractionsChangedHandler))]
-        internal static class Patch_NativePayPrompt
+        [IcebreakerPatchTarget(typeof(GamePlayerOwner), nameof(GamePlayerOwner.InteractionsChangedHandler))]
+        internal sealed class Patch_NativePayPrompt : IcebreakerModulePatch<Patch_NativePayPrompt>
         {
-            [HarmonyPostfix]
+            [PatchPostfix]
             private static void Postfix(GamePlayerOwner __instance)
             {
                 try
@@ -618,12 +619,12 @@ namespace Manimal.Icebreaker
         // "IEAPI toggle does nothing" on a transited fresh-install raid, while menu-entry
         // raids (EntryPoint='Icebreaker' from base.json) always worked. on OUR map every
         // exit is authored by us for every entry path, so the match is simply YES here.
-        [HarmonyPatch(typeof(EFT.Interactive.ExfiltrationPoint), nameof(EFT.Interactive.ExfiltrationPoint.InfiltrationMatch))]
-        internal static class Patch_EntryAgnosticExfil
+        [IcebreakerPatchTarget(typeof(EFT.Interactive.ExfiltrationPoint), nameof(EFT.Interactive.ExfiltrationPoint.InfiltrationMatch))]
+        internal sealed class Patch_EntryAgnosticExfil : IcebreakerModulePatch<Patch_EntryAgnosticExfil>
         {
             private static bool _logged;
 
-            [HarmonyPostfix]
+            [PatchPostfix]
             private static void Postfix(Player player, ref bool __result)
             {
                 if (__result || !IceGate.On) return;

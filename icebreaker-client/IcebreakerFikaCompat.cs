@@ -1,7 +1,6 @@
 using System;
 using System.Reflection;
 using EFT;
-using HarmonyLib;
 using SPT.Reflection.Patching;
 
 namespace Manimal.Icebreaker
@@ -26,11 +25,15 @@ namespace Manimal.Icebreaker
                     ?.GetMethod("Create", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
                 if (create != null)
                 {
-                    new CoopCreatePatch(create).Enable();
+                    IcebreakerPatchLifecycle.RegisterBootstrap(new CoopCreatePatch(create));
                     applied++;
                 }
                 else Plugin.Log.LogError("[Fika] CoopGame.Create not found — map fare will NOT charge in coop, report this");
+            }
+            catch (Exception e) { Plugin.Log.LogError($"[Fika] CoopGame.Create compat failed: {e}"); }
 
+            try
+            {
                 // fika's player never passes LocalPlayer.Create, where the icebreaker
                 // EnvironmentManager/weather rebuild is anchored — without this, coop
                 // Player.Init NRE'd on the missing manager and loading froze at 25%
@@ -45,53 +48,68 @@ namespace Manimal.Icebreaker
                         }
                 if (playerCreate != null)
                 {
-                    new PlayerCreatePatch(playerCreate).Enable();
+                    IcebreakerPatchLifecycle.RegisterBootstrap(new PlayerCreatePatch(playerCreate));
                     applied++;
                 }
                 else Plugin.Log.LogError("[Fika] FikaPlayer.Create not found — icebreaker will NOT load in coop, report this");
+            }
+            catch (Exception e) { Plugin.Log.LogError($"[Fika] FikaPlayer.Create compat failed: {e}"); }
 
+            try
+            {
                 // CoopGame overrides Stop, so the LocalGame.Stop torch-strip never fires
                 // in coop — re-anchor it (same param names, harmony binds them through)
                 var coopStop = Type.GetType("Fika.Core.Main.GameMode.CoopGame, Fika.Core")
                     ?.GetMethod("Stop", BindingFlags.Public | BindingFlags.Instance);
                 if (coopStop != null)
                 {
-                    new CoopStopPatch(coopStop).Enable();
+                    IcebreakerPatchLifecycle.RegisterBootstrap(new CoopStopPatch(coopStop));
                     applied++;
                 }
                 else Plugin.Log.LogWarning("[Fika] CoopGame.Stop not found — blowtorch stays in inventory after coop extracts");
             }
-            catch (Exception e) { Plugin.Log.LogError($"[Fika] compat patching failed: {e}"); }
+            catch (Exception e) { Plugin.Log.LogError($"[Fika] CoopGame.Stop compat failed: {e}"); }
             Plugin.Log.LogDebug($"[Fika] compat patches applied: {applied}/3");
         }
 
-        private sealed class CoopCreatePatch : ModulePatch
+        private sealed class CoopCreatePatch : IcebreakerModulePatch<CoopCreatePatch>
         {
             private readonly MethodBase target;
-            internal CoopCreatePatch(MethodBase target) { this.target = target; }
+            internal CoopCreatePatch(MethodBase target) : base(target) { this.target = target; }
             protected override MethodBase GetTargetMethod() => target;
             [PatchPrefix]
             private static void Prefix(Profile profile, JsonType.LocationSettings.Location location, LocalRaidSettings localRaidSettings)
                 => CoopGameCreatePrefix(profile, location, localRaidSettings);
+
+            [PatchFinalizer]
+            private static Exception Finalizer(Exception __exception)
+            {
+                if (__exception != null)
+                    IcebreakerPatchLifecycle.NotifyLoadFailure("CoopGame.Create failed");
+                return __exception;
+            }
         }
 
-        private sealed class PlayerCreatePatch : ModulePatch
+        private sealed class PlayerCreatePatch : IcebreakerModulePatch<PlayerCreatePatch>
         {
             private readonly MethodBase target;
-            internal PlayerCreatePatch(MethodBase target) { this.target = target; }
+            internal PlayerCreatePatch(MethodBase target) : base(target) { this.target = target; }
             protected override MethodBase GetTargetMethod() => target;
             [PatchPrefix]
             private static void Prefix() => Patch_EnsureEnvironmentManager.EnsureEnvAndWeather();
         }
 
-        private sealed class CoopStopPatch : ModulePatch
+        private sealed class CoopStopPatch : IcebreakerModulePatch<CoopStopPatch>
         {
             private readonly MethodBase target;
-            internal CoopStopPatch(MethodBase target) { this.target = target; }
+            internal CoopStopPatch(MethodBase target) : base(target) { this.target = target; }
             protected override MethodBase GetTargetMethod() => target;
             [PatchPrefix]
             private static void Prefix(string profileId, ExitStatus exitStatus)
-                => Patch_StripTorchOnExtract.Strip(profileId, exitStatus);
+            {
+                try { Patch_StripTorchOnExtract.Strip(profileId, exitStatus); }
+                finally { IcebreakerPatchLifecycle.DisableRaid("CoopGame.Stop"); }
+            }
         }
 
         private static void CoopGameCreatePrefix(Profile profile, JsonType.LocationSettings.Location location, LocalRaidSettings localRaidSettings)
@@ -103,6 +121,7 @@ namespace Manimal.Icebreaker
             // onto vanilla maps around scene teardown)
             IceGate.PendingLocationId = location?.Id;
             try { IcebreakerPhysicsRegions.ResetForNewRaid(); } catch { }
+            IcebreakerPatchLifecycle.Enter(IceGate.PendingLocationId);
             Plugin.Log.LogInfo($"[IceGate] raid location (coop): '{IceGate.PendingLocationId ?? "<null>"}'");
             IcebreakerMapFare.Consume(profile, location, localRaidSettings);
         }

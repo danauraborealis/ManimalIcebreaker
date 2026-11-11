@@ -34,7 +34,12 @@ namespace Manimal.Icebreaker.Fika
             _next = Time.time + 0.5f;
             try
             {
-                if (!IceGate.On) return;
+                if (!IceGate.On)
+                {
+                    _hadTorch.Clear();
+                    return;
+                }
+
                 var manager = Singleton<IFikaNetworkManager>.Instance;
                 if (manager == null || manager.ObservedPlayers == null) return;
                 foreach (var op in manager.ObservedPlayers)

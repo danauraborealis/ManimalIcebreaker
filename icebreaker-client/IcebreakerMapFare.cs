@@ -51,7 +51,8 @@ namespace Manimal.Icebreaker
             return CrossingCost;
         }
 
-        internal sealed class Patch_ReadyGate : ModulePatch
+        [IcebreakerPatchScope(IcebreakerPatchScope.Bootstrap)]
+        internal sealed class Patch_ReadyGate : IcebreakerModulePatch<Patch_ReadyGate>
         {
             protected override MethodBase GetTargetMethod()
                 => AccessTools.Method(typeof(EFT.MainMenuShowOperation), "method_54");
@@ -83,7 +84,8 @@ namespace Manimal.Icebreaker
             }
         }
 
-        internal sealed class Patch_ConsumeFare : ModulePatch
+        [IcebreakerPatchScope(IcebreakerPatchScope.Bootstrap)]
+        internal sealed class Patch_ConsumeFare : IcebreakerModulePatch<Patch_ConsumeFare>
         {
             protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(LocalGame), "Create");
 

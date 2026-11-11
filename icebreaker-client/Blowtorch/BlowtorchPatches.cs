@@ -4,6 +4,7 @@ using EFT;
 using EFT.Animations;
 using EFT.InventoryLogic;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using UnityEngine;
 
 namespace Manimal.Icebreaker.Blowtorch
@@ -96,10 +97,10 @@ namespace Manimal.Icebreaker.Blowtorch
     }
 
     // quickslot key path — keys dispatch to nothing in vanilla TryProceed
-    [HarmonyPatch(typeof(Player), nameof(Player.TryProceed))]
-    internal static class Patch_TorchTryProceed
+    [IcebreakerPatchTarget(typeof(Player), nameof(Player.TryProceed))]
+    internal sealed class Patch_TorchTryProceed : IcebreakerModulePatch<Patch_TorchTryProceed>
     {
-        [HarmonyPrefix]
+        [PatchPrefix]
         private static bool Prefix(Player __instance, Item item)
         {
             if (!BlowtorchIds.IsTorch(item)) return true;
@@ -108,10 +109,10 @@ namespace Manimal.Icebreaker.Blowtorch
         }
     }
 
-    [HarmonyPatch(typeof(Player), nameof(Player.SetInHandsUsableItem))]
-    internal static class Patch_TorchSetInHands
+    [IcebreakerPatchTarget(typeof(Player), nameof(Player.SetInHandsUsableItem))]
+    internal sealed class Patch_TorchSetInHands : IcebreakerModulePatch<Patch_TorchSetInHands>
     {
-        [HarmonyPrefix]
+        [PatchPrefix]
         private static bool Prefix(Player __instance, Item item)
         {
             if (!BlowtorchIds.IsTorch(item)) return true;
@@ -122,10 +123,10 @@ namespace Manimal.Icebreaker.Blowtorch
 
     // async controller factory during hand swaps only recognizes the rangefinder —
     // for our item it builds a controller with a null item and breaks the swap
-    [HarmonyPatch(typeof(ClientUsableItemController), "CreateAsync")]
-    internal static class Patch_TorchSmethod11
+    [IcebreakerPatchTarget(typeof(ClientUsableItemController), "CreateAsync")]
+    internal sealed class Patch_TorchSmethod11 : IcebreakerModulePatch<Patch_TorchSmethod11>
     {
-        [HarmonyPrefix]
+        [PatchPrefix]
         private static bool Prefix(ref System.Threading.Tasks.Task<ClientUsableItemController> __result,
             ClientPlayer player, string itemId)
         {
@@ -138,10 +139,10 @@ namespace Manimal.Icebreaker.Blowtorch
     }
 
     // EFT.NextObservedPlayer.IObservedUsableItem dispatcher returns null for unknown types — null breaks the chain
-    [HarmonyPatch(typeof(EFT.NextObservedPlayer.ObservedPlayerUsableItemController), "GetObservedUsableItem")]
-    internal static class Patch_TorchInterfaceDispatch
+    [IcebreakerPatchTarget(typeof(EFT.NextObservedPlayer.ObservedPlayerUsableItemController), "GetObservedUsableItem")]
+    internal sealed class Patch_TorchInterfaceDispatch : IcebreakerModulePatch<Patch_TorchInterfaceDispatch>
     {
-        [HarmonyPrefix]
+        [PatchPrefix]
         private static bool Prefix(ref EFT.NextObservedPlayer.IObservedUsableItem __result, Item item)
         {
             if (!BlowtorchIds.IsTorch(item)) return true;
@@ -152,10 +153,10 @@ namespace Manimal.Icebreaker.Blowtorch
 
     // full-body animation type — Pistol is the one-handed held-in-front fit. two call
     // sites; known-insufficient for a perfect third-person pose (accepted).
-    [HarmonyPatch(typeof(EFT.NextObservedPlayer.ObservedPlayerHandsController), "GetWeaponAnimationType")]
-    internal static class Patch_TorchAnimationType
+    [IcebreakerPatchTarget(typeof(EFT.NextObservedPlayer.ObservedPlayerHandsController), "GetWeaponAnimationType")]
+    internal sealed class Patch_TorchAnimationType : IcebreakerModulePatch<Patch_TorchAnimationType>
     {
-        [HarmonyPrefix]
+        [PatchPrefix]
         private static bool Prefix(ref PlayerAnimator.EWeaponAnimationType __result, EFT.NextObservedPlayer.ObservedPlayerHandsController __instance)
         {
             if (!BlowtorchIds.IsTorch(__instance.ItemInHands)) return true;
@@ -164,10 +165,10 @@ namespace Manimal.Icebreaker.Blowtorch
         }
     }
 
-    [HarmonyPatch(typeof(Player), nameof(Player.GetWeaponAnimationType))]
-    internal static class Patch_TorchWeaponAnimationType
+    [IcebreakerPatchTarget(typeof(Player), nameof(Player.GetWeaponAnimationType))]
+    internal sealed class Patch_TorchWeaponAnimationType : IcebreakerModulePatch<Patch_TorchWeaponAnimationType>
     {
-        [HarmonyPrefix]
+        [PatchPrefix]
         private static bool Prefix(ref PlayerAnimator.EWeaponAnimationType __result,
             Player.AbstractHandsController handsController)
         {
@@ -181,10 +182,10 @@ namespace Manimal.Icebreaker.Blowtorch
     // run LAST: WTT-PackNStrap's postfixes on both checks recompute the result from
     // scratch (their own class whitelist), which clobbered the torch's true and left it
     // unbindable. SPT's ModulePatch names each owner after its class, hence the ids.
-    [HarmonyPatch(typeof(InventoryController), nameof(InventoryController.IsAtBindablePlace))]
-    internal static class Patch_TorchBindable
+    [IcebreakerPatchTarget(typeof(InventoryController), nameof(InventoryController.IsAtBindablePlace))]
+    internal sealed class Patch_TorchBindable : IcebreakerModulePatch<Patch_TorchBindable>
     {
-        [HarmonyPostfix, HarmonyPriority(Priority.Last)]
+        [PatchPostfix, HarmonyPriority(Priority.Last)]
         [HarmonyAfter("IsAtBindablePlacePatch", "BindableTacticalPatch", "MedpouchBindablePatch")]
         private static void Postfix(Item item, ref bool __result)
         {
@@ -192,10 +193,10 @@ namespace Manimal.Icebreaker.Blowtorch
         }
     }
 
-    [HarmonyPatch(typeof(InventoryController), nameof(InventoryController.IsAtReachablePlace))]
-    internal static class Patch_TorchReachable
+    [IcebreakerPatchTarget(typeof(InventoryController), nameof(InventoryController.IsAtReachablePlace))]
+    internal sealed class Patch_TorchReachable : IcebreakerModulePatch<Patch_TorchReachable>
     {
-        [HarmonyPostfix, HarmonyPriority(Priority.Last)]
+        [PatchPostfix, HarmonyPriority(Priority.Last)]
         [HarmonyAfter("IsAtReachablePlacePatch", "ReachableTacticalPatch", "PhantomReachabilityPatch")]
         private static void Postfix(Item item, ref bool __result)
         {
@@ -205,18 +206,18 @@ namespace Manimal.Icebreaker.Blowtorch
 
     // during controller teardown/respawn WeaponRootAnim is briefly null and PWA's
     // update chain derefs it unguarded — same guards the ammo-loading mod ships
-    [HarmonyPatch(typeof(ProceduralWeaponAnimation), nameof(ProceduralWeaponAnimation.ProcessEffectors))]
-    internal static class Patch_PwaEffectorsGuard
+    [IcebreakerPatchTarget(typeof(ProceduralWeaponAnimation), nameof(ProceduralWeaponAnimation.ProcessEffectors))]
+    internal sealed class Patch_PwaEffectorsGuard : IcebreakerModulePatch<Patch_PwaEffectorsGuard>
     {
-        [HarmonyPrefix]
+        [PatchPrefix]
         private static bool Prefix(ProceduralWeaponAnimation __instance)
             => __instance.HandsContainer == null || __instance.HandsContainer.WeaponRootAnim != null;
     }
 
-    [HarmonyPatch(typeof(Player), nameof(Player.VisualPass))]
-    internal static class Patch_VisualPassGuard
+    [IcebreakerPatchTarget(typeof(Player), nameof(Player.VisualPass))]
+    internal sealed class Patch_VisualPassGuard : IcebreakerModulePatch<Patch_VisualPassGuard>
     {
-        [HarmonyPrefix]
+        [PatchPrefix]
         private static bool Prefix(Player __instance)
         {
             var hc = __instance.ProceduralWeaponAnimation?.HandsContainer;
@@ -225,10 +226,10 @@ namespace Manimal.Icebreaker.Blowtorch
     }
 
     // safety net: a torch spawn/preview failure must never abort raid load
-    [HarmonyPatch(typeof(EFT.ObjectsFactory), nameof(EFT.ObjectsFactory.CreateCleanLootPrefab))]
-    internal static class Patch_LootPrefabGuard
+    [IcebreakerPatchTarget(typeof(EFT.ObjectsFactory), nameof(EFT.ObjectsFactory.CreateCleanLootPrefab))]
+    internal sealed class Patch_LootPrefabGuard : IcebreakerModulePatch<Patch_LootPrefabGuard>
     {
-        [HarmonyFinalizer]
+        [PatchFinalizer]
         private static Exception Finalizer(Exception __exception, Item item, ref GameObject __result)
         {
             if (__exception == null) return null;

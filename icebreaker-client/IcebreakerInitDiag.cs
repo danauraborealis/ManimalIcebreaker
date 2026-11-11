@@ -3,6 +3,7 @@ using System.Text;
 using Comfort.Common;
 using EFT;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 
 namespace Manimal.Icebreaker
 {
@@ -11,10 +12,10 @@ namespace Manimal.Icebreaker
     // on shoreline coop, so it's something icebreaker x fika. this prefix null-checks
     // everything Init dereferences and prints one [InitDiag] block, so the next raid
     // log names the culprit instead of an offset. remove once the null is found.
-    [HarmonyPatch(typeof(Player), nameof(Player.Init))]
-    internal static class Patch_PlayerInitDiag
+    [IcebreakerPatchTarget(typeof(Player), nameof(Player.Init))]
+    internal sealed class Patch_PlayerInitDiag : IcebreakerModulePatch<Patch_PlayerInitDiag>
     {
-        [HarmonyPrefix]
+        [PatchPrefix]
         private static void Prefix(Player __instance, Profile profile)
         {
             try

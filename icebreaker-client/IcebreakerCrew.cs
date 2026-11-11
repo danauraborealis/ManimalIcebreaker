@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using UnityEngine;
 
 namespace Manimal.Icebreaker
@@ -31,6 +32,7 @@ namespace Manimal.Icebreaker
         private void Start()
         {
             _zoneCache = null;
+            IcebreakerCombineEncounter.ResetForRaid();
             IcebreakerCutscene.ResetForRaid();
             IcebreakerChainDoor.ResetForRaid();
             IcebreakerFlares.ResetForRaid();
@@ -139,13 +141,15 @@ namespace Manimal.Icebreaker
             // fired before we're ready (the hides0-lost-during-topup race) — attach the
             // bridge and drain the buffer
             IcebreakerAIPlaces.AttachBridge(OnSpawnEvent);
-            _unsubEvents = () => IcebreakerAIPlaces.Bridge = null;
+            _unsubEvents = () => IcebreakerAIPlaces.DetachBridge(OnSpawnEvent);
             Plugin.Log.LogDebug("[Crew] event-spawn bridge armed (buffered events drained)");
         }
 
         private void OnDestroy()
         {
             _unsubEvents?.Invoke();
+            _chargeSweepRunning = false;
+            _pendingChargeZones.Clear();
             // statics must not leak bots into the next raid's pool
             _penPending.Clear(); _penIntake.Clear(); _pool.Clear(); _penSlot = 0;
         }
@@ -256,6 +260,13 @@ namespace Manimal.Icebreaker
 
         private IEnumerator EngineAdvanceWatch()
         {
+            // Fika clients have no local BossSpawnScenario.  Let the host selection
+            // arrive before arming the cutscene, but keep this wait bounded so a stale
+            // or missing addon cannot strand the route forever; late authoritative
+            // state still updates role predicates after the watcher falls through.
+            yield return IcebreakerCombineEncounter.WaitUntilReady(12f);
+            if (!IcebreakerCombineEncounter.SelectionAuthoritative)
+                Plugin.Log.LogWarning("[Crew] authoritative Combine selection was not available before cutscene wait; arming the watcher and allowing late state");
             var triggerGo = GameObject.Find("Icebreaker_StartCutsceneTrigger");
             if (triggerGo == null)
             {
@@ -415,7 +426,21 @@ namespace Manimal.Icebreaker
 
         private void OnSpawnEvent(string eventId)
         {
-            if (string.IsNullOrEmpty(eventId) || !_firedEvents.Add(eventId)) return; // one-shot per event
+            if (string.IsNullOrEmpty(eventId)) return;
+
+            // Trigger side effects are one-shot, but charge placement is a delivery
+            // attempt. A first wave can arrive before its inventory is usable or have
+            // no eligible space, so a later qualifying wave must be allowed to retry
+            // even when this trigger id is already in the one-shot set.
+            bool firstEvent = _firedEvents.Add(eventId);
+            if (eventId.StartsWith("hides"))
+                QueueChargeSweep("BotZoneEngineHide");
+            else if (eventId.StartsWith("stern"))
+                QueueChargeSweep("BotZoneSternTop", "BotZoneStern");
+            else if (eventId == "T3")
+                QueueChargeSweep("BotZoneOutside_t3");
+
+            if (!firstEvent) return; // placement above remains independently retryable
 
             // POST-EVENT JOBS ONLY (2026-08-11 rework). the spawning itself is BSG's now:
             // our trigger ids ARE the retail TriggerIds, base.json carries the retail
@@ -432,12 +457,7 @@ namespace Manimal.Icebreaker
             if (eventId.StartsWith("hides"))
             {
                 StartCoroutine(HoldEngineSquad(0, 4, 0)); // watcher — holds whoever arrives at the hide markers
-                StartCoroutine(PlaceChargeSweep("BotZoneEngineHide"));
             }
-            else if (eventId.StartsWith("stern"))
-                StartCoroutine(PlaceChargeSweep("BotZoneSternTop", "BotZoneStern"));
-            else if (eventId == "T3")
-                StartCoroutine(PlaceChargeSweep("BotZoneOutside_t3"));
             else if (eventId.StartsWith("wedges"))
                 StartCoroutine(PlaceWedgeTag()); // his guaranteed red tag — see PlaceWedgeTag
             else
@@ -531,7 +551,7 @@ namespace Manimal.Icebreaker
             yield return SpawnSquad("stern helipad", new[] { "BotZoneSternTop" }, 3 + extras, null);
             yield return SpawnSquad("stern", new[] { "BotZoneStern" }, 3, null);
             yield return SpawnSquad("stern second team", new[] { "BotZoneStern" }, 3, null);
-            StartCoroutine(PlaceChargeSweep("BotZoneSternTop", "BotZoneStern"));
+            QueueChargeSweep("BotZoneSternTop", "BotZoneStern");
         }
 
         // retail T1: the knight arrives mid-raid at Mash_t1 with two rogue escorts —
@@ -586,13 +606,45 @@ namespace Manimal.Icebreaker
         // SZ-1 GUARANTEE (user call 08-03; replaced the knight-pocket server inject that
         // died on pocket size): exactly ONE chain-door charge per raid, carried by the
         // black division. the first qualifying deployment to spawn gets it — stern,
-        // stern top, engine hide, or the outside T3 squad — preferring a guard who
-        // rolled a BACKPACK (rare here) with pockets as the fallback. client-side and
+        // stern top, engine hide, or the outside T3 squad — preferring pockets, then
+        // any accessible rig/backpack grid. client-side and
         // host-only by construction (the crew spawner runs with bots authority; fika
         // corpse searches read the host's inventory live, so the loot replicates).
         private bool _chargePlaced;
+        private bool _chargeSweepRunning;
+        private readonly HashSet<string> _pendingChargeZones = new HashSet<string>();
 
-        private IEnumerator PlaceChargeSweep(params string[] zoneNames)
+        private void QueueChargeSweep(params string[] zoneNames)
+        {
+            if (_chargePlaced || !FikaBridge.BotsAuthority) return;
+            if (zoneNames != null)
+                foreach (var zoneName in zoneNames)
+                    if (!string.IsNullOrEmpty(zoneName)) _pendingChargeZones.Add(zoneName);
+            if (_chargeSweepRunning || _pendingChargeZones.Count == 0) return;
+            StartCoroutine(PlaceChargeSweep());
+        }
+
+        private IEnumerator PlaceChargeSweep()
+        {
+            if (_chargePlaced || _chargeSweepRunning || !FikaBridge.BotsAuthority) yield break;
+            _chargeSweepRunning = true;
+            try
+            {
+                while (!_chargePlaced && _pendingChargeZones.Count > 0)
+                {
+                    var zoneNames = _pendingChargeZones.AsValueEnumerable().ToArray();
+                    _pendingChargeZones.Clear();
+                    yield return PlaceChargeSweepCore(zoneNames);
+                }
+            }
+            finally
+            {
+                if (_chargePlaced) _pendingChargeZones.Clear();
+                _chargeSweepRunning = false;
+            }
+        }
+
+        private IEnumerator PlaceChargeSweepCore(string[] zoneNames)
         {
             if (_chargePlaced) yield break;
             // batches create asynchronously (server round trips) — poll until the squad
@@ -612,7 +664,8 @@ namespace Manimal.Icebreaker
                 cands.Clear();
                 foreach (var b in LiveBots())
                 {
-                    if (b == null || b.Profile?.Info?.Settings?.Role != (WildSpawnType)BdIb || IsPenBot(b)) continue;
+                    if (b == null || b.Profile?.Info?.Settings?.Role is not WildSpawnType role
+                        || !IcebreakerCombineEncounter.IsCrewRole((int)role) || IsPenBot(b)) continue;
                     var p = b.GetPlayer;
                     if (p == null || p.HealthController == null || !p.HealthController.IsAlive) continue;
                     foreach (var a in anchors)
@@ -744,7 +797,518 @@ namespace Manimal.Icebreaker
             }
         }
 
-        private static bool StuffCharge(BotOwner b) => StuffItem(b, IcebreakerChainDoor.ChargeTpls[0], "SZ-1 charge");
+        private sealed class ChargeMove
+        {
+            internal EFT.InventoryLogic.Grid Source;
+            internal EFT.InventoryLogic.Grid Destination;
+            internal EFT.InventoryLogic.Item Item;
+            internal LocationInGrid Location;
+        }
+
+        private sealed class ChargeRemoval
+        {
+            internal EFT.InventoryLogic.Grid Source;
+            internal EFT.InventoryLogic.Item Item;
+            internal LocationInGrid Location;
+        }
+
+        // The Combine pocket loadout's inspected ordinary pool. Keep this explicit:
+        // class/flag checks alone cannot distinguish a custom evidence item that was
+        // authored as a normal Meds/Ammo subclass.
+        private static readonly HashSet<string> ChargeEvictionTpls = new HashSet<string>
+        {
+            "5e32f56fcb6d5863cc5e5ee4",
+            "5c0e534186f7747fa1419867",
+            "5c0e533786f7747fa23f4d47",
+            "5c0e530286f7747fa1419862",
+            "619256e5f8af2c1a4e1f5d92",
+            "60098af40accd37ef2175f27",
+            "544fb3f34bdc2d03748b456a",
+            "617aa4dd8166f034d57de9c5",
+        };
+
+        private static bool StuffCharge(BotOwner b)
+        {
+            try
+            {
+                if (b == null) return false;
+                if (CarriesCharge(b)) return true;
+
+                var templates = IcebreakerChainDoor.ChargeTpls;
+                if (templates == null || templates.Length == 0)
+                {
+                    Plugin.Log.LogWarning($"[Crew] SZ-1 placement: no charge templates configured for '{b.name}'");
+                    return false;
+                }
+
+                // Keep the original Black Division placement path unchanged: it uses
+                // StuffItem's backpack-then-pockets ordering and never evicts loot.
+                // The richer grid transaction below is only needed for Combine's full
+                // pocket loadouts.
+                if (!IcebreakerCombineEncounter.Active)
+                {
+                    for (int i = 0; i < templates.Length; i++)
+                    {
+                        var tpl = templates[i];
+                        if (!string.IsNullOrEmpty(tpl) && StuffItem(b, tpl, "SZ-1 charge")) return true;
+                    }
+                    return false;
+                }
+
+                var factory = Singleton<EFT.ItemFactory>.Instance;
+                if (factory == null)
+                {
+                    Plugin.Log.LogWarning($"[Crew] SZ-1 placement: ItemFactory unavailable for '{b.name}'");
+                    return false;
+                }
+
+                var grids = ChargeAccessibleGrids(b, out var pocketGrids);
+                if (grids.Count == 0)
+                {
+                    Plugin.Log.LogWarning($"[Crew] SZ-1 placement: no accessible pockets, rig, or backpack on '{b.name}'");
+                    return false;
+                }
+
+                // The two SZ-1 templates are shipped by different content packs. A
+                // missing template or an ItemFactory exception must only reject that
+                // candidate; the other template remains a valid charge.
+                for (int i = 0; i < templates.Length; i++)
+                {
+                    var tpl = templates[i];
+                    if (string.IsNullOrEmpty(tpl)) continue;
+
+                    EFT.InventoryLogic.Item charge;
+                    try
+                    {
+                        charge = factory.CreateItem(factory.NextId, tpl, null);
+                    }
+                    catch (Exception e)
+                    {
+                        Plugin.Log.LogWarning($"[Crew] SZ-1 template '{tpl}' factory failed on '{b.name}': {e.Message}");
+                        continue;
+                    }
+
+                    if (charge == null || charge.Width <= 0 || charge.Height <= 0)
+                    {
+                        Plugin.Log.LogWarning($"[Crew] SZ-1 template '{tpl}' produced no usable item on '{b.name}'");
+                        continue;
+                    }
+
+                    EFT.InventoryLogic.Grid placedGrid;
+                    if (TryPlaceCharge(charge, grids, out placedGrid))
+                    {
+                        Plugin.Log.LogInfo($"[Crew] SZ-1 charge placed in '{b.name}' {ChargeGridLabel(placedGrid, pocketGrids)}");
+                        return true;
+                    }
+
+                    // Ordinary Black Division loadouts can have five full pocket grids
+                    // and no rig/backpack. Only the Combine encounter may make room by
+                    // relocating or discarding whitelisted mundane pocket loot. The
+                    // normal Black Division path keeps the old no-room behavior.
+                    bool rollbackFailed = false;
+                    if (TryReservePocketSpace(b, charge, grids, pocketGrids, out var moved, out var removed, out rollbackFailed))
+                    {
+                        Plugin.Log.LogInfo($"[Crew] SZ-1 charge reserved in '{b.name}' pockets ({moved} moved, {removed} mundane item(s) replaced)");
+                        return true;
+                    }
+                    else if (rollbackFailed)
+                        return false;
+                }
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogWarning($"[Crew] SZ-1 charge stuff failed on '{b?.name}': {e.Message}");
+            }
+
+            return false;
+        }
+
+        private static bool CarriesCharge(BotOwner b)
+        {
+            try
+            {
+                var items = b?.Profile?.Inventory?.AllRealPlayerItems;
+                if (items == null) return false;
+                return items.AsValueEnumerable().Any(item => IcebreakerChainDoor.IsCharge(item));
+            }
+            catch { }
+            return false;
+        }
+
+        private static List<EFT.InventoryLogic.Grid> ChargeAccessibleGrids(
+            BotOwner b,
+            out List<EFT.InventoryLogic.Grid> pocketGrids)
+        {
+            var grids = new List<EFT.InventoryLogic.Grid>();
+            pocketGrids = new List<EFT.InventoryLogic.Grid>();
+            var seen = new HashSet<EFT.InventoryLogic.Grid>();
+            var equipment = b?.Profile?.Inventory?.Equipment;
+            if (equipment == null) return grids;
+
+            AddChargeGrids(equipment.GetSlot(EFT.InventoryLogic.EquipmentSlot.Pockets)?.ContainedItem
+                as EFT.InventoryLogic.CompoundItem, grids, pocketGrids, seen);
+            AddChargeGrids(equipment.GetSlot(EFT.InventoryLogic.EquipmentSlot.TacticalVest)?.ContainedItem
+                as EFT.InventoryLogic.CompoundItem, grids, null, seen);
+            AddChargeGrids(equipment.GetSlot(EFT.InventoryLogic.EquipmentSlot.Backpack)?.ContainedItem
+                as EFT.InventoryLogic.CompoundItem, grids, null, seen);
+            return grids;
+        }
+
+        private static void AddChargeGrids(
+            EFT.InventoryLogic.CompoundItem container,
+            List<EFT.InventoryLogic.Grid> grids,
+            List<EFT.InventoryLogic.Grid> pocketGrids,
+            HashSet<EFT.InventoryLogic.Grid> seen)
+        {
+            if (container?.Grids == null) return;
+            foreach (var grid in container.Grids)
+            {
+                if (grid == null || !seen.Add(grid)) continue;
+                grids.Add(grid);
+                pocketGrids?.Add(grid);
+            }
+        }
+
+        private static string ChargeGridLabel(
+            EFT.InventoryLogic.Grid grid,
+            List<EFT.InventoryLogic.Grid> pocketGrids)
+            => pocketGrids.Contains(grid) ? "POCKETS" : "rig/backpack";
+
+        private static bool TryPlaceCharge(
+            EFT.InventoryLogic.Item charge,
+            List<EFT.InventoryLogic.Grid> grids,
+            out EFT.InventoryLogic.Grid placedGrid)
+        {
+            placedGrid = null;
+            if (charge == null) return false;
+
+            foreach (var grid in grids)
+            {
+                if (grid == null) continue;
+                LocationInGrid location;
+                try { location = grid.FindFreeSpace(charge); }
+                catch { continue; }
+                if (location == null) continue;
+
+                try
+                {
+                    if (grid.AddItemWithoutRestrictions(charge, location).Succeeded)
+                    {
+                        placedGrid = grid;
+                        return true;
+                    }
+                }
+                catch { }
+
+                // A failed native add should be side-effect free, but clean up if a
+                // drifting inventory implementation attached the item before reporting
+                // failure so the next grid/template attempt cannot duplicate it.
+                RemoveUnattachedCharge(grids, charge);
+            }
+
+            return false;
+        }
+
+        private static bool TryPlaceChargeInGrid(
+            EFT.InventoryLogic.Grid grid,
+            EFT.InventoryLogic.Item charge)
+        {
+            if (grid == null || charge == null) return false;
+            LocationInGrid location;
+            try { location = grid.FindFreeSpace(charge); }
+            catch { return false; }
+            if (location == null) return false;
+
+            try
+            {
+                if (grid.AddItemWithoutRestrictions(charge, location).Succeeded) return true;
+            }
+            catch { }
+            RemoveUnattachedCharge(grid, charge);
+            return false;
+        }
+
+        private static void RemoveUnattachedCharge(
+            List<EFT.InventoryLogic.Grid> grids,
+            EFT.InventoryLogic.Item charge)
+        {
+            if (grids == null) return;
+            foreach (var grid in grids)
+            {
+                try
+                {
+                    if (grid != null && grid.Contains(charge))
+                        grid.RemoveWithoutRestrictions(charge);
+                }
+                catch { }
+            }
+        }
+
+        private static void RemoveUnattachedCharge(
+            EFT.InventoryLogic.Grid grid,
+            EFT.InventoryLogic.Item charge)
+        {
+            try
+            {
+                if (grid != null && grid.Contains(charge))
+                    grid.RemoveWithoutRestrictions(charge);
+            }
+            catch { }
+        }
+
+        private static bool TryReservePocketSpace(
+            BotOwner owner,
+            EFT.InventoryLogic.Item charge,
+            List<EFT.InventoryLogic.Grid> grids,
+            List<EFT.InventoryLogic.Grid> pocketGrids,
+            out int moved,
+            out int removed,
+            out bool rollbackFailed)
+        {
+            moved = 0;
+            removed = 0;
+            rollbackFailed = false;
+            if (charge == null || pocketGrids == null || pocketGrids.Count == 0) return false;
+
+            foreach (var target in pocketGrids)
+            {
+                var moves = new List<ChargeMove>();
+                var removals = new List<ChargeRemoval>();
+
+                if (TryPlaceChargeInGrid(target, charge))
+                {
+                    moved = 0;
+                    removed = 0;
+                    return true;
+                }
+
+                // Keep the candidate set limited to direct, small, mundane loot from
+                // the inspected Combine pool. This excludes quest/evidence objects,
+                // keys, dogtags, equipped weapons and weapon mods by exact template id,
+                // while also avoiding deletion of large containers in a pocket grid.
+                List<EFT.InventoryLogic.Item> candidates;
+                try
+                {
+                    candidates = target.Items.AsValueEnumerable()
+                        .Where(item => IsChargeEvictionCandidate(owner, item))
+                        .OrderByDescending(item => item.Width * item.Height)
+                        .ToList();
+                }
+                catch
+                {
+                    if (!RollbackChargeReservation(moves, removals))
+                    {
+                        Plugin.Log.LogWarning("[Crew] SZ-1 pocket candidate scan rollback was incomplete; aborting this placement attempt");
+                        rollbackFailed = true;
+                        return false;
+                    }
+                    continue;
+                }
+
+                foreach (var candidate in candidates)
+                {
+                    bool moveRestoreFailed;
+                    if (TryMoveChargeItem(candidate, target, grids, moves, out moveRestoreFailed))
+                    {
+                        // Relocation is preferred. Removing an item is the last resort
+                        // when every other accessible grid is full.
+                    }
+                    else if (moveRestoreFailed)
+                    {
+                        Plugin.Log.LogWarning("[Crew] SZ-1 pocket move could not restore rejected loot; aborting this placement attempt");
+                        RollbackChargeReservation(moves, removals);
+                        rollbackFailed = true;
+                        return false;
+                    }
+                    else
+                    {
+                        bool removeRestoreFailed;
+                        if (TryRemoveChargeItem(candidate, target, removals, out removeRestoreFailed))
+                        {
+                            // The removed object stays detached until the charge commits,
+                            // which gives the failure path a complete rollback.
+                        }
+                        else if (removeRestoreFailed)
+                        {
+                            Plugin.Log.LogWarning("[Crew] SZ-1 pocket removal could not restore rejected loot; aborting this placement attempt");
+                            RollbackChargeReservation(moves, removals);
+                            rollbackFailed = true;
+                            return false;
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+
+                    if (TryPlaceChargeInGrid(target, charge))
+                    {
+                        moved = moves.Count;
+                        removed = removals.Count;
+                        return true;
+                    }
+                }
+
+                if (!RollbackChargeReservation(moves, removals))
+                {
+                    Plugin.Log.LogWarning("[Crew] SZ-1 pocket reservation rollback was incomplete; aborting this placement attempt");
+                    rollbackFailed = true;
+                    return false;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsChargeEvictionCandidate(BotOwner owner, EFT.InventoryLogic.Item item)
+        {
+            if (item == null || item.QuestItem || item.IsUnremovable || item.IsSecretExitRequirement
+                || item.IsSpecialSlotOnly || IcebreakerChainDoor.IsCharge(item)) return false;
+
+            var handsItem = owner?.GetPlayer?.HandsController?.Item;
+            if (handsItem != null && (ReferenceEquals(handsItem, item) || handsItem.Id == item.Id)) return false;
+            return ChargeEvictionTpls.Contains(item.TemplateId.ToString())
+                && item.Width <= 2 && item.Height <= 2;
+        }
+
+        private static bool TryMoveChargeItem(
+            EFT.InventoryLogic.Item item,
+            EFT.InventoryLogic.Grid source,
+            List<EFT.InventoryLogic.Grid> grids,
+            List<ChargeMove> moves,
+            out bool restoreFailed)
+        {
+            restoreFailed = false;
+            if (item == null || source == null || grids == null) return false;
+
+            LocationInGrid location;
+            try { location = source.GetItemLocation(item)?.Clone(); }
+            catch { return false; }
+            if (location == null) return false;
+
+            foreach (var destination in grids)
+            {
+                if (destination == null || ReferenceEquals(destination, source)) continue;
+                LocationInGrid destinationLocation;
+                try { destinationLocation = destination.FindFreeSpace(item); }
+                catch { continue; }
+                if (destinationLocation == null) continue;
+
+                bool removed = false;
+                try { removed = source.RemoveWithoutRestrictions(item).Succeeded; }
+                catch { }
+                if (!removed)
+                {
+                    try
+                    {
+                        if (!source.Contains(item)
+                            && !source.AddItemWithoutRestrictions(item, location).Succeeded)
+                            restoreFailed = true;
+                    }
+                    catch { restoreFailed = true; }
+                    if (restoreFailed) return false;
+                    continue;
+                }
+
+                try
+                {
+                    if (destination.AddItemWithoutRestrictions(item, destinationLocation).Succeeded)
+                    {
+                        moves.Add(new ChargeMove
+                        {
+                            Source = source,
+                            Destination = destination,
+                            Item = item,
+                            Location = location,
+                        });
+                        return true;
+                    }
+                }
+                catch { }
+
+                // Return the item immediately if this destination rejected it. The
+                // outer transaction should only record completed moves.
+                RemoveUnattachedCharge(destination, item);
+                try
+                {
+                    if (!source.AddItemWithoutRestrictions(item, location).Succeeded)
+                        restoreFailed = true;
+                }
+                catch { restoreFailed = true; }
+                if (restoreFailed) return false;
+            }
+
+            return false;
+        }
+
+        private static bool TryRemoveChargeItem(
+            EFT.InventoryLogic.Item item,
+            EFT.InventoryLogic.Grid source,
+            List<ChargeRemoval> removals,
+            out bool restoreFailed)
+        {
+            restoreFailed = false;
+            if (item == null || source == null) return false;
+            LocationInGrid location;
+            try { location = source.GetItemLocation(item)?.Clone(); }
+            catch { return false; }
+            if (location == null) return false;
+
+            bool removed = false;
+            try { removed = source.RemoveWithoutRestrictions(item).Succeeded; }
+            catch { }
+            if (!removed)
+            {
+                // A native callback can throw after detaching the item. Failed
+                // results and exceptions both need the same restoration path.
+                try
+                {
+                    if (!source.Contains(item)
+                        && !source.AddItemWithoutRestrictions(item, location).Succeeded)
+                        restoreFailed = true;
+                }
+                catch { restoreFailed = true; }
+                return false;
+            }
+            removals.Add(new ChargeRemoval { Source = source, Item = item, Location = location });
+            return true;
+        }
+
+        private static bool RollbackChargeReservation(
+            List<ChargeMove> moves,
+            List<ChargeRemoval> removals)
+        {
+            bool complete = true;
+            for (int i = moves.Count - 1; i >= 0; i--)
+            {
+                var move = moves[i];
+                try
+                {
+                    if (move.Destination.Contains(move.Item)
+                        && !move.Destination.RemoveWithoutRestrictions(move.Item).Succeeded)
+                    {
+                        complete = false;
+                        continue;
+                    }
+                    if (!move.Source.AddItemWithoutRestrictions(move.Item, move.Location).Succeeded)
+                        complete = false;
+                }
+                catch { complete = false; }
+            }
+
+            for (int i = removals.Count - 1; i >= 0; i--)
+            {
+                var removal = removals[i];
+                try
+                {
+                    if (!removal.Source.Contains(removal.Item)
+                        && !removal.Source.AddItemWithoutRestrictions(removal.Item, removal.Location).Succeeded)
+                        complete = false;
+                }
+                catch { complete = false; }
+            }
+            return complete;
+        }
 
         private static bool StuffItem(BotOwner b, string tpl, string label)
         {
@@ -841,7 +1405,8 @@ namespace Manimal.Icebreaker
                         // IsPenBot: a pool bot in pen transit stands at its birth marker
                         // for a frame or two — the 07-28 raid held one, and it spent the
                         // rest of the raid paused under the ice
-                        if (b != null && b.Profile?.Info?.Settings?.Role == (WildSpawnType)BdIb
+                        if (b != null && b.Profile?.Info?.Settings?.Role is WildSpawnType role
+                            && IcebreakerCombineEncounter.IsCrewRole((int)role)
                             && (b.Position - anchor).sqrMagnitude < 30f * 30f
                             && !IsPenBot(b) && !free.Contains(b) && !held.Contains(b))
                         {
@@ -1398,10 +1963,10 @@ namespace Manimal.Icebreaker
             }
         }
 
-        [HarmonyPatch(typeof(BotOwner), nameof(BotOwner.Create))]
-        internal static class Patch_PenIntake
+        [IcebreakerPatchTarget(typeof(BotOwner), nameof(BotOwner.Create))]
+        internal sealed class Patch_PenIntake : IcebreakerModulePatch<Patch_PenIntake>
         {
-            [HarmonyPostfix]
+            [PatchPostfix]
             private static void Postfix(BotOwner __result)
             {
                 try
@@ -1520,10 +2085,10 @@ namespace Manimal.Icebreaker
             => (IsBd(a) && b == WildSpawnType.exUsec) || (a == WildSpawnType.exUsec && IsBd(b));
     }
 
-    [HarmonyPatch(typeof(BotsGroup), nameof(BotsGroup.IsPlayerEnemy))]
-    internal static class Patch_BotsGroupInitialHostility
+    [IcebreakerPatchTarget(typeof(BotsGroup), nameof(BotsGroup.IsPlayerEnemy))]
+    internal sealed class Patch_BotsGroupInitialHostility : IcebreakerModulePatch<Patch_BotsGroupInitialHostility>
     {
-        [HarmonyPostfix]
+        [PatchPostfix]
         private static void Postfix(BotsGroup __instance, IPlayer player, ref bool __result)
         {
             try
@@ -1550,10 +2115,10 @@ namespace Manimal.Icebreaker
     // the initial matrix isn't the only entry: provocation paths (friendly fire, revenge
     // logic) go through CheckAndAddEnemy — skip it entirely for the BD/rogue pair so one
     // stray hit can't escalate into a ship-wide civil war.
-    [HarmonyPatch(typeof(BotsGroup), nameof(BotsGroup.CheckAndAddEnemy))]
-    internal static class Patch_BotsGroupProvokedHostility
+    [IcebreakerPatchTarget(typeof(BotsGroup), nameof(BotsGroup.CheckAndAddEnemy))]
+    internal sealed class Patch_BotsGroupProvokedHostility : IcebreakerModulePatch<Patch_BotsGroupProvokedHostility>
     {
-        [HarmonyPrefix]
+        [PatchPrefix]
         private static bool Prefix(BotsGroup __instance, IPlayer player, ref bool __result)
         {
             try

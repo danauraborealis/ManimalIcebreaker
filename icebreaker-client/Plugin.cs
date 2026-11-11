@@ -2,6 +2,7 @@ using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using UnityEngine;
 
 // the fika sync addon subscribes to the chain-door/sealed-door world-event hooks
@@ -377,27 +378,7 @@ namespace Manimal.Icebreaker
 
             // kill the origin-stacked zone tones the instant the sound scene loads —
             // during loading the AudioListener sits at origin inside all 13 of them
-            UnityEngine.SceneManagement.SceneManager.sceneLoaded += (scene, mode) =>
-            {
-                try { IcebreakerAcoustics.OnSceneLoaded(scene); } catch { }
-                // material ownership capture must beat every mod's runtime spawns —
-                // scene load IS that moment (see the rebind ownership gate)
-                try
-                {
-                    if (scene.name != null && scene.name.StartsWith("Icebreaker", System.StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (FikaBridge.CanRender) RenderEnvProbe.CaptureSceneMaterials(scene);
-                        // SAIN masquerade (user-approved special case, 2026-08-03) — was
-                        // wired to the tripwire hook, which never fires at default config;
-                        // scene load always does, and every plugin is loaded by now
-                        SainLocationCompat.TryPatch(new HarmonyLib.Harmony("com.manimal.icebreaker.saincompat"));
-                        // same moment, same reason: every plugin has loaded, so its patch
-                        // types resolve. gated on IceGate at call time, so the mod keeps
-                        // working normally on every other map.
-                        IcebreakerLockableDoorsOff.TryPatch(new HarmonyLib.Harmony("com.manimal.icebreaker.lockabledoors"));
-                    }
-                } catch { }
-            };
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
 
             // preload the self-hosted Perfect Culling runtime so the icebreaker scene
             // bundle's PerfectCullingVolume components bind at scene load (unity resolves
@@ -415,47 +396,18 @@ namespace Manimal.Icebreaker
             }
             catch (System.Exception e) { Log.LogWarning($"PerfectCullingRuntime preload failed: {e.Message}"); }
 
-            var harmony = new Harmony(BuildInfo.ModGuid);
-
-            // BUNDLES FIRST, and PatchAll wrapped. twice on 07-31 a single bad diagnostic
-            // patch threw inside PatchAll, aborted Awake, and took the bundle host with it —
-            // the map then 404'd on maps/icebreaker.bundle and the whole mod looked dead,
-            // which is a wildly misleading symptom for "one probe had an ambiguous overload".
-            // the host is load-bearing; patches are not. it goes up first and PatchAll is no
-            // longer allowed to kill the process.
-            //
             // serve the map bundles out of the plugin folder — nothing is copied into
             // EscapeFromTarkov_Data (this replaced the old materializer), then sweep away
             // whatever that materializer left behind on installs that ran it
-            IcebreakerBundleHost.Init(harmony);
+            IcebreakerBundleHost.Init();
             IcebreakerBundleHost.CleanLegacyStreamingAssets();
-
-            try { new Patch_RejectShellCameraPrefab().Enable(); }
-            catch (System.Exception e) { Log.LogError($"Camera prefab safety patch failed: {e}"); }
-            foreach (var patch in new SPT.Reflection.Patching.ModulePatch[] {
-                new IceGate.Patch_CaptureLocationId(), new IceGate.Patch_PhysicsAudit(),
-                new IcebreakerMapUnlock.Patch_Show(), new IcebreakerMapFare.Patch_ReadyGate(),
-                new IcebreakerMapFare.Patch_ConsumeFare(), new Keypad.Patch_IcebreakerPasscodes(),
-                new IcebreakerFlyerUnlock.Patch_BackendCount(), new IcebreakerFlyerUnlock.Patch_GameCount(),
-                new IcebreakerFlyerUnlock.Patch_Visibility(),
-                new Patch_IcebreakerLootDiag() })
-            {
-                try { patch.Enable(); }
-                catch (System.Exception e) { Log.LogError($"{patch.GetType().Name} failed: {e}"); }
-            }
-            try { harmony.PatchAll(); }
-            catch (System.Exception e)
-            {
-                // a partial patch set is survivable and obvious in play; a dead mod is not
-                Log.LogError($"PatchAll FAILED — some patches did not apply, the map still loads: {e}");
-            }
+            IcebreakerPatchLifecycle.Initialize();
             IcebreakerFikaCompat.TryApply(); // no-op without fika
+            IcebreakerCombineCutscene.Initialize();
             IcebreakerSplash.RefreshExisting(); // splash Awake can precede plugin loading
             // QuestingBots per-map mute (ported from terminal): QB's spawn takeover
             // fights event-driven wave choreography; QB itself has no per-map off
             // switch. gated on IceGate — QB fully active on every other map.
-            try { IcebreakerQuestingBotsOff.TryPatch(harmony); }
-            catch (System.Exception e) { Log.LogWarning($"questing-bots mute failed: {e}"); }
 
             // bigbrain crew layer (hard dep, so the call is safe) — registration is
             // global and one-time; IceGate keeps the layer inert off-map
@@ -467,6 +419,27 @@ namespace Manimal.Icebreaker
 
             Log.LogInfo($"Manimal-Icebreaker {BuildInfo.Version} loaded");
             LogConfigBanner();
+        }
+
+        private static void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
+        {
+            try { IcebreakerPatchLifecycle.OnSceneLoaded(scene); } catch { }
+            try { IcebreakerAcoustics.OnSceneLoaded(scene); } catch { }
+            // Capture ownership before other mods start spawning runtime materials.
+            try
+            {
+                if (scene.name != null && scene.name.StartsWith("Icebreaker", System.StringComparison.OrdinalIgnoreCase)
+                    && FikaBridge.CanRender)
+                    RenderEnvProbe.CaptureSceneMaterials(scene);
+            }
+            catch { }
+        }
+
+        private void OnDestroy()
+        {
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
+            try { IcebreakerPatchLifecycle.Shutdown("plugin destroyed"); }
+            catch (System.Exception e) { Log?.LogWarning($"[PatchLifecycle] shutdown failed: {e.Message}"); }
         }
 
         // SUPPORT BANNER. every bug report starts with a log, and the first question is
@@ -505,10 +478,10 @@ namespace Manimal.Icebreaker
     // CachePoints is the last step of the covers restore chain in BotsController.Init
     // (CreateOrFind -> RestoreData -> CachePoints), so a postfix here sees the graph
     // exactly as bots will use it — ids rewired, manual points merged, voxels linked.
-    [HarmonyPatch(typeof(AICoversData), nameof(AICoversData.CachePoints))]
-    internal static class Patch_CachePoints
+    [IcebreakerPatchTarget(typeof(AICoversData), nameof(AICoversData.CachePoints))]
+    internal sealed class Patch_CachePoints : IcebreakerModulePatch<Patch_CachePoints>
     {
-        [HarmonyPostfix]
+        [PatchPostfix]
         private static void Postfix(AICoversData __instance)
         {
             if (IceGate.On && Plugin.DevMode.Value && Plugin.AutoDump.Value)
@@ -519,10 +492,10 @@ namespace Manimal.Icebreaker
     // swap in generated covers BEFORE the game restores/wires anything, so the whole
     // restore chain (voxel rewire, way targets, patrol restore) runs on our data the
     // same way it runs on baked data
-    [HarmonyPatch(typeof(AICoversData), nameof(AICoversData.RestoreData))]
-    internal static class Patch_RestoreData
+    [IcebreakerPatchTarget(typeof(AICoversData), nameof(AICoversData.RestoreData))]
+    internal sealed class Patch_RestoreData : IcebreakerModulePatch<Patch_RestoreData>
     {
-        [HarmonyPrefix]
+        [PatchPrefix]
         private static void Prefix(AICoversData __instance)
         {
             if (IceGate.On && Plugin.InjectCovers.Value)
@@ -533,10 +506,10 @@ namespace Manimal.Icebreaker
     // loose-loot points cant be generated at RestoreData time — factory-style maps have
     // no loose-loot scene markers, only backend records, and those arrive here. postfix
     // so the game's own container matching has already run on our container points.
-    [HarmonyPatch(typeof(AIPatrolsData), nameof(AIPatrolsData.RestoreLoot))]
-    internal static class Patch_RestoreLoot
+    [IcebreakerPatchTarget(typeof(AIPatrolsData), nameof(AIPatrolsData.RestoreLoot))]
+    internal sealed class Patch_RestoreLoot : IcebreakerModulePatch<Patch_RestoreLoot>
     {
-        [HarmonyPostfix]
+        [PatchPostfix]
         private static void Postfix(AIPatrolsData __instance, [HarmonyArgument(0)] JsonType.LootData lootData)
         {
             try

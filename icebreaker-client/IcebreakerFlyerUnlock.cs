@@ -21,7 +21,8 @@ namespace Manimal.Icebreaker
             => status == EQuestStatus.Started || status == EQuestStatus.AvailableForFinish ||
                status == EQuestStatus.Success || status == EQuestStatus.Fail || status == EQuestStatus.FailRestartable;
 
-        internal sealed class Patch_BackendCount : ModulePatch
+        [IcebreakerPatchScope(IcebreakerPatchScope.Bootstrap)]
+        internal sealed class Patch_BackendCount : IcebreakerModulePatch<Patch_BackendCount>
         {
             protected override MethodBase GetTargetMethod()
                 => AccessTools.Method(typeof(ConditionsConnectorsManagerQuestClientBackend), "GetFindItemConditionCount");
@@ -30,7 +31,8 @@ namespace Manimal.Icebreaker
                 => PreserveDiscovery(quest, condition, ref __result);
         }
 
-        internal sealed class Patch_GameCount : ModulePatch
+        [IcebreakerPatchScope(IcebreakerPatchScope.Bootstrap)]
+        internal sealed class Patch_GameCount : IcebreakerModulePatch<Patch_GameCount>
         {
             protected override MethodBase GetTargetMethod()
                 => AccessTools.Method(typeof(ConditionsConnectorsManagerQuestClientGame), "GetFindItemConditionCount");
@@ -39,7 +41,8 @@ namespace Manimal.Icebreaker
                 => PreserveDiscovery(quest, condition, ref __result);
         }
 
-        internal sealed class Patch_Visibility : ModulePatch
+        [IcebreakerPatchScope(IcebreakerPatchScope.Bootstrap)]
+        internal sealed class Patch_Visibility : IcebreakerModulePatch<Patch_Visibility>
         {
             protected override MethodBase GetTargetMethod() => AccessTools.PropertyGetter(typeof(Quest), nameof(Quest.IsVisible));
             [PatchPostfix]

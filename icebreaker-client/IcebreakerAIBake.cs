@@ -30,6 +30,15 @@ namespace Manimal.Icebreaker
 
         private static readonly Dictionary<long, Component> _comps = new Dictionary<long, Component>();
 
+        internal static void ReleaseRaid()
+        {
+            Loaded = false;
+            _comps.Clear();
+            var marker = _marker;
+            _marker = null;
+            if (marker != null) UnityEngine.Object.Destroy(marker);
+        }
+
         private static string DataDir =>
             SysIoPath.Combine(SysIoPath.GetDirectoryName(typeof(Plugin).Assembly.Location) ?? ".", "aibake");
 

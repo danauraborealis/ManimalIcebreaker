@@ -10,7 +10,7 @@ using EFT.CameraControl;
 using EFT.AssetsManager;
 using EFT.InventoryLogic;
 using EFT.PrefabSettings;
-using HarmonyLib;
+using SPT.Reflection.Patching;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -64,16 +64,16 @@ namespace Manimal.Icebreaker
             Plugin.Log.LogInfo($"[Tripwires] seed {seed} received from host");
         }
 
-        [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
-        private static class Patch_PlantAuthoredTripwires
+        [IcebreakerPatchTarget(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
+        private sealed class Patch_PlantAuthoredTripwires : IcebreakerModulePatch<Patch_PlantAuthoredTripwires>
         {
-            [HarmonyPostfix]
+            [PatchPostfix]
             private static void Postfix()
             {
                 if (!IceGate.On) return;
                 // SAIN's assembly is definitely loaded by raid start, whatever the
                 // plugin init order was — safe moment for the soft-dependency patch
-                SainLocationCompat.TryPatch(new Harmony("com.manimal.icebreaker.saincompat"));
+                SainLocationCompat.TryPatch();
                 if (!Plugin.Tripwires.Value) return;
                 _donorVisual = null;      // per-raid: pooled assets die with the raid
                 if (_visualRoot != null) UnityEngine.Object.Destroy(_visualRoot);
@@ -325,11 +325,11 @@ namespace Manimal.Icebreaker
 
         // Repair the INSTANCE returned to SetupStakes, including instances already
         // created in a pool. Scanning prefab assets by name missed these copies.
-        [HarmonyPatch(typeof(ObjectsFactory), nameof(ObjectsFactory.CreateItem),
+        [IcebreakerPatchTarget(typeof(ObjectsFactory), nameof(ObjectsFactory.CreateItem),
             typeof(Item), typeof(ECameraType), typeof(IPlayer), typeof(bool))]
-        private static class Patch_TripwireItemVisual
+        private sealed class Patch_TripwireItemVisual : IcebreakerModulePatch<Patch_TripwireItemVisual>
         {
-            [HarmonyPostfix]
+            [PatchPostfix]
             private static void Postfix(Item item, GameObject __result)
             {
                 if (!IceGate.On || item == null || __result == null ||

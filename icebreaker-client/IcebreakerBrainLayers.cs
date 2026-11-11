@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -110,13 +111,23 @@ namespace Manimal.Icebreaker
             var id = bot?.ProfileId;
             if (id == null) return null;
             if (ByProfile.TryGetValue(id, out var rec)) return rec;
-            if (bot.Profile?.Info?.Settings?.Role == (WildSpawnType)IcebreakerCrew.BdIb)
+            if (bot.Profile?.Info?.Settings?.Role is WildSpawnType role
+                && IcebreakerCombineEncounter.IsCrewRole((int)role))
             {
                 if (!FirstSeen.TryGetValue(id, out var seen)) { FirstSeen[id] = Time.time; return null; }
                 if (Time.time - seen < 5f) return null;
                 var zone = new Bounds(bot.Position, new Vector3(24f, 8f, 24f));
                 Assign(bot, Job.Guard, zone);
                 return ByProfile[id];
+            }
+            if (bot.Profile?.Info?.Settings?.Role is WildSpawnType pendingRole
+                && IcebreakerCombineEncounter.IsPotentialCrewRole((int)pendingRole)
+                && !IcebreakerCombineEncounter.SelectionAuthoritative)
+            {
+                // A client can tick a replicated Combine body before the host's
+                // selection packet. Do not cache this as a permanent non-crew bot;
+                // the authoritative SelectionReady edge may promote it later.
+                return null;
             }
             ByProfile[id] = null; // cached negative — not a crew-managed bot
             return null;
@@ -382,10 +393,10 @@ namespace Manimal.Icebreaker
         // Speaker calls are muzzled too, not just vanilla BotTalk
         internal static readonly HashSet<EFT.BaseSpeaker> MutedSpeakers = new HashSet<EFT.BaseSpeaker>();
 
-        [HarmonyPatch(typeof(EFT.BaseSpeaker), nameof(EFT.BaseSpeaker.Play))]
-        internal static class Patch_MuteHeldSpeakerPlay
+        [IcebreakerPatchTarget(typeof(EFT.BaseSpeaker), nameof(EFT.BaseSpeaker.Play))]
+        internal sealed class Patch_MuteHeldSpeakerPlay : IcebreakerModulePatch<Patch_MuteHeldSpeakerPlay>
         {
-            [HarmonyPrefix]
+            [PatchPrefix]
             private static bool Prefix(EFT.BaseSpeaker __instance, ref TagBank __result)
             {
                 if (!MutedSpeakers.Contains(__instance)) return true;
@@ -394,10 +405,10 @@ namespace Manimal.Icebreaker
             }
         }
 
-        [HarmonyPatch(typeof(EFT.BaseSpeaker), nameof(EFT.BaseSpeaker.Queue))]
-        internal static class Patch_MuteHeldSpeakerQueue
+        [IcebreakerPatchTarget(typeof(EFT.BaseSpeaker), nameof(EFT.BaseSpeaker.Queue))]
+        internal sealed class Patch_MuteHeldSpeakerQueue : IcebreakerModulePatch<Patch_MuteHeldSpeakerQueue>
         {
-            [HarmonyPrefix]
+            [PatchPrefix]
             private static bool Prefix(EFT.BaseSpeaker __instance) => !MutedSpeakers.Contains(__instance);
         }
     }

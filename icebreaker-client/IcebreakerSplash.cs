@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using EFT.UI;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using UnityEngine;
 
 namespace Manimal.Icebreaker
@@ -88,10 +89,11 @@ namespace Manimal.Icebreaker
             catch (Exception e) { Plugin.Log.LogWarning("[Splash] existing panel update failed: " + e.Message); }
         }
 
-        [HarmonyPatch(typeof(SplashScreenPanel), "get_RandomSprite")]
-        private static class Patch_RandomSplash
+        [IcebreakerPatchTarget(typeof(SplashScreenPanel), "get_RandomSprite")]
+        [IcebreakerPatchScope(IcebreakerPatchScope.Bootstrap)]
+        private sealed class Patch_RandomSplash : IcebreakerModulePatch<Patch_RandomSplash>
         {
-            [HarmonyPrefix]
+            [PatchPrefix]
             private static bool Prefix(SplashScreenPanel __instance, ref Sprite __result)
             {
                 if (!FikaBridge.CanRender) return true;

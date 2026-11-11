@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 
 namespace Manimal.Icebreaker
 {
@@ -24,13 +25,13 @@ namespace Manimal.Icebreaker
 
         internal static void ResetForNewRaid() => RegionsApplied = false;
 
-        [HarmonyPatch(typeof(LevelPhysicsSettings), "Awake")]
-        internal static class Patch_NewestMapOwnsRegions
+        [IcebreakerPatchTarget(typeof(LevelPhysicsSettings), "Awake")]
+        internal sealed class Patch_NewestMapOwnsRegions : IcebreakerModulePatch<Patch_NewestMapOwnsRegions>
         {
             private static readonly FieldInfo Owner =
                 AccessTools.Field(typeof(LevelPhysicsSettings), "_used");
 
-            [HarmonyPrefix]
+            [PatchPrefix]
             private static void Prefix(LevelPhysicsSettings __instance)
             {
                 try
@@ -49,7 +50,7 @@ namespace Manimal.Icebreaker
                 catch (Exception e) { Plugin.Log.LogWarning($"[PhysRegions] handover failed: {e.Message}"); }
             }
 
-            [HarmonyPostfix]
+            [PatchPostfix]
             private static void Postfix(LevelPhysicsSettings __instance)
             {
                 try

@@ -1,5 +1,7 @@
 using System;
+using System.Reflection;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 
 namespace Manimal.Icebreaker
 {
@@ -13,8 +15,12 @@ namespace Manimal.Icebreaker
     // delay_game_start_until_bot_gen_finishes wait would hang the raid load.
     internal static class IcebreakerQuestingBotsOff
     {
-        internal static void TryPatch(Harmony h)
+        private static bool _tried;
+
+        internal static void TryPatch()
         {
+            if (_tried) return;
+            _tried = true;
             var pmc = AccessTools.TypeByName("QuestingBots.Components.Spawning.PMCGenerator");
             var pscav = AccessTools.TypeByName("QuestingBots.Components.Spawning.PScavGenerator");
             if (pmc == null && pscav == null) return; // QB not installed
@@ -28,13 +34,13 @@ namespace Manimal.Icebreaker
                 var canSpawn = AccessTools.DeclaredMethod(t, "CanSpawnBots");
                 if (canSpawn != null)
                 {
-                    h.Patch(canSpawn, prefix: new HarmonyMethod(typeof(IcebreakerQuestingBotsOff), nameof(SkipFalse)));
+                    IcebreakerPatchLifecycle.RegisterRaid(new BoolPatch(canSpawn));
                     gated++;
                 }
                 var allowed = AccessTools.DeclaredMethod(t, "GetNumberOfBotsAllowedToSpawn");
                 if (allowed != null)
                 {
-                    h.Patch(allowed, prefix: new HarmonyMethod(typeof(IcebreakerQuestingBotsOff), nameof(SkipZero)));
+                    IcebreakerPatchLifecycle.RegisterRaid(new IntPatch(allowed));
                     gated++;
                 }
             }
@@ -46,7 +52,7 @@ namespace Manimal.Icebreaker
             var suppress = bossPatch == null ? null : AccessTools.DeclaredMethod(bossPatch, "shouldSuppressBossWave");
             if (suppress != null)
             {
-                h.Patch(suppress, prefix: new HarmonyMethod(typeof(IcebreakerQuestingBotsOff), nameof(SkipFalse)));
+                IcebreakerPatchLifecycle.RegisterRaid(new BoolPatch(suppress));
                 gated++;
             }
 
@@ -59,7 +65,7 @@ namespace Manimal.Icebreaker
             var delayGetter = gameStart == null ? null : AccessTools.PropertyGetter(gameStart, "IsDelayingGameStart");
             if (delayGetter != null)
             {
-                h.Patch(delayGetter, prefix: new HarmonyMethod(typeof(IcebreakerQuestingBotsOff), nameof(SkipFalse)));
+                IcebreakerPatchLifecycle.RegisterRaid(new BoolPatch(delayGetter));
                 gated++;
             }
 
@@ -79,6 +85,22 @@ namespace Manimal.Icebreaker
             if (!IceGate.On) return true;
             __result = 0;
             return false;
+        }
+
+        private sealed class BoolPatch : IcebreakerModulePatch<BoolPatch>
+        {
+            internal BoolPatch(MethodBase target) : base(target) { }
+
+            [PatchPrefix]
+            private static bool Prefix(ref bool __result) => SkipFalse(ref __result);
+        }
+
+        private sealed class IntPatch : IcebreakerModulePatch<IntPatch>
+        {
+            internal IntPatch(MethodBase target) : base(target) { }
+
+            [PatchPrefix]
+            private static bool Prefix(ref int __result) => SkipZero(ref __result);
         }
     }
 }

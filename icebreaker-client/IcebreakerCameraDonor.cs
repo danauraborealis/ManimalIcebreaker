@@ -5,6 +5,7 @@ using System.Reflection;
 using Comfort.Common;
 using EFT;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 
@@ -109,10 +110,14 @@ namespace Manimal.Icebreaker
 
         // ------------------------------------------------------------------ dump side
 
-        [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
-        internal static class Patch_DumpDonorCamera
+        // The donor dump is intentionally available on a vanilla map while DevMode
+        // is enabled. Keep this observer in the bootstrap set; its graft path remains
+        // gated by IceGate and therefore does not install map behavior elsewhere.
+        [IcebreakerPatchScope(IcebreakerPatchScope.Bootstrap)]
+        [IcebreakerPatchTarget(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
+        internal sealed class Patch_DumpDonorCamera : IcebreakerModulePatch<Patch_DumpDonorCamera>
         {
-            [HarmonyPostfix]
+            [PatchPostfix]
             private static void Postfix()
             {
                 if (!FikaBridge.CanRender) return;
@@ -179,10 +184,10 @@ namespace Manimal.Icebreaker
 
         // ------------------------------------------------------------------ graft side
 
-        [HarmonyPatch(typeof(EFT.CameraControl.CameraManager), "SetCamera", typeof(Camera))]
-        internal static class Patch_GraftDonorCamera
+        [IcebreakerPatchTarget(typeof(EFT.CameraControl.CameraManager), "SetCamera", typeof(Camera))]
+        internal sealed class Patch_GraftDonorCamera : IcebreakerModulePatch<Patch_GraftDonorCamera>
         {
-            [HarmonyPrefix]
+            [PatchPrefix]
             private static void Prefix(Camera camera)
             {
                 if (!IceGate.On || camera == null) return;

@@ -45,7 +45,8 @@ namespace Manimal.Icebreaker
 
         // the game hands smethod_6 the authoritative Location object before any other
         // identity exists — capture the id so construction-time patches can gate on it
-        internal sealed class Patch_CaptureLocationId : ModulePatch
+        [IcebreakerPatchScope(IcebreakerPatchScope.Bootstrap)]
+        internal sealed class Patch_CaptureLocationId : IcebreakerModulePatch<Patch_CaptureLocationId>
         {
             protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(LocalGame), "Create");
 
@@ -55,7 +56,17 @@ namespace Manimal.Icebreaker
                 PendingLocationId = location?.Id;
                 // before any scene (and so any LevelPhysicsSettings.Awake) loads
                 IcebreakerPhysicsRegions.ResetForNewRaid();
+                IcebreakerPatchLifecycle.Enter(PendingLocationId);
                 Plugin.Log.LogInfo($"[IceGate] raid location: '{PendingLocationId ?? "<null>"}'");
+            }
+
+
+            [PatchFinalizer]
+            private static Exception Finalizer(Exception __exception)
+            {
+                if (__exception != null)
+                    IcebreakerPatchLifecycle.NotifyLoadFailure("LocalGame.Create failed");
+                return __exception;
             }
         }
 
@@ -66,7 +77,7 @@ namespace Manimal.Icebreaker
         // measures the map BEFORE loot spawns, so the two can be compared directly.
         // if the collider count matches but only the transit run overflows, the regions
         // themselves are stale from the previous map rather than the map being too big.
-        internal sealed class Patch_PhysicsAudit : ModulePatch
+        internal sealed class Patch_PhysicsAudit : IcebreakerModulePatch<Patch_PhysicsAudit>
         {
             protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GameWorld), nameof(GameWorld.OnGameStarted));
 

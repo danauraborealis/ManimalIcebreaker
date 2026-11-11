@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 
 namespace Manimal.Icebreaker
 {
@@ -32,7 +33,7 @@ namespace Manimal.Icebreaker
             ("LockableDoors.Patches.GetAvailableActionsPatch", "PatchPostfix"),
         };
 
-        internal static void TryPatch(Harmony h)
+        internal static void TryPatch()
         {
             if (_tried) return;
             _tried = true;
@@ -40,7 +41,6 @@ namespace Manimal.Icebreaker
             {
                 if (!BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(PluginGuid)) return;
 
-                var skip = new HarmonyMethod(AccessTools.Method(typeof(IcebreakerLockableDoorsOff), nameof(SkipOnIcebreaker)));
                 int done = 0;
                 foreach (var (typeName, methodName) in Targets)
                 {
@@ -54,7 +54,7 @@ namespace Manimal.Icebreaker
                                 + "doors on the icebreaker may be locked/broken until this shim is refreshed");
                             continue;
                         }
-                        h.Patch(m, prefix: skip);
+                        IcebreakerPatchLifecycle.RegisterRaid(new LockablePatch(m));
                         done++;
                     }
                     catch (Exception e)
@@ -72,5 +72,13 @@ namespace Manimal.Icebreaker
         // false = skip the original. IceGate is the ONLY condition, so every other map
         // keeps the mod's behaviour untouched.
         private static bool SkipOnIcebreaker() => !IceGate.On;
+
+        private sealed class LockablePatch : IcebreakerModulePatch<LockablePatch>
+        {
+            internal LockablePatch(MethodBase target) : base(target) { }
+
+            [PatchPrefix]
+            private static bool Prefix() => SkipOnIcebreaker();
+        }
     }
 }

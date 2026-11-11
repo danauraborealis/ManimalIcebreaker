@@ -168,6 +168,12 @@ namespace Manimal.Icebreaker
         private static object _handler;
         private static readonly List<Player> Scratch = new List<Player>();
 
+        internal static void ReleaseRaid()
+        {
+            _handler = null;
+            Scratch.Clear();
+        }
+
         private static System.Collections.IEnumerable HumanListOrNull()
         {
             Resolve();

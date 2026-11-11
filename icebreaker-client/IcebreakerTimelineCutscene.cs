@@ -175,9 +175,14 @@ namespace Manimal.Icebreaker
             IcebreakerVolFog.CutsceneProfile = true;
             try { IcebreakerVolFog.Tick(); } catch { }
 
-            // the wedge actor becomes the player — BEFORE the body hides below, its
-            // renderers must still be readable
-            TrySwapWedgeActor();
+            // Selected Combine takes own every authored body actor, including both
+            // wedge boss roots.  The render-only transaction completes under the fade;
+            // if it fails, each actor keeps its authored renderer set.  Only when the
+            // authoritative selection is not Combine may the legacy player-wedge
+            // override dress Actor_Jumper02_Boss.
+            yield return IcebreakerCombineCutscene.Apply(_scene);
+            if (!IcebreakerCombineCutscene.CombineTookPrecedence(_scene))
+                TrySwapWedgeActor();
 
             // hide the player (body + hands + weapon) — the flying camera would
             // otherwise film the frozen scav standing at the trigger
@@ -471,6 +476,8 @@ namespace Manimal.Icebreaker
         {
             if (_restored) return;
             _restored = true;
+            try { IcebreakerCombineCutscene.ReleaseForScene(_scene); }
+            catch (Exception e) { Plugin.Log.LogWarning($"[TimelineCutscene] Combine visual cleanup failed: {e.Message}"); }
             if (_driving) { Camera.onPreCull -= DriveCamera; _driving = false; }
             try { RenderEnvProbe.CutsceneRelease(); } catch { }
             if (_realCam != null && _savedFov > 0f) _realCam.fieldOfView = _savedFov;

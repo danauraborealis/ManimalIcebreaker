@@ -45,7 +45,8 @@ public record ModMetadata : IModMetadata
         { "com.wtt.contentbackport", new SemanticVersioning.Range("~2.0.1") },
         { "com.morebotsapi.tacticaltoaster", new SemanticVersioning.Range("~2.1.1") },
         { "com.blackdiv.tacticaltoaster", new SemanticVersioning.Range("~1.3.1") },
-        { "com.manimal.csgas", new SemanticVersioning.Range("~2.0.0") },
+        // any 2.x — csgas adds grenades in minor releases
+        { "com.manimal.csgas", new SemanticVersioning.Range(">=2.0.0 <3.0.0") },
         // Boreas Part 6 counts kills in the retail q14_10_kill_ice zone, which only
         // exists on the backported Interchange map
         { "com.manimal.interchange", new SemanticVersioning.Range("~1.0.0") }

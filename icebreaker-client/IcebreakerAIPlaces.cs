@@ -5,6 +5,7 @@ using EFT;
 using EFT.Interactive;
 using Comfort.Common;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -28,6 +29,14 @@ namespace Manimal.Icebreaker
         private static JObject _sidecar;
         private static bool _sidecarTried;
         private static GameObject _marker;
+        private static GlobalEventDispatcher _eventDispatcher;
+
+        // The bridge is normally attached within the first few seconds of raid
+        // startup, but the authored trigger can fire immediately when the player
+        // starts inside its bounds. Keep that early-trigger fix bounded: a broken
+        // bridge must not retain an unbounded event list for the rest of the raid.
+        private const int MaxPendingEvents = 128;
+        private static bool _pendingOverflowLogged;
 
         // events can fire the moment triggers exist (player spawns near the bow box —
         // hides0 fired 14 log-lines before the crew bridge armed and was LOST). so the
@@ -40,10 +49,10 @@ namespace Manimal.Icebreaker
         // raise these and BSG's BossSpawnScenario acts on them, so this line is the only
         // proof of "which wave fired and when" — it turned a player's "guys spawned in
         // the wrong place" report into a five-second grep (08-09).
-        [HarmonyPatch(typeof(GlobalEventDispatcher), nameof(GlobalEventDispatcher.AnyEvent), new[] { typeof(string) })]
-        internal static class Patch_LogAnyEvent
+        [IcebreakerPatchTarget(typeof(GlobalEventDispatcher), nameof(GlobalEventDispatcher.AnyEvent), new[] { typeof(string) })]
+        internal sealed class Patch_LogAnyEvent : IcebreakerModulePatch<Patch_LogAnyEvent>
         {
-            [HarmonyPostfix]
+            [PatchPostfix]
             private static void Postfix(string eventId)
             {
                 if (IceGate.On)
@@ -53,16 +62,96 @@ namespace Manimal.Icebreaker
 
         private static void OnAnyEvent(string id)
         {
+            // BossSpawnScenario is host-authoritative under Fika. A remote peer
+            // still has the scene trigger objects, but must not retain a local
+            // event queue after IcebreakerCrew exits before AttachBridge.
+            if (!IceGate.On || !FikaBridge.BotsAuthority) return;
+
             var b = Bridge;
             if (b != null) b(id);
-            else { PendingEvents.Add(id); Plugin.Log.LogDebug($"[AIPlaces] event '{id}' buffered (bridge not armed yet)"); }
+            else
+            {
+                if (PendingEvents.Count >= MaxPendingEvents)
+                {
+                    if (!_pendingOverflowLogged)
+                    {
+                        _pendingOverflowLogged = true;
+                        Plugin.Log.LogWarning($"[AIPlaces] pending event buffer reached {MaxPendingEvents}; later pre-bridge events are dropped");
+                    }
+                    return;
+                }
+
+                PendingEvents.Add(id);
+                Plugin.Log.LogDebug($"[AIPlaces] event '{id}' buffered (bridge not armed yet)");
+            }
         }
 
         public static void AttachBridge(Action<string> bridge)
         {
+            if (!IceGate.On || !FikaBridge.BotsAuthority)
+            {
+                // A Fika client intentionally has no spawn bridge. Clear any
+                // stale state left by a scene transition instead of retaining
+                // events that can never be consumed.
+                UnsubscribeDispatcher();
+                Bridge = null;
+                PendingEvents.Clear();
+                return;
+            }
+
+            if (bridge == null)
+            {
+                Bridge = null;
+                return;
+            }
+
             Bridge = bridge;
-            foreach (var id in PendingEvents) bridge(id);
+            var pending = PendingEvents.ToArray();
             PendingEvents.Clear();
+            _pendingOverflowLogged = false;
+            foreach (var id in pending)
+            {
+                try { bridge(id); }
+                catch (Exception e) { Plugin.Log.LogWarning($"[AIPlaces] buffered event '{id}' bridge failed: {e.Message}"); }
+            }
+        }
+
+        internal static void DetachBridge(Action<string> bridge)
+        {
+            // A late OnDestroy from an older crew object must not clear a newer
+            // raid's bridge. Delegate equality includes the target instance, so
+            // only the subscriber that owns the current bridge can detach it.
+            if (bridge != null && Bridge == bridge)
+                Bridge = null;
+        }
+
+        // Called by the central raid lifecycle only after owned scenes and their
+        // producer tasks are terminal. Store and detach the exact dispatcher we
+        // subscribed to; consulting Singleton.Instance here could unsubscribe a
+        // later raid's dispatcher while this old subscription is still alive.
+        internal static void ReleaseRaid()
+        {
+            UnsubscribeDispatcher();
+
+            Bridge = null;
+            PendingEvents.Clear();
+            _pendingOverflowLogged = false;
+
+            if (_marker != null)
+            {
+                try { UnityEngine.Object.Destroy(_marker); }
+                catch (Exception e) { Plugin.Log?.LogWarning($"[AIPlaces] marker cleanup failed: {e.Message}"); }
+            }
+            _marker = null;
+        }
+
+        private static void UnsubscribeDispatcher()
+        {
+            var dispatcher = _eventDispatcher;
+            _eventDispatcher = null;
+            if (dispatcher == null) return;
+            try { dispatcher.OnEvent -= OnAnyEvent; }
+            catch (Exception e) { Plugin.Log?.LogWarning($"[AIPlaces] dispatcher unsubscribe failed: {e.Message}"); }
         }
 
         private static string DataDir =>
@@ -193,12 +282,26 @@ namespace Manimal.Icebreaker
                         Plugin.Log.LogDebug($"[AIPlaces] box '{go.name}' at {t.position} size {Vector3.Scale(bc.size, t.lossyScale)}");
                 }
 
-                // subscribe NOW — before any player movement can fire a trigger
+                // subscribe NOW — before any player movement can fire a trigger.
+                // Only the bot-authority peer consumes these events; remote Fika
+                // peers still need the trigger visuals/components but must not
+                // buffer an event stream that no local crew can drain.
+                UnsubscribeDispatcher();
                 Bridge = null;
                 PendingEvents.Clear();
-                var handler = Singleton<GlobalEventDispatcher>.Instance;
-                if (handler != null) handler.OnEvent += OnAnyEvent;
-                else Plugin.Log.LogDebug("[AIPlaces] no GlobalEventDispatcher at build time — events may be lost");
+                _pendingOverflowLogged = false;
+                if (FikaBridge.BotsAuthority)
+                {
+                    var handler = Singleton<GlobalEventDispatcher>.Instance;
+                    if (handler != null)
+                    {
+                        _eventDispatcher = handler;
+                        handler.OnEvent += OnAnyEvent;
+                    }
+                    else Plugin.Log.LogDebug("[AIPlaces] no GlobalEventDispatcher at build time — events may be lost");
+                }
+                else
+                    Plugin.Log.LogDebug("[AIPlaces] non-authority peer — event bridge subscription skipped");
 
                 _marker = new GameObject("Icebreaker_AIPlacesStaged");
                 var scn = SceneManager.GetSceneByName("Icebreaker_AI");

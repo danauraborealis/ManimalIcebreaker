@@ -6,6 +6,8 @@ using Comfort.Common;
 using EFT;
 using EFT.Game.Spawning;
 using HarmonyLib;
+using SPT.Reflection.Patching;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -15,25 +17,52 @@ namespace Manimal.Icebreaker
     // BSG's boss path activates the leader, THEN generates/queues the four escorts
     // with forceSpawn=false and four copies of the leader's point. Prepare this
     // particular squad together and submit five single-bot activations instead.
-    [HarmonyPatch(typeof(BotBossSpawn), nameof(BotBossSpawn.SpawnBossAndFollowers))]
-    internal static class IcebreakerFinalSquad
+    internal sealed class IcebreakerFinalSquad : IcebreakerModulePatch<IcebreakerFinalSquad>
     {
-        [HarmonyPrefix]
-        private static bool Prefix(BotBossSpawn __instance, BotCreationData creationData,
-            BossLocationSpawn wave, BotSpawnParams spawnParams, int followersCount,
-            BotZone botZone, ref Task __result)
-        {
-            if (!IceGate.On || !FikaBridge.BotsAuthority || wave == null ||
-                wave.TriggerId != "T4" || !wave.ForceSpawn || followersCount != 4 ||
-                (int)wave.BossType != IcebreakerCrew.BdIb || wave.EscortType != wave.BossType ||
-                botZone == null || botZone.name != "BotZoneInside_t4") return true;
-            __result = Spawn(__instance, creationData, wave, spawnParams, botZone);
-            return false;
-        }
+        protected override MethodBase GetTargetMethod()
+            => AccessTools.Method(typeof(BotBossSpawn), nameof(BotBossSpawn.SpawnBossAndFollowers));
 
-        private static async Task Spawn(BotBossSpawn boss, BotCreationData leader,
-            BossLocationSpawn wave, BotSpawnParams spawnParams, BotZone zone)
-        {
+        [PatchPrefix]
+            private static bool Prefix(BotBossSpawn __instance, BotCreationData creationData,
+                BossLocationSpawn wave, BotSpawnParams spawnParams, int followersCount,
+                BotZone botZone, ref Task __result)
+            {
+                if (!IceGate.On || !FikaBridge.BotsAuthority || wave == null ||
+                    wave.TriggerId != "T4" || !wave.ForceSpawn || botZone == null ||
+                    botZone.name != "BotZoneInside_t4") return true;
+
+                IcebreakerCombineEncounter.TryEnsureHostSelection();
+
+                bool vanillaBdT4 = followersCount == 4
+                    && (int)wave.BossType == IcebreakerCrew.BdIb
+                    && wave.EscortType == wave.BossType;
+                // BossLocationSpawn.Init expands Supports into EscortCount (4) even
+                // though the authored BossEscortAmount remains "0". Match the
+                // post-Init call shape, while IsConvertedT4 verifies the raw 0 + 2+2
+                // contract so native Supports cannot run after this prefix returns.
+                bool combineT4 = followersCount == 4 && IsConvertedT4(wave);
+                if (!vanillaBdT4 && !combineT4) return true;
+
+                __result = Spawn(__instance, creationData, wave, spawnParams, botZone, combineT4);
+                return false;
+            }
+
+            private static bool IsConvertedT4(BossLocationSpawn wave)
+            {
+                if (!IcebreakerCombineEncounter.Active || wave.BossType != (WildSpawnType)IcebreakerCombineEncounter.CombineSoldier
+                    || !string.Equals(wave.BossEscortAmount, "0", StringComparison.OrdinalIgnoreCase)
+                    || wave.Supports == null) return false;
+                return wave.Supports.AsValueEnumerable().Any(s => s != null
+                        && s.BossEscortType == (WildSpawnType)IcebreakerCombineEncounter.CombineSoldier
+                        && s.BossEscortAmount == 2)
+                    && wave.Supports.AsValueEnumerable().Any(s => s != null
+                        && s.BossEscortType == (WildSpawnType)IcebreakerCombineEncounter.CombineShotgunner
+                        && s.BossEscortAmount == 2);
+            }
+
+            private static async Task Spawn(BotBossSpawn boss, BotCreationData leader,
+                BossLocationSpawn wave, BotSpawnParams spawnParams, BotZone zone, bool combineT4)
+            {
             var ready = new List<BotCreationData> { leader };
             var token = boss._spawner.GetCancelToken();
             bool submitted = false;
@@ -44,10 +73,21 @@ namespace Manimal.Icebreaker
                 spawnParams.ShallBeGroup = new ShallBeGroupParams(true, true, 5);
                 // SPT's profile-client path may ignore Create(count), so make four
                 // explicit requests and await all of them BEFORE activating the leader.
+                // Converted T4 preserves the server's Supports contract exactly:
+                // two CombineSoldier and two CombineShotgunner escorts.
+                var supportRoles = combineT4
+                    ? new[]
+                    {
+                        (WildSpawnType)IcebreakerCombineEncounter.CombineSoldier,
+                        (WildSpawnType)IcebreakerCombineEncounter.CombineSoldier,
+                        (WildSpawnType)IcebreakerCombineEncounter.CombineShotgunner,
+                        (WildSpawnType)IcebreakerCombineEncounter.CombineShotgunner,
+                    }
+                    : new[] { wave.EscortType, wave.EscortType, wave.EscortType, wave.EscortType };
                 var requests = new Task<BotCreationData>[4];
                 for (int i = 0; i < requests.Length; i++)
                     requests[i] = BotCreationData.Create(new GetProfileDataParams(EPlayerSide.Savage,
-                        wave.EscortType, wave.EscortDif, wave.Time, spawnParams, false),
+                        supportRoles[i], wave.EscortDif, wave.Time, spawnParams, false),
                         boss._botCreator, 1, boss._spawner);
                 try { await Task.WhenAll(requests); }
                 finally
@@ -93,7 +133,7 @@ namespace Manimal.Icebreaker
                             Plugin.Log.LogInfo($"[T4Squad] active {activated}/5 at {bot.Position}, +{Time.time - started:0.00}s");
                         });
                 }
-                Plugin.Log.LogInfo("[T4Squad] all five profiles ready; five separated activations submitted together");
+                Plugin.Log.LogInfo($"[T4Squad] all five profiles ready ({(combineT4 ? "2 soldier + 2 shotgunner" : "BD")}); five separated activations submitted together");
             }
             catch (OperationCanceledException) { }
             catch (Exception e)
@@ -109,8 +149,8 @@ namespace Manimal.Icebreaker
             }
         }
 
-        private static List<ISpawnPoint> PickPositions(BotZone zone, int count)
-        {
+            private static List<ISpawnPoint> PickPositions(BotZone zone, int count)
+            {
             var result = new List<ISpawnPoint>();
             if (zone.SpawnPoints == null) return result;
             var seeds = zone.SpawnPoints.AsValueEnumerable().Where(p => p != null)
@@ -146,7 +186,7 @@ namespace Manimal.Icebreaker
                 });
                 if (result.Count == count) return result;
             }
-            return result;
+                return result;
+            }
         }
     }
-}

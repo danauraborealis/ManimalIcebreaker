@@ -4,6 +4,7 @@ using Comfort.Common;
 using EFT;
 using EFT.Interactive;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using UnityEngine;
 
 namespace Manimal.Icebreaker
@@ -226,9 +227,10 @@ namespace Manimal.Icebreaker
 
     // append "Unseal Door" / "Reseal Door" to the vanilla door action menu. smethod_14
     // is the builder for plain doors — the sealed face (Locked, no key) lands here.
-    [HarmonyPatch(typeof(EFT.InteractionContextHelper), "GetAvailableActions", typeof(EFT.GamePlayerOwner), typeof(EFT.Interactive.Door))]
-    internal static class Patch_SealedDoorActions
+    [IcebreakerPatchTarget(typeof(EFT.InteractionContextHelper), "GetAvailableActions", typeof(EFT.GamePlayerOwner), typeof(EFT.Interactive.Door))]
+    internal sealed class Patch_SealedDoorActions : IcebreakerModulePatch<Patch_SealedDoorActions>
     {
+        [PatchPostfix]
         private static void Postfix(EFT.UI.AvailableInteractionState __result, GamePlayerOwner owner, Door door)
         {
             if (__result == null || door == null) return;

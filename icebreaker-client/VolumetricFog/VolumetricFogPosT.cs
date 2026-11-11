@@ -67,6 +67,13 @@ namespace VolumetricFogAndMist {
 
         }
 
+		void OnDestroy() {
+			if (copyOpaqueMat != null) {
+				DestroyImmediate(copyOpaqueMat);
+				copyOpaqueMat = null;
+			}
+		}
+
         public void DestroySelf() {
             DestroyImmediate(this);
         }

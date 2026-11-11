@@ -59,6 +59,15 @@ namespace VolumetricFogAndMist {
 			}
 		}
 
+		void OnDestroy() {
+			// A camera/helper can be torn down between OnRenderImage and OnPostRender
+			// during raid unload. Release the outstanding temporary target in that path.
+			if (opaqueFrame != null) {
+				RenderTexture.ReleaseTemporary(opaqueFrame);
+				opaqueFrame = null;
+			}
+		}
+
 		public void DestroySelf() {
 			DestroyImmediate(this);
 		}

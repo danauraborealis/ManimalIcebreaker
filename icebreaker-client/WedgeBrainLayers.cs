@@ -1,6 +1,7 @@
 using Comfort.Common;
 using EFT;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -60,10 +61,10 @@ namespace Manimal.Icebreaker
         private BotOwner _boss;
         private float _nextTick, _nextFind, _nextTaunt, _nextBand;
 
-        [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
-        internal static class Patch_Attach
+        [IcebreakerPatchTarget(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
+        internal sealed class Patch_Attach : IcebreakerModulePatch<Patch_Attach>
         {
-            [HarmonyPostfix]
+            [PatchPostfix]
             private static void Postfix()
             {
                 if (!IceGate.On || !FikaBridge.BotsAuthority) return;

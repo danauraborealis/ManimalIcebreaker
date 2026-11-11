@@ -1,14 +1,16 @@
 using EFT;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using UnityEngine;
 
 namespace Manimal.Icebreaker
 {
     // RenderEnvProbe normally starts these gameplay services after shader repair.
     // A dedicated host must start them without creating a camera or render probe.
-    [HarmonyPatch(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
-    internal static class IcebreakerHeadless
+    [IcebreakerPatchTarget(typeof(GameWorld), nameof(GameWorld.OnGameStarted))]
+    internal sealed class IcebreakerHeadless : IcebreakerModulePatch<IcebreakerHeadless>
     {
+        [PatchPostfix]
         private static void Postfix(GameWorld __instance)
         {
             if (FikaBridge.CanRender || !IceGate.On) return;

@@ -47,6 +47,22 @@ namespace Manimal.Icebreaker
         private static int _drainIdx;
         private static readonly System.Diagnostics.Stopwatch _sw = new System.Diagnostics.Stopwatch();
 
+        internal static void ReleaseRaid()
+        {
+            _built = false;
+            _g = null;
+            _orig = null;
+            _cells = null;
+            _dirty.Clear();
+            _dirty.TrimExcess();
+            _dirtyWant.Clear();
+            _dirtyWant.TrimExcess();
+            _draining = null;
+            _n = _drainIdx = 0;
+            _camCell = new Vector3Int(int.MinValue, 0, 0);
+            _lastNear = _lastFar = _lastRadius = float.NaN;
+        }
+
         private static Vector3Int Key(Vector3 p) => new Vector3Int(
             Mathf.RoundToInt(p.x / CellSize), Mathf.RoundToInt(p.y / CellSize), Mathf.RoundToInt(p.z / CellSize));
 

@@ -6,6 +6,7 @@ using EFT;
 using EFT.Interactive;
 using EFT.Quests;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -294,9 +295,10 @@ namespace Manimal.Icebreaker
 
     // own the three panel switches' action menus, the chain-door way: vanilla would name
     // the action from the ripped-empty ContextMenuTip and flip the switch state on use.
-    [HarmonyPatch(typeof(InteractionContextHelper), "GetAvailableActions", typeof(GamePlayerOwner), typeof(Switch))]
-    internal static class Patch_PanelRepairSwitches
+    [IcebreakerPatchTarget(typeof(InteractionContextHelper), "GetAvailableActions", typeof(GamePlayerOwner), typeof(Switch))]
+    internal sealed class Patch_PanelRepairSwitches : IcebreakerModulePatch<Patch_PanelRepairSwitches>
     {
+        [PatchPostfix]
         private static void Postfix(ref EFT.UI.AvailableInteractionState __result, GamePlayerOwner owner, Switch interactiveSwitch)
         {
             try

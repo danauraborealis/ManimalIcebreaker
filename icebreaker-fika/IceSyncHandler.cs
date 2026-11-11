@@ -8,6 +8,7 @@ using Fika.Core.Networking.LiteNetLib.Utils;
 using HarmonyLib;
 using EFT;
 using Manimal.Icebreaker.Blowtorch;
+using UnityEngine;
 
 namespace Manimal.Icebreaker.Fika
 {
@@ -18,10 +19,11 @@ namespace Manimal.Icebreaker.Fika
         public byte Kind;      // 0/1 chain plant/open, 2 seal, 3 heli, 4 progress door,
                                // 5-7 hatch stages, 8 torch flame, 9 cutscene activation,
                                // 10 ladder enter/exit, 11 ladder bar angle,
-                               // 12 tripwire layout seed, 13 keypad unlock (doorId)
+                               // 12 tripwire layout seed, 13 keypad unlock (doorId),
+                               // 14 authoritative Combine selection, 15 selection request
         public string DoorId;  // seal doorId / profileId / ladder NetId, per kind
         public bool Sealing;   // seal state / torch flame / ladder enter
-        public int IntA;       // player NetId (torch/ladder kinds)
+        public int IntA;       // player NetId (torch) / raid selection token (14/15)
         public float Value;    // ladder bar angle
 
         public void Serialize(NetDataWriter writer)
@@ -47,6 +49,8 @@ namespace Manimal.Icebreaker.Fika
     {
         internal IceSyncHandler()
         {
+            IcebreakerCombineEncounter.RaidReset += OnRaidReset;
+            IcebreakerCombineEncounter.SelectionReady += OnSelectionReady;
             FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>(OnManagerCreated);
             if (Singleton<IFikaNetworkManager>.Instantiated)
                 Register(Singleton<IFikaNetworkManager>.Instance);
@@ -62,6 +66,12 @@ namespace Manimal.Icebreaker.Fika
             Manimal.Icebreaker.Keypad.Keypad.UnlockCommitted += OnKeypadUnlock;
         }
 
+        private SelectionRetryPump _selectionRetryPump;
+        private int _selectionRequests;
+        private float _selectionDeadline;
+        private bool _selectionAwaitingReply;
+        private bool _disposed;
+
         private void OnManagerCreated(FikaNetworkManagerCreatedEvent ev) => Register(ev.Manager);
 
         private void Register(IFikaNetworkManager manager)
@@ -69,7 +79,22 @@ namespace Manimal.Icebreaker.Fika
             manager.RegisterPacket<IceWorldPacket>(OnReceived);
             IceBodyDiag.Ensure(); // raid-time creation — the chainloader-time component never ticked
             IceTorchSync.Ensure();
+            if (!FikaBridge.BotsAuthority && IcebreakerCombineEncounter.RaidInitialized)
+                StartSelectionRequests();
             FikaAddonPlugin.Log.LogInfo("[IceSync] packet registered");
+        }
+
+        private void OnRaidReset()
+        {
+            if (_disposed || FikaBridge.BotsAuthority) return;
+
+            // A manager can survive a raid transition. Reset the request budget and
+            // deadline on the encounter edge so a prior raid cannot consume this
+            // raid's retries or leave a stale state marked complete.
+            _selectionRequests = 0;
+            _selectionAwaitingReply = false;
+            _selectionDeadline = Time.unscaledTime + 120f;
+            StartSelectionRequests();
         }
 
         // send side: the base mod's hooks fire only on LOCAL commits (remote applies
@@ -118,6 +143,57 @@ namespace Manimal.Icebreaker.Fika
         private void OnKeypadUnlock(string doorId)
             => Send(new IceWorldPacket { Kind = 13, DoorId = doorId });
 
+        private void OnSelectionReady(bool active)
+        {
+            // SelectionReady is raised on every peer, but only the bot authority may
+            // publish a state packet. Fika clients never roll or echo a local guess.
+            if (!FikaBridge.BotsAuthority || !IcebreakerCombineEncounter.Ready) return;
+            Send(new IceWorldPacket
+            {
+                Kind = 14,
+                Sealing = IcebreakerCombineEncounter.Active,
+                IntA = IcebreakerCombineEncounter.RaidToken,
+            }, quiet: true);
+        }
+
+        private void StartSelectionRequests()
+        {
+            if (_selectionRetryPump != null || _disposed) return;
+            if (FikaBridge.BotsAuthority || !IcebreakerCombineEncounter.RaidInitialized) return;
+            if (_selectionDeadline > 0f && _selectionDeadline <= Time.unscaledTime) return;
+            if (_selectionDeadline <= 0f)
+                _selectionDeadline = Time.unscaledTime + 120f;
+            var go = new GameObject("Icebreaker_CombineSelectionSync");
+            UnityEngine.Object.DontDestroyOnLoad(go);
+            _selectionRetryPump = go.AddComponent<SelectionRetryPump>();
+            _selectionRetryPump.Initialize(this);
+        }
+
+        private void RequestSelection()
+        {
+            if (_disposed || FikaBridge.BotsAuthority || !IceGate.On
+                || !IcebreakerCombineEncounter.RaidInitialized
+                || IcebreakerCombineEncounter.SelectionAuthoritative) return;
+            if (_selectionDeadline <= 0f)
+                _selectionDeadline = Time.unscaledTime + 120f;
+            if (Time.unscaledTime >= _selectionDeadline || _selectionRequests >= 120) return;
+            _selectionRequests++;
+            _selectionAwaitingReply = true;
+            Send(new IceWorldPacket
+            {
+                Kind = 15,
+                IntA = IcebreakerCombineEncounter.RaidToken,
+            }, quiet: true);
+        }
+
+        private void OnSelectionRequest()
+        {
+            // Requests can arrive before the host's game object has initialized. The
+            // client retries; once Ready is true this also serves late joiners.
+            if (FikaBridge.BotsAuthority && IcebreakerCombineEncounter.Ready)
+                OnSelectionReady(IcebreakerCombineEncounter.Active);
+        }
+
         internal static void Send(IceWorldPacket packet, DeliveryMethod delivery = DeliveryMethod.ReliableOrdered, bool quiet = false)
         {
             var manager = Singleton<IFikaNetworkManager>.Instance;
@@ -159,6 +235,26 @@ namespace Manimal.Icebreaker.Fika
                 // decode a ladder packet as something else.
                 case 12: IcebreakerTripwires.ApplyRemoteSeed(packet.IntA); break;
                 case 13: Manimal.Icebreaker.Keypad.Keypad.ApplyRemoteUnlock(packet.DoorId); break;
+                case 14:
+                    if (FikaBridge.BotsAuthority)
+                    {
+                        FikaAddonPlugin.Log.LogWarning("[IceSync] ignored Combine selection state on the authority");
+                        break;
+                    }
+                    // A client accepts state only after it has requested the host's
+                    // answer for this raid. This keeps a relayed client-local guess
+                    // from becoming authoritative on its peers; the host itself
+                    // rejects kind 14 above.
+                    if (!_selectionAwaitingReply)
+                    {
+                        FikaAddonPlugin.Log.LogWarning("[IceSync] ignored unsolicited Combine selection state");
+                        break;
+                    }
+                    IcebreakerCombineEncounter.ApplyRemoteSelection(packet.Sealing, packet.IntA);
+                    if (IcebreakerCombineEncounter.SelectionAuthoritative)
+                        _selectionAwaitingReply = false;
+                    break;
+                case 15: OnSelectionRequest(); break;
                 default: FikaAddonPlugin.Log.LogWarning($"[IceSync] unknown event kind {packet.Kind}"); break;
             }
         }
@@ -174,7 +270,16 @@ namespace Manimal.Icebreaker.Fika
             IcebreakerCrew.CutsceneActivated -= OnCutsceneActivated;
             IcebreakerTripwires.SeedRolled -= OnTripwireSeed;
             Manimal.Icebreaker.Keypad.Keypad.UnlockCommitted -= OnKeypadUnlock;
+            IcebreakerCombineEncounter.RaidReset -= OnRaidReset;
+            IcebreakerCombineEncounter.SelectionReady -= OnSelectionReady;
             FikaEventDispatcher.UnsubscribeEvent<FikaNetworkManagerCreatedEvent>(OnManagerCreated);
+            _disposed = true;
+            if (_selectionRetryPump != null)
+            {
+                var pump = _selectionRetryPump;
+                _selectionRetryPump = null;
+                UnityEngine.Object.Destroy(pump.gameObject);
+            }
             try
             {
                 // same teardown the ladders addon uses: the processor field is not
@@ -189,5 +294,45 @@ namespace Manimal.Icebreaker.Fika
             }
             catch (Exception e) { FikaAddonPlugin.Log?.LogWarning($"[IceSync] unregister failed: {e.Message}"); }
         }
+
+        private sealed class SelectionRetryPump : MonoBehaviour
+        {
+            private IceSyncHandler _owner;
+            private float _next;
+
+            internal void Initialize(IceSyncHandler owner)
+            {
+                _owner = owner;
+                _next = 0f;
+            }
+
+            private void Update()
+            {
+                if (_owner == null || _owner._disposed)
+                {
+                    Destroy(gameObject);
+                    return;
+                }
+                if (_owner.StopSelectionRetrying)
+                {
+                    _owner._selectionRetryPump = null;
+                    Destroy(gameObject);
+                    return;
+                }
+                if (Time.unscaledTime < _next) return;
+                _next = Time.unscaledTime + 1f;
+                _owner.RequestSelection();
+                if (_owner._selectionRequests >= 120 || Time.unscaledTime >= _owner._selectionDeadline)
+                {
+                    _owner._selectionRetryPump = null;
+                    Destroy(gameObject);
+                }
+            }
+        }
+
+        private bool StopSelectionRetrying
+            => IcebreakerCombineEncounter.SelectionAuthoritative
+                || !IcebreakerCombineEncounter.RaidInitialized
+                || (_selectionDeadline > 0f && Time.unscaledTime >= _selectionDeadline);
     }
 }

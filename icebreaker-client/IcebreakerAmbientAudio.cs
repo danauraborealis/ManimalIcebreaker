@@ -41,6 +41,51 @@ namespace Manimal.Icebreaker
         private static Dictionary<string, AudioClip> _clips;
         private static Dictionary<string, UnityEngine.Object> _banks;
         private static Dictionary<string, AudioMixerGroup> _mixers;
+        // Sound banks and season data rebuilt from our sidecars are runtime-owned. Keep
+        // them separate from assets discovered through Resources or the intentional bank
+        // bundle cache so raid teardown never destroys a game-owned object.
+        private static readonly List<ScriptableObject> _ownedAssets = new List<ScriptableObject>();
+
+        internal static void ReleaseRaid()
+        {
+            OutdoorDuck.Reset();
+
+            if (_roomToneHandler != null)
+            {
+                try { _roomToneHandler.Dispose(); } catch { }
+                _roomToneHandler = null;
+            }
+
+            _watchDay = null;
+            _watchNight = null;
+            _watchTicks = 0;
+            _watchSettled = false;
+            _watchBuf = null;
+
+            _byPath?.Clear();
+            _byPath = null;
+            _clips?.Clear();
+            _clips = null;
+            _banks?.Clear();
+            _banks = null;
+            _mixers?.Clear();
+            _mixers = null;
+            _types.Clear();
+            _missingClips.Clear();
+            _missingBanks.Clear();
+
+            // _bankBundle is intentionally retained for the process lifetime. Ambient loads
+            // this small bank bundle directly (it is not a BundleHost-owned manager entry),
+            // so unloading it here would invalidate the clip assets used by later raids.
+            for (int i = 0; i < _ownedAssets.Count; i++)
+            {
+                var asset = _ownedAssets[i];
+                if (asset != null) UnityEngine.Object.Destroy(asset);
+            }
+            _ownedAssets.Clear();
+            _seasonData = null;
+            OutdoorBedRestored = false;
+        }
 
         internal static void TryRestore()
         {
@@ -378,6 +423,7 @@ namespace Manimal.Icebreaker
                     if (clips.Count == 0) { thin.Add(kv.Key); continue; }
 
                     var bank = ScriptableObject.CreateInstance(bankType);
+                    _ownedAssets.Add(bank);
                     bank.name = kv.Key;
 
                     // Environments[0][0].Clips = our clips, with HasEnvironment off so
@@ -440,6 +486,7 @@ namespace Manimal.Icebreaker
                 foreach (var v in Enum.GetValues(seasonEnum)) dict[v] = container;
 
                 var so = ScriptableObject.CreateInstance(soType);
+                _ownedAssets.Add(so);
                 so.name = "ManimalIcebreakerSeasonAmbientSoundData";
                 AccessTools.Field(soType, "_dayTimeAmbientSeasonClips").SetValue(so, dict);
                 _seasonData = so;
@@ -620,10 +667,18 @@ namespace Manimal.Icebreaker
                 }
                 var t = ResolveType("Audio.AmbientSubsystem.RoomToneController");
                 if (t == null) { Plugin.Log.LogWarning("[Ambient] room-tone handler type not found — indoor tones stay silent"); return; }
+                // RoomToneController is disposable in the installed Assembly-CSharp. Do
+                // not instantiate a drifted replacement that cannot be torn down with the
+                // raid; an untracked event subscriber would survive into later raids.
+                if (!typeof(IDisposable).IsAssignableFrom(t))
+                {
+                    Plugin.Log.LogWarning("[Ambient] room-tone handler is not IDisposable — refusing to construct it");
+                    return;
+                }
                 _roomToneHandler = Activator.CreateInstance(t) as IDisposable;
                 Plugin.Log.LogDebug(_roomToneHandler != null
                     ? "[Ambient] room-tone transitions armed — indoor tones now fade in/out per room"
-                    : "[Ambient] room-tone handler built but not IDisposable — leaving it running");
+                    : "[Ambient] room-tone handler construction returned null — indoor tones stay silent");
             }
             catch (Exception e)
             {
@@ -837,7 +892,11 @@ namespace Manimal.Icebreaker
 
             internal static void Reset()
             {
-                if (_live != null) { UnityEngine.Object.Destroy(_live.gameObject); _live = null; }
+                var live = _live;
+                _live = null;
+                if (live == null) return;
+                live._entries.Clear();
+                UnityEngine.Object.Destroy(live.gameObject);
             }
 
             // the outdoor bed: two sources, whichever the time of day voiced

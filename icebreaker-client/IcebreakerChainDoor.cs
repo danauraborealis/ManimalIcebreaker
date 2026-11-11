@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Comfort.Common;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using UnityEngine;
 using EFT;
 using EFT.GameTriggers;
@@ -631,8 +632,8 @@ namespace Manimal.Icebreaker
     // switch interaction (state flip + prompt death) — replace wholesale:
     //   Try_open        -> "Open" (pulse IsTryOpen; the rattle)
     //   Explosion_Logic -> "Plant" hold session, gated on carrying the charge item
-    [HarmonyPatch(typeof(EFT.InteractionContextHelper), "GetAvailableActions", typeof(EFT.GamePlayerOwner), typeof(EFT.Interactive.Switch))]
-    internal static class Patch_ChainDoorSwitches
+    [IcebreakerPatchTarget(typeof(EFT.InteractionContextHelper), "GetAvailableActions", typeof(EFT.GamePlayerOwner), typeof(EFT.Interactive.Switch))]
+    internal sealed class Patch_ChainDoorSwitches : IcebreakerModulePatch<Patch_ChainDoorSwitches>
     {
         private static void Replace(ref EFT.UI.AvailableInteractionState result, EFT.UI.InteractionAction act)
         {
@@ -640,6 +641,7 @@ namespace Manimal.Icebreaker
             else { result.Actions.Clear(); result.Actions.Add(act); }
         }
 
+        [PatchPostfix]
         private static void Postfix(ref EFT.UI.AvailableInteractionState __result, GamePlayerOwner owner, EFT.Interactive.Switch interactiveSwitch)
         {
             try
