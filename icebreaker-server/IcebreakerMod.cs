@@ -119,7 +119,7 @@ public class IcebreakerMod(
         ("Icebreaker_UI_Heli_Signal", "Signal the helicopter with a green flare to extract"),
         ("Icebreaker_UI_Heli_Inbound", "The helicopter has been signaled — inbound, hold the pad"),
         ("Icebreaker_UI_Heli_Landed", "The helicopter has landed — extraction active"),
-        ("Icebreaker_UI_Fare_NotEnough", "The smugglers want {0:N0} roubles for the crossing ({1:N0} carried)"),
+        ("Icebreaker_UI_Fare_NotEnough", "The smugglers want {0:N0} roubles ({1:N0} carried) or a Sudak-Tudak kit for the crossing"),
     };
 
     // per-language overrides, applied on top of the english above. a language with
@@ -161,7 +161,7 @@ public class IcebreakerMod(
             ("Icebreaker_UI_Heli_Signal", "Запустите зелёную ракету, чтобы вызвать вертолёт"),
             ("Icebreaker_UI_Heli_Inbound", "Сигнал принят — вертолёт летит, удерживайте площадку"),
             ("Icebreaker_UI_Heli_Landed", "Вертолёт приземлился — эвакуация доступна"),
-            ("Icebreaker_UI_Fare_NotEnough", "Контрабандисты просят {0:N0} руб. за переправу (у вас {1:N0})"),
+            ("Icebreaker_UI_Fare_NotEnough", "Контрабандисты просят за переправу {0:N0} руб. (у вас {1:N0}) или ремнабор «Судак-Тудак»"),
         },
         // from the Chinese translation PR (#10); its file-side copies of these keys
         // were overwritten by the transformer above, so they live here instead
@@ -579,6 +579,9 @@ public class IcebreakerFlyerGateRouter(
     // about "that ship in the bay" and offers to sell you the shipment, which only reads
     // right to someone who has already been out there and seen who is guarding it.
     private const string ChainOfCustody = "6a7e0916b881de241018539d";
+    // Ragman's kit trade. he opens with "heard you've started taking boat rides with
+    // the smugglers", so it waits for a first crossing paid in roubles.
+    private const string PayTheFare = IcebreakerFareKit.PayTheFare;
 
     // quests gated on "you have been to the icebreaker" (any raid outcome counts,
     // user call 08-19 — die on the deck, still counts). AfterQuest null means the
@@ -596,6 +599,7 @@ public class IcebreakerFlyerGateRouter(
         new(OilChange, null),
         new(Biochemistry, null),
         new(ChainOfCustody, null),
+        new(PayTheFare, null),
     };
 
     private static ValueTask<string> GateQuests(

@@ -1,0 +1,21 @@
+{
+  "6b09d210a3f2b67dccada501 name": "Pay the Fare!",
+  "6b09d210a3f2b67dccada501 description": "Sup, brother! Heard you've started taking boat rides somewhere with the smugglers. You planning to get out of Tarkov by water or something? Hope you know about the naval blockade...\n\nAnd I hope you're not counting on the smugglers' boats being in perfect condition. If you really need to travel by water on their boats, you won't get far without the right tools. I'm telling you that straight, unlike those guys.\n\nBut you're in luck, ahper! My guys recently cracked open one of the railcars headed either to the port or the Norvinsky pier, and what do you know, it was packed with special repair kits for watercraft! All kinds of patches, sealants, and other stuff.\n\nI think you know where I'm going with this, huh? Let's help each other out, and we'll both come out ahead. I could really use some of the tools that aren't included in those kits.",
+  "6b09d210a3f2b67dccada501 startedMessageText": "",
+  "6b09d210a3f2b67dccada501 successMessageText": "Now that's the kind of deal I like. As long as people have something to trade, guys like you and me will always come out on top!\n\nHere are your kits. And if you need more, you know who to come to.",
+  "6b09d210a3f2b67dccada501 failMessageText": "",
+  "6b09d210a3f2b67dccada501 acceptPlayerMessage": "",
+  "6b09d210a3f2b67dccada501 declinePlayerMessage": "",
+  "6b09d210a3f2b67dccada501 completePlayerMessage": "",
+  "6b09d210a3f2b67dccada501 changeQuestMessageText": "",
+  "6b09d210a3f2b67dccada501 note": "",
+  "6b09d210a3f2b67dccada502": "Find the item in raid: Pipe grip wrench",
+  "6b09d210a3f2b67dccada503": "Hand over the item",
+  "6b09d210a3f2b67dccada504": "Find the item in raid: Ratchet wrench",
+  "6b09d210a3f2b67dccada505": "Hand over the item",
+  "6b09d210a3f2b67dccada506": "Find the item in raid: Electric drill",
+  "6b09d210a3f2b67dccada507": "Hand over the item",
+  "6b09d210a3f2b67dccada520 description": "So, make it where you wanted to go by that hovercraft? If you wanna keep reaching your destinations safely by water, you're gonna need more marine repair kits. I'm having some trouble getting certain materials and tools right now, so I'm willing to make a trade.",
+  "6b09d210a3f2b67dccada520 successMessageText": "Good stuff. Even if you don't need them right now, you can stockpile these kits for later. They'll come in handy either way!",
+  "6b09d210a3f2b67dccada520 changeQuestMessageText": "If you don't have anything like that on hand, we can work out another deal. Don't sweat it, brother!"
+}

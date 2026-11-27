@@ -28,9 +28,13 @@ namespace Manimal.Icebreaker
     // the BTR questline's payoff (user call, same day): finishing Hangover, the end of
     // the Saving Private Roman chain, HALVES the fare. that replaced the chain's old
     // reward of unlocking the map screen, which Boreas P3 now grants much earlier.
+    //
+    // a carried sudak-tudak kit (retail's own access key for the map) pays the whole
+    // crossing instead, and is taken before any roubles.
     internal static class IcebreakerMapFare
     {
         private const string RoubleTpl = "5449016a4bdc2d6f028b456f";
+        private const string KitTpl = "6a8c4c7999baf8bd5802f7fe"; // content backport item
         internal const int CrossingCost = 500_000;
         internal const int CrossingCostDiscounted = 250_000;
         private const string HangoverQuestId = "3f8d2c5a9b17e04d6ca8f312"; // BTR chain final
@@ -70,11 +74,15 @@ namespace Manimal.Icebreaker
 
                     int carried = 0;
                     foreach (var item in __instance.InventoryController.Inventory.GetPlayerItems(EPlayerItems.Equipment))
-                        if (item != null && item.TemplateId == RoubleTpl) carried += item.StackObjectsCount;
+                    {
+                        if (item == null) continue;
+                        if (IsUsableKit(item)) return;
+                        if (item.TemplateId == RoubleTpl) carried += item.StackObjectsCount;
+                    }
                     if (carried >= cost) return;
 
                     EFT.Communications.NotificationManager.DisplayWarningNotification(
-                        string.Format(IcebreakerText.Get("Icebreaker_UI_Fare_NotEnough", "The smugglers want {0:N0} roubles for the crossing ({1:N0} carried)"), cost, carried),
+                        string.Format(IcebreakerText.Get("Icebreaker_UI_Fare_NotEnough", "The smugglers want {0:N0} roubles ({1:N0} carried) or a Sudak-Tudak kit for the crossing"), cost, carried),
                         ENotificationDurationType.Long);
                     __result = false;
                 }
@@ -112,6 +120,8 @@ namespace Manimal.Icebreaker
             {
                 if (location == null || !IcebreakerLocation.Matches(location.Id)) return;
                 if (profile == null || profile.Side == EPlayerSide.Savage) return;
+                // a kit that wont come out falls through to the roubles below
+                if (TryConsumeKit(profile)) return;
                 int cost = CostFor(profile);
 
                 // smallest stacks first, so change stays consolidated in one stack
@@ -166,6 +176,39 @@ namespace Manimal.Icebreaker
                     Plugin.Log.LogDebug($"[MapFare] consumed {cost} roubles for the crossing");
             }
             catch (Exception e) { Plugin.Log.LogWarning($"[MapFare] consume failed: {e.Message}"); }
+        }
+
+        // shared by the gate and the consume, so the gate never passes on a kit the
+        // consume cant take out
+        private static bool IsUsableKit(Item item)
+        {
+            if (item == null || item.TemplateId != KitTpl || item.Parent == null) return false;
+            var container = item.Parent.Container;
+            return container is EFT.InventoryLogic.Slot || container is EFT.InventoryLogic.Grid;
+        }
+
+        // one kit per crossing. its special-slot-only, so the container is a slot —
+        // which RemoveUsedLocationKeycard (grids only) would leave in place
+        private static bool TryConsumeKit(Profile profile)
+        {
+            Item kit = null;
+            foreach (var item in profile.Inventory.GetPlayerItems(EPlayerItems.Equipment))
+                if (IsUsableKit(item)) { kit = item; break; }
+            if (kit == null) return false;
+
+            var container = kit.Parent.Container;
+            if (container is EFT.InventoryLogic.Slot slot)
+            {
+                var op = slot.RemoveItemWithoutRestrictions();
+                if (op.Failed) { Plugin.Log.LogWarning($"[MapFare] kit slot removal failed: {op.Error}"); return false; }
+            }
+            else
+            {
+                var op = ((EFT.InventoryLogic.Grid)container).Remove(kit, false);
+                if (op.Failed) { Plugin.Log.LogWarning($"[MapFare] kit grid removal failed: {op.Error}"); return false; }
+            }
+            Plugin.Log.LogDebug("[MapFare] consumed a sudak-tudak kit for the crossing");
+            return true;
         }
     }
 }
